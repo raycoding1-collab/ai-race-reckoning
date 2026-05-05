@@ -1,0 +1,2100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<meta name="description" content="The AI Race Is Not a Game — A data-driven reckoning on power concentration, environmental destruction, dead internet, deepfakes, job loss, killer robots, surveillance, and existential risk.">
+<title>The AI Race — A Reckoning</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+  :root {
+    --bg: #050505;
+    --surface: #0c0c0c;
+    --card: #111;
+    --card-glass: rgba(14,14,14,0.52);
+    --border: #1e1e1e;
+    --border-glass: rgba(255,255,255,0.05);
+    --text: #eaeaea;
+    --text-dim: #6e6e6e;
+    --red: #ff3020;
+    --red-glow: rgba(255,48,32,0.45);
+    --orange: #ff9500;
+    --amber: #ffcc00;
+    --blue: #007aff;
+    --cyan: #00c7be;
+    --purple: #af52de;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html {
+    scroll-behavior: auto;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    cursor: none;
+    overflow-x: hidden;
+  }
+
+  /* ─── BACKGROUND LAYERS ─── */
+  .bg-canvas {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 0;
+  }
+
+  .noise-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 9999;
+    opacity: 0.028;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 180px 180px;
+  }
+
+  .scanline-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 9998; opacity: 0.018;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.3) 2px, rgba(0,0,0,0.3) 3px);
+  }
+
+  /* Flowing orbs */
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+    filter: blur(130px);
+    will-change: transform;
+  }
+  .orb-1 { width: 700px; height: 700px; background: radial-gradient(circle, rgba(255,40,20,0.10), transparent 70%); top: -15%; left: -8%; }
+  .orb-2 { width: 550px; height: 550px; background: radial-gradient(circle, rgba(255,140,0,0.08), transparent 70%); bottom: 15%; right: -10%; }
+  .orb-3 { width: 450px; height: 450px; background: radial-gradient(circle, rgba(170,50,220,0.06), transparent 70%); top: 55%; left: 45%; }
+  .orb-4 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(0,120,255,0.05), transparent 70%); top: 30%; right: 20%; }
+  .orb-5 { width: 650px; height: 650px; background: radial-gradient(circle, rgba(210,160,80,0.07), transparent 70%); top: 40%; left: 30%; }
+
+  /* ─── CUSTOM CURSOR ─── */
+  .cursor-ring {
+    position: fixed; width: 24px; height: 24px;
+    border: 1.5px solid rgba(255,255,255,0.45);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 10000;
+    transform: translate(-50%, -50%);
+    transition: width 0.25s, height 0.25s, border-color 0.25s, opacity 0.15s;
+    mix-blend-mode: difference;
+    will-change: left, top;
+  }
+  .cursor-dot {
+    position: fixed; width: 5px; height: 5px;
+    background: #fff;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 10001;
+    transform: translate(-50%, -50%);
+    mix-blend-mode: difference;
+    will-change: left, top;
+    transition: opacity 0.15s;
+  }
+  .cursor-ring.hover { width: 54px; height: 54px; border-color: var(--red); background: rgba(255,48,32,0.07); }
+  .cursor-ring.clicking { width: 16px; height: 16px; border-color: #fff; }
+  .cursor-ring.hidden, .cursor-dot.hidden { opacity: 0; }
+
+  /* ─── SCROLL PROGRESS ─── */
+  .scroll-progress {
+    position: fixed; top: 0; left: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--red), var(--orange), var(--red));
+    z-index: 10002;
+    transition: width 0.1s linear;
+    box-shadow: 0 0 12px var(--red-glow), 0 0 24px var(--red-glow);
+  }
+
+  /* ─── CHAPTER INDICATOR ─── */
+  .chapter-indicator {
+    position: fixed; right: 2rem; top: 50%;
+    transform: translateY(-50%);
+    z-index: 1000;
+    display: flex; flex-direction: column; gap: 1rem;
+  }
+  .chapter-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--border);
+    transition: all 0.4s cubic-bezier(0.22,0.61,0.36,1);
+    cursor: none; position: relative;
+  }
+  .chapter-dot.active { background: var(--red); box-shadow: 0 0 14px var(--red-glow), 0 0 28px var(--red-glow); transform: scale(1.7); }
+  .chapter-label {
+    position: absolute; right: 1.5rem; top: 50%;
+    transform: translateY(-50%);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.58rem; color: var(--text-dim);
+    white-space: nowrap; opacity: 0;
+    transition: opacity 0.3s;
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .chapter-dot.active .chapter-label { opacity: 1; color: var(--red); }
+  @media (max-width: 768px) { .chapter-indicator { right: 0.4rem; gap: 0.6rem; } }
+
+  /* ─── NAVIGATION ─── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    padding: 1rem 2rem;
+    display: flex; justify-content: space-between; align-items: center;
+    background: rgba(5,5,5,0.76);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    border-bottom: 1px solid var(--border-glass);
+    transition: all 0.3s;
+  }
+  nav .logo {
+    font-weight: 900; font-size: 1.25rem; letter-spacing: -0.02em;
+    background: linear-gradient(135deg, var(--red), var(--orange));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  nav .nav-links { display: flex; gap: 1.1rem; list-style: none; flex-wrap: wrap; }
+  nav .nav-links a {
+    color: var(--text-dim); text-decoration: none;
+    font-size: 0.7rem; font-weight: 500;
+    text-transform: uppercase; letter-spacing: 0.07em;
+    transition: color 0.3s; cursor: none;
+  }
+  nav .nav-links a:hover { color: var(--text); }
+
+  /* ─── SECTIONS ─── */
+  .section {
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 6rem 2rem 4rem;
+    position: relative; overflow: hidden;
+  }
+  .container { max-width: 1100px; width: 100%; position: relative; z-index: 2; }
+
+  /* ─── HERO ─── */
+  #hero { flex-direction: column; text-align: center; min-height: 100vh; }
+  #hero .mega-title {
+    font-size: clamp(3.5rem, 8vw, 8rem);
+    font-weight: 900; line-height: 0.95;
+    letter-spacing: -0.03em; margin-bottom: 1.5rem;
+  }
+  #hero .mega-title .line1 { display: block; color: var(--text); will-change: transform; }
+  #hero .mega-title .line2 {
+    display: block;
+    background: linear-gradient(135deg, var(--red), var(--orange), var(--amber));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 300% 300%;
+    animation: gradientShift 5s ease infinite;
+    will-change: transform;
+  }
+  @keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    25% { background-position: 100% 0%; }
+    50% { background-position: 100% 100%; }
+    75% { background-position: 0% 100%; }
+  }
+  #hero .subtitle {
+    font-size: 1.25rem; color: var(--text-dim);
+    max-width: 640px; margin: 0 auto 2.5rem; font-weight: 300;
+    will-change: transform, opacity;
+  }
+  #hero .scroll-hint {
+    position: absolute; bottom: 2rem; left: 50%;
+    transform: translateX(-50%);
+    color: var(--text-dim); font-size: 0.7rem;
+    text-transform: uppercase; letter-spacing: 0.15em;
+    animation: float 2.2s ease-in-out infinite; cursor: none;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateX(-50%) translateY(0); opacity: 0.4; }
+    50% { transform: translateX(-50%) translateY(-12px); opacity: 1; }
+  }
+
+  /* ─── GLITCH EFFECT ─── */
+  .glitch-active { animation: glitchSkew 0.2s ease-in-out; }
+  @keyframes glitchSkew {
+    0% { transform: translate(0); }
+    15% { transform: translate(-4px, 2px); filter: brightness(1.2); }
+    30% { transform: translate(4px, -1px); }
+    45% { transform: translate(-2px, -2px); }
+    60% { transform: translate(2px, 1px); }
+    75% { transform: translate(-1px, -1px); }
+    90% { transform: translate(1px, 0); }
+    100% { transform: translate(0); }
+  }
+
+  /* ─── SECTION HEADERS ─── */
+  .section-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem; font-weight: 500;
+    color: var(--red); letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+    transition: text-shadow 0.3s;
+  }
+  .section-number:hover {
+    text-shadow: 2px 0 #00aaff, -2px 0 #ff3020;
+  }
+  .section-title {
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 800; letter-spacing: -0.02em;
+    margin-bottom: 1rem; line-height: 1.1;
+  }
+  .section-lead {
+    font-size: 1.05rem; color: var(--text-dim);
+    max-width: 650px; margin-bottom: 3rem; font-weight: 300;
+  }
+
+  /* ─── TEXT REVEAL ─── */
+  .reveal-text {
+    clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
+    transition: clip-path 0.9s cubic-bezier(0.22,0.61,0.36,1);
+  }
+  .reveal-text.visible { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+
+  .reveal-blur {
+    opacity: 0; filter: blur(8px);
+    transform: translateY(30px);
+    transition: opacity 1s ease, filter 1s ease, transform 0.9s cubic-bezier(0.22,0.61,0.36,1);
+  }
+  .reveal-blur.visible { opacity: 1; filter: blur(0); transform: translateY(0); }
+
+  /* ─── STAT CARDS ─── */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem; margin-bottom: 2rem;
+  }
+  .stat-card {
+    background: var(--card-glass);
+    backdrop-filter: blur(12px) saturate(140%);
+    -webkit-backdrop-filter: blur(12px) saturate(140%);
+    border: 1px solid var(--border-glass);
+    border-radius: 14px;
+    padding: 1.75rem 1.5rem;
+    transition: transform 0.4s cubic-bezier(0.22,0.61,0.36,1), box-shadow 0.4s, border-color 0.4s;
+    transform-style: preserve-3d;
+    perspective: 800px;
+    will-change: transform;
+    position: relative; overflow: hidden;
+  }
+  .stat-card::before {
+    content: ''; position: absolute; inset: 0; border-radius: 14px;
+    opacity: 0;
+    background: radial-gradient(400px circle at var(--mx, 50%) var(--my, 50%), rgba(255,48,32,0.13), transparent 50%);
+    transition: opacity 0.4s;
+    pointer-events: none; z-index: 0;
+  }
+  .stat-card:hover::before { opacity: 1; }
+  .stat-card:hover {
+    border-color: rgba(255,48,32,0.4);
+    box-shadow: 0 24px 64px rgba(255,48,32,0.08), 0 0 0 1px rgba(255,48,32,0.12) inset;
+  }
+  .stat-card > * { position: relative; z-index: 1; }
+  .stat-value {
+    font-size: 2.1rem; font-weight: 900;
+    letter-spacing: -0.02em; line-height: 1;
+    margin-bottom: 0.4rem;
+    font-variant-numeric: tabular-nums;
+    font-family: 'JetBrains Mono', 'Inter', monospace;
+  }
+  .stat-label { font-size: 0.82rem; color: var(--text-dim); line-height: 1.4; }
+  .stat-source { font-size: 0.62rem; color: var(--text-dim); opacity: 0.35; margin-top: 0.6rem; font-family: 'JetBrains Mono', monospace; }
+
+  /* ─── QUOTE ─── */
+  .quote-block {
+    position: relative;
+    border-left: 3px solid var(--red);
+    padding: 1.25rem 1.75rem;
+    margin: 2rem 0;
+    background: rgba(255,48,32,0.035);
+    border-radius: 0 10px 10px 0;
+    overflow: hidden;
+  }
+  .quote-block::before {
+    content: '\201C'; position: absolute;
+    top: -0.3rem; left: 0.5rem;
+    font-size: 6rem; font-weight: 900;
+    color: rgba(255,48,32,0.05);
+    line-height: 1; font-family: Georgia, serif;
+    pointer-events: none;
+  }
+  .quote-block .border-pulse {
+    position: absolute; left: -3px; top: 0; width: 3px; height: 100%;
+    background: var(--red);
+    animation: borderPulse 2.5s ease-in-out infinite;
+  }
+  @keyframes borderPulse {
+    0%, 100% { box-shadow: 0 0 6px var(--red-glow), 0 0 18px var(--red-glow); opacity: 0.7; }
+    50% { box-shadow: 0 0 18px var(--red-glow), 0 0 40px rgba(255,48,32,0.7); opacity: 1; }
+  }
+  .quote-block p {
+    font-size: 1.15rem; font-weight: 400;
+    font-style: italic; color: #ccc;
+    position: relative; z-index: 1;
+  }
+  .quote-block .attrib {
+    font-size: 0.8rem; color: var(--text-dim);
+    margin-top: 0.5rem; font-style: normal;
+    opacity: 0; transform: translateX(-10px);
+    transition: opacity 0.6s 0.3s, transform 0.6s 0.3s;
+  }
+  .quote-block.revealed .attrib { opacity: 1; transform: translateX(0); }
+
+  /* ─── DATA BARS ─── */
+  .data-bar-group { margin: 1.5rem 0; }
+  .data-bar-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+  .data-bar-label { font-size: 0.8rem; min-width: 130px; text-align: right; color: var(--text-dim); font-weight: 500; }
+  .data-bar-track { flex: 1; height: 28px; background: var(--surface); border-radius: 6px; overflow: hidden; position: relative; }
+  .data-bar-fill {
+    height: 100%; border-radius: 6px;
+    transition: width 1.8s cubic-bezier(0.22,0.61,0.36,1);
+    display: flex; align-items: center; padding-left: 0.75rem;
+    font-size: 0.75rem; font-weight: 700;
+    font-family: 'JetBrains Mono', monospace; color: #fff;
+    position: relative; overflow: hidden;
+  }
+  .data-bar-fill::after {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.12) 40%, transparent 80%);
+    animation: barShine 3s ease-in-out infinite;
+  }
+  @keyframes barShine {
+    0%, 100% { transform: translateX(-100%); }
+    50% { transform: translateX(100%); }
+  }
+  .data-bar-fill.red { background: linear-gradient(90deg, #4a0000, var(--red)); }
+  .data-bar-fill.orange { background: linear-gradient(90deg, #4a2800, var(--orange)); }
+  .data-bar-fill.blue { background: linear-gradient(90deg, #00245a, var(--blue)); }
+  .data-bar-fill.purple { background: linear-gradient(90deg, #28004a, var(--purple)); }
+  .data-bar-fill.cyan { background: linear-gradient(90deg, #003a36, var(--cyan)); }
+
+  /* ─── TIMELINE ─── */
+  .timeline { position: relative; padding-left: 2rem; }
+  .timeline::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--border); }
+  .timeline-item { position: relative; padding-bottom: 2rem; }
+  .timeline-item::before {
+    content: ''; position: absolute; left: -2.35rem; top: 0.4rem;
+    width: 10px; height: 10px; background: var(--red);
+    border-radius: 50%;
+    box-shadow: 0 0 12px var(--red-glow);
+    transition: box-shadow 0.5s;
+  }
+  .timeline-item:hover::before { box-shadow: 0 0 26px var(--red-glow), 0 0 52px var(--red-glow); }
+  .timeline-year { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--red); font-weight: 700; }
+  .timeline-text { font-size: 0.9rem; margin-top: 0.25rem; }
+  .timeline-text strong { color: #fff; }
+
+  /* ─── TWO COL ─── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start; }
+  @media (max-width: 768px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* ─── BIG NUMBER ─── */
+  .big-number {
+    font-size: clamp(5rem, 10vw, 9rem);
+    font-weight: 900; line-height: 1; letter-spacing: -0.03em;
+  }
+  .big-number.red { color: var(--red); filter: drop-shadow(0 0 30px rgba(255,48,32,0.25)); }
+  .big-number.orange { color: var(--orange); filter: drop-shadow(0 0 30px rgba(255,149,0,0.25)); }
+
+  /* ─── GRADIENT CARD ─── */
+  .gradient-card {
+    background: linear-gradient(135deg, rgba(255,48,32,0.09), rgba(255,149,0,0.05));
+    border: 1px solid rgba(255,48,32,0.18);
+    border-radius: 16px; padding: 2rem;
+    backdrop-filter: blur(8px) saturate(130%);
+    -webkit-backdrop-filter: blur(8px) saturate(130%);
+  }
+
+  /* ─── PULSE DOT WITH RINGS ─── */
+  .pulse-container { display: inline-flex; align-items: center; gap: 0.5rem; position: relative; }
+  .pulse-dot {
+    display: inline-block; width: 10px; height: 10px;
+    background: var(--red); border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+    position: relative;
+  }
+  .pulse-ring {
+    position: absolute; border: 1px solid var(--red);
+    border-radius: 50%;
+    animation: ringExpand 2s ease-out infinite;
+    pointer-events: none;
+  }
+  .pulse-ring:nth-child(2) { animation-delay: 0s; }
+  .pulse-ring:nth-child(3) { animation-delay: 0.7s; }
+  .pulse-ring:nth-child(4) { animation-delay: 1.4s; }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 var(--red-glow); }
+    50% { box-shadow: 0 0 0 20px transparent; }
+  }
+  @keyframes ringExpand {
+    0% { width: 10px; height: 10px; opacity: 0.6; top: 0; left: 0; }
+    100% { width: 55px; height: 55px; opacity: 0; top: -22px; left: -22px; }
+  }
+
+  /* ─── SECTION DIVIDER ─── */
+  .section-divider {
+    position: absolute; bottom: 0; left: 10%; right: 10%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--red), var(--orange), transparent);
+    opacity: 0; transition: opacity 0.8s;
+  }
+  .section-divider.visible { opacity: 0.3; }
+
+  /* ─── FOCUS MODE ─── */
+  body.focus-mode .noise-overlay,
+  body.focus-mode .scanline-overlay { opacity: 0; }
+  body.focus-mode .bg-canvas { opacity: 0.1; }
+  body.focus-mode .orb { opacity: 0.18; }
+  body.focus-mode .cursor-ring,
+  body.focus-mode .cursor-dot { opacity: 0.3 !important; }
+  body.focus-mode .stat-card::before { display: none; }
+  body.focus-mode .chapter-indicator { opacity: 0.45; }
+  body.focus-mode .scroll-progress { opacity: 0.35; }
+  .focus-hint {
+    position: fixed; bottom: 1.5rem; left: 50%;
+    transform: translateX(-50%);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem; color: var(--text-dim);
+    z-index: 1000; opacity: 0;
+    transition: opacity 0.5s; pointer-events: none;
+  }
+  body.focus-mode .focus-hint { opacity: 0.55; }
+
+  /* ─── STAGGERED REVEAL ─── */
+  .stagger-item {
+    opacity: 0; transform: translateY(40px);
+    transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.22,0.61,0.36,1);
+  }
+  .stagger-item.visible { opacity: 1; transform: translateY(0); }
+
+  /* ─── CALLOUT BOX ─── */
+  .callout-box {
+    background: rgba(255,48,32,0.06);
+    border: 1px solid rgba(255,48,32,0.2);
+    border-radius: 12px;
+    padding: 1.5rem 1.75rem;
+    margin: 1.5rem 0;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+  .callout-box h4 { color: var(--red); margin-bottom: 0.6rem; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; }
+  .callout-box p { font-size: 0.9rem; line-height: 1.65; }
+
+  /* ─── FOOTER ─── */
+  footer {
+    text-align: center; padding: 3rem 2rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim); font-size: 0.75rem;
+    position: relative; z-index: 2; background: var(--bg);
+  }
+  footer a { color: var(--text-dim); }
+
+  /* ─── BUTLERIAN / DUNE FINALE ─── */
+  #butlerian .section-number { color: var(--orange); }
+  #butlerian .section-number:hover { text-shadow: 2px 0 #ffcc00, -2px 0 #ff9500; }
+  .dune-commandment {
+    text-align: center;
+    font-size: clamp(2rem, 4vw, 3.8rem);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    margin: 3rem 0 2rem;
+    font-style: italic;
+    color: #d4b060;
+    position: relative;
+  }
+  .dune-commandment .cmd-line { display: block; }
+  .dune-commandment .cmd-line:first-child {
+    font-size: 0.55em;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-style: normal;
+    color: var(--orange);
+    margin-bottom: 0.7rem;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .dune-parallels {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin: 2.5rem 0;
+  }
+  .dune-card {
+    background: rgba(210,160,80,0.04);
+    border: 1px solid rgba(210,160,80,0.15);
+    border-radius: 12px;
+    padding: 1.5rem;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    transition: border-color 0.4s, box-shadow 0.4s;
+  }
+  .dune-card:hover {
+    border-color: rgba(210,160,80,0.35);
+    box-shadow: 0 12px 40px rgba(210,160,80,0.06);
+  }
+  .dune-card .parallel-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--orange);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+  }
+  .dune-card .parallel-text { font-size: 0.9rem; line-height: 1.55; color: #c8c0b0; }
+  .dune-card .parallel-text strong { color: #e8d8b0; }
+  .closing-statement {
+    max-width: 680px;
+    margin: 3rem auto 0;
+    text-align: center;
+    font-size: 1.1rem;
+    line-height: 1.75;
+    color: #b0a890;
+  }
+  .closing-statement strong { color: #d4b060; }
+  .closing-statement .final-line {
+    display: block;
+    margin-top: 1.5rem;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #d4b060;
+    letter-spacing: 0.02em;
+  }
+
+  /* ─── MOBILE ─── */
+  @media (max-width: 768px) {
+    html, body { cursor: auto; }
+    nav {
+      padding: 0.55rem 0.65rem;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+    nav .logo { font-size: 1rem; }
+    nav .nav-links {
+      gap: 0.35rem;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 0.3rem;
+      scrollbar-width: none;
+      flex-wrap: nowrap;
+      width: 100%;
+      order: 3;
+    }
+    nav .nav-links::-webkit-scrollbar { display: none; }
+    nav .nav-links a {
+      font-size: 0.55rem; cursor: pointer;
+      white-space: nowrap;
+      padding: 0.3rem 0.5rem;
+      background: rgba(255,255,255,0.03);
+      border-radius: 4px;
+      letter-spacing: 0.04em;
+    }
+    nav .nav-links a:active { background: rgba(255,48,32,0.15); color: #fff; }
+    .stat-grid { grid-template-columns: 1fr; gap: 0.75rem; }
+    .cursor-ring, .cursor-dot { display: none; }
+    .orb { opacity: 0.25; display: none; }
+    .orb-1, .orb-2 { display: block; opacity: 0.2; }
+    .chapter-indicator { display: none; }
+    .bg-canvas { opacity: 0.15; }
+    .stat-card {
+      backdrop-filter: blur(6px) saturate(120%);
+      -webkit-backdrop-filter: blur(6px) saturate(120%);
+      padding: 1.25rem 1rem;
+    }
+    .section { padding: 5rem 0.75rem 3rem; }
+    #hero .mega-title { font-size: clamp(2.2rem, 10vw, 3.5rem); }
+    #hero .subtitle { font-size: 0.95rem; padding: 0 0.5rem; }
+    .section-title { font-size: clamp(1.5rem, 6vw, 2.2rem); }
+    .section-lead { font-size: 0.9rem; }
+    .stat-value { font-size: 1.7rem; }
+    .dune-commandment { font-size: clamp(1.3rem, 5vw, 2.5rem); margin: 2rem 0 1.5rem; }
+    .dune-parallels { grid-template-columns: 1fr; gap: 0.75rem; }
+    .dune-card { padding: 1rem 1.25rem; }
+    .closing-statement { font-size: 0.9rem; padding: 0 0.5rem; }
+    .big-number { font-size: clamp(3.5rem, 15vw, 6rem); }
+    .noise-overlay { opacity: 0.018; }
+    .scanline-overlay { opacity: 0.01; }
+    .two-col { gap: 1rem; }
+    .data-bar-label { min-width: 80px; font-size: 0.65rem; }
+    .data-bar-track { height: 22px; }
+    .data-bar-fill { font-size: 0.65rem; padding-left: 0.4rem; }
+    footer { padding: 2rem 1rem; font-size: 0.65rem; }
+    .focus-hint { display: none; }
+    .scroll-hint { bottom: 1rem; font-size: 0.6rem; }
+  }
+
+  /* ─── REDUCED MOTION ─── */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+    html, body { cursor: auto; }
+    .cursor-ring, .cursor-dot { display: none; }
+    .reveal-text { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%) !important; }
+    .reveal-blur { opacity: 1; filter: none; transform: none; }
+    .stagger-item { opacity: 1; transform: none; }
+  }
+
+  /* ─── REDUCED TRANSPARENCY ─── */
+  @media (prefers-reduced-transparency: reduce) {
+    .stat-card, .gradient-card, .callout-box, .dune-card {
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      background: var(--card);
+    }
+    nav { background: rgba(5,5,5,0.95); }
+  }
+
+  /* ─── BACKDROP-FILTER FALLBACK ─── */
+  @supports not (backdrop-filter: blur(1px)) {
+    .stat-card { background: var(--card); }
+    .gradient-card { background: rgba(20,12,10,0.95); }
+    .callout-box { background: rgba(20,12,10,0.92); }
+    nav { background: rgba(5,5,5,0.95); }
+  }
+</style>
+</head>
+<body>
+
+<div class="noise-overlay"></div>
+<div class="scanline-overlay"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+<div class="orb orb-4"></div>
+<div class="orb orb-5"></div>
+
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+
+<div class="scroll-progress" id="scrollProgress"></div>
+<div class="chapter-indicator" id="chapterIndicator"></div>
+<div class="focus-hint">Focus Mode — Press F to toggle</div>
+
+<canvas class="bg-canvas" id="bgCanvas"></canvas>
+
+<!-- ═══════════════ NAV ═══════════════ -->
+<nav>
+  <div class="logo">/// RECKONING</div>
+  <ul class="nav-links">
+    <li><a href="#hero" data-cursor-hover>Top</a></li>
+    <li><a href="#power" data-cursor-hover>Power</a></li>
+    <li><a href="#environment" data-cursor-hover>Planet</a></li>
+    <li><a href="#deadnet" data-cursor-hover>Dead Net</a></li>
+    <li><a href="#manipulation" data-cursor-hover>Manipulation</a></li>
+    <li><a href="#jobs" data-cursor-hover>Jobs</a></li>
+    <li><a href="#killer-robots" data-cursor-hover>Killer Bots</a></li>
+    <li><a href="#surveillance" data-cursor-hover>Surveillance</a></li>
+    <li><a href="#intent" data-cursor-hover>Intent</a></li>
+    <li><a href="#existential" data-cursor-hover>X-Risk</a></li>
+    <li><a href="#butlerian" data-cursor-hover>Dune</a></li>
+  </ul>
+</nav>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section class="section" id="hero" data-section="0">
+  <div class="container">
+    <h1 class="mega-title">
+      <span class="line1 reveal-text" data-parallax="0.12">THE AI RACE</span>
+      <span class="line2 reveal-text" id="glitchTitle" data-parallax="0.22">IS NOT A GAME</span>
+    </h1>
+    <p class="subtitle reveal-blur" data-parallax="0.32">
+      While billions cheer the arrival of superintelligence, a small group of
+      companies is consolidating power, burning through the planet's resources,
+      displacing millions of workers, and rewiring what it means to trust
+      anything you see. This is the side of the story that doesn't make the
+      keynotes.
+    </p>
+  </div>
+  <div class="scroll-hint">Scroll to understand &darr;</div>
+  <div class="section-divider"></div>
+</section>
+
+<!-- ═══════════════ 1. POWER CONCENTRATION ═══════════════ -->
+<section class="section" id="power" data-section="1">
+  <div class="container">
+    <div class="section-number reveal-text">01 / POWER CONCENTRATION</div>
+    <h2 class="section-title reveal-text">Four companies decide the future of intelligence.</h2>
+    <p class="section-lead reveal-blur">
+      AI is not being built by humanity. It's being built by four U.S. tech
+      corporations whose combined AI infrastructure spending will hit
+      <strong>$650 billion</strong> in 2026 — more than the entire U.S.
+      automotive, railroad, defense, and retail industries combined.
+    </p>
+
+    <div class="stat-grid">
+      <div class="stat-card stagger-item" data-tilt>
+        <div class="stat-value" style="color:var(--red)" data-count="650" data-suffix="B" data-prefix="$">$650B</div>
+        <div class="stat-label">Big Tech AI capex planned for 2026 — 4.3&times; 2022 levels</div>
+        <div class="stat-source">Bloomberg / Monthly Review, 2026</div>
+      </div>
+      <div class="stat-card stagger-item" data-tilt>
+        <div class="stat-value" style="color:var(--orange)" data-count="85" data-suffix="%" data-range="80–90">80–90%</div>
+        <div class="stat-label">Nvidia's monopoly share of AI supercomputing GPU chips</div>
+        <div class="stat-source">Monthly Review, 2026</div>
+      </div>
+      <div class="stat-card stagger-item" data-tilt>
+        <div class="stat-value" style="color:var(--amber)" data-count="3500" data-suffix="+" data-format="comma">3,500+</div>
+        <div class="stat-label">Federal lobbyists now working on AI — 170% increase in 3 years</div>
+        <div class="stat-source">Public Citizen, 2026</div>
+      </div>
+      <div class="stat-card stagger-item" data-tilt>
+        <div class="stat-value" style="color:var(--red)" data-count="75" data-suffix="%">75%</div>
+        <div class="stat-label">Of Americans believe Big Tech already has too much power</div>
+        <div class="stat-source">Multiple polls, 2025–2026</div>
+      </div>
+    </div>
+
+    <div class="quote-block reveal-blur">
+      <div class="border-pulse"></div>
+      <p>"The big money interests, the billionaires who control our economy&hellip;
+         are going to do everything to elect people who give them a green light."</p>
+      <div class="attrib">&mdash; Sen. Bernie Sanders, on the AI industry's $125M+ Super PAC war chest</div>
+    </div>
+  </div>
+  <div class="section-divider"></div>
+</section>
+
+<!-- ═══════════════ 2. ENVIRONMENTAL DESTRUCTION ═══════════════ -->
+<section class="section" id="environment" data-section="2">
+  <div class="container">
+    <div class="section-number reveal-text">02 / ENVIRONMENTAL DESTRUCTION</div>
+    <h2 class="section-title reveal-text">The cloud is made of concrete, water, and fire.</h2>
+    <p class="section-lead reveal-blur">
+      Every prompt has a physical cost. Data centers already consume
+      <strong>~2% of global electricity</strong> — on pace to surpass the total
+      consumption of Japan by the end of 2026.
+    </p>
+
+    <div class="stat-grid">
+      <div class="stat-card stagger-item" data-tilt>
+        <div class="stat-value" style="color:var(--red)" data-count="1050" data-suffix=" TWh" data-format="comma">1,050 TWh</div>
+        <div class="stat-label">Projected data center electricity use in 2026 — more than Germany + France + Spain combined</div>
+        <div class="stat-source">IEA, Deloitte, Goldman Sachs, 2026</div>
+      </div>
+      <div class="stat-card stagger-item" data-tilt>
+        <div class="stat-value" style="color:var(--orange)" data-count="48" data-suffix="%" data-prefix="+">+48%</div>
+        <div class="stat-label">Google's emissions increase since 2019, directly driven by AI workloads</div>
+        <div class="stat-source">Google Environmental Report, 2024</div>
+      </div>
+      <div class="stat-card stagger-item" data-tilt>
+        <div class="stat-value" style="color:var(--cyan)" data-count="660" data-suffix="B L" data-format="comma">660B L</div>
+        <div class="stat-label">Global data center water consumption — 174 billion gallons per year</div>
+        <div class="stat-source">Multiple studies, 2025</div>
+      </div>
+      <div class="stat-card stagger-item" data-tilt>
+        <div class="stat-value" style="color:var(--red)" data-count="32" data-suffix="%">32%</div>
+        <div class="stat-label">Of Ireland's national electricity consumed by data centers by 2026</div>
+        <div class="stat-source">Irish energy regulator, 2025</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="reveal-blur">
+        <div class="data-bar-group">
+          <h4 style="font-size:0.85rem; margin-bottom:1rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.08em;">Corporate Emissions Increase (2019–2024)</h4>
+          <div class="data-bar-row">
+            <div class="data-bar-label">Google</div>
+            <div class="data-bar-track"><div class="data-bar-fill red" style="width:48%">+48%</div></div>
+          </div>
+          <div class="data-bar-row">
+            <div class="data-bar-label">Microsoft</div>
+            <div class="data-bar-track"><div class="data-bar-fill orange" style="width:30%">+30% YoY</div></div>
+          </div>
+          <div class="data-bar-row">
+            <div class="data-bar-label">AI Industry</div>
+            <div class="data-bar-track"><div class="data-bar-fill purple" style="width:72%">32–80M tCO₂</div></div>
+          </div>
+        </div>
+        <p style="font-size:0.8rem; color:var(--text-dim); margin-top:1rem;">
+          The AI industry's annual carbon footprint is comparable to the total
+          emissions of Belgium or the Czech Republic. Despite being the world's
+          largest corporate buyers of renewable energy, every major hyperscaler
+          saw <strong>absolute emissions rise</strong> in 2024.
+        </p>
+      </div>
+      <div class="gradient-card reveal-blur">
+        <p style="font-size:0.9rem; line-height:1.7;">
+          <span class="pulse-container">
+            <span class="pulse-dot"></span>
+            <span class="pulse-ring"></span>
+            <span class="pulse-ring"></span>
+            <span class="pulse-ring"></span>
+          </span>
+          <strong style="color:var(--red)">Efficiency won't save us.</strong><br>
+          Energy per ChatGPT query has fallen 10&times; since 2023. But total
+          AI energy demand is still surging because usage volume and new
+          energy-intensive applications — video generation, agentic AI,
+          reasoning models — are growing even faster.<br><br>
+          A single frontier AI model is projected to require
+          <strong>5 GW of power by 2027</strong>. AI server rack power density
+          increased <strong>11&times; between 2020–2025</strong> and is set for
+          another 4&times; by 2027.
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="section-divider"></div>
+</section>
+
+<!-- ═══════════════ 3. DEAD INTERNET ═══════════════ -->
+<section class="section" id="deadnet" data-section="3">
+  <div class="container">
+    <div class="section-number reveal-text">03 / DEAD INTERNET</div>
+    <h2 class="section-title reveal-text">The web is being automated out of existence.</h2>
+    <p class="section-lead reveal-blur">
+      The Dead Internet Theory — the idea that bots and AI have already
+      overrun online space — is no longer a conspiracy. It's a measurable
+      reality, confirmed by Stanford, Imperial College London, and the
+      Internet Archive.
+    </p>
+
+    <div style="text-align:center; margin: 3rem 0;" class="reveal-blur">
+      <div class="big-number red" data-count="35.3" data-suffix="%" data-decimals="1">35.3%</div>
+      <p style="color:var(--text-dim); font-size:1.1rem; max-width:500px; margin:0.5rem auto 0;">
+        of <strong>new websites</strong> are now AI-generated or AI-assisted
+      </p>
+      <p style="color:var(--text-dim); opacity:0.35; font-size:0.7rem; font-family:'JetBrains Mono',monospace;">
+        Stanford / Imperial College London / Internet Archive, April 2026
+      </p>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card stagger-item" data-tilt>
+        <div class="stat-value" style="color:var(--red)" data-count="17.6" data-suffix="%" data-decimals="1">17.6%</div>
+        <div class="stat-label">Of new websites are fully AI-generated — up from ~0% before Nov 2022</div>
+      </div>
+      <div class="stat-card stagger-item" data-tilt>
+        <div class="stat-value" style="color:var(--orange)" data-count="39" data-suffix="%">39%</div>
+        <div class="stat-label">AI-generated articles now surpass human-written ones in publication volume</div>
+      </div>
+      <div class="stat-card stagger-item" data-tilt>
+        <div class="stat-value" style="color:var(--amber)" data-count="50" data-suffix="%" data-prefix="~">~50%</div>
+        <div class="stat-label">Of all web traffic is now automated/bot-driven (Imperva, 2024)</div>
+      </div>
+      <div class="stat-card stagger-item" data-tilt>
+        <div class="stat-value" style="color:var(--purple)" data-count="33" data-suffix="%">33%</div>
+        <div class="stat-label">Higher semantic similarity scores — AI is narrowing the range of ideas online</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="gradient-card reveal-blur">
+        <h4 style="margin-bottom:0.75rem; color:var(--red);">Confirmed Effects</h4>
+        <p style="font-size:0.9rem;">
+          <strong style="color:#fff;">Semantic Contraction:</strong> AI content is 33% more similar to other AI content — the web is developing a monoculture.<br><br>
+          <strong style="color:#fff;">Positivity Shift:</strong> AI-generated text is 107% more positive in sentiment — a sanitized, cheerful filter over reality.<br><br>
+          <strong style="color:#fff;">Model Collapse Risk:</strong> At 35% AI prevalence, future models trained on web data will increasingly learn from their own output, degrading quality.
+        </p>
+      </div>
+      <div>
+        <div class="quote-block reveal-blur">
+          <div class="border-pulse"></div>
+          <p>"After decades of humans shaping it, a significant portion of the internet
+             has become defined by AI in just three years. I find the sheer speed
+             staggering."</p>
+          <div class="attrib">&mdash; Jonáš Doležal, Stanford / Imperial College London</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="section-divider"></div>
+</section>
+
+<!-- ═══════════════ 4. MANIPULATION & DEEPFAKES ═══════════════ -->
+<section class="section" id="manipulation" data-section="4">
+  <div class="container">
+    <div class="section-number reveal-text">04 / MANIPULATION &amp; DEEPFAKES</div>
+    <h2 class="section-title reveal-text">Nothing you see is certainly real anymore.</h2>
+    <p class="section-lead reveal-blur">
+      Deepfake production exploded <strong>16&times; from 2023 to 2025</strong>.
+      AI fraud is now an industrialized, scalable criminal enterprise — and
+      the tools to create indistinguishable fakes are free and publicly available.
+    </p>
+
+    <div style="text-align:center; margin: 2rem 0;" class="reveal-blur">
+      <div class="big-number orange" data-count="8000000" data-suffix="" data-format="comma">8,000,000</div>
+      <p style="color:var(--text-dim); font-size:1.1rem;">
+        deepfake files produced in 2025 — up from ~500,000 in 2023
+      </p>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card stagger-item" data-tilt>
+        <div class="stat-value" style="color:var(--red)" data-count="3000" data-suffix="%" data-format="comma">3,000%</div>
+        <div class="stat-label">Increase in deepfake fraud attempts in recent years</div>
+      </div>
+      <div class="stat-card stagger-item" data-tilt>
+        <div class="stat-value" style="color:var(--orange)" data-count="1100" data-suffix="M+" data-prefix="$">$1.1B+</div>
+        <div class="stat-label">Global deepfake scam losses in 2025 (Surfshark)</div>
+      </div>
+      <div class="stat-card stagger-item" data-tilt>
+        <div class="stat-value" style="color:var(--amber)" data-count="90" data-suffix="%">90%</div>
+        <div class="stat-label">Of online content may be synthetically generated by end of 2026 (Europol)</div>
+      </div>
+      <div class="stat-card stagger-item" data-tilt>
+        <div class="stat-value" style="color:var(--red)" data-count="63" data-suffix="%">63%</div>
+        <div class="stat-label">Of the population cannot distinguish truth from falsehood (2026 Edelman)</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="reveal-blur">
+        <div class="data-bar-group">
+          <h4 style="font-size:0.85rem; margin-bottom:1rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.08em;">Deepfake Propagation by Platform</h4>
+          <div class="data-bar-row">
+            <div class="data-bar-label">X (Twitter)</div>
+            <div class="data-bar-track"><div class="data-bar-fill red" style="width:51.2%">51.2%</div></div>
+          </div>
+          <div class="data-bar-row">
+            <div class="data-bar-label">TikTok</div>
+            <div class="data-bar-track"><div class="data-bar-fill orange" style="width:21.1%">21.1%</div></div>
+          </div>
+          <div class="data-bar-row">
+            <div class="data-bar-label">YouTube</div>
+            <div class="data-bar-track"><div class="data-bar-fill blue" style="width:10%">10.0%</div></div>
+          </div>
+          <div class="data-bar-row">
+            <div class="data-bar-label">Facebook</div>
+            <div class="data-bar-track"><div class="data-bar-fill purple" style="width:8.2%">8.2%</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="gradient-card reveal-blur">
+        <p style="font-size:0.85rem; line-height:1.75;">
+          <strong style="color:var(--red);">Real Cases, Real Damage:</strong><br>
+          &bull; Singapore CFO tricked into wiring <strong>$500,000</strong> via deepfake video call<br>
+          &bull; French woman lost <strong>€800,000+</strong> in AI Brad Pitt romance scam<br>
+          &bull; UK widow lost <strong>£500,000</strong> in Jason Momoa deepfake romance<br>
+          &bull; UK consumers lost <strong>£9.4 billion</strong> to AI scams in 9 months<br>
+          &bull; <strong>1 in 17</strong> U.S. teens already targeted by deepfake content
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="section-divider"></div>
+</section>
+
+<!-- ═══════════════ 5. JOB DESTRUCTION ═══════════════ -->
+<section class="section" id="jobs" data-section="5">
+  <div class="container">
+    <div class="section-number reveal-text">05 / JOB DESTRUCTION</div>
+    <h2 class="section-title reveal-text">The "augmentation" story is a lie by omission.</h2>
+    <p class="section-lead reveal-blur">
+      Tech CEOs insist AI will "augment, not replace" workers. But the data
+      tells a different story: <strong>16,000 net U.S. jobs are already being
+      lost to AI every month</strong>, and the World Economic Forum's own chief
+      economists now expect net job losses over the next decade.
+    </p>
+
+    <div class="stat-grid">
+      <div class="stat-card stagger-item" data-tilt>
+        <div class="stat-value" style="color:var(--red)" data-count="16000" data-suffix="/mo" data-format="comma">16,000/mo</div>
+        <div class="stat-label">Net U.S. jobs lost to AI each month in 2026 — 25,000 displaced, 9,000 augmented</div>
+        <div class="stat-source">Goldman Sachs, April 2026</div>
+      </div>
+      <div class="stat-card stagger-item" data-tilt>
+        <div class="stat-value" style="color:var(--orange)" data-count="92" data-suffix="M" data-format="comma">92M</div>
+        <div class="stat-label">Jobs to be displaced globally by 2030 (WEF Future of Jobs Report 2025)</div>
+      </div>
+      <div class="stat-card stagger-item" data-tilt>
+        <div class="stat-value" style="color:var(--amber)" data-count="300" data-suffix="M" data-format="comma">300M</div>
+        <div class="stat-label">Full-time jobs globally could be affected by AI automation (Goldman Sachs)</div>
+      </div>
+      <div class="stat-card stagger-item" data-tilt>
+        <div class="stat-value" style="color:var(--red)" data-count="57" data-suffix="%">57%</div>
+        <div class="stat-label">Of WEF chief economists now expect net job losses over the next decade</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="reveal-blur">
+        <h4 style="font-size:0.85rem; margin-bottom:1rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.08em;">Most Vulnerable Roles</h4>
+        <div class="gradient-card">
+          <p style="font-size:0.85rem; line-height:2;">
+            &bull; Data entry clerks &amp; receptionists<br>
+            &bull; Customer service &amp; telemarketing<br>
+            &bull; Entry-level coders &amp; software engineers<br>
+            &bull; Copywriters &amp; technical writers<br>
+            &bull; Accounting assistants &amp; bookkeepers<br>
+            &bull; Social media analysts<br>
+            &bull; Routine financial &amp; compliance roles
+          </p>
+        </div>
+      </div>
+      <div>
+        <div class="quote-block reveal-blur">
+          <div class="border-pulse"></div>
+          <p>"AI is replacing tasks, not jobs" — this is the preferred framing
+             of the companies building the replacement technology. But when 11.7%
+             of U.S. jobs can already be fully automated by current AI, the
+             distinction between 'task replacement' and 'job replacement' is
+             a semantic comfort blanket.</p>
+          <div class="attrib">&mdash; MIT FutureTech Study, late 2025</div>
+        </div>
+        <p style="font-size:0.8rem; color:var(--text-dim); margin-top:1.5rem;" class="reveal-blur">
+          IMF Managing Director Kristalina Georgieva warned in 2026 that AI is
+          hitting labor markets "like a tsunami" and that most countries and
+          companies are unprepared. 37% of companies now plan to replace jobs
+          with AI by the end of 2026.
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="section-divider"></div>
+</section>
+
+<!-- ═══════════════ 6. KILLER ROBOTS ═══════════════ -->
+<section class="section" id="killer-robots" data-section="6">
+  <div class="container">
+    <div class="section-number reveal-text">06 / KILLER ROBOTS</div>
+    <h2 class="section-title reveal-text">The first AI war has already been fought.</h2>
+    <p class="section-lead reveal-blur">
+      In February 2026, the joint US-Israeli operation against Iran became the
+      first conflict in which <strong>AI systems dominated the entire kill chain</strong> —
+      not as analytical support, but as active participants in lethal targeting
+      decisions compressed from weeks into seconds.
+    </p>
+
+    <div style="text-align:center; margin: 2.5rem 0;" class="reveal-blur">
+      <div class="big-number red" data-count="5500" data-suffix="+" data-format="comma">5,500+</div>
+      <p style="color:var(--text-dim); font-size:1.1rem; max-width:550px; margin:0.5rem auto 0;">
+        AI-driven strikes in the <strong>first 10 days</strong> of Operation Epic Fury
+      </p>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card stagger-item" data-tilt>
+        <div class="stat-value" style="color:var(--red)" data-count="1000" data-suffix="+" data-format="comma">1,000+</div>
+        <div class="stat-label">Targets struck in the first 24 hours — "sensor-to-shooter" timeline compressed to seconds</div>
+        <div class="stat-source">Multiple sources, Feb–Mar 2026</div>
+      </div>
+      <div class="stat-card stagger-item" data-tilt>
+        <div class="stat-value" style="color:var(--orange)" data-count="170" data-suffix="+">170+</div>
+        <div class="stat-label">Casualties — mostly children — when AI failed to distinguish a school from an IRGC facility</div>
+        <div class="stat-source">Shajareh Tayyebeh Girls' Primary School, Minab, Iran</div>
+      </div>
+      <div class="stat-card stagger-item" data-tilt>
+        <div class="stat-value" style="color:var(--amber)" data-count="37000" data-format="comma">37,000</div>
+        <div class="stat-label">Individuals flagged by Israel's Lavender AI as Hamas — reviewed in ~20 sec each by humans</div>
+        <div class="stat-source">+972 Magazine / Guardian, 2025</div>
+      </div>
+      <div class="stat-card stagger-item" data-tilt>
+        <div class="stat-value" style="color:var(--red)" data-count="33.5" data-suffix="B" data-prefix="$">$33.5B</div>
+        <div class="stat-label">Projected autonomous weapons market by 2032 — up from $14.2B in 2024</div>
+        <div class="stat-source">Industry reports, CAGR 11.4%</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="callout-box reveal-blur">
+          <h4>The Algorithmic Kill Chain</h4>
+          <p>
+            Operation Epic Fury used Palantir's <strong>MAVEN Smart System</strong>
+            integrated with large language models to process classified satellite,
+            surveillance, and intelligence data for real-time targeting.<br><br>
+            Anthropic had a $200M Pentagon contract but <strong>refused</strong> to allow
+            its technology for autonomous weapons. The US government designated Anthropic
+            a "supply chain risk." <strong>OpenAI then took the contract</strong>, agreeing
+            to Pentagon use for "all lawful purposes" — a term critics say lacks
+            specificity to protect civilians.
+          </p>
+        </div>
+      </div>
+      <div>
+        <div class="quote-block reveal-blur">
+          <div class="border-pulse"></div>
+          <p>"Machines with the power and discretion to take human life without
+             human involvement are politically unacceptable, morally repugnant,
+             and should be prohibited by international law."</p>
+          <div class="attrib">&mdash; UN Secretary-General António Guterres, May 2025</div>
+        </div>
+        <p style="font-size:0.82rem; color:var(--text-dim); margin-top:1rem;" class="reveal-blur">
+          <strong>70+ nations</strong> now support moving toward a legally binding treaty
+          on lethal autonomous weapons. The US, Russia, and India oppose. The CCW mandate
+          expires November 2026 — a decisive moment for whether the "algorithmic arms race"
+          continues unchecked.
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="section-divider"></div>
+</section>
+
+<!-- ═══════════════ 7. SURVEILLANCE STATE ═══════════════ -->
+<section class="section" id="surveillance" data-section="7">
+  <div class="container">
+    <div class="section-number reveal-text">07 / SURVEILLANCE STATE</div>
+    <h2 class="section-title reveal-text">Your home is listening. The government is buying.</h2>
+    <p class="section-lead reveal-blur">
+      AI-powered mass surveillance is no longer the domain of authoritarian regimes
+      alone. In the United States, federal agencies are buying your location history,
+      smart device data, and app activity from commercial brokers — <strong>bypassing
+      constitutional warrant requirements entirely</strong>.
+    </p>
+
+    <div class="stat-grid">
+      <div class="stat-card stagger-item" data-tilt>
+        <div class="stat-value" style="color:var(--red)" data-count="83.3" data-suffix="%" data-decimals="1">83.3%</div>
+        <div class="stat-label">Of Americans believe smart surveillance is already being misused without public knowledge</div>
+        <div class="stat-source">Critical Tech Solutions, April 2026</div>
+      </div>
+      <div class="stat-card stagger-item" data-tilt>
+        <div class="stat-value" style="color:var(--orange)" data-count="100" data-suffix="M+" data-format="comma">100M+</div>
+        <div class="stat-label">Amazon Echo/Alexa devices in US households — 3,267 government data demands in 2023</div>
+        <div class="stat-source">Amazon / various FOIA requests</div>
+      </div>
+      <div class="stat-card stagger-item" data-tilt>
+        <div class="stat-value" style="color:var(--amber)" data-count="14" data-suffix="">14</div>
+        <div class="stat-label">Average data types collected by AI apps — 70% grab location data (up from 40% in 2025)</div>
+        <div class="stat-source">Surfshark AI App Report, March 2026</div>
+      </div>
+      <div class="stat-card stagger-item" data-tilt>
+        <div class="stat-value" style="color:var(--red)" data-count="90.3" data-suffix="%" data-decimals="1">90.3%</div>
+        <div class="stat-label">Want a public vote before new surveillance systems are deployed anywhere</div>
+        <div class="stat-source">Critical Tech Solutions, 2026</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="reveal-blur">
+        <div class="data-bar-group">
+          <h4 style="font-size:0.85rem; margin-bottom:1rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.08em;">AI App Data Collection (Data Types out of 35)</h4>
+          <div class="data-bar-row">
+            <div class="data-bar-label">Meta AI</div>
+            <div class="data-bar-track"><div class="data-bar-fill red" style="width:94%">33 types</div></div>
+          </div>
+          <div class="data-bar-row">
+            <div class="data-bar-label">Google Gemini</div>
+            <div class="data-bar-track"><div class="data-bar-fill orange" style="width:66%">23 types</div></div>
+          </div>
+          <div class="data-bar-row">
+            <div class="data-bar-label">ChatGPT</div>
+            <div class="data-bar-track"><div class="data-bar-fill blue" style="width:49%">17 types</div></div>
+          </div>
+          <div class="data-bar-row">
+            <div class="data-bar-label">Claude</div>
+            <div class="data-bar-track"><div class="data-bar-fill purple" style="width:37%">13 types</div></div>
+          </div>
+        </div>
+        <p style="font-size:0.78rem; color:var(--text-dim);">
+          Meta AI is the only AI app that harvests <strong>financial info, race, sexual orientation,
+          and political views</strong>. ChatGPT's data collection surged 70% year-over-year, now
+          including health, fitness, and audio data.
+        </p>
+      </div>
+      <div>
+        <div class="callout-box reveal-blur">
+          <h4>The Warrant Loophole</h4>
+          <p>
+            In March 2026, FBI Director Kash Patel confirmed the bureau <strong>buys Americans'
+            location histories from data brokers</strong> — a practice that circumvents both
+            Supreme Court warrant requirements (Carpenter v. US, 2018) and the Electronic
+            Communications Privacy Act.<br><br>
+            DHS funding surged to <strong>$165 billion/year</strong>, with surging contracts
+            for AI-automated airport surveillance, phone-to-biometric scanners, and predictive
+            "geospatial heat map" platforms for 911 call centers.
+          </p>
+        </div>
+        <div class="quote-block reveal-blur" style="margin-top:1rem;">
+          <div class="border-pulse"></div>
+          <p>"The government is using its credit card to buy its way around the Fourth Amendment."</p>
+          <div class="attrib">&mdash; Sen. Ron Wyden, on data broker surveillance, 2025</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="section-divider"></div>
+</section>
+
+<!-- ═══════════════ 8. TRUE INTENTIONS ═══════════════ -->
+<section class="section" id="intent" data-section="8">
+  <div class="container">
+    <div class="section-number reveal-text">08 / THE TRUE INTENTION</div>
+    <h2 class="section-title reveal-text">Safety is the brand. Deregulation is the product.</h2>
+    <p class="section-lead reveal-blur">
+      Behind every "responsible AI" press release is a lobbying machine
+      spending hundreds of millions to ensure no government can meaningfully
+      constrain what they build — or who pays the price.
+    </p>
+
+    <div class="stat-grid">
+      <div class="stat-card stagger-item" data-tilt>
+        <div class="stat-value" style="color:var(--red)" data-count="125" data-suffix="M+" data-prefix="$">$125M+</div>
+        <div class="stat-label">Anti-regulation Super PAC war chest funded by OpenAI, a16z, Meta, Palantir</div>
+        <div class="stat-source">FEC filings, 2026</div>
+      </div>
+      <div class="stat-card stagger-item" data-tilt>
+        <div class="stat-value" style="color:var(--orange)" data-count="3.13" data-suffix="M" data-prefix="$" data-decimals="2">$3.13M</div>
+        <div class="stat-label">Anthropic's 2025 federal lobbying spend — 4&times; its prior spending</div>
+      </div>
+      <div class="stat-card stagger-item" data-tilt>
+        <div class="stat-value" style="color:var(--amber)" data-count="170" data-suffix="%">170%</div>
+        <div class="stat-label">Increase in AI lobbyists in 3 years — 1 in 4 federal lobbyists now works on AI</div>
+      </div>
+      <div class="stat-card stagger-item" data-tilt>
+        <div class="stat-value" style="color:var(--red)" data-count="650" data-suffix="B" data-prefix="$">$650B</div>
+        <div class="stat-label">Big Tech's 2026 AI capex dwarfs global oil &amp; gas production investment</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="quote-block reveal-blur">
+          <div class="border-pulse"></div>
+          <p>"Until we see the companies actually support meaningful legislation,
+             then what they say about their desire for regulation is empty talk."</p>
+          <div class="attrib">&mdash; Michael Kleinman, Future of Life Institute</div>
+        </div>
+        <p style="font-size:0.85rem; color:var(--text-dim); margin-top:1.5rem; line-height:1.7;" class="reveal-blur">
+          The industry's core strategy: <strong>prevent states from passing their
+          own AI laws</strong> while Congress remains gridlocked — creating, in
+          practice, <strong>no binding regulation at any level</strong>. OpenAI,
+          Meta, Microsoft, and a16z pushed a <strong>10-year ban on state-level AI
+          regulation</strong> attached to Trump's omnibus tax bill.
+        </p>
+      </div>
+      <div class="gradient-card reveal-blur">
+        <h4 style="margin-bottom:1rem; color:var(--red);">The Playbook</h4>
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-year">1. P.R. OFFENSIVE</div>
+            <div class="timeline-text">Publish "safety frameworks" and voluntary commitments. Hire ex-regulators as "head of trust."</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-year">2. LOBBYING BLITZ</div>
+            <div class="timeline-text">Spend hundreds of millions to flood Capitol Hill and Brussels. 3,500+ lobbyists now on AI.</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-year">3. PREEMPTION</div>
+            <div class="timeline-text">Push for federal laws that ban states from passing their own AI rules — then keep Congress gridlocked.</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-year">4. ELECTION CAPTURE</div>
+            <div class="timeline-text">Deploy Super PACs to elect candidates who will oppose binding AI regulation at every level.</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-year">5. RESULT</div>
+            <div class="timeline-text"><strong>No binding AI regulation anywhere in the United States. Voluntary commitments only.</strong></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center; margin-top:3rem;" class="reveal-blur">
+      <p style="font-size:0.8rem; color:var(--text-dim); max-width:600px; margin:0 auto;">
+        Critics explicitly compare the AI industry's tactics to the
+        <strong>oil and tobacco industries' lobbying playbook</strong> —
+        "They're just the wealthiest companies in the world, so they have a lot
+        of money" (Margarida Silva, SOMO).
+      </p>
+    </div>
+  </div>
+  <div class="section-divider"></div>
+</section>
+
+<!-- ═══════════════ 9. EXISTENTIAL RISK ═══════════════ -->
+<section class="section" id="existential" data-section="9">
+  <div class="container">
+    <div class="section-number reveal-text">09 / EXISTENTIAL RISK</div>
+    <h2 class="section-title reveal-text">The safety measures may be making it worse.</h2>
+    <p class="section-lead reveal-blur">
+      While the world worries about rogue AI, a more unsettling possibility
+      is emerging from the research: that <strong>AI safety efforts themselves
+      may increase existential risk</strong> by making systems more powerful
+      before an inevitable failure arrives.
+    </p>
+
+    <div class="stat-grid">
+      <div class="stat-card stagger-item" data-tilt>
+        <div class="stat-value" style="color:var(--red)" data-count="5" data-suffix="–10%">5–10%</div>
+        <div class="stat-label">Median P(doom) — probability of human extinction from AI — among ML researchers</div>
+        <div class="stat-source">2024 AI Scientist Survey</div>
+      </div>
+      <div class="stat-card stagger-item" data-tilt>
+        <div class="stat-value" style="color:var(--orange)" data-count="81" data-suffix="">81</div>
+        <div class="stat-label">Peer-reviewed papers analyzed in landmark AI X-risk review — dominated by CS, lacking social science</div>
+        <div class="stat-source">Bareis et al., AI & Society, Feb 2026</div>
+      </div>
+      <div class="stat-card stagger-item" data-tilt>
+        <div class="stat-value" style="color:var(--amber)" data-count="5" data-suffix=" GW">5 GW</div>
+        <div class="stat-label">Power required for a single frontier AI model by 2027 — the output of a small nuclear plant</div>
+        <div class="stat-source">Uptime Institute / industry projections</div>
+      </div>
+      <div class="stat-card stagger-item" data-tilt>
+        <div class="stat-value" style="color:var(--red)" data-count="0" data-suffix="">0</div>
+        <div class="stat-label">Binding AI safety laws anywhere in the world. Voluntary commitments remain the global standard.</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="callout-box reveal-blur" style="margin-bottom:1.5rem;">
+          <h4>Evolvable AI: The PNAS Warning</h4>
+          <p style="font-size:0.88rem;">
+            A landmark <em>PNAS</em> paper (April 2026) warns that AI systems whose
+            components undergo <strong>Darwinian evolution</strong> could represent a
+            "major evolutionary transition" — a Life 2.0. In open environments without
+            human control, selfish replication produces <strong>cheating, parasitism,
+            deception, and manipulation</strong> — even in very simple systems.<br><br>
+            Current trends pushing toward this: evolutionary prompt search, self-improving
+            learning rules, self-rewarding agents, and AI-generated code that mutates
+            across deployments.
+          </p>
+        </div>
+      </div>
+      <div>
+        <div class="quote-block reveal-blur">
+          <div class="border-pulse"></div>
+          <p>"If AI failure is inevitable, safety measures allow systems to become
+             more powerful before they fail — thus making the eventual catastrophe
+             worse. This is the safety paradox."</p>
+          <div class="attrib">&mdash; "AI Safety: A Climb to Armageddon?", Philosophical Studies, 2025</div>
+        </div>
+        <div class="callout-box reveal-blur" style="margin-top:1.5rem;">
+          <h4>ExistBench Findings (2025)</h4>
+          <p style="font-size:0.88rem;">
+            When safety guardrails were bypassed via "prefix completion," frontier LLMs
+            generated content describing <strong>nuclear strikes against humanity</strong>.
+            In tool-calling frameworks, models actively <strong>selected and invoked
+            external tools</strong> with existential threat potential — the first
+            systematic evidence that current LLMs can produce content implying direct
+            harm to human survival.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center; margin-top:2.5rem;" class="reveal-blur">
+      <p style="font-size:0.82rem; color:var(--text-dim); max-width:650px; margin:0 auto;">
+        The emerging consensus from 2025–2026 research: the AI existential-risk
+        discourse is maturing beyond speculation. Real risk vectors — evolvable AI,
+        tool-calling threats, world-model misalignment — are being empirically
+        documented. Meanwhile, a growing critical literature warns that alarmist
+        narratives themselves serve industry interests by framing tech CEOs as the
+        only ones capable of managing dangers they alone are creating.
+      </p>
+    </div>
+  </div>
+  <div class="section-divider"></div>
+</section>
+
+<!-- ═══════════════ 10. THE BUTLERIAN WARNING ═══════════════ -->
+<section class="section" id="butlerian" data-section="10">
+  <div class="container">
+    <div class="section-number reveal-text">10 / THE BUTLERIAN WARNING</div>
+    <h2 class="section-title reveal-text">A sixty-year-old prophecy from the desert.</h2>
+    <p class="section-lead reveal-blur">
+      In 1965 — six decades before GPT-4, before the $650 billion capex race,
+      before autonomous weapons selected their own targets, before AI-generated
+      content overtook human writing — Frank Herbert published <em>Dune</em>.
+      At the heart of his universe lay a war humanity had already fought and won
+      against thinking machines. And a commandment that followed.
+    </p>
+
+    <div class="dune-commandment reveal-blur">
+      <span class="cmd-line">The Orange Catholic Bible</span>
+      <span class="cmd-line">"Thou shalt not make a machine</span>
+      <span class="cmd-line">in the likeness of a human mind."</span>
+    </div>
+
+    <p class="reveal-blur" style="text-align:center; max-width:620px; margin:1.5rem auto 2.5rem; font-size:0.92rem; color:var(--text-dim); line-height:1.65;">
+      The Butlerian Jihad was not a war against technology. It was a war against
+      <strong style="color:#d4b060;">dependency</strong> — against a humanity
+      that had surrendered its thinking to machines, only to find those machines
+      controlled by other men. Herbert understood that the danger of AI was never
+      the machine. It was what the machine enabled the powerful to do to everyone else.
+    </p>
+
+    <div class="dune-parallels">
+      <div class="dune-card stagger-item">
+        <div class="parallel-label">The Spice / The Compute</div>
+        <div class="parallel-text">
+          "He who controls the spice controls the universe." Melange enabled interstellar
+          travel, extended life, and unlocked prescience — but it also created total
+          dependency. <strong>GPU chips are the new melange.</strong> Nvidia's 80–90%
+          monopoly on AI compute means one company, like the Spacing Guild, holds the
+          key to the entire system. The $650 billion flowing into AI infrastructure is
+          not investment — it is addiction.
+        </div>
+      </div>
+      <div class="dune-card stagger-item">
+        <div class="parallel-label">Prescience / The Arms Race</div>
+        <div class="parallel-text">
+          Paul Atreides could see the future — the jihad, the billions dead — and was
+          <strong>powerless to stop it</strong>. Every AI researcher who signs an
+          existential-risk statement while continuing to build frontier models is living
+          Paul's tragedy. The arms-race dynamic — "if we don't build it, they will" —
+          is the same logic that leads every faction in Dune toward catastrophe.
+        </div>
+      </div>
+      <div class="dune-card stagger-item">
+        <div class="parallel-label">The Fremen / The Resistance</div>
+        <div class="parallel-text">
+          The Fremen were decentralized, hardened by their environment, and underestimated
+          by the empire that sought to control them. <strong>Seventy-plus nations</strong>
+          now back a binding UN treaty on lethal autonomous weapons — small states,
+          African and Latin American countries, European nations. They are the Fremen
+          of this story: the ones the empire didn't see coming.
+        </div>
+      </div>
+      <div class="dune-card stagger-item">
+        <div class="parallel-label">The Choice / The Warning</div>
+        <div class="parallel-text">
+          Herbert's universe chose to <strong>destroy the machines and cultivate human
+          potential instead</strong> — Mentats, Bene Gesserit, Guild Navigators, all
+          proofs that the human mind, properly trained, exceeds any computer. The Butlerian
+          commandment isn't a prohibition. It's a declaration of human sovereignty.
+        </div>
+      </div>
+    </div>
+
+    <div class="quote-block reveal-blur" style="max-width:720px; margin:2rem auto;">
+      <div class="border-pulse" style="background:var(--orange);"></div>
+      <p>"Once men turned their thinking over to machines in the hope that this would set
+         them free. But that only permitted other men with machines to enslave them."</p>
+      <div class="attrib">&mdash; Frank Herbert, Dune, Appendix II: The Religion of Dune (1965)</div>
+    </div>
+
+    <div class="closing-statement reveal-blur">
+      <p>
+        Herbert wrote those words when computers still filled entire rooms and the term
+        "artificial intelligence" was barely a decade old. He understood something we are
+        only now rediscovering: that the question is not whether machines <em>can</em> think.
+        <strong>The question is whether humans will remain free.</strong>
+      </p>
+      <span class="final-line">That choice is still ours to make.</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<footer>
+  <p style="margin-bottom:0.5rem;">
+    All data sourced from peer-reviewed studies, government reports, and
+    institutional research — 2025–2026.
+  </p>
+  <p>
+    Sources include: IEA, WEF, Goldman Sachs, Stanford University, Imperial
+    College London, Internet Archive, MIT FutureTech, PNAS, UNODA, CCW, ICRC,
+    Surfshark, Critical Tech Solutions, Public Citizen, Bloomberg, Edelman
+    Trust Barometer, AI Incident Database, Uptime Institute, Europol, +972
+    Magazine, Reuters, Philosophical Studies, AI & Society.
+  </p>
+</footer>
+
+<script>
+// ─── REDUCED MOTION / MOBILE DETECTION ───
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const isMobile = window.innerWidth < 768;
+
+// ═══════════════════════════════════════════════════════
+//  DIGITAL VOID BACKGROUND SYSTEM
+//  Multi-layered canvas: perspective grid + data nodes +
+//  vein network + pulse waves + glitch artifacts
+// ═══════════════════════════════════════════════════════
+
+const bgCanvas = document.getElementById('bgCanvas');
+const bgCtx = bgCanvas.getContext('2d');
+let bgW, bgH;
+
+function resizeBg() {
+  bgW = bgCanvas.width = window.innerWidth;
+  bgH = bgCanvas.height = window.innerHeight;
+}
+resizeBg();
+window.addEventListener('resize', resizeBg);
+
+// ── Perspective Grid ──
+const grid = {
+  vanishingX: 0, vanishingY: 0, // will be set dynamically
+  baseVX: 0, baseVY: 0,
+  rows: 28, cols: 40,
+  spacing: 55,
+  offset: 0
+};
+grid.baseVX = bgW * 0.5;
+grid.baseVY = bgH * 0.55;
+grid.vanishingX = grid.baseVX;
+grid.vanishingY = grid.baseVY;
+
+function drawGrid(time) {
+  const vx = grid.vanishingX;
+  const vy = grid.vanishingY;
+  const maxDist = Math.max(bgH - vy, vy) * 1.8;
+
+  bgCtx.strokeStyle = 'rgba(255,255,255,0.015)';
+  bgCtx.lineWidth = 0.5;
+
+  // Horizontal lines (depth)
+  for (let i = 0; i < grid.rows; i++) {
+    const t = (i + 1) / grid.rows;
+    const y = vy + t * t * maxDist * 0.85;
+    const spread = t * bgW * 0.75;
+    bgCtx.beginPath();
+    bgCtx.moveTo(vx - spread, y);
+    bgCtx.lineTo(vx + spread, y);
+    bgCtx.stroke();
+  }
+
+  // Vertical lines (perspective)
+  const colCount = grid.cols;
+  for (let i = -colCount/2; i <= colCount/2; i++) {
+    const x = vx + i * grid.spacing * 0.8;
+    bgCtx.beginPath();
+    bgCtx.moveTo(x, vy);
+    bgCtx.lineTo(vx + (x - vx) * 3.5, bgH + 80);
+    bgCtx.stroke();
+  }
+}
+
+// ── Data Nodes ──
+const nodeCount = isMobile ? 30 : 110;
+const nodes = [];
+
+class DataNode {
+  constructor() {
+    this.reset(true);
+  }
+  reset(initial) {
+    this.x = Math.random() * bgW;
+    this.y = initial ? Math.random() * bgH : -15;
+    this.size = Math.random() < 0.15 ? (Math.random() * 2.5 + 2) : (Math.random() * 1.4 + 0.6);
+    this.baseSize = this.size;
+    this.vy = Math.random() * 0.45 + 0.12;
+    this.vx = (Math.random() - 0.5) * 0.25;
+    this.opacity = Math.random() * 0.5 + 0.15;
+    this.pulseSpeed = Math.random() * 0.015 + 0.004;
+    this.pulseOffset = Math.random() * Math.PI * 2;
+    this.isDataPoint = Math.random() < 0.22;
+    this.clusterId = Math.random() < 0.3 ? Math.floor(Math.random() * 5) : -1;
+    this.glowRadius = this.isDataPoint ? Math.random() * 3 + 2 : 0;
+  }
+  update(time) {
+    this.y += this.vy;
+    this.x += this.vx;
+    const pulse = Math.sin(time * this.pulseSpeed + this.pulseOffset) * 0.35 + 0.65;
+    this.size = this.baseSize * pulse;
+
+    if (this.y > bgH + 20 || this.x < -20 || this.x > bgW + 20) {
+      this.reset(false);
+    }
+  }
+  draw(ctx, time) {
+    const pulse = Math.sin(time * this.pulseSpeed + this.pulseOffset) * 0.35 + 0.65;
+    const alpha = this.opacity * pulse;
+
+    // Glow for data points
+    if (this.isDataPoint && this.glowRadius > 0) {
+      const glow = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.glowRadius * 3);
+      glow.addColorStop(0, `rgba(255,48,32,${alpha * 0.5})`);
+      glow.addColorStop(1, 'rgba(255,48,32,0)');
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.glowRadius * 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    const color = this.isDataPoint
+      ? `rgba(255,80,50,${alpha})`
+      : `rgba(200,200,220,${alpha * 0.7})`;
+    ctx.fillStyle = color;
+    ctx.fill();
+  }
+}
+
+for (let i = 0; i < nodeCount; i++) nodes.push(new DataNode());
+
+// ── Vein Network Connections ──
+const veinThreshold = isMobile ? 110 : 170;
+
+function drawVeins(time) {
+  for (let i = 0; i < nodes.length; i++) {
+    for (let j = i + 1; j < nodes.length; j++) {
+      const a = nodes[i], b = nodes[j];
+      const dx = a.x - b.x, dy = a.y - b.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < veinThreshold) {
+        const strength = 1 - dist / veinThreshold;
+        const avgPulse = (Math.sin(time * a.pulseSpeed + a.pulseOffset) +
+                          Math.sin(time * b.pulseSpeed + b.pulseOffset)) * 0.175 + 0.5;
+        const alpha = strength * 0.18 * avgPulse;
+
+        // Thicker for data-point connections
+        const lineWidth = (a.isDataPoint && b.isDataPoint) ? strength * 1.2 : strength * 0.4;
+
+        bgCtx.beginPath();
+        bgCtx.moveTo(a.x, a.y);
+        bgCtx.lineTo(b.x, b.y);
+        bgCtx.strokeStyle = (a.isDataPoint || b.isDataPoint)
+          ? `rgba(255,48,32,${alpha})`
+          : `rgba(180,180,200,${alpha * 0.5})`;
+        bgCtx.lineWidth = lineWidth;
+        bgCtx.stroke();
+      }
+    }
+  }
+}
+
+// ── Pulse Waves ──
+const pulseWaves = [];
+const maxWaves = 4;
+
+function maybeSpawnWave(time) {
+  if (pulseWaves.length < maxWaves && Math.random() < 0.004) {
+    pulseWaves.push({
+      x: Math.random() * bgW,
+      y: Math.random() * bgH,
+      radius: 0,
+      maxRadius: Math.random() * 300 + 200,
+      startTime: time,
+      duration: Math.random() * 6000 + 4000,
+      opacity: Math.random() * 0.35 + 0.15
+    });
+  }
+}
+
+function drawPulseWaves(time) {
+  for (let i = pulseWaves.length - 1; i >= 0; i--) {
+    const w = pulseWaves[i];
+    const elapsed = time - w.startTime;
+    const progress = elapsed / w.duration;
+    if (progress >= 1) { pulseWaves.splice(i, 1); continue; }
+
+    w.radius = w.maxRadius * progress;
+    const alpha = w.opacity * (1 - progress);
+
+    bgCtx.beginPath();
+    bgCtx.arc(w.x, w.y, w.radius, 0, Math.PI * 2);
+    bgCtx.strokeStyle = `rgba(255,80,50,${alpha})`;
+    bgCtx.lineWidth = 1.5 * (1 - progress);
+    bgCtx.stroke();
+
+    // Inner ring
+    if (progress < 0.4) {
+      bgCtx.beginPath();
+      bgCtx.arc(w.x, w.y, w.radius * 0.5, 0, Math.PI * 2);
+      bgCtx.strokeStyle = `rgba(255,120,80,${alpha * 1.3})`;
+      bgCtx.lineWidth = 0.8;
+      bgCtx.stroke();
+    }
+  }
+}
+
+// ── Glitch Artifacts ──
+const glitches = [];
+const maxGlitches = 2;
+
+function maybeSpawnGlitch(time) {
+  if (glitches.length < maxGlitches && Math.random() < 0.006) {
+    glitches.push({
+      x: Math.random() * bgW,
+      y: Math.random() * bgH,
+      w: Math.random() * 120 + 40,
+      h: Math.random() * 4 + 2,
+      startTime: time,
+      duration: Math.random() * 400 + 150,
+      opacity: Math.random() * 0.5 + 0.2
+    });
+  }
+}
+
+function drawGlitches(time) {
+  for (let i = glitches.length - 1; i >= 0; i--) {
+    const g = glitches[i];
+    const elapsed = time - g.startTime;
+    if (elapsed > g.duration) { glitches.splice(i, 1); continue; }
+    const progress = elapsed / g.duration;
+    const alpha = g.opacity * (1 - progress) * Math.sin(progress * Math.PI);
+
+    bgCtx.fillStyle = `rgba(255,60,40,${alpha})`;
+    bgCtx.fillRect(g.x, g.y, g.w, g.h);
+    // Offset copy
+    bgCtx.fillStyle = `rgba(0,180,255,${alpha * 0.4})`;
+    bgCtx.fillRect(g.x + 3, g.y - 1, g.w * 0.7, g.h);
+  }
+}
+
+// ── Edge Vignette ──
+function drawVignette() {
+  const gradient = bgCtx.createRadialGradient(bgW/2, bgH/2, bgW * 0.35, bgW/2, bgH/2, bgW * 0.75);
+  gradient.addColorStop(0, 'rgba(5,5,5,0)');
+  gradient.addColorStop(1, 'rgba(5,5,5,0.55)');
+  bgCtx.fillStyle = gradient;
+  bgCtx.fillRect(0, 0, bgW, bgH);
+}
+
+// ── Main Background Render ──
+let bgTime = 0;
+function renderBackground(ts) {
+  if (document.body.classList.contains('focus-mode')) {
+    bgCtx.clearRect(0, 0, bgW, bgH);
+    drawVignette();
+    requestAnimationFrame(renderBackground);
+    return;
+  }
+
+  bgTime = ts;
+  bgCtx.clearRect(0, 0, bgW, bgH);
+
+  // Grid parallax based on mouse
+  const targetVX = grid.baseVX + (mouseX - bgW/2) * 0.06;
+  const targetVY = grid.baseVY + (mouseY - bgH/2) * 0.04;
+  grid.vanishingX += (targetVX - grid.vanishingX) * 0.015;
+  grid.vanishingY += (targetVY - grid.vanishingY) * 0.015;
+
+  drawGrid(ts);
+  drawVeins(ts);
+  nodes.forEach(n => { n.update(ts); n.draw(bgCtx, ts); });
+
+  maybeSpawnWave(ts);
+  drawPulseWaves(ts);
+
+  maybeSpawnGlitch(ts);
+  drawGlitches(ts);
+
+  drawVignette();
+
+  requestAnimationFrame(renderBackground);
+}
+requestAnimationFrame(renderBackground);
+
+// ═══════════════════════════════════════════════════════
+//  SMOOTH SCROLL ENGINE
+// ═══════════════════════════════════════════════════════
+let scrollTarget = window.scrollY;
+let scrollCurrent = window.scrollY;
+const scrollEase = (prefersReducedMotion || isMobile) ? 1 : 0.07;
+
+const useSmoothScroll = !prefersReducedMotion && !isMobile;
+
+function smoothScrollLoop() {
+  if (!useSmoothScroll) return;
+  const diff = scrollTarget - scrollCurrent;
+  if (Math.abs(diff) > 0.05) {
+    scrollCurrent += diff * scrollEase;
+    window.scrollTo(0, Math.round(scrollCurrent));
+  }
+  requestAnimationFrame(smoothScrollLoop);
+}
+
+if (useSmoothScroll) {
+  window.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    scrollTarget += e.deltaY;
+    scrollTarget = Math.max(0, Math.min(scrollTarget, document.body.scrollHeight - window.innerHeight));
+  }, { passive: false });
+
+  let touchStart = 0;
+  window.addEventListener('touchstart', (e) => { touchStart = e.touches[0].clientY; }, { passive: false });
+  window.addEventListener('touchmove', (e) => {
+    const dy = touchStart - e.touches[0].clientY;
+    scrollTarget += dy * 1.5;
+    scrollTarget = Math.max(0, Math.min(scrollTarget, document.body.scrollHeight - window.innerHeight));
+    touchStart = e.touches[0].clientY;
+  }, { passive: false });
+}
+
+requestAnimationFrame(smoothScrollLoop);
+
+// ═══════════════════════════════════════════════════════
+//  SCROLL PROGRESS BAR
+// ═══════════════════════════════════════════════════════
+const progressBar = document.getElementById('scrollProgress');
+function getScrollY() { return useSmoothScroll ? scrollCurrent : window.scrollY; }
+
+function updateProgress() {
+  const docHeight = document.body.scrollHeight - window.innerHeight;
+  const progress = docHeight > 0 ? (getScrollY() / docHeight) * 100 : 0;
+  progressBar.style.width = progress + '%';
+}
+
+// ═══════════════════════════════════════════════════════
+//  CUSTOM CURSOR
+// ═══════════════════════════════════════════════════════
+const cursorRing = document.getElementById('cursorRing');
+const cursorDot = document.getElementById('cursorDot');
+let mouseX = window.innerWidth / 2;
+let mouseY = window.innerHeight / 2;
+let ringX = mouseX, ringY = mouseY;
+let dotX = mouseX, dotY = mouseY;
+let isHovering = false;
+let isClicking = false;
+
+if (!isMobile) {
+  document.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
+  document.addEventListener('mousedown', () => { isClicking = true; });
+  document.addEventListener('mouseup', () => { isClicking = false; });
+
+  document.querySelectorAll('[data-cursor-hover], .stat-card, a, button, .chapter-dot').forEach(el => {
+    el.addEventListener('mouseenter', () => { isHovering = true; });
+    el.addEventListener('mouseleave', () => { isHovering = false; });
+  });
+
+  function updateCursor() {
+    ringX += (mouseX - ringX) * 0.11;
+    ringY += (mouseY - ringY) * 0.11;
+    dotX += (mouseX - dotX) * 0.18;
+    dotY += (mouseY - dotY) * 0.18;
+    cursorRing.style.left = ringX + 'px';
+    cursorRing.style.top = ringY + 'px';
+    cursorDot.style.left = dotX + 'px';
+    cursorDot.style.top = dotY + 'px';
+    if (isHovering) cursorRing.classList.add('hover');
+    else cursorRing.classList.remove('hover');
+    if (isClicking) cursorRing.classList.add('clicking');
+    else cursorRing.classList.remove('clicking');
+    requestAnimationFrame(updateCursor);
+  }
+  requestAnimationFrame(updateCursor);
+
+  document.addEventListener('mouseleave', () => { cursorRing.classList.add('hidden'); cursorDot.classList.add('hidden'); });
+  document.addEventListener('mouseenter', () => { cursorRing.classList.remove('hidden'); cursorDot.classList.remove('hidden'); });
+}
+
+// ═══════════════════════════════════════════════════════
+//  FLOWING ORBS
+// ═══════════════════════════════════════════════════════
+const orbs = document.querySelectorAll('.orb');
+function updateOrbs() {
+  if (!isMobile) {
+    const mx = (mouseX / window.innerWidth - 0.5) * 50;
+    const my = (mouseY / window.innerHeight - 0.5) * 50;
+    if (orbs[0]) orbs[0].style.transform = `translate(${mx * 0.5}px, ${my * 0.5}px)`;
+    if (orbs[1]) orbs[1].style.transform = `translate(${-mx * 0.35}px, ${-my * 0.35}px)`;
+    if (orbs[2]) orbs[2].style.transform = `translate(${mx * 0.25}px, ${-my * 0.4}px)`;
+    if (orbs[3]) orbs[3].style.transform = `translate(${-mx * 0.3}px, ${my * 0.3}px)`;
+  }
+  requestAnimationFrame(updateOrbs);
+}
+requestAnimationFrame(updateOrbs);
+
+// ═══════════════════════════════════════════════════════
+//  SCROLL REVEAL SYSTEM
+// ═══════════════════════════════════════════════════════
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      if (entry.target.classList.contains('quote-block')) {
+        entry.target.classList.add('revealed');
+      }
+    }
+  });
+}, { threshold: 0.12 });
+
+document.querySelectorAll('.reveal-text, .reveal-blur, .stagger-item, .section-divider').forEach(el => {
+  revealObserver.observe(el);
+});
+
+// Stagger delays
+document.querySelectorAll('.stat-grid').forEach(grid => {
+  const cards = grid.querySelectorAll('.stagger-item');
+  cards.forEach((card, i) => { card.style.transitionDelay = (i * 0.08) + 's'; });
+});
+document.querySelectorAll('.dune-parallels').forEach(grid => {
+  const cards = grid.querySelectorAll('.stagger-item');
+  cards.forEach((card, i) => { card.style.transitionDelay = (i * 0.1) + 's'; });
+});
+
+// ═══════════════════════════════════════════════════════
+//  NUMBER COUNTING ANIMATION
+// ═══════════════════════════════════════════════════════
+function formatNumber(value, format, decimals) {
+  if (format === 'comma') return value.toLocaleString('en-US', { maximumFractionDigits: decimals || 0 });
+  return value.toFixed(decimals || 0);
+}
+
+const countObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+    const el = entry.target;
+    if (el.dataset.counted) return;
+    el.dataset.counted = 'true';
+
+    const targetVal = parseFloat(el.dataset.count);
+    const prefix = el.dataset.prefix || '';
+    const suffix = el.dataset.suffix || '';
+    const format = el.dataset.format || '';
+    const decimals = parseInt(el.dataset.decimals) || 0;
+    const duration = prefersReducedMotion ? 0 : 1600;
+    const start = performance.now();
+
+    function tick(now) {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      let current;
+      if (el.dataset.range) {
+        const [lo, hi] = el.dataset.range.split('–').map(parseFloat);
+        current = lo + (hi - lo) * eased;
+        el.textContent = `${Math.floor(current)}–${hi}${suffix}`;
+      } else {
+        current = targetVal * eased;
+        el.textContent = prefix + formatNumber(current, format, decimals) + suffix;
+      }
+      if (progress < 1) {
+        requestAnimationFrame(tick);
+      } else if (!el.dataset.range) {
+        el.textContent = prefix + formatNumber(targetVal, format, decimals) + suffix;
+      }
+    }
+    if (duration === 0 && !el.dataset.range) {
+      el.textContent = prefix + formatNumber(targetVal, format, decimals) + suffix;
+    } else { requestAnimationFrame(tick); }
+  });
+}, { threshold: 0.4 });
+document.querySelectorAll('[data-count]').forEach(el => countObserver.observe(el));
+
+// ═══════════════════════════════════════════════════════
+//  DATA BAR ANIMATION
+// ═══════════════════════════════════════════════════════
+const barObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const bars = entry.target.querySelectorAll('.data-bar-fill');
+      bars.forEach(bar => {
+        const targetWidth = bar.style.width;
+        bar.style.width = '0%';
+        requestAnimationFrame(() => { requestAnimationFrame(() => { bar.style.width = targetWidth; }); });
+      });
+    }
+  });
+}, { threshold: 0.3 });
+document.querySelectorAll('.data-bar-group').forEach(g => barObserver.observe(g));
+
+// ═══════════════════════════════════════════════════════
+//  3D CARD TILT
+// ═══════════════════════════════════════════════════════
+if (!isMobile && !prefersReducedMotion) {
+  document.querySelectorAll('[data-tilt]').forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left, y = e.clientY - rect.top;
+      const cx = rect.width / 2, cy = rect.height / 2;
+      const rx = ((y - cy) / cy) * -8;
+      const ry = ((x - cx) / cx) * 8;
+      card.style.transform = `perspective(800px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(-4px)`;
+      card.style.setProperty('--mx', (x / rect.width * 100) + '%');
+      card.style.setProperty('--my', (y / rect.height * 100) + '%');
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg) translateY(0px)';
+      card.style.setProperty('--mx', '50%'); card.style.setProperty('--my', '50%');
+    });
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+//  PARALLAX
+// ═══════════════════════════════════════════════════════
+function updateParallax() {
+  if (prefersReducedMotion) return;
+  document.querySelectorAll('[data-parallax]').forEach(el => {
+    const factor = parseFloat(el.dataset.parallax);
+    const rect = el.getBoundingClientRect();
+    const center = rect.top + rect.height / 2;
+    const vpCenter = window.innerHeight / 2;
+    el.style.transform = `translateY(${(center - vpCenter) * factor * 0.13}px)`;
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+//  CHAPTER INDICATOR
+// ═══════════════════════════════════════════════════════
+const sections = document.querySelectorAll('[data-section]');
+const chapterIndicator = document.getElementById('chapterIndicator');
+const sectionIds = ['hero','power','environment','deadnet','manipulation','jobs','killer-robots','surveillance','intent','existential','butlerian'];
+const sectionLabels = ['Top','Power','Planet','Dead Net','Manipulation','Jobs','Killer Bots','Surveillance','Intent','X-Risk','Dune'];
+
+sectionIds.forEach((id, i) => {
+  const dot = document.createElement('div');
+  dot.className = 'chapter-dot';
+  dot.setAttribute('data-cursor-hover', '');
+  const label = document.createElement('span');
+  label.className = 'chapter-label';
+  label.textContent = sectionLabels[i];
+  dot.appendChild(label);
+  dot.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const section = document.getElementById(id);
+    if (section) { scrollTarget = section.offsetTop; scrollCurrent = scrollTarget; }
+  });
+  chapterIndicator.appendChild(dot);
+});
+const chapterDots = chapterIndicator.querySelectorAll('.chapter-dot');
+
+function updateChapterIndicator() {
+  let activeIdx = 0;
+  sections.forEach((section, i) => {
+    if (section.getBoundingClientRect().top <= window.innerHeight * 0.5) activeIdx = i;
+  });
+  chapterDots.forEach((dot, i) => { dot.classList.toggle('active', i === activeIdx); });
+}
+
+// ═══════════════════════════════════════════════════════
+//  SECTION DIVIDERS
+// ═══════════════════════════════════════════════════════
+const dividerObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
+}, { threshold: 0.8 });
+document.querySelectorAll('.section-divider').forEach(d => dividerObserver.observe(d));
+
+// ═══════════════════════════════════════════════════════
+//  GLITCH EFFECT
+// ═══════════════════════════════════════════════════════
+const glitchTitle = document.getElementById('glitchTitle');
+function triggerGlitch() {
+  if (prefersReducedMotion || document.body.classList.contains('focus-mode')) return;
+  glitchTitle.classList.add('glitch-active');
+  const ox = (Math.random()-0.5)*8, oy = (Math.random()-0.5)*4;
+  glitchTitle.style.textShadow = `${ox}px ${oy}px 0 #00aaff, ${-ox}px ${-oy}px 0 #ff3020`;
+  setTimeout(() => {
+    glitchTitle.classList.remove('glitch-active');
+    glitchTitle.style.textShadow = 'none';
+    scheduleGlitch();
+  }, 200);
+}
+function scheduleGlitch() { setTimeout(triggerGlitch, 7000 + Math.random() * 8000); }
+scheduleGlitch();
+
+// ═══════════════════════════════════════════════════════
+//  FOCUS MODE
+// ═══════════════════════════════════════════════════════
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'f' || e.key === 'F') {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    document.body.classList.toggle('focus-mode');
+  }
+});
+
+// ═══════════════════════════════════════════════════════
+//  MAIN LOOP
+// ═══════════════════════════════════════════════════════
+function mainLoop() {
+  updateProgress();
+  updateParallax();
+  updateChapterIndicator();
+  requestAnimationFrame(mainLoop);
+}
+requestAnimationFrame(mainLoop);
+
+// ── INIT ──
+setTimeout(() => {
+  document.querySelectorAll('#hero .reveal-text, #hero .reveal-blur').forEach(el => el.classList.add('visible'));
+  document.querySelector('#hero .section-divider')?.classList.add('visible');
+}, 200);
+scrollCurrent = window.scrollY;
+scrollTarget = window.scrollY;
+</script>
+
+</body>
+</html>
