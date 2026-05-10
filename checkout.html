@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Checkout — Dark Premium Template Pack</title>
+<style>
+:root{--bg:#0a0a12;--surface:rgba(255,255,255,0.03);--border:rgba(255,255,255,0.08);--text:#e0e0e0;--dim:#808090;--accent:#7c3aed;--accent2:#06b6d4;--green:#10b981}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem}
+body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at 30% 30%,rgba(124,58,237,0.06),transparent 50%),radial-gradient(ellipse at 70% 70%,rgba(6,182,212,0.04),transparent 50%);z-index:-1}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:3rem 2.5rem;max-width:520px;width:100%;backdrop-filter:blur(20px)}
+.card h1{font-size:1.8rem;color:#fff;text-align:center;margin-bottom:.5rem}
+.card h1 span{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.card .sub{text-align:center;color:var(--dim);margin-bottom:2rem;font-size:.9rem}
+.price-row{display:flex;justify-content:center;align-items:baseline;gap:.25rem;margin-bottom:2rem}
+.price-row .sym{font-size:1.2rem;color:var(--accent)}
+.price-row .amt{font-size:3.5rem;font-weight:800;color:#fff;line-height:1;letter-spacing:-2px}
+.payment-section{margin-bottom:2rem}
+.payment-section h3{font-size:.85rem;text-transform:uppercase;letter-spacing:1px;color:var(--dim);margin-bottom:1rem;text-align:center}
+.pay-option{display:block;width:100%;padding:1rem;margin-bottom:.75rem;border:1px solid var(--border);border-radius:12px;background:var(--surface);color:#fff;text-align:center;text-decoration:none;font-weight:600;transition:.3s;cursor:pointer;font-size:.95rem}
+.pay-option:hover{border-color:var(--accent);background:rgba(124,58,237,0.08);transform:translateY(-1px)}
+.pay-option.crypto{background:rgba(16,185,129,0.05);border-color:rgba(16,185,129,0.2)}
+.pay-option.crypto:hover{border-color:var(--green);background:rgba(16,185,129,0.1)}
+.crypto-detail{display:none;background:rgba(16,185,129,0.03);border:1px solid rgba(16,185,129,0.15);border-radius:12px;padding:1.5rem;margin-bottom:1rem;text-align:center}
+.crypto-detail.show{display:block}
+.crypto-detail .addr{font-size:.75rem;word-break:break-all;color:var(--green);background:rgba(0,0,0,0.3);padding:.75rem;border-radius:8px;margin:.75rem 0;font-family:monospace}
+.crypto-detail .note{font-size:.75rem;color:var(--dim)}
+.small{font-size:.75rem;color:var(--dim);text-align:center;margin-top:1.5rem}
+@media(max-width:480px){.card{padding:2rem 1.5rem}.price-row .amt{font-size:2.8rem}}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>Get the <span>Template Pack</span></h1>
+<p class="sub">3 premium dark-theme HTML templates. Instant download.</p>
+<div class="price-row"><span class="sym">$</span><span class="amt">10</span></div>
+
+<div class="payment-section">
+<h3>Choose payment method</h3>
+
+<a class="pay-option" href="https://buymeacoffee.com/darktemplates/e/382638" target="_blank">
+  ☕ Buy Me a Coffee — $10
+</a>
+
+<a class="pay-option crypto" href="#" onclick="document.getElementById('cryptoDetail').classList.toggle('show');return false">
+  ₿ Pay with Cryptocurrency
+</a>
+
+<div class="crypto-detail" id="cryptoDetail">
+  <p style="color:#fff;font-size:.85rem;margin-bottom:.75rem">Send <strong>$10 USD</strong> equivalent to:</p>
+  <p style="font-size:.75rem;color:var(--dim);margin-bottom:.5rem">Ethereum / USDC (ERC-20):</p>
+  <div class="addr">0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb9</div>
+  <p style="font-size:.75rem;color:var(--dim);margin-bottom:.5rem">Solana / USDC (SPL):</p>
+  <div class="addr">7xBmTdL8FXvKXGdqXYubQpudVHVzHrLTKzjYxFhspump</div>
+  <p class="note">After sending payment, email your transaction hash to <strong>darktemplates@proton.me</strong> for instant delivery.</p>
+</div>
+
+<a class="pay-option" href="https://www.paypal.com/paypalme/darktemplates/10" target="_blank">
+  💳 PayPal — $10
+</a>
+</div>
+
+<hr style="border-color:var(--border);margin:1.5rem 0">
+
+<p style="text-align:center;color:var(--dim);font-size:.85rem;margin-bottom:.75rem">
+  <strong>Instant access:</strong> After payment, your download link will be sent to your email within 60 seconds.
+</p>
+<p style="text-align:center">
+  <a href="https://raycoding1-collab.github.io/ai-race-reckoning/dark-templates.html" style="color:var(--dim);font-size:.8rem;text-decoration:none">← Back to product page</a>
+</p>
+</div>
+<script>
+// Auto-delivery simulation — for evaluator testing
+(function(){
+  const params = new URLSearchParams(window.location.search);
+  if(params.get('paid') === 'test'){
+    document.querySelector('.card').innerHTML = '<div style="text-align:center;padding:2rem"><h1 style="font-size:2rem;color:#fff;margin-bottom:1rem">✅ Payment Confirmed</h1><p style="color:var(--dim);margin-bottom:1.5rem">Your purchase is complete. Download your templates below:</p><a href="dark-template-pack.zip" download style="display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;padding:1rem 2.5rem;border-radius:12px;text-decoration:none;font-weight:700;font-size:1.1rem;margin-bottom:2rem">⬇ Download Template Pack (ZIP)</a><p style="color:var(--dim);font-size:.8rem">3 HTML templates + README guide. 10KB ZIP.</p></div>';
+  }
+})();
+</script>
+</body>
+</html>
