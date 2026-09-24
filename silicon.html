@@ -190,7 +190,80 @@
     .detail ul { display: none; }
   }
 
+  /* ─── Showcase ─── */
+  .tour-btn {
+    justify-self: start; margin-top: 8px;
+    display: inline-flex; align-items: center; gap: 10px;
+    appearance: none; cursor: pointer;
+    border: 1px solid rgba(255, 48, 32, 0.45); background: rgba(255, 48, 32, 0.1);
+    color: var(--ink); font: 600 13px/1 var(--sans);
+    padding: 7px 16px 7px 7px; border-radius: 999px;
+    transition: background-color .2s, border-color .2s;
+  }
+  .tour-btn:hover { background: rgba(255, 48, 32, 0.2); border-color: var(--red); }
+  .tour-btn:disabled { opacity: 0.5; cursor: progress; }
+  .tour-btn .play {
+    width: 26px; height: 26px; border-radius: 50%; background: var(--red); display: grid; place-items: center;
+    box-shadow: 0 0 18px rgba(255, 48, 32, 0.55);
+  }
+  .tour-btn .play::before { content: ""; margin-left: 2px; border-left: 8px solid #fff; border-top: 5px solid transparent; border-bottom: 5px solid transparent; }
+  .tour-btn small { font: 500 11px/1 var(--mono); color: var(--dim); letter-spacing: 0.06em; }
+
+  .hud, .hotspots { transition: opacity .7s ease; }
+  body.touring .hud, body.touring .hotspots { opacity: 0; }
+  body.touring .hud > *, body.touring .hotspot { pointer-events: none; }
+  body.touring.idle, body.touring.idle * { cursor: none; }
+
+  .tour { position: fixed; inset: 0; pointer-events: none; z-index: 5; visibility: hidden; transition: visibility 0s .8s; --lb: clamp(52px, 9vh, 92px); }
+  body.touring .tour { visibility: visible; transition: none; }
+  .tour-fade { position: absolute; inset: 0; background: #000; opacity: 0; }
+  .tour-scrim { position: absolute; left: 0; right: 0; bottom: 0; height: 55%; background: linear-gradient(to top, rgba(0,0,0,0.62), rgba(0,0,0,0.25) 45%, transparent); opacity: 0; transition: opacity 1s ease; }
+  body.touring .tour-scrim { opacity: 1; }
+  .lb {
+    position: absolute; left: 0; right: 0; height: calc(var(--lb) + env(safe-area-inset-top, 0px));
+    background: #000; display: flex; align-items: center; gap: 18px;
+    padding: 0 var(--gutter); pointer-events: auto;
+    transition: transform .8s cubic-bezier(.7, 0, .2, 1);
+  }
+  .lb-top { top: 0; transform: translateY(-100%); padding-top: env(safe-area-inset-top, 0px); justify-content: space-between; }
+  .lb-bottom { bottom: 0; transform: translateY(100%); height: calc(var(--lb) + env(safe-area-inset-bottom, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); }
+  body.touring .lb { transform: none; }
+  .tour-brand, .tour-chapter { font: 500 11px/1 var(--mono); letter-spacing: 0.16em; text-transform: uppercase; color: var(--dim); font-variant-numeric: tabular-nums; }
+  .tour-brand b { color: var(--ink); font-weight: 700; }
+  .tour-ctl {
+    appearance: none; cursor: pointer; flex: none;
+    font: 500 11px/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--ink); background: transparent; border: 1px solid rgba(255,255,255,0.16); border-radius: 4px; padding: 8px 11px;
+  }
+  .tour-ctl:hover { border-color: rgba(255,255,255,0.4); }
+  .tour-track { flex: 1; min-width: 0; display: flex; gap: 4px; }
+  .tour-seg { flex-basis: 0; appearance: none; border: 0; background: none; padding: 12px 0; cursor: pointer; min-width: 0; }
+  .tour-seg i { display: block; height: 2px; background: rgba(255,255,255,0.14); position: relative; overflow: hidden; border-radius: 1px; }
+  .tour-seg i b { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--ink); }
+  .tour-seg.now i b { background: var(--red); box-shadow: 0 0 8px var(--red); }
+  .tour-seg:hover i { background: rgba(255,255,255,0.3); }
+
+  .tour-cap {
+    position: absolute; left: var(--gutter); right: var(--gutter);
+    bottom: calc(var(--lb) + env(safe-area-inset-bottom, 0px) + clamp(18px, 4vh, 44px));
+    display: grid; gap: 10px; justify-items: start; max-width: 44rem;
+  }
+  .tour-cap > * { opacity: 0; transform: translateY(14px); transition: opacity .6s ease, transform .9s cubic-bezier(.2, .7, .1, 1); }
+  .tour-cap.show > * { opacity: 1; transform: none; }
+  .tour-cap.show .tc-title { transition-delay: .08s; }
+  .tour-cap.show .tc-sub { transition-delay: .2s; }
+  .tc-eyebrow { font: 500 11px/1 var(--mono); letter-spacing: 0.18em; text-transform: uppercase; color: var(--red); display: flex; gap: 12px; align-items: center; }
+  .tc-eyebrow::before { content: ""; width: 26px; height: 1px; background: var(--red); }
+  .tc-title { font-weight: 900; font-size: clamp(30px, 5.4vw, 76px); line-height: 0.95; letter-spacing: -0.04em; text-wrap: balance; text-shadow: 0 2px 30px rgba(0,0,0,0.6); }
+  .tc-sub { margin: 0; color: #cfc9c4; font-size: clamp(14px, 1.35vw, 18px); max-width: 34rem; text-wrap: pretty; text-shadow: 0 1px 16px rgba(0,0,0,0.8); }
+  @media (max-width: 600px) {
+    .tour-brand { display: none; }
+    .lb { gap: 10px; }
+    .tour-ctl { padding: 7px 8px; letter-spacing: 0.06em; }
+  }
+
   @media (prefers-reduced-motion: reduce) {
+    .lb, .tour-cap > * { transition: none; }
     .hotspot i::after { animation: none; }
     .loader, .hotspot, .hotspot span { transition: none; }
   }
@@ -206,6 +279,7 @@
     <!--repo-only--><a class="back" href="index.html">&larr; The AI Race, a reckoning</a><!--/repo-only-->
     <div class="eyebrow">Exhibit &middot; The hardware</div>
     <h1>Accelerator Anatomy</h1>
+    <button type="button" class="tour-btn" id="btn-tour" disabled><span class="play" aria-hidden="true"></span>Play the showcase <small id="tour-len">1 min</small></button>
     <p class="lede">Every frontier model is trained on packages like this one: a single slab of logic, walled in by stacked memory, drawing as much power as a space heater. Drag to orbit, scroll to zoom, and pick a part to inspect it.</p>
   </header>
 
@@ -241,6 +315,7 @@
       </div>
     </div>
     <div class="keys" aria-label="Keyboard shortcuts">
+      <span><kbd>P</kbd></span><span>Play the showcase</span>
       <span><kbd>E</kbd></span><span>Explode or assemble</span>
       <span><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd></span><span>Lighting</span>
       <span><kbd>&larr;</kbd><kbd>&rarr;</kbd></span><span>Step through parts</span>
@@ -268,6 +343,25 @@
     <div class="spec"><b>65 × 65 mm</b><span>Package</span></div>
     <div class="spec"><b>1,000 W</b><span>Board power</span></div>
     <div class="note" id="spec-note">Illustrative model built to scale from public packaging norms. Not a specific product.</div>
+  </div>
+</div>
+
+<div class="tour" id="tour" aria-live="polite">
+  <div class="tour-scrim"></div>
+  <div class="tour-fade" id="tour-fade"></div>
+  <div class="tour-cap" id="tour-cap">
+    <div class="tc-eyebrow" id="tc-eyebrow"></div>
+    <div class="tc-title" id="tc-title"></div>
+    <p class="tc-sub" id="tc-sub"></p>
+  </div>
+  <div class="lb lb-top">
+    <span class="tour-brand"><b>Accelerator Anatomy</b> &nbsp;&middot;&nbsp; Showcase</span>
+    <span class="tour-chapter" id="tour-chapter">01 / 10</span>
+  </div>
+  <div class="lb lb-bottom">
+    <button type="button" class="tour-ctl" id="tour-pause">Pause</button>
+    <div class="tour-track" id="tour-track" role="group" aria-label="Chapters"></div>
+    <button type="button" class="tour-ctl" id="tour-exit">Exit</button>
   </div>
 </div>
 
@@ -1143,7 +1237,7 @@ function buildComposer() {
 
 const PRESETS = {
   studio: { env: 'studio', envI: 1.0, key: 3.2, keyC: '#fff1e2', rim: 1.6, rimC: '#ff3020', fill: 0.25, heat: 0, dieE: 0.0, hbmE: 0, eC: '#ff3020', bloom: 0.32, exp: 1.0, bg: '#060606' },
-  hall: { env: 'hall', envI: 1.1, key: 1.4, keyC: '#d6e6ff', rim: 3.4, rimC: '#20c8ff', fill: 0.4, heat: 0, dieE: 0.35, hbmE: 0, eC: '#36c8ff', bloom: 0.45, exp: 1.05, bg: '#04070a' },
+  hall: { env: 'hall', envI: 1.15, key: 1.9, keyC: '#d6e6ff', rim: 3.4, rimC: '#20c8ff', fill: 0.4, heat: 0, dieE: 0.35, hbmE: 0, eC: '#36c8ff', bloom: 0.45, exp: 1.05, bg: '#04070a' },
   thermal: { env: 'studio', envI: 0.28, key: 0.45, keyC: '#ffd9c2', rim: 4.0, rimC: '#ff5a1f', fill: 0.05, heat: 9, dieE: 5.5, hbmE: 0.06, eC: '#ff4a14', bloom: 0.95, exp: 1.0, bg: '#0a0504' },
 };
 let ENVMAPS = null;
@@ -1196,7 +1290,7 @@ function updateExplode(dt) {
   }
   // Raise the camera with the stack's centre so the framing holds.
   const lift = (ease(explodeT) - before) * 0.9;
-  if (fly.t >= 1) { controls.target.y += lift; camera.position.y += lift; }
+  if (fly.t >= 1 && !tour.active) { controls.target.y += lift; camera.position.y += lift; }
 }
 
 /* ───────────────────────── Parts / hotspots ───────────────────────── */
@@ -1331,6 +1425,14 @@ $('btn-next').addEventListener('click', () => select(selected + 1, true));
 controls.addEventListener('start', () => { fly.t = 1; });
 addEventListener('keydown', (e) => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
+  if (tour.active) {
+    if (e.key === 'Escape') endTour(false);
+    else if (e.key === ' ' || e.key.toLowerCase() === 'k') { e.preventDefault(); setTourPaused(!tour.paused); }
+    else if (e.key === 'ArrowRight') enterShot(Math.min(tour.i + 1, SHOTS.length - 1), true);
+    else if (e.key === 'ArrowLeft') enterShot(Math.max(tour.i - 1, 0), true);
+    return;
+  }
+  if (e.key.toLowerCase() === 'p') { startTour(); return; }
   const k = e.key.toLowerCase();
   if (k === 'e') setExploded(explodeTarget === 0);
   else if (k === '1') setPreset('studio');
@@ -1341,6 +1443,18 @@ addEventListener('keydown', (e) => {
   else if (e.key === 'ArrowLeft') select(selected - 1, true);
   else if (e.key === 'Escape') resetView();
 });
+
+/* The showcase hides the interface, so it frames against the full screen instead:
+   subject a touch right of and above centre, clear of the captions. */
+const layoutCentre = new THREE.Vector2(innerWidth / 2, innerHeight / 2);
+let tourMix = 0;
+function applyViewOffset() {
+  const W = innerWidth, H = innerHeight;
+  const tx = W * (W > 860 ? 0.56 : 0.5), ty = H * 0.44;
+  const cx = layoutCentre.x + (tx - layoutCentre.x) * tourMix, cy = layoutCentre.y + (ty - layoutCentre.y) * tourMix;
+  camera.setViewOffset(W, H, W / 2 - cx, H / 2 - cy, W, H);
+  camera.updateProjectionMatrix();
+}
 
 /* Frame the model inside the screen area the interface leaves free: shift the projection
    centre there and pick a home distance that fits the package into it. */
@@ -1354,7 +1468,8 @@ function frameModel() {
     fw = $('controls').getBoundingClientRect().left;
   }
   const cx = fx + fw / 2, cy = fy + fh / 2;
-  camera.setViewOffset(W, H, W / 2 - cx, H / 2 - cy, W, H);
+  layoutCentre.set(cx, cy);
+  applyViewOffset();
   const ppu = Math.min(fw * 0.86, fh * 1.45) / (2 * R);
   const dist = (H / ppu) / 2 / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
   const atHome = camera.position.distanceTo(HOME.pos) < 0.01;
@@ -1378,7 +1493,174 @@ function onResize() {
 }
 addEventListener('resize', onResize);
 
+/* ───────────────────────── Showcase ─────────────────────────
+   A directed sequence of shots. Each shot orbits a live target (so the camera follows parts
+   while they move), from one spherical pose to another. "cut" shots dip through black;
+   the others continue from wherever the previous shot left the camera. */
+
+const _off = new THREE.Vector3();
+const anchorOf = (id) => anchors.find((a) => a.h.id === id).obj;
+const AT = (id, dx = 0, dy = 0, dz = 0) => (out) => anchorOf(id).getWorldPosition(out).add(_off.set(dx, dy, dz));
+const MID = (y) => (out) => out.set(0, chip.position.y + y + ease(explodeT) * 0.9, 0);
+const dieMM = () => Math.round(D.die.w * MM * D.die.d * MM);
+
+const SHOTS = [
+  { eyebrow: 'Reckoning R1', title: 'One package. 65 × 65 mm.', sub: 'The unit of compute that every frontier model is trained on.',
+    dur: 6.5, cut: true, target: MID(0.25), from: [-72, 5, 22], to: [-22, 15, 17], state: { x: false, p: 'studio' } },
+  { eyebrow: 'Stiffener ring', title: 'Built to stay flat.', sub: 'Nickel-plated copper holds the laminate true through thousands of heat cycles.',
+    dur: 5.5, cut: false, target: AT('stiffener', 0.4, 0, -0.1), to: [8, 30, 6] },
+  { eyebrow: 'Compute die', title: () => `${dieMM()} mm² of logic.`, sub: 'As large as a lithography scanner can print. Roughly 200 billion transistors.',
+    dur: 6.5, cut: true, target: AT('die', -0.9, 0, 1.1), from: [58, 58, 7.5], to: [112, 36, 5.2] },
+  { eyebrow: 'Decoupling capacitors', title: () => `${CAPS.caps.length + CAPS.land.length} tiny reservoirs.`, sub: 'Current swings by hundreds of amps in microseconds. These hold the voltage steady.',
+    dur: 5, cut: true, target: AT('caps', -2.83, -0.02, 1.87), from: [206, 24, 2.7], to: [158, 31, 2.3] },
+  { eyebrow: 'Exploded view', title: () => `${partCount.toLocaleString()} parts.`, sub: 'Bonded into one package at micron scale. Here it is taken apart.',
+    dur: 8.5, cut: true, target: MID(0.4), from: [24, 18, 21], to: [78, 27, 20], state: { x: false, p: 'hall' }, events: [[0.9, () => setExploded(true)]] },
+  { eyebrow: 'HBM · 6 stacks', title: 'Memory, eight dies high.', sub: 'Each DRAM layer is thinned to about 30 µm and wired straight through the silicon.',
+    dur: 6, cut: true, target: AT('hbm', 0, -0.35, 0), from: [-100, 6, 4.4], to: [-58, 16, 4.0], state: { x: true } },
+  { eyebrow: 'Silicon interposer', title: 'Millimetres, not centimetres.', sub: 'Thousands of microbumps let logic and memory talk across a slab of passive silicon.',
+    dur: 5.5, cut: true, target: AT('interposer', 0.6, 0, -0.4), from: [26, 11, 5.4], to: [-8, 17, 4.6], state: { x: true } },
+  { eyebrow: 'Ball grid array', title: () => `${(D.bga.n * D.bga.n - D.bga.hole * D.bga.hole).toLocaleString()} solder balls.`, sub: 'Every watt and every signal reaches the board through here.',
+    dur: 5.5, cut: true, target: AT('bga', -1.4, 0, -1.4), from: [150, -26, 6.4], to: [104, -16, 5.8], state: { x: true }, under: true },
+  { eyebrow: 'Under load', title: '1,000 watts. All day.', sub: 'Nearly every joule the die spends on arithmetic leaves it as heat, around the clock.',
+    dur: 8.5, cut: true, target: MID(0.3), from: [-34, 34, 16], to: [18, 26, 13], state: { x: true, p: 'thermal' }, events: [[0.4, () => setExploded(false)]] },
+  { eyebrow: 'The AI race runs on this', title: 'Accelerator Anatomy', sub: 'Now take it apart yourself.',
+    dur: 6.5, cut: false, target: (out) => out.copy(HOME.target), home: true, events: [[1.4, () => setPreset('studio')]] },
+];
+
+const tour = { active: false, paused: false, i: 0, t: 0, fired: new Set(), sT: new THREE.Vector3(), sSph: [0, 0, 0], capOn: false, fill: 0 };
+const tourFill = new THREE.DirectionalLight('#dfe8ff', 0);
+tourFill.position.set(2, -10, 4);
+scene.add(tourFill);
+
+const tourEls = { root: document.body, fade: $('tour-fade'), cap: $('tour-cap'), eyebrow: $('tc-eyebrow'), title: $('tc-title'), sub: $('tc-sub'), chapter: $('tour-chapter'), track: $('tour-track'), pause: $('tour-pause') };
+const segs = SHOTS.map((sh, i) => {
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = 'tour-seg'; b.style.flexGrow = sh.dur;
+  b.setAttribute('aria-label', `Chapter ${i + 1}: ${sh.eyebrow}`);
+  b.innerHTML = '<i><b></b></i>';
+  b.addEventListener('click', () => enterShot(i, true));
+  tourEls.track.appendChild(b);
+  return b.querySelector('b');
+});
+$('tour-len').textContent = `${Math.round(SHOTS.reduce((a, s) => a + s.dur, 0))} s`;
+
+const deg = THREE.MathUtils.degToRad;
+const val = (v) => (typeof v === 'function' ? v() : v);
+function sphOf(pos, target) {
+  const d = _off.copy(pos).sub(target); const r = d.length();
+  return [THREE.MathUtils.radToDeg(Math.atan2(d.x, d.z)), THREE.MathUtils.radToDeg(Math.asin(THREE.MathUtils.clamp(d.y / r, -1, 1))), r];
+}
+function lerpAngle(a, b, k) { let d = ((b - a + 540) % 360) - 180; return a + d * k; }
+const camEase = (k) => 0.45 * k + 0.55 * (0.5 - 0.5 * Math.cos(Math.PI * k));
+
+function setTourPaused(p) { tour.paused = p; tourEls.pause.textContent = p ? 'Play' : 'Pause'; }
+
+function enterShot(i, jump = false) {
+  tour.i = i; if (jump) tour.t = 0;
+  tour.fired = new Set();
+  const sh = SHOTS[i];
+  tour.sT.copy(controls.target);
+  tour.sSph = sphOf(camera.position, controls.target);
+  if (sh.state && (sh.cut || jump)) {
+    if (sh.state.x !== undefined && (explodeTarget === 1) !== sh.state.x) setExploded(sh.state.x);
+    if (sh.state.p && lp.to !== PRESETS[sh.state.p]) setPreset(sh.state.p);
+  }
+  tourEls.eyebrow.textContent = val(sh.eyebrow);
+  tourEls.title.textContent = val(sh.title);
+  tourEls.sub.textContent = val(sh.sub);
+  tourEls.cap.classList.remove('show'); tour.capOn = false;
+  tourEls.chapter.textContent = `${String(i + 1).padStart(2, '0')} / ${String(SHOTS.length).padStart(2, '0')}  ·  ${val(sh.eyebrow)}`;
+  segs.forEach((b, j) => { b.style.width = j < i ? '100%' : '0%'; b.parentElement.parentElement.classList.toggle('now', j === i); });
+}
+
+let wasAutoRotate = false, idleTimer = 0;
+function markActive() {
+  document.body.classList.remove('idle');
+  clearTimeout(idleTimer);
+  if (tour.active) idleTimer = setTimeout(() => document.body.classList.add('idle'), 2200);
+}
+addEventListener('pointermove', markActive);
+
+function startTour() {
+  if (!modelReady || tour.active) return;
+  tour.active = true; setTourPaused(false);
+  wasAutoRotate = controls.autoRotate; setAutoRotate(false);
+  controls.enabled = false; fly.t = 1;
+  document.body.classList.add('touring');
+  markActive();
+  enterShot(0, true);
+  tourEls.pause.focus({ preventScroll: true });
+}
+function endTour(completed) {
+  if (!tour.active) return;
+  tour.active = false;
+  document.body.classList.remove('touring', 'idle');
+  tourEls.fade.style.opacity = 0; tourEls.cap.classList.remove('show');
+  controls.enabled = true;
+  if (!completed) {
+    if (explodeTarget) setExploded(false);
+    if (lp.to !== PRESETS.studio) setPreset('studio');
+    resetView();
+  } else setAutoRotate(wasAutoRotate);
+  select(0, false);
+  $('btn-tour').focus({ preventScroll: true });
+}
+
+const _tg = new THREE.Vector3();
+function updateTour(dt, time) {
+  // The fill light that lets the underside read in the BGA shot eases in and out on its own.
+  const wantFill = tour.active && SHOTS[tour.i].under ? 1.5 : 0;
+  tour.fill += (wantFill - tour.fill) * Math.min(1, dt * 2.5);
+  tourFill.intensity = tour.fill;
+  const wantMix = tour.active && !SHOTS[tour.i].home ? 1 : 0;
+  if (Math.abs(wantMix - tourMix) > 0.0005) {
+    tourMix += (wantMix - tourMix) * Math.min(1, dt * (wantMix ? 3 : 1.1));
+    applyViewOffset();
+  }
+  if (!tour.active) return;
+
+  if (!tour.paused) tour.t += dt;
+  let sh = SHOTS[tour.i];
+  if (tour.t >= sh.dur) {
+    if (tour.i + 1 >= SHOTS.length) { endTour(true); return; }
+    tour.t -= sh.dur; enterShot(tour.i + 1); sh = SHOTS[tour.i];
+  }
+  for (const [k, [et, fn]] of (sh.events || []).entries()) if (!tour.fired.has(k) && tour.t >= et) { tour.fired.add(k); fn(); }
+
+  const k = THREE.MathUtils.clamp(tour.t / sh.dur, 0, 1);
+  const e = reduceMotion ? 1 : camEase(k);
+  sh.target(_tg);
+  const target = sh.cut ? _tg : _tg.lerp(tour.sT, 1 - e);
+  const ds = Math.max(1, fitScale * 0.8);
+  const to = sh.home ? sphOf(HOME.pos, HOME.target) : [sh.to[0], sh.to[1], sh.to[2] * ds];
+  const from = sh.cut ? [sh.from[0], sh.from[1], sh.from[2] * ds] : tour.sSph;
+  let az = lerpAngle(from[0], to[0], e), el = from[1] + (to[1] - from[1]) * e;
+  const d = from[2] + (to[2] - from[2]) * e;
+  if (!reduceMotion && !sh.home) { az += Math.sin(time * 0.53) * 0.5; el += Math.sin(time * 0.37 + 1.3) * 0.35; } // a breath of handheld drift
+  const ca = Math.cos(deg(el));
+  camera.position.set(target.x + d * ca * Math.sin(deg(az)), target.y + d * Math.sin(deg(el)), target.z + d * ca * Math.cos(deg(az)));
+  controls.target.copy(target);
+  camera.lookAt(target);
+
+  // Dip to black around cuts
+  let f = 0;
+  if (sh.cut) f = Math.max(f, 1 - THREE.MathUtils.clamp(tour.t / 0.5, 0, 1));
+  const next = SHOTS[tour.i + 1];
+  if (next && next.cut) f = Math.max(f, THREE.MathUtils.clamp((tour.t - (sh.dur - 0.35)) / 0.35, 0, 1));
+  tourEls.fade.style.opacity = f.toFixed(3);
+
+  const on = tour.t > 0.6 && tour.t < sh.dur - 0.75;
+  if (on !== tour.capOn) { tour.capOn = on; tourEls.cap.classList.toggle('show', on); }
+  segs[tour.i].style.width = (k * 100).toFixed(2) + '%';
+}
+
+$('btn-tour').addEventListener('click', startTour);
+$('tour-pause').addEventListener('click', () => setTourPaused(!tour.paused));
+$('tour-exit').addEventListener('click', () => endTour(false));
+
 /* ───────────────────────── Boot ───────────────────────── */
+
+let modelReady = false;
 
 const chipLift = 1.0;
 chip.position.y = chipLift;
@@ -1417,11 +1699,11 @@ async function boot() {
 
   renderer.setAnimationLoop(() => {
     const dt = Math.min(clock.getDelta(), 0.1), t = clock.elapsedTime;
-    updateFly(dt);
     updatePreset(dt);
     updateExplode(dt);
     chip.position.y = chipLift + (reduceMotion ? 0 : Math.sin(t * 0.8) * 0.035);
-    controls.update(dt);
+    updateTour(dt, t);
+    if (!tour.active) { updateFly(dt); controls.update(dt); }
     // Fog only ever eats the floor's horizon, never the model, whatever the zoom.
     const camD = camera.position.distanceTo(controls.target);
     scene.fog.near = camD + 6; scene.fog.far = camD + 40;
@@ -1430,9 +1712,9 @@ async function boot() {
     renderContactShadow();
     renderer.shadowMap.needsUpdate = true;
     composer.render(dt);
-    updateHotspots();
+    if (!tour.active) updateHotspots();
     autoQuality(dt);
-    if (first) { first = false; $('loader').classList.add('done'); }
+    if (first) { first = false; modelReady = true; $('btn-tour').disabled = false; $('loader').classList.add('done'); }
   });
 }
 
