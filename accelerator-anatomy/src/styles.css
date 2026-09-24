@@ -22,7 +22,7 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; }
-html { scrollbar-gutter: stable; scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+html { background: var(--bg); scrollbar-gutter: stable; scroll-behavior: smooth; -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
 body {
   margin: 0;
   background: var(--bg);
@@ -48,7 +48,7 @@ a { color: inherit; }
 
 /* ── Buttons ── */
 .btn {
-  appearance: none; cursor: pointer;
+  appearance: none; cursor: pointer; touch-action: manipulation;
   display: inline-flex; align-items: center; justify-content: center; gap: 10px;
   min-height: 44px; padding: 0 18px;
   font: 500 14px/1 var(--sans); letter-spacing: 0.005em; white-space: nowrap;
@@ -90,6 +90,16 @@ a { color: inherit; }
 .sec.right::before { background: linear-gradient(to left, rgba(10,10,11,0.86) 0%, rgba(10,10,11,0.62) 30%, rgba(10,10,11,0) 56%); }
 .chapter { min-height: 140vh; }
 .copy { position: relative; width: 100%; max-width: 30rem; display: grid; gap: 20px; justify-items: start; }
+.pin { display: contents; }
+
+/* Sections settle into place as they reach the centre of the screen */
+.js .sec:not(.hero) .copy { opacity: 0; transform: translateY(22px); transition: opacity .8s ease, transform 1s cubic-bezier(.2, .7, .1, 1); }
+.js .sec.active .copy { opacity: 1; transform: none; }
+.hero .copy > * { animation: rise 1s cubic-bezier(.2, .7, .1, 1) both; }
+.hero .copy > :nth-child(2) { animation-delay: .08s; }
+.hero .copy > :nth-child(3) { animation-delay: .16s; }
+.hero .copy > :nth-child(4) { animation-delay: .24s; }
+@keyframes rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
 .sec.left .copy { justify-self: start; }
 .sec.right .copy { justify-self: end; }
 
@@ -299,13 +309,33 @@ body.touring .lb { transform: none; }
 }
 @media (max-width: 860px) {
   :root { --nav-h: 56px; }
+  .stage { height: 100lvh; bottom: auto; }
+  .sec:not(.hero) { display: block; padding: 0; min-height: 175svh; }
+  .sec:not(.hero)::before { display: none; }
+  .sec:not(.hero) .pin {
+    position: sticky; top: 0; height: 100svh; isolation: isolate;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 0 var(--gutter) calc(28px + env(safe-area-inset-bottom, 0px));
+  }
+  .sec:not(.hero) .pin::before {
+    content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+    background: linear-gradient(to top, rgba(10,10,11,0.96) 0%, rgba(10,10,11,0.82) 30%, rgba(10,10,11,0.35) 50%, rgba(10,10,11,0) 62%);
+  }
+  .specs-sec .pin::before, .scale-sec .pin::before { background: linear-gradient(to top, rgba(10,10,11,0.97) 0%, rgba(10,10,11,0.88) 55%, rgba(10,10,11,0.4) 72%, rgba(10,10,11,0) 84%) !important; }
+  .specs-sec { min-height: 150svh !important; }
+  .scale-sec { min-height: 190svh !important; }
+  .explore-sec { min-height: 130svh !important; }
+  .copy { gap: 14px; }
+  h1 { font-size: clamp(38px, 10.5vw, 56px); }
+  h2 { font-size: clamp(28px, 8vw, 40px); }
+  .params dt, .params dd, .sheet th, .sheet td { padding: 8px 0; }
+  .params dd { padding-left: 20px; }
+  .figures > div { padding: 12px 0; }
   .nav-links { display: none; }
-  .sec { align-items: end; padding-bottom: 64px; }
-  .sec.left::before, .sec.right::before, .hero::before { background: linear-gradient(to top, rgba(10,10,11,0.95) 14%, rgba(10,10,11,0.7) 44%, rgba(10,10,11,0) 68%); }
-  .specs-sec::before, .scale-sec::before { background: linear-gradient(to top, rgba(10,10,11,0.96) 32%, rgba(10,10,11,0.78) 62%, rgba(10,10,11,0) 84%); }
-  .sec.right .copy { justify-self: start; }
-  .chapter { min-height: 125vh; }
-  .copy > p:not(.label):not(.small) { font-size: 16px; }
+  .hero { align-items: end; padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px)); }
+  .hero::before { background: linear-gradient(to top, rgba(10,10,11,0.95) 12%, rgba(10,10,11,0.7) 40%, rgba(10,10,11,0) 62%); }
+  .copy > p:not(.label):not(.small) { font-size: 15.5px; line-height: 1.6; }
+  .copy > p.deck { font-size: 16.5px; }
   .sheet th { white-space: normal; }
   .foot { grid-template-columns: 1fr; gap: 28px; }
 
@@ -334,5 +364,7 @@ body.touring .lb { transform: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
+  .js .sec:not(.hero) .copy { opacity: 1; transform: none; transition: none; }
+  .hero .copy > * { animation: none; }
   .lb, .tour-cap > *, .loader, .hotspot, .hotspot span, .stage { transition: none; }
 }

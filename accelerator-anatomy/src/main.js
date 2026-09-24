@@ -44,6 +44,9 @@ renderer.domElement.setAttribute('aria-label', '3D model of an AI accelerator pa
 renderer.domElement.setAttribute('role', 'img');
 
 const MAX_ANISO = renderer.capabilities.getMaxAnisotropy();
+// Phones: touch-first and small. They get full-DPR rendering with lighter effects and dynamic resolution.
+const MOBILE = matchMedia('(pointer: coarse)').matches && Math.min(screen.width, screen.height) < 820;
+const vp = { w: innerWidth, h: innerHeight };
 const BG = new THREE.Color('#0a0a0b');
 
 const scene = new THREE.Scene();
@@ -732,7 +735,7 @@ async function buildModel() {
 
 /* ───────────────────────── Floor with contact shadow ───────────────────────── */
 
-const CS = { size: 16, res: 512, far: 4.5, blur: 2.6, darkness: 1.6, opacity: 0.92 };
+const CS = { size: 16, res: MOBILE ? 256 : 512, far: 4.5, blur: 2.6, darkness: 1.6, opacity: 0.92 };
 const csRT = new THREE.WebGLRenderTarget(CS.res, CS.res);
 const csBlurRT = new THREE.WebGLRenderTarget(CS.res, CS.res);
 csRT.texture.generateMipmaps = csBlurRT.texture.generateMipmaps = false;
@@ -767,6 +770,7 @@ const floor = new THREE.Mesh(new THREE.PlaneGeometry(140, 140), floorMat);
 floor.rotation.x = -Math.PI / 2;
 scene.add(floor);
 
+let shadowsDirty = true;
 function renderContactShadow() {
   const bg = scene.background, fog = scene.fog;
   scene.background = null; scene.fog = null; floor.visible = false;
@@ -792,7 +796,7 @@ const key = new THREE.SpotLight('#fff1e2', 3.2, 0, 0.4, 0.9, 0);
 key.position.set(6.5, 15, 8);
 key.target.position.set(0, 0.8, 0);
 key.castShadow = true;
-key.shadow.mapSize.set(2048, 2048);
+key.shadow.mapSize.setScalar(MOBILE ? 1024 : 2048);
 key.shadow.camera.near = 8; key.shadow.camera.far = 30;
 key.shadow.bias = -0.00015; key.shadow.normalBias = 0.012;
 key.shadow.radius = 3;
@@ -816,7 +820,7 @@ scene.add(heat);
 let composer, gtao, bloom, finish;
 function buildComposer() {
   const pr = renderer.getPixelRatio();
-  const rt = new THREE.WebGLRenderTarget(innerWidth * pr, innerHeight * pr, { type: THREE.HalfFloatType, samples: 4 });
+  const rt = new THREE.WebGLRenderTarget(innerWidth * pr, innerHeight * pr, { type: THREE.HalfFloatType, samples: MOBILE ? 2 : 4 });
   composer = new EffectComposer(renderer, rt);
   composer.addPass(new RenderPass(scene, camera));
   gtao = new GTAOPass(scene, camera, innerWidth, innerHeight);
@@ -899,6 +903,7 @@ let MAXD = 0;
 function updateExplode(dt) {
   const dir = Math.sign(explodeTarget - explodeT);
   if (dir === 0) return;
+  shadowsDirty = true;
   const before = ease(explodeT);
   explodeT = THREE.MathUtils.clamp(explodeT + dir * dt / (reduceMotion ? 0.01 : 2.2), 0, 1);
   for (const p of Object.values(parts)) {
@@ -1003,22 +1008,40 @@ function updateHotspots() {
 /* ───────────────────────── Quality ───────────────────────── */
 
 let quality = 'high';
-function setQuality(q, manual) {
-  quality = q;
-  const pr = q === 'high' ? Math.min(devicePixelRatio, 2) : q === 'balanced' ? Math.min(devicePixelRatio, 1.5) : Math.min(devicePixelRatio, 1);
+const dyn = { pr: Math.min(devicePixelRatio, 2), max: Math.min(devicePixelRatio, 2), frames: 0, acc: 0, cool: 0 };
+function applyPixelRatio(pr) {
   renderer.setPixelRatio(pr);
   composer.setPixelRatio(pr);
-  composer.setSize(innerWidth, innerHeight);
-  finish.uniforms.uRes.value.set(innerWidth * pr, innerHeight * pr);
+  composer.setSize(vp.w, vp.h);
+  finish.uniforms.uRes.value.set(vp.w * pr, vp.h * pr);
+}
+function setQuality(q, manual) {
+  quality = q;
+  const pr = q === 'mobile' ? dyn.pr : q === 'high' ? Math.min(devicePixelRatio, 2) : q === 'balanced' ? Math.min(devicePixelRatio, 1.5) : Math.min(devicePixelRatio, 1);
+  applyPixelRatio(pr);
   gtao.enabled = q === 'high';
   bloom.enabled = q !== 'fast';
-  key.shadow.mapSize.setScalar(q === 'fast' ? 1024 : 2048);
+  key.shadow.mapSize.setScalar(q === 'fast' || q === 'mobile' ? 1024 : 2048);
   if (key.shadow.map) { key.shadow.map.dispose(); key.shadow.map = null; }
+  shadowsDirty = true;
   document.querySelectorAll('[data-quality]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.quality === q)));
   if (manual) perf.locked = true;
 }
 const perf = { frames: 0, acc: 0, locked: false, settle: 0 };
+// On phones, resolution tracks frame time continuously (in quarter steps, with a cooldown)
+// so scrolling stays smooth without giving up sharpness when the device can afford it.
+function dynamicResolution(dt) {
+  dyn.cool -= dt; dyn.frames++; dyn.acc += dt;
+  if (dyn.frames < 40) return;
+  const avg = dyn.acc / dyn.frames; dyn.frames = 0; dyn.acc = 0;
+  if (dyn.cool > 0) return;
+  let next = dyn.pr;
+  if (avg > 1 / 40) next = Math.max(1, dyn.pr - 0.25);
+  else if (avg < 1 / 57) next = Math.min(dyn.max, dyn.pr + 0.25);
+  if (next !== dyn.pr) { dyn.pr = next; applyPixelRatio(next); dyn.cool = 2.5; }
+}
 function autoQuality(dt) {
+  if (quality === 'mobile') { dynamicResolution(dt); return; }
   if (perf.locked) return;
   perf.settle += dt; if (perf.settle < 3) return; // let shaders compile and the intro finish
   perf.frames++; perf.acc += dt;
@@ -1090,6 +1113,10 @@ function frameModel() {
 }
 
 function onResize() {
+  // Mobile browsers resize the viewport as the address bar slides; keep the canvas as it is
+  // for those, since reallocating the render targets mid-scroll causes a visible hitch.
+  if (MOBILE && composer && innerWidth === vp.w && Math.abs(innerHeight - vp.h) < vp.h * 0.25) return;
+  vp.w = innerWidth; vp.h = innerHeight;
   camera.aspect = innerWidth / innerHeight;
   camera.fov = innerWidth / innerHeight < 0.8 ? 34 : 28;
   frameModel();
@@ -1271,27 +1298,39 @@ $('tour-exit').addEventListener('click', () => endTour(false));
 
 let mode = 'story';
 const STORY = [
-  { view: 'General arrangement', scale: '1 : 1', target: MID(0.2), sph: [-30, 18, 27], side: 'right', spin: true, state: { x: false, p: 'studio', field: false } },
+  { m: 1.45, view: 'General arrangement', scale: '1 : 1', target: MID(0.2), sph: [-30, 18, 27], side: 'right', spin: true, state: { x: false, p: 'studio', field: false } },
   { view: 'Detail A, compute die', scale: '3 : 1', target: AT('die', -0.9, 0, 1.1), sph: [62, 50, 7.2], side: 'right', state: { x: false, p: 'studio', field: false } },
   { view: 'Detail B, HBM stack', scale: '4 : 1', target: AT('hbm', 0, -0.1, -0.2), sph: [-112, 22, 5.6], side: 'left', state: { x: false, p: 'studio', field: false } },
-  { view: 'Section C–C, exploded', scale: '1 : 1', target: MID(0.45), sph: [34, 22, 17], side: 'right', state: { x: true, p: 'hall', field: false } },
+  { m: 1.6, view: 'Section C–C, exploded', scale: '1 : 1', target: MID(0.45), sph: [34, 22, 17], side: 'right', state: { x: true, p: 'hall', field: false } },
   { view: 'Detail D, capacitors', scale: '8 : 1', target: AT('caps', -2.83, -0.02, 1.87), sph: [180, 28, 2.7], side: 'left', state: { x: false, p: 'studio', field: false } },
   { view: 'View E, underside', scale: '3 : 1', target: AT('bga', -1.4, 0, -1.4), sph: [128, -20, 6.8], side: 'right', state: { x: false, p: 'studio', field: false, under: true } },
-  { view: 'Detail F, thermal', scale: '1.5 : 1', target: MID(0.3), sph: [-24, 30, 16], side: 'left', state: { x: false, p: 'thermal', field: false } },
-  { view: 'Plan view', scale: '1 : 1', target: MID(0.2), sph: [8, 70, 20], side: 'right', state: { x: false, p: 'studio', field: false } },
-  { view: 'Array, 224 packages', scale: '1 : 6', target: MID(0.1), sph: [36, 28, 50], side: 'right', state: { x: false, p: 'hall', field: true } },
-  { view: 'General arrangement', scale: '1 : 1', target: MID(0.25), sph: [39, 24, 27], side: 'centre', spin: true, state: { x: false, p: 'studio', field: false } },
+  { m: 1.2, view: 'Detail F, thermal', scale: '1.5 : 1', target: MID(0.3), sph: [-24, 30, 16], side: 'left', state: { x: false, p: 'thermal', field: false } },
+  { m: 2.3, view: 'Plan view', scale: '1 : 1', target: MID(0.2), sph: [8, 70, 20], side: 'right', state: { x: false, p: 'studio', field: false } },
+  { m: 1.5, view: 'Array, 224 packages', scale: '1 : 6', target: MID(0.1), sph: [36, 28, 50], side: 'right', state: { x: false, p: 'hall', field: true } },
+  { m: 1.4, view: 'General arrangement', scale: '1 : 1', target: MID(0.25), sph: [39, 24, 27], side: 'centre', spin: true, state: { x: false, p: 'studio', field: false } },
 ];
 const tbView = $('tb-view'), tbScale = $('tb-scale'), tbSheet = $('tb-sheet');
 const NAV_OF = ['', 'anatomy', 'anatomy', 'anatomy', 'anatomy', 'anatomy', 'anatomy', 'specs', 'scale', 'explore'];
 const storyEls = [...document.querySelectorAll('[data-shot]')];
 const navLinks = [...document.querySelectorAll('[data-nav]')];
+let revealed = -1;
+function markSections() {
+  const vc = innerHeight / 2;
+  let best = 0, bestD = Infinity;
+  storyEls.forEach((el, k) => { const r = el.getBoundingClientRect(); const d = Math.abs(r.top + r.height / 2 - vc); if (d < bestD) { bestD = d; best = k; } });
+  if (best === revealed) return;
+  revealed = best;
+  storyEls.forEach((el, k) => el.classList.toggle('active', k === best));
+}
+addEventListener('scroll', markSections, { passive: true });
+markSections();
+document.documentElement.classList.add('story-ready');
 const storyCentre = new THREE.Vector2(innerWidth / 2, innerHeight / 2);
 let storyNear = -1;
 const _sa = new THREE.Vector3(), _sb = new THREE.Vector3(), _sp = new THREE.Vector3();
 
 function sideCentre(side, out) {
-  const W = innerWidth, H = innerHeight;
+  const W = vp.w, H = vp.h;
   if (W <= 860) return out.set(W * 0.5, H * (side === 'centre' ? 0.36 : 0.3));
   return out.set(W * (side === 'right' ? 0.69 : side === 'left' ? 0.31 : 0.5), H * (side === 'centre' ? 0.33 : 0.5));
 }
@@ -1322,10 +1361,12 @@ function updateStory(dt, time) {
   const target = _sa.lerp(_sb, e);
   const spin = reduceMotion ? 0 : time * 4;
   // Wide screens put text beside the model rather than below it, so the camera stands further back.
-  const ds = innerWidth > 860 ? 1.4 : Math.max(1, fitScale * 0.8);
+  const ds = vp.w > 860 ? 1.4 : Math.max(0.9, fitScale * 0.7);
   const az = lerpAngle(A.sph[0] + (A.spin ? spin : 0), B.sph[0] + (B.spin ? spin : 0), e);
   const el = A.sph[1] + (B.sph[1] - A.sph[1]) * e;
-  const d = (A.sph[2] + (B.sph[2] - A.sph[2]) * e) * ds;
+  // Phones get per-shot distances: the wide establishing shots pull back so the whole package reads.
+  const mA = vp.w > 860 ? 1 : A.m || 1, mB = vp.w > 860 ? 1 : B.m || 1;
+  const d = (A.sph[2] * mA + (B.sph[2] * mB - A.sph[2] * mA) * e) * ds;
   const ca = Math.cos(deg(el));
   _sp.set(target.x + d * ca * Math.sin(deg(az)), target.y + d * Math.sin(deg(el)), target.z + d * ca * Math.cos(deg(az)));
   storyCentre.copy(sideCentre(A.side, _c1).lerp(sideCentre(B.side, _c2), e));
@@ -1341,7 +1382,7 @@ function updateAmbient(dt) {
   const under = tour.active ? SHOTS[tour.i].under : mode === 'story' && storyNear >= 0 && STORY[storyNear].state.under;
   tour.fill += ((under ? 1.5 : 0) - tour.fill) * Math.min(1, dt * 2.5);
   tourFill.intensity = tour.fill;
-  const W = innerWidth, H = innerHeight;
+  const W = vp.w, H = vp.h;
   if (tour.active && !SHOTS[tour.i].home) _want.set(W * (W > 860 ? 0.56 : 0.5), H * 0.44);
   else if (tour.active) _want.copy(mode === 'viewer' ? layoutCentre : storyCentre);
   else _want.copy(mode === 'viewer' ? layoutCentre : storyCentre);
@@ -1378,6 +1419,7 @@ function updateField(dt) {
   if (!field) return;
   const dir = Math.sign(fieldTarget - fieldT);
   if (!dir) return;
+  shadowsDirty = true;
   fieldT = THREE.MathUtils.clamp(fieldT + dir * dt / (reduceMotion ? 0.01 : 2.6), 0, 1);
   field.g.visible = fieldT > 0;
   field.cells.forEach((c, k) => {
@@ -1456,7 +1498,7 @@ async function boot() {
 
   await stage('Compiling shaders', 88);
   try { await renderer.compileAsync(scene, camera); } catch (e) { /* older drivers: compile on first frame */ }
-  if (innerWidth < 860) setQuality('balanced'); else setQuality('high');
+  setQuality(MOBILE ? 'mobile' : innerWidth < 860 ? 'balanced' : 'high');
   await stage('Ready', 100);
 
   const clock = new THREE.Clock();
@@ -1471,7 +1513,7 @@ async function boot() {
     updatePreset(dt);
     updateExplode(dt);
     updateField(dt);
-    chip.position.y = chipLift + (reduceMotion ? 0 : Math.sin(t * 0.8) * 0.035);
+    if (!reduceMotion && !MOBILE) { chip.position.y = chipLift + Math.sin(t * 0.8) * 0.035; shadowsDirty = true; }
     if (tour.active) updateTour(dt, t);
     else if (mode === 'viewer') { updateFly(dt); controls.update(dt); }
     else updateStory(dt, t);
@@ -1481,8 +1523,7 @@ async function boot() {
     scene.fog.near = camD + 6; scene.fog.far = camD + 40;
     MAT.dieTop.userData.uTime.value = t;
     finish.uniforms.uTime.value = t;
-    renderContactShadow();
-    renderer.shadowMap.needsUpdate = true;
+    if (shadowsDirty) { renderContactShadow(); renderer.shadowMap.needsUpdate = true; shadowsDirty = false; }
     composer.render(dt);
     if (mode === 'viewer' && !tour.active) updateHotspots();
     autoQuality(dt);
