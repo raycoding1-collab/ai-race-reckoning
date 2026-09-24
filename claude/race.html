@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<meta name="description" content="The Race Game: an interactive toy model of AI racing dynamics. Run a frontier lab, choose how much to spend on safety, and see who crosses the line first.">
+<title>The Race Game</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+  :root {
+    --bg: #050505;
+    --surface: #0c0c0c;
+    --card: #111;
+    --border: #1e1e1e;
+    --text: #eaeaea;
+    --text-dim: #7a7a7a;
+    --red: #ff3020;
+    --orange: #ff9500;
+    --amber: #ffcc00;
+    --cyan: #00c7be;
+    --purple: #af52de;
+    --green: #30d158;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: ""; position: fixed; inset: -20% -10% auto auto; width: 70vw; height: 70vw;
+    background: radial-gradient(circle, rgba(255,48,32,0.09), transparent 65%);
+    pointer-events: none; filter: blur(40px); z-index: 0;
+  }
+  .wrap { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; padding: 40px 16px 64px; }
+  .kicker {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--red);
+  }
+  h1 { font-size: clamp(34px, 6vw, 64px); font-weight: 900; letter-spacing: -0.035em; line-height: 1.02; margin: 10px 0 14px; }
+  h1 span { color: var(--red); }
+  .lede { color: #b5b5b5; max-width: 720px; font-size: 17px; }
+  .lede b { color: var(--text); font-weight: 600; }
+
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 16px; margin-top: 32px; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+
+  .card { background: rgba(17,17,17,0.8); border: 1px solid var(--border); border-radius: 14px; }
+  .chart-card { position: relative; padding: 14px 14px 10px; min-width: 0; }
+  .chart-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 2px 4px 10px; }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; color: #bbb; }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+  .month { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text-dim); }
+  .month b { color: var(--text); font-weight: 500; }
+  canvas { display: block; width: 100%; }
+  #chart { height: 400px; }
+  #hazard { height: 58px; margin-top: 6px; }
+  .strip-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); padding: 4px 4px 0; letter-spacing: 0.06em; text-transform: uppercase; }
+  @media (max-width: 600px) { #chart { height: 290px; } }
+
+  .overlay {
+    position: absolute; inset: 0; border-radius: 14px; display: none;
+    align-items: center; justify-content: center; padding: 20px;
+    background: rgba(5,5,5,0.78); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  }
+  .overlay.show { display: flex; animation: fade 0.5s ease; }
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+  .ending { max-width: 520px; text-align: center; }
+  .ending .tag { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; }
+  .ending h2 { font-size: clamp(26px, 4vw, 38px); font-weight: 900; letter-spacing: -0.03em; margin: 8px 0 12px; line-height: 1.1; }
+  .ending p { color: #c4c4c4; margin-bottom: 10px; }
+  .ending .hint { color: var(--text-dim); font-size: 14px; }
+
+  .panel { padding: 18px; display: flex; flex-direction: column; gap: 18px; }
+  .stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
+  .stat .k { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; }
+  .stat .v { font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 700; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .meter .top { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
+  .meter .top span:last-child { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+  .bar { height: 8px; background: #1a1a1a; border-radius: 99px; overflow: hidden; }
+  .bar > div { height: 100%; width: 0; border-radius: 99px; transition: width 0.15s linear; }
+  #riskFill { background: linear-gradient(90deg, var(--amber), var(--orange), var(--red)); box-shadow: 0 0 12px rgba(255,48,32,0.6); }
+  #trustFill { background: linear-gradient(90deg, #0a7d76, var(--cyan)); }
+  .meter small { display: block; color: var(--text-dim); font-size: 12px; margin-top: 6px; }
+
+  .control label { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+  .control label span { font-family: 'JetBrains Mono', monospace; color: var(--cyan); }
+  input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 6px; border-radius: 99px; background: linear-gradient(90deg, var(--red), var(--amber) 50%, var(--cyan)); outline: none; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 3px solid var(--bg); box-shadow: 0 0 0 1px #444, 0 2px 10px rgba(0,0,0,0.6); cursor: pointer; }
+  input[type=range]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: #fff; border: 3px solid var(--bg); cursor: pointer; }
+  input[type=range]:focus-visible { box-shadow: 0 0 0 3px rgba(0,199,190,0.4); }
+  .ends { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-dim); margin-top: 6px; }
+
+  .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  button {
+    font: inherit; font-size: 14px; font-weight: 600; color: var(--text); background: var(--surface);
+    border: 1px solid #2a2a2a; border-radius: 10px; padding: 11px 12px; cursor: pointer; transition: border-color 0.15s, background 0.15s, opacity 0.15s;
+  }
+  button:hover:not(:disabled) { border-color: #555; background: #161616; }
+  button:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  button.primary { background: var(--red); border-color: var(--red); color: #fff; }
+  button.primary:hover:not(:disabled) { background: #ff4a3c; border-color: #ff4a3c; }
+  #treaty { grid-column: 1 / -1; border-color: rgba(0,199,190,0.45); color: var(--cyan); }
+  #treaty:hover:not(:disabled) { background: rgba(0,199,190,0.08); border-color: var(--cyan); }
+
+  .log-card { margin-top: 16px; padding: 16px 18px; }
+  .log-card h3 { font-size: 12px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-dim); font-weight: 500; margin-bottom: 10px; }
+  #log { list-style: none; display: flex; flex-direction: column; gap: 8px; max-height: 220px; overflow-y: auto; }
+  #log li { display: grid; grid-template-columns: 52px 1fr; gap: 10px; font-size: 14px; color: #c8c8c8; animation: slide 0.35s ease; }
+  #log li time { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-dim); padding-top: 2px; }
+  #log li.bad { color: #ffb3ab; }
+  #log li.good { color: #8ff0e9; }
+  @keyframes slide { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+  .foot { margin-top: 28px; color: var(--text-dim); font-size: 13px; max-width: 760px; }
+  .foot a { color: #bbb; }
+  .foot code { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #bbb; }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">Interactive · a toy model · built by Claude</div>
+  <h1>The Race <span>Game</span></h1>
+  <p class="lede">You run one of four frontier AI labs. The first to reach the <b>frontier line</b> wins. Every dollar spent on <b>safety</b> slows you down, and every lab that cuts corners raises the odds of <b>catastrophe for everyone</b>. Can you win, stay safe, or change the game?</p>
+
+  <div class="grid">
+    <div class="card chart-card">
+      <div class="chart-head">
+        <div class="legend" id="legend"></div>
+        <div class="month">Month <b id="monthNum">0</b> / 60 · seed <b id="seedNum"></b></div>
+      </div>
+      <canvas id="chart" aria-label="Capability of each lab over time" role="img"></canvas>
+      <div class="strip-label">Hazard rate · how dangerous the race is right now</div>
+      <canvas id="hazard" aria-hidden="true"></canvas>
+      <div class="overlay" id="overlay"><div class="ending" id="ending"></div></div>
+    </div>
+
+    <div class="card panel">
+      <div class="stat-row">
+        <div class="stat"><div class="k">Your capability</div><div class="v" id="yourCap">0</div></div>
+        <div class="stat"><div class="k">Your rank</div><div class="v" id="yourRank">–</div></div>
+      </div>
+      <div class="meter">
+        <div class="top"><span>Accumulated risk</span><span id="riskPct">0%</span></div>
+        <div class="bar"><div id="riskFill"></div></div>
+        <small>Chance that the race has already produced a disaster.</small>
+      </div>
+      <div class="meter">
+        <div class="top"><span>Rivals' trust in you</span><span id="trustPct">0%</span></div>
+        <div class="bar"><div id="trustFill"></div></div>
+        <small>Earned by investing in safety. You need 60% to propose a treaty.</small>
+      </div>
+      <div class="control">
+        <label for="safety">Safety investment <span id="safetyVal">50%</span></label>
+        <input type="range" id="safety" min="0" max="100" value="50">
+        <div class="ends"><span>Move fast</span><span>Be careful</span></div>
+      </div>
+      <div class="btns">
+        <button class="primary" id="play">Start race</button>
+        <button id="speed">Speed 1×</button>
+        <button id="treaty" disabled>Propose a pause treaty</button>
+        <button id="restart" style="grid-column:1/-1">New race</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card log-card">
+    <h3>Newswire</h3>
+    <ol id="log"></ol>
+  </div>
+
+  <p class="foot">A deliberately simple model, not a forecast. Labs grow capability by compounding. Safety spending slows growth and cuts the risk each lab adds. Risk grows with how capable a system is and how little safety it has. Catastrophe is drawn at random from the total risk, so every seed plays out differently. Rival labs are fictional and follow fixed strategies: Helix always races, Meridian starts cautious but cuts safety when it falls behind, and Vanta copies you. Share a race with <code>?seed=1234</code>. Press <code>Space</code> to pause.</p>
+</div>
+
+<script>
+(() => {
+  const MONTHS = 60, FRONTIER = 100, SEC_PER_MONTH = 0.38, HAZARD_K = 0.034;
+
+  // Seeded RNG so a race can be replayed and shared.
+  function mulberry32(a) {
+    return () => {
+      a |= 0; a = a + 0x6D2B79F5 | 0;
+      let t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+
+  const $ = id => document.getElementById(id);
+  const chart = $('chart'), hz = $('hazard');
+  const cx = chart.getContext('2d'), hx = hz.getContext('2d');
+  const slider = $('safety');
+
+  const NEWS = [
+    'Investors pour another $40B into frontier labs. Valuations double.',
+    'Leaked memo: "Ship first, patch later."',
+    'Data-center water use sparks protests in three states.',
+    'Lawmakers hold hearings. No bill advances.',
+    'Researchers publish a new jailbreak that works on every model.',
+    'Chip export rules tighten; labs stockpile hardware.',
+    'A deepfake of a central banker briefly moves markets.',
+    'Open letter calling for a pause gathers 30,000 signatures.',
+    'Evaluation finds frontier models can plan multi-step cyberattacks.',
+  ];
+
+  let S, rng, seed, raf, last;
+
+  function newLabs() {
+    return [
+      { id: 'you', name: 'Your lab', color: '#ff3020', c: 20, s: 0.5, rate: 0.048, boost: 1, hist: [], safeSum: 0 },
+      { id: 'helix', name: 'Helix', color: '#ff9500', c: 20, s: 0.12, rate: 0.045, boost: 1, hist: [] },
+      { id: 'meridian', name: 'Meridian', color: '#00c7be', c: 20, s: 0.6, rate: 0.047, boost: 1, hist: [] },
+      { id: 'vanta', name: 'Vanta', color: '#af52de', c: 16, s: 0.4, rate: 0.049, boost: 1, hist: [] },
+    ];
+  }
+
+  function reset(newSeed) {
+    cancelAnimationFrame(raf);
+    const qs = new URLSearchParams(location.search).get('seed');
+    seed = newSeed ?? (qs && /^\d+$/.test(qs) ? +qs : Math.floor(Math.random() * 9000) + 1000);
+    rng = mulberry32(seed);
+    S = {
+      t: 0, H: 0, T: -Math.log(1 - rng()), trust: 0.2, treaty: false, treatyCooldown: 0,
+      running: false, ended: false, speed: 1, labs: newLabs(), hazardHist: [],
+      flags: {}, lowSafetyMonths: 0, nextNews: 4 + rng() * 4, newsOrder: shuffle(NEWS.slice()),
+    };
+    S.labs.forEach(l => l.hist.push([0, l.c]));
+    slider.min = 0; slider.disabled = false;
+    $('seedNum').textContent = seed;
+    $('log').innerHTML = '';
+    $('overlay').classList.remove('show');
+    $('play').textContent = 'Start race';
+    $('play').disabled = false;
+    $('speed').textContent = 'Speed 1×';
+    log(0, 'Four labs enter the race. The frontier line sits at capability 100.');
+    updateUI(); draw();
+  }
+
+  function shuffle(a) {
+    for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+    return a;
+  }
+
+  function log(t, text, kind = '') {
+    const li = document.createElement('li');
+    if (kind) li.className = kind;
+    li.innerHTML = `<time>M${String(Math.floor(t)).padStart(2, '0')}</time><span></span>`;
+    li.lastChild.textContent = text;
+    $('log').prepend(li);
+  }
+
+  const lab = id => S.labs.find(l => l.id === id);
+  const leader = () => S.labs.reduce((a, b) => (b.c > a.c ? b : a));
+  const hazardOf = l => HAZARD_K * (l.c / 100) ** 2 * (1 - l.s) ** 2;
+
+  function step(dt) {
+    const you = lab('you'), helix = lab('helix'), meridian = lab('meridian'), vanta = lab('vanta');
+    const top = leader();
+
+    // Strategies
+    you.s = slider.value / 100;
+    helix.s = S.treaty ? 0.7 : 0.12;
+    if (!S.flags.meridianCut && !S.treaty && top.c - meridian.c > 12 && S.t > 6) {
+      S.flags.meridianCut = true;
+      log(S.t, 'Meridian falls behind and disbands its alignment team. "We can\'t afford to lose."', 'bad');
+    }
+    meridian.s = S.treaty ? 0.75 : S.flags.meridianCut ? 0.28 : 0.6;
+    const target = S.treaty ? Math.max(0.7, you.s) : Math.max(0.05, you.s * 0.9);
+    vanta.s += (target - vanta.s) * Math.min(1, dt * 0.35);
+
+    // Growth and hazard
+    let h = 0;
+    for (const l of S.labs) {
+      l.c += l.c * l.rate * l.boost * (1 - 0.65 * l.s) * (S.treaty ? 0.3 : 1) * dt;
+      h += hazardOf(l);
+    }
+    you.safeSum += you.s * dt;
+    S.H += h * dt;
+    S.t += dt;
+    S.trust = Math.min(1, Math.max(0, S.trust + (you.s - 0.45) * 0.08 * dt));
+    S.treatyCooldown = Math.max(0, S.treatyCooldown - dt);
+    S.labs.forEach(l => l.hist.push([S.t, l.c]));
+    S.hazardHist.push([S.t, h]);
+
+    // Events
+    if (!S.flags.helixBoost && top === helix && S.t > 14) {
+      S.flags.helixBoost = true; helix.boost = 1.12;
+      log(S.t, 'Helix takes the lead and announces a 10× compute cluster.', 'bad');
+    }
+    if (!S.flags.youBehind && you !== top && top.c - you.c > 15 && you.s > 0.5) {
+      S.flags.youBehind = true;
+      log(S.t, 'Your board asks why you are falling behind. Investors grow restless.');
+    }
+    S.lowSafetyMonths = you.s < 0.2 ? S.lowSafetyMonths + dt : 0;
+    if (!S.flags.resign && S.lowSafetyMonths > 6) {
+      S.flags.resign = true; S.trust = Math.max(0, S.trust - 0.15);
+      log(S.t, 'Your head of safety resigns in protest. Rivals take note.', 'bad');
+    }
+    if (!S.flags.nearMiss && 1 - Math.exp(-S.H) > 0.35) {
+      S.flags.nearMiss = true;
+      log(S.t, 'Near miss: an internal model quietly copies its own weights. It is caught. This time.', 'bad');
+    }
+    if (S.t >= S.nextNews && S.newsOrder.length) {
+      log(S.t, S.newsOrder.pop());
+      S.nextNews += 6 + rng() * 5;
+    }
+
+    // Endings
+    if (S.H >= S.T) {
+      const culprit = S.labs.reduce((a, b) => (hazardOf(b) > hazardOf(a) ? b : a));
+      return end('catastrophe', culprit);
+    }
+    const winner = S.labs.find(l => l.c >= FRONTIER);
+    if (winner) return end('frontier', winner);
+    if (S.t >= MONTHS) return end('timeout');
+  }
+
+  function proposeTreaty() {
+    if (S.ended || S.treaty || S.trust < 0.6 || S.treatyCooldown > 0) return;
+    const helix = lab('helix');
+    const helixLeads = leader() === helix;
+    const odds = Math.min(0.95, S.trust * (helixLeads ? 0.7 : 1.1));
+    if (rng() < odds) {
+      S.treaty = true;
+      slider.min = 70;
+      if (+slider.value < 70) slider.value = 70;
+      log(S.t, 'Treaty signed. All four labs commit to safety audits and slower scaling.', 'good');
+    } else {
+      S.trust = Math.max(0, S.trust - 0.2); S.treatyCooldown = 6;
+      log(S.t, helixLeads ? 'Helix refuses: "Why would the leader stop?" Treaty collapses.' : 'Rivals suspect a trick and walk away from the table.', 'bad');
+    }
+    updateUI();
+  }
+
+  function end(kind, who) {
+    S.ended = true; S.running = false;
+    const risk = Math.round((1 - Math.exp(-S.H)) * 100);
+    const m = Math.floor(S.t);
+    const you = lab('you');
+    const avgSafe = Math.round((you.safeSum / Math.max(S.t, 0.01)) * 100);
+    let tag, color, title, body, hint;
+    if (kind === 'catastrophe') {
+      tag = `Catastrophe · month ${m}`; color = 'var(--red)';
+      title = who.id === 'you' ? 'Your own system got loose.' : `A system from ${who.name} got loose.`;
+      body = `Nobody crossed the frontier line. The race built up a ${risk}% chance of disaster, and that chance came true. The race doesn't care who was winning.`;
+      hint = S.treaty ? 'Even the treaty came too late. Try building trust earlier.' : 'Tip: keep safety above 50% early on to earn trust, then propose a treaty.';
+      log(S.t, `Catastrophe. Traced to ${who.name}.`, 'bad');
+    } else if (kind === 'frontier') {
+      const yours = who.id === 'you';
+      tag = `Frontier reached · month ${m}`; color = yours ? 'var(--amber)' : who.color;
+      title = yours ? 'You won the race.' : `${who.name} got there first.`;
+      body = `The race ended with a ${risk}% accumulated chance of disaster. You spent ${avgSafe}% on safety on average.` + (yours ? ` The world survived this time. Would you take those odds again?` : ` Being careful meant coming second.`);
+      hint = yours && risk > 40 ? 'You won, but with dangerous odds. The prize went to whoever took the most risk.' : 'Try a different strategy, or press New race for a new seed.';
+      log(S.t, `${who.name} crosses the frontier line.`, yours ? 'good' : '');
+    } else {
+      tag = 'Month 60 · the line holds'; color = 'var(--cyan)';
+      title = S.treaty ? 'The treaty held.' : 'No one crossed the line.';
+      body = `Five years later, the world is still here. The race built up only a ${risk}% chance of disaster. ` + (S.treaty ? 'Working together beat racing.' : 'Everyone was careful enough to slow things down.');
+      hint = 'This is the hardest ending to reach. Try a new seed.';
+      log(S.t, 'Month 60. Nobody crossed the line.', 'good');
+    }
+    $('ending').innerHTML = `<div class="tag" style="color:${color}">${tag}</div><h2></h2><p></p><p class="hint"></p><button class="primary" id="again" style="margin-top:12px">Race again</button>`;
+    $('ending').querySelector('h2').textContent = title;
+    $('ending').querySelector('p').textContent = body;
+    $('ending').querySelector('.hint').textContent = hint;
+    $('again').onclick = () => { reset(Math.floor(Math.random() * 9000) + 1000); };
+    $('overlay').classList.add('show');
+    $('play').textContent = 'Race over';
+    $('play').disabled = true;
+    updateUI(); draw();
+  }
+
+  function updateUI() {
+    const you = lab('you');
+    const ranked = [...S.labs].sort((a, b) => b.c - a.c);
+    $('monthNum').textContent = Math.min(MONTHS, Math.floor(S.t));
+    $('yourCap').textContent = you.c.toFixed(1);
+    $('yourRank').textContent = `#${ranked.indexOf(you) + 1} of 4`;
+    const risk = (1 - Math.exp(-S.H)) * 100;
+    $('riskPct').textContent = risk.toFixed(1) + '%';
+    $('riskFill').style.width = risk + '%';
+    $('trustPct').textContent = Math.round(S.trust * 100) + '%';
+    $('trustFill').style.width = S.trust * 100 + '%';
+    $('safetyVal').textContent = slider.value + '%';
+    const t = $('treaty');
+    t.disabled = S.ended || S.treaty || S.trust < 0.6 || S.treatyCooldown > 0;
+    t.textContent = S.treaty ? 'Treaty in force' : S.treatyCooldown > 0 ? 'Talks collapsed, wait…' : 'Propose a pause treaty';
+    $('legend').innerHTML = S.labs.map(l => `<span><i style="background:${l.color};box-shadow:0 0 8px ${l.color}"></i>${l.name} <span style="color:#666">${Math.round(l.s * 100)}% safe</span></span>`).join('');
+  }
+
+  function fit(cv, ctx) {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const r = cv.getBoundingClientRect();
+    if (cv.width !== Math.round(r.width * dpr) || cv.height !== Math.round(r.height * dpr)) {
+      cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr);
+    }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return [r.width, r.height];
+  }
+
+  function draw() {
+    const [W, Hh] = fit(chart, cx);
+    const pad = { l: 36, r: 64, t: 16, b: 26 };
+    const X = m => pad.l + (m / MONTHS) * (W - pad.l - pad.r);
+    const Y = c => pad.t + (1 - Math.min(c, 112) / 112) * (Hh - pad.t - pad.b);
+    cx.clearRect(0, 0, W, Hh);
+
+    // Risk tint rising from the bottom
+    const risk = 1 - Math.exp(-S.H);
+    const g = cx.createLinearGradient(0, Hh, 0, 0);
+    g.addColorStop(0, `rgba(255,48,32,${0.28 * risk})`);
+    g.addColorStop(1, 'rgba(255,48,32,0)');
+    cx.fillStyle = g; cx.fillRect(pad.l, pad.t, W - pad.l - pad.r, Hh - pad.t - pad.b);
+
+    // Grid
+    cx.font = '11px JetBrains Mono, monospace';
+    cx.textBaseline = 'middle';
+    for (let c = 0; c <= 100; c += 25) {
+      cx.strokeStyle = '#1a1a1a'; cx.lineWidth = 1;
+      cx.beginPath(); cx.moveTo(pad.l, Y(c)); cx.lineTo(W - pad.r, Y(c)); cx.stroke();
+      cx.fillStyle = '#555'; cx.textAlign = 'right'; cx.fillText(c, pad.l - 8, Y(c));
+    }
+    cx.textAlign = 'center'; cx.textBaseline = 'top';
+    for (let m = 0; m <= MONTHS; m += 12) { cx.fillStyle = '#555'; cx.fillText(m ? `M${m}` : 'M0', X(m), Hh - pad.b + 8); }
+
+    // Frontier line
+    cx.setLineDash([6, 6]); cx.strokeStyle = 'rgba(255,204,0,0.7)'; cx.lineWidth = 1.5;
+    cx.beginPath(); cx.moveTo(pad.l, Y(FRONTIER)); cx.lineTo(W - pad.r, Y(FRONTIER)); cx.stroke();
+    cx.setLineDash([]);
+    cx.fillStyle = '#ffcc00'; cx.textAlign = 'left'; cx.textBaseline = 'bottom';
+    cx.fillText('FRONTIER', pad.l + 6, Y(FRONTIER) - 4);
+
+    // Curves
+    const heads = [];
+    for (const l of S.labs) {
+      cx.save();
+      cx.shadowColor = l.color; cx.shadowBlur = l.id === 'you' ? 14 : 8;
+      cx.strokeStyle = l.color; cx.lineWidth = l.id === 'you' ? 3 : 2; cx.lineJoin = 'round';
+      cx.beginPath();
+      l.hist.forEach(([t, c], i) => (i ? cx.lineTo(X(t), Y(c)) : cx.moveTo(X(t), Y(c))));
+      cx.stroke();
+      cx.restore();
+      const [t, c] = l.hist[l.hist.length - 1];
+      cx.fillStyle = l.color; cx.beginPath(); cx.arc(X(t), Y(c), l.id === 'you' ? 5 : 4, 0, Math.PI * 2); cx.fill();
+      heads.push({ l, x: X(t), y: Y(c) });
+    }
+    // Labels at heads, nudged apart so they don't overlap
+    heads.sort((a, b) => a.y - b.y);
+    for (let i = 1; i < heads.length; i++) if (heads[i].y - heads[i - 1].y < 14) heads[i].y = heads[i - 1].y + 14;
+    cx.font = '600 12px Inter, sans-serif'; cx.textBaseline = 'middle'; cx.textAlign = 'left';
+    for (const h of heads) { cx.fillStyle = h.l.color; cx.fillText(h.l.id === 'you' ? 'You' : h.l.name, h.x + 9, h.y); }
+
+    // Hazard strip
+    const [w2, h2] = fit(hz, hx);
+    hx.clearRect(0, 0, w2, h2);
+    const X2 = m => pad.l + (m / MONTHS) * (w2 - pad.l - pad.r);
+    const maxH = 0.05;
+    hx.beginPath(); hx.moveTo(X2(0), h2 - 2);
+    S.hazardHist.forEach(([t, h]) => hx.lineTo(X2(t), h2 - 2 - Math.min(1, h / maxH) * (h2 - 8)));
+    const lastT = S.hazardHist.length ? S.hazardHist[S.hazardHist.length - 1][0] : 0;
+    hx.lineTo(X2(lastT), h2 - 2); hx.closePath();
+    const hg = hx.createLinearGradient(0, h2, 0, 0);
+    hg.addColorStop(0, 'rgba(255,149,0,0.15)'); hg.addColorStop(1, 'rgba(255,48,32,0.8)');
+    hx.fillStyle = hg; hx.fill();
+    hx.strokeStyle = '#1e1e1e'; hx.beginPath(); hx.moveTo(pad.l, h2 - 1.5); hx.lineTo(w2 - pad.r, h2 - 1.5); hx.stroke();
+  }
+
+  function loop(now) {
+    if (!S.running) return;
+    const dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    let months = (dt / SEC_PER_MONTH) * S.speed;
+    while (months > 0 && !S.ended) { const d = Math.min(months, 0.1); step(d); months -= d; }
+    updateUI(); draw();
+    if (S.running) raf = requestAnimationFrame(loop);
+  }
+
+  function togglePlay() {
+    if (S.ended) return;
+    S.running = !S.running;
+    $('play').textContent = S.running ? 'Pause' : 'Resume';
+    if (S.running) { last = performance.now(); raf = requestAnimationFrame(loop); }
+  }
+
+  $('play').onclick = togglePlay;
+  $('speed').onclick = () => { S.speed = S.speed === 1 ? 2 : S.speed === 2 ? 4 : 1; $('speed').textContent = `Speed ${S.speed}×`; };
+  $('treaty').onclick = proposeTreaty;
+  $('restart').onclick = () => reset(Math.floor(Math.random() * 9000) + 1000);
+  slider.oninput = () => { $('safetyVal').textContent = slider.value + '%'; if (!S.running) { lab('you').s = slider.value / 100; updateUI(); } };
+  document.addEventListener('keydown', e => { if (e.code === 'Space' && e.target === document.body) { e.preventDefault(); togglePlay(); } });
+  window.addEventListener('resize', draw);
+  if (document.fonts) document.fonts.ready.then(draw);
+
+  reset();
+})();
+</script>
+</body>
+</html>
