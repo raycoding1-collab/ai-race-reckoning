@@ -4,13 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#050505">
-<meta name="description" content="An interactive, studio-lit 3D model of an AI accelerator package: compute die, HBM stacks, interposer, capacitors and solder balls, down to the bumps.">
+<meta name="description" content="A scroll-driven 3D teardown of an AI accelerator package: compute die, HBM stacks, interposer, capacitors and solder balls, and what a kilowatt per chip adds up to.">
 <title>Accelerator Anatomy</title>
 <link rel="canonical" href="https://raycoding1-collab.github.io/ai-race-reckoning/chip/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="The AI Race — A Reckoning">
 <meta property="og:title" content="Accelerator Anatomy">
-<meta property="og:description" content="Take apart the chip every frontier AI model is trained on. An interactive, studio-lit 3D model with a one-minute cinematic tour.">
+<meta property="og:description" content="Scroll through a to-scale 3D teardown of the chip every frontier AI model is trained on, then take it apart yourself.">
 <meta property="og:url" content="https://raycoding1-collab.github.io/ai-race-reckoning/chip/">
 <meta property="og:image" content="https://raycoding1-collab.github.io/ai-race-reckoning/chip/og.jpg">
 <meta property="og:image:width" content="1200">
@@ -44,7 +44,7 @@
   }
 
   * { box-sizing: border-box; }
-  html, body { height: 100%; }
+  html { scrollbar-gutter: stable; scroll-behavior: smooth; }
   body {
     margin: 0;
     background: var(--bg);
@@ -53,10 +53,12 @@
     font-size: 14px;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
-    overflow: hidden;
+    overflow-x: hidden;
   }
 
-  .stage { position: fixed; inset: 0; }
+  .stage { position: fixed; inset: 0; z-index: 0; opacity: 0; transition: opacity 1.6s ease; }
+  .stage.ready { opacity: 1; }
+  body:not(.mode-viewer) .stage { pointer-events: none; }
   .stage canvas { display: block; width: 100%; height: 100%; touch-action: none; outline: none; }
 
   /* Film-plane overlays */
@@ -78,8 +80,9 @@
     padding: 6px 0;
   }
   .back:hover, .back:focus-visible { color: var(--ink); }
+  button.back { appearance: none; background: none; border: 0; cursor: pointer; text-align: left; }
   .eyebrow { font: 500 11px/1.2 var(--mono); letter-spacing: 0.16em; text-transform: uppercase; color: var(--red); }
-  h1 {
+  .title-block h2 {
     margin: 0;
     font-weight: 900; font-size: clamp(28px, 4.2vw, 52px); line-height: 0.98; letter-spacing: -0.035em;
     text-wrap: balance;
@@ -170,11 +173,14 @@
   @keyframes ping { 0% { transform: scale(.6); opacity: .9; } 80%, 100% { transform: scale(1.6); opacity: 0; } }
 
   .loader {
-    position: fixed; inset: 0; z-index: 10; display: grid; place-items: center;
-    background: var(--bg); transition: opacity .9s ease, visibility .9s;
+    position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 22px); transform: translateX(-50%);
+    z-index: 10; padding: 12px 18px; border-radius: 12px; max-width: calc(100vw - 32px);
+    background: var(--glass-strong); border: 1px solid var(--line);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    transition: opacity .9s ease, visibility .9s;
   }
   .loader.done { opacity: 0; visibility: hidden; }
-  .loader-inner { display: grid; gap: 12px; justify-items: center; font: 500 11px/1.4 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); text-align: center; padding-inline: 16px; }
+  .loader-inner { display: grid; gap: 9px; justify-items: center; font: 500 11px/1.4 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); text-align: center; padding-inline: 16px; }
   .bar { width: 180px; height: 1px; background: var(--line); overflow: hidden; }
   .bar > div { height: 100%; width: 0; background: var(--red); transition: width .3s ease; box-shadow: 0 0 10px var(--red); }
   .fallback { color: var(--ink); text-transform: none; letter-spacing: 0; font: 400 14px/1.5 var(--sans); max-width: 26rem; }
@@ -201,9 +207,114 @@
   }
   @media (min-width: 861px) and (max-height: 760px) {
     .lede, .keys, .ctl-quality, .specs { display: none; }
-    h1 { font-size: clamp(26px, 3.2vw, 40px); }
+    .title-block h2 { font-size: clamp(26px, 3.2vw, 40px); }
     .detail { max-width: 22rem; padding: 12px 14px; gap: 6px; }
     .detail ul { display: none; }
+  }
+
+  /* ─── Site ─── */
+  .site { position: relative; z-index: 1; transition: opacity .7s ease; }
+  .hud, .hotspots { z-index: 3; }
+  body:not(.mode-viewer) .hud, body:not(.mode-viewer) .hotspots { opacity: 0; visibility: hidden; }
+  .hud { transition: opacity .7s ease, visibility .7s; }
+  body.mode-viewer, body.touring { overflow: hidden; }
+  body.mode-viewer .site, body.touring .site { opacity: 0; pointer-events: none; }
+
+  .progress { position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 6; transform-origin: 0 50%; transform: scaleX(0); background: var(--red); box-shadow: 0 0 10px var(--red); }
+  body.mode-viewer .progress, body.touring .progress { opacity: 0; }
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 4;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    padding: calc(env(safe-area-inset-top, 0px) + 14px) var(--gutter) 14px;
+    background: linear-gradient(to bottom, rgba(5,5,5,0.9), rgba(5,5,5,0.55) 60%, rgba(5,5,5,0));
+    transition: opacity .6s ease, transform .6s ease;
+  }
+  body.mode-viewer .nav, body.touring .nav { opacity: 0; transform: translateY(-100%); pointer-events: none; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 15px; letter-spacing: -0.01em; color: var(--ink); text-decoration: none; white-space: nowrap; }
+  .brand svg { width: 22px; height: 22px; flex: none; }
+  .nav-links { display: flex; gap: clamp(14px, 2vw, 26px); list-style: none; margin: 0; padding: 0; }
+  .nav-links a { color: var(--dim); text-decoration: none; font: 500 11px/1 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; transition: color .2s; }
+  .nav-links a:hover, .nav-links a.on { color: var(--ink); }
+  .nav-links a.on { box-shadow: 0 1px 0 var(--red); }
+  .tour-btn.sm { margin-top: 0; padding: 5px 13px 5px 5px; font-size: 12.5px; }
+  .tour-btn.sm .play { width: 22px; height: 22px; }
+  @media (max-width: 820px) { .nav-links { display: none; } }
+  @media (max-width: 400px) { .brand span { display: none; } }
+
+  .sec { position: relative; min-height: 100vh; min-height: 100svh; display: grid; align-items: center; padding: 104px var(--gutter); }
+  .sec::before { content: ""; position: absolute; inset: 0; pointer-events: none; }
+  .sec.left::before { background: radial-gradient(ellipse 58% 60% at 14% 50%, rgba(5,5,5,0.78), rgba(5,5,5,0.35) 55%, transparent 75%); }
+  .sec.right::before { background: radial-gradient(ellipse 58% 60% at 86% 50%, rgba(5,5,5,0.78), rgba(5,5,5,0.35) 55%, transparent 75%); }
+  .chapter { min-height: 135vh; }
+  .copy { position: relative; max-width: 31rem; display: grid; gap: 16px; justify-items: start; }
+  .sec.left .copy { justify-self: start; }
+  .sec.right .copy { justify-self: end; }
+  .kicker { font: 500 11px/1.2 var(--mono); letter-spacing: 0.18em; text-transform: uppercase; color: var(--red); display: flex; gap: 12px; align-items: center; }
+  .kicker::before { content: ""; width: 26px; height: 1px; background: var(--red); flex: none; }
+  .kicker b { color: var(--dim); font-weight: 500; }
+  .sec h2 { margin: 0; font-weight: 900; font-size: clamp(36px, 5.2vw, 72px); line-height: 0.96; letter-spacing: -0.04em; text-wrap: balance; }
+  .sec p { margin: 0; color: #c9c3be; font-size: clamp(15px, 1.2vw, 18px); line-height: 1.6; text-wrap: pretty; }
+  .facts { list-style: none; margin: 4px 0 0; padding: 14px 0 0; border-top: 1px solid var(--line); display: grid; gap: 6px; width: 100%; }
+  .facts li { font: 400 13px/1.5 var(--mono); font-variant-numeric: tabular-nums; display: flex; gap: 10px; }
+  .facts li::before { content: ""; flex: none; width: 5px; height: 5px; margin-top: 7px; background: var(--red); border-radius: 1px; }
+
+  .hero { align-items: end; padding-bottom: clamp(56px, 11vh, 128px); }
+  .hero::before { background: radial-gradient(ellipse 70% 60% at 10% 90%, rgba(5,5,5,0.85), rgba(5,5,5,0.4) 55%, transparent 80%); }
+  .hero .copy { max-width: 44rem; }
+  .hero h1 { margin: 0; font-weight: 900; font-size: clamp(46px, 7.6vw, 116px); line-height: 0.9; letter-spacing: -0.05em; text-wrap: balance; }
+  .hero p { max-width: 34rem; }
+  .cta-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 8px; }
+  .cta-row .tour-btn { margin-top: 0; padding: 8px 18px 8px 8px; font-size: 14px; }
+  .cta-row .tour-btn .play { width: 30px; height: 30px; }
+  .ghost-btn {
+    appearance: none; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.04);
+    color: var(--ink); font: 600 14px/1 var(--sans); padding: 15px 20px; border-radius: 999px; transition: border-color .2s, background-color .2s;
+  }
+  .ghost-btn:hover { border-color: rgba(255,255,255,0.45); background: rgba(255,255,255,0.08); }
+  .ghost-btn:disabled { opacity: 0.5; cursor: progress; }
+  .scroll-cue {
+    position: absolute; right: var(--gutter); bottom: clamp(56px, 11vh, 128px);
+    font: 500 10.5px/1 var(--mono); letter-spacing: 0.2em; text-transform: uppercase; color: var(--dim);
+    writing-mode: vertical-rl; display: flex; gap: 12px; align-items: center;
+  }
+  .scroll-cue::after { content: ""; width: 1px; height: 56px; background: linear-gradient(var(--dim), transparent); transform-origin: top; animation: cue 2.4s ease-in-out infinite; }
+  @keyframes cue { 0% { transform: scaleY(0); } 50% { transform: scaleY(1); opacity: 1; } 100% { transform: scaleY(1); opacity: 0; } }
+
+  .sheet { display: grid; grid-template-columns: auto 1fr; margin: 4px 0 0; width: 100%; border-top: 1px solid var(--line); }
+  .sheet dt, .sheet dd { margin: 0; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .sheet dt { color: var(--dim); font: 500 10.5px/1.9 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; padding-right: 24px; white-space: nowrap; }
+  .sheet dd { font: 500 13.5px/1.5 var(--mono); font-variant-numeric: tabular-nums; text-align: right; }
+  .fine { font: 400 11px/1.5 var(--mono); color: var(--faint); }
+  .specs-sec .copy { max-width: 34rem; }
+
+  .scale-sec { min-height: 160vh; }
+  .stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 28px; margin-top: 6px; width: 100%; border-top: 1px solid var(--line); padding-top: 20px; }
+  .stat b { display: block; font-weight: 800; font-size: clamp(26px, 3vw, 42px); line-height: 1; letter-spacing: -0.035em; font-variant-numeric: tabular-nums; }
+  .stat span { display: block; margin-top: 8px; font: 500 10.5px/1.5 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); }
+
+  .explore-sec { align-items: end; text-align: center; }
+  .explore-sec::before { background: linear-gradient(to top, rgba(5,5,5,0.9), rgba(5,5,5,0.4) 38%, transparent 60%); }
+  .explore-sec .copy { justify-self: center; justify-items: center; max-width: 38rem; }
+  .explore-sec .cta-row { justify-content: center; }
+
+  .foot {
+    position: relative; z-index: 1; background: #050505; border-top: 1px solid var(--line);
+    padding: 44px var(--gutter) calc(44px + env(safe-area-inset-bottom, 0px));
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 28px;
+    color: var(--dim); font-size: 13.5px; line-height: 1.6;
+  }
+  .foot h3 { margin: 0 0 8px; color: var(--ink); font-size: 13px; font-weight: 700; }
+  .foot p { margin: 0; max-width: 30rem; }
+  .foot a { color: var(--ink); text-underline-offset: 3px; }
+
+  @media (max-width: 860px) {
+    .sec { align-items: end; padding-bottom: 72px; }
+    .sec.left::before, .sec.right::before, .hero::before { background: linear-gradient(to top, rgba(5,5,5,0.94) 12%, rgba(5,5,5,0.6) 42%, transparent 66%); }
+    .sec.right .copy { justify-self: start; }
+    .chapter { min-height: 125vh; }
+    .scroll-cue { display: none; }
+    .sheet dt { white-space: normal; }
+    .specs-sec::before, .scale-sec::before { background: linear-gradient(to top, rgba(5,5,5,0.94) 30%, rgba(5,5,5,0.72) 62%, transparent 82%); }
   }
 
   /* ─── Showcase ─── */
@@ -279,6 +390,8 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .scroll-cue::after { animation: none; }
     .lb, .tour-cap > * { transition: none; }
     .hotspot i::after { animation: none; }
     .loader, .hotspot, .hotspot span { transition: none; }
@@ -288,16 +401,162 @@
 <body>
 
 <noscript><p style="padding:24px;font:16px/1.5 system-ui,sans-serif;color:#ece9e6">This 3D model needs JavaScript and WebGL. Turn JavaScript on to explore it.</p></noscript>
+<div class="progress" id="progress"></div>
+<nav class="nav" aria-label="Site">
+  <a class="brand" href="#top"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="3" width="26" height="26" rx="4" fill="#121212" stroke="#b9b6ae" stroke-width="2"/><rect x="10" y="9" width="12" height="14" rx="1" fill="#ff3020"/></svg><span>Accelerator Anatomy</span></a>
+  <ul class="nav-links">
+    <li><a href="#anatomy" data-nav="anatomy">Anatomy</a></li>
+    <li><a href="#specs" data-nav="specs">Specs</a></li>
+    <li><a href="#scale" data-nav="scale">Scale</a></li>
+    <li><a href="#explore" data-nav="explore">Explore</a></li>
+    <li><a href="../">The Reckoning</a></li>
+  </ul>
+  <button type="button" class="tour-btn sm" data-film disabled><span class="play" aria-hidden="true"></span>Watch the film</button>
+</nav>
+
+<div class="site" id="site">
+<main>
+  <section class="sec hero" id="top" data-shot="0">
+    <div class="copy">
+      <div class="kicker">An interactive teardown</div>
+      <h1>The machine behind the machine.</h1>
+      <p>Every frontier AI model is trained on packages like this one: one slab of logic walled in by stacked memory, drawing a kilowatt around the clock. Scroll to take it apart.</p>
+      <div class="cta-row">
+        <button type="button" class="tour-btn" data-film disabled><span class="play" aria-hidden="true"></span>Watch the film <small class="film-len">64 s</small></button>
+        <button type="button" class="ghost-btn" data-viewer disabled>Open the 3D viewer</button>
+      </div>
+    </div>
+    <div class="scroll-cue" aria-hidden="true">Scroll</div>
+  </section>
+
+  <section class="sec chapter left" id="anatomy" data-shot="1">
+    <div class="copy">
+      <div class="kicker">01 <b>/ 06</b> &nbsp;Compute die</div>
+      <h2>787 mm² of logic.</h2>
+      <p>One slab of silicon, as large as a lithography scanner can print in a single exposure. Matrix engines fill the two halves; the band across the middle is cache that keeps them fed.</p>
+      <ul class="facts"><li>3 nm-class process</li><li>Roughly 200 billion transistors</li><li>24.7 × 31.9 mm, at the reticle limit</li></ul>
+    </div>
+  </section>
+
+  <section class="sec chapter right" data-shot="2">
+    <div class="copy">
+      <div class="kicker">02 <b>/ 06</b> &nbsp;High-bandwidth memory</div>
+      <h2>Memory, stacked eight high.</h2>
+      <p>Six towers of DRAM flank the die. Each layer is thinned to about 30 µm and wired straight through the silicon, because moving data, rather than the arithmetic itself, sets the pace of most AI work.</p>
+      <ul class="facts"><li>6 stacks × 8 DRAM dies</li><li>144 GB in total</li><li>About 7.2 TB/s combined</li></ul>
+    </div>
+  </section>
+
+  <section class="sec chapter left" data-shot="3">
+    <div class="copy">
+      <div class="kicker">03 <b>/ 06</b> &nbsp;Silicon interposer</div>
+      <h2>Millimetres, not centimetres.</h2>
+      <p>Logic and memory sit side by side on a slab of passive silicon wired like a miniature circuit board. Tens of thousands of microbumps join them, so signals cross millimetres instead of centimetres of board.</p>
+      <ul class="facts"><li>46 × 35 mm of silicon</li><li>Microbumps at about 45 µm pitch</li><li>Thousands of wires per millimetre</li></ul>
+    </div>
+  </section>
+
+  <section class="sec chapter right" data-shot="4">
+    <div class="copy">
+      <div class="kicker">04 <b>/ 06</b> &nbsp;Decoupling capacitors</div>
+      <h2>440 tiny reservoirs.</h2>
+      <p>Current demand swings by hundreds of amps within microseconds as work starts and stops. Ceramic capacitors ring the die and hold its voltage steady while it does.</p>
+      <ul class="facts"><li>368 on top, 72 underneath</li><li>0402 size: 1.0 × 0.5 mm</li><li>Multilayer ceramic (MLCC)</li></ul>
+    </div>
+  </section>
+
+  <section class="sec chapter left" data-shot="5">
+    <div class="copy">
+      <div class="kicker">05 <b>/ 06</b> &nbsp;Ball grid array</div>
+      <h2>3,456 ways down.</h2>
+      <p>Every watt and every signal reaches the board through a grid of solder balls. Most of them carry power and ground: at under one volt, a kilowatt means more than a thousand amps.</p>
+      <ul class="facts"><li>3,456 balls at 1.0 mm pitch</li><li>More than 1,000 A of supply current</li></ul>
+    </div>
+  </section>
+
+  <section class="sec chapter right" data-shot="6">
+    <div class="copy">
+      <div class="kicker">06 <b>/ 06</b> &nbsp;Under load</div>
+      <h2>1,000 watts, all day.</h2>
+      <p>Nearly every joule the die spends on arithmetic leaves it as heat. At this power, fans give way to liquid cold plates, and the building around the chip is designed for water as much as for electricity.</p>
+      <ul class="facts"><li>About 1 kW per package</li><li>Direct liquid cooling is typical</li></ul>
+    </div>
+  </section>
+
+  <section class="sec left specs-sec" id="specs" data-shot="7">
+    <div class="copy">
+      <div class="kicker">Spec sheet</div>
+      <h2>R1, on paper.</h2>
+      <dl class="sheet">
+        <dt>Process</dt><dd>3 nm-class</dd>
+        <dt>Compute die</dt><dd>787 mm² · 24.7 × 31.9 mm</dd>
+        <dt>Transistors</dt><dd>~200 billion</dd>
+        <dt>Memory</dt><dd>6 × HBM, 8-high · 144 GB</dd>
+        <dt>Bandwidth</dt><dd>~7.2 TB/s</dd>
+        <dt>Interposer</dt><dd>46 × 35 mm silicon</dd>
+        <dt>Package</dt><dd>65 × 65 mm</dd>
+        <dt>Capacitors</dt><dd>440 MLCC</dd>
+        <dt>Solder balls</dt><dd>3,456 · 1.0 mm pitch</dd>
+        <dt>Board power</dt><dd>1,000 W</dd>
+      </dl>
+      <div class="fine">R1 is an illustrative model built to scale from public packaging norms. It is not a specific product.</div>
+    </div>
+  </section>
+
+  <section class="sec left scale-sec" id="scale" data-shot="8">
+    <div class="copy">
+      <div class="kicker">Scale</div>
+      <h2>Now multiply.</h2>
+      <p>There are 224 packages on screen. A frontier training cluster links around 100,000 of them, and the building around it is planned around power and water first.</p>
+      <div class="stats">
+        <div class="stat"><b>~10 kW</b><span>One server of eight</span></div>
+        <div class="stat"><b>~150 MW</b><span>100,000 chips, cooling included</span></div>
+        <div class="stat"><b>~125,000</b><span>US homes' average draw</span></div>
+        <div class="stat"><b>24 / 7</b><span>For weeks to months per run</span></div>
+      </div>
+      <div class="fine">Rough, illustrative figures.</div>
+    </div>
+  </section>
+
+  <section class="sec explore-sec" id="explore" data-shot="9">
+    <div class="copy">
+      <div class="kicker">Explore</div>
+      <h2>Take it apart yourself.</h2>
+      <p>Orbit and zoom, explode the stack, switch the lighting, and inspect every part up close.</p>
+      <div class="cta-row">
+        <button type="button" class="ghost-btn" data-viewer disabled>Open the 3D viewer</button>
+        <button type="button" class="tour-btn" data-film disabled><span class="play" aria-hidden="true"></span>Watch the film <small class="film-len">64 s</small></button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div>
+    <h3>Accelerator Anatomy</h3>
+    <p>Part of <a href="../">The AI Race: A Reckoning</a>, a data-driven look at what the race to build AI costs.</p>
+  </div>
+  <div>
+    <h3>How it's made</h3>
+    <p>Built with three.js r170. Every texture, from the die layout to the laser marks, is generated in your browser. Nothing is downloaded but code.</p>
+  </div>
+  <div>
+    <h3>About the model</h3>
+    <p>R1 is illustrative and built to scale, one unit to 6.5 mm. It is not a specific product.</p>
+  </div>
+</footer>
+</div>
+
 <div class="stage" id="stage"></div>
 <div class="hotspots" id="hotspots" aria-label="Parts"></div>
 
 <div class="hud">
   <header class="title-block" id="title-block">
-    <!--repo-only--><a class="back" href="../">&larr; The AI Race, a reckoning</a><!--/repo-only-->
-    <div class="eyebrow">Exhibit &middot; The hardware</div>
-    <h1>Accelerator Anatomy</h1>
-    <button type="button" class="tour-btn" id="btn-tour" disabled><span class="play" aria-hidden="true"></span>Play the showcase <small id="tour-len">1 min</small></button>
-    <p class="lede">Every frontier model is trained on packages like this one: a single slab of logic, walled in by stacked memory, drawing as much power as a space heater. Drag to orbit, scroll to zoom, and pick a part to inspect it.</p>
+    <button type="button" class="back" id="btn-back">&larr; Back to the story</button>
+    <div class="eyebrow">3D viewer</div>
+    <h2>Accelerator Anatomy</h2>
+    <button type="button" class="tour-btn" id="btn-tour" data-film disabled><span class="play" aria-hidden="true"></span>Watch the film <small class="film-len">64 s</small></button>
+    <p class="lede">Drag to orbit, scroll or pinch to zoom, and pick a part to inspect it. Everything you see is to scale.</p>
   </header>
 
   <aside class="controls panel" id="controls" aria-label="View controls">
@@ -933,6 +1192,7 @@ function register(name, obj, off, delay) { parts[name] = { obj, base: obj.positi
 function shadowed(o, cast = true, recv = true) { o.traverse((m) => { if (m.isMesh) { m.castShadow = cast; m.receiveShadow = recv; } }); return o; }
 
 let partCount = 0; // instances + meshes, reported on the loader
+const GEO = {};
 let MAT = {};
 
 async function buildModel() {
@@ -1038,6 +1298,7 @@ async function buildModel() {
   const ringGeo = new THREE.ExtrudeGeometry(ringShape, { depth: D.stiff.t - 2 * bev, bevelEnabled: true, bevelThickness: bev, bevelSize: bev, bevelSegments: 3, curveSegments: 18 });
   ringGeo.rotateX(-Math.PI / 2);
   const ring = new THREE.Mesh(ringGeo, MAT.stiff);
+  GEO.ring = ringGeo;
   ring.position.y = D.y.subTop + bev;
   const stiffG = new THREE.Group(); stiffG.add(shadowed(ring)); chip.add(stiffG);
   register('stiffener', stiffG, 0.62, 0.04);
@@ -1307,7 +1568,7 @@ function updateExplode(dt) {
   }
   // Raise the camera with the stack's centre so the framing holds.
   const lift = (ease(explodeT) - before) * 0.9;
-  if (fly.t >= 1 && !tour.active) { controls.target.y += lift; camera.position.y += lift; }
+  if (mode === 'viewer' && fly.t >= 1 && !tour.active) { controls.target.y += lift; camera.position.y += lift; }
 }
 
 /* ───────────────────────── Parts / hotspots ───────────────────────── */
@@ -1450,6 +1711,7 @@ addEventListener('keydown', (e) => {
     return;
   }
   if (e.key.toLowerCase() === 'p') { startTour(); return; }
+  if (mode !== 'viewer') return;
   const k = e.key.toLowerCase();
   if (k === 'e') setExploded(explodeTarget === 0);
   else if (k === '1') setPreset('studio');
@@ -1464,14 +1726,6 @@ addEventListener('keydown', (e) => {
 /* The showcase hides the interface, so it frames against the full screen instead:
    subject a touch right of and above centre, clear of the captions. */
 const layoutCentre = new THREE.Vector2(innerWidth / 2, innerHeight / 2);
-let tourMix = 0;
-function applyViewOffset() {
-  const W = innerWidth, H = innerHeight;
-  const tx = W * (W > 860 ? 0.56 : 0.5), ty = H * 0.44;
-  const cx = layoutCentre.x + (tx - layoutCentre.x) * tourMix, cy = layoutCentre.y + (ty - layoutCentre.y) * tourMix;
-  camera.setViewOffset(W, H, W / 2 - cx, H / 2 - cy, W, H);
-  camera.updateProjectionMatrix();
-}
 
 /* Frame the model inside the screen area the interface leaves free: shift the projection
    centre there and pick a home distance that fits the package into it. */
@@ -1486,7 +1740,6 @@ function frameModel() {
   }
   const cx = fx + fw / 2, cy = fy + fh / 2;
   layoutCentre.set(cx, cy);
-  applyViewOffset();
   const ppu = Math.min(fw * 0.86, fh * 1.45) / (2 * R);
   const dist = (H / ppu) / 2 / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
   const atHome = camera.position.distanceTo(HOME.pos) < 0.01;
@@ -1559,7 +1812,7 @@ const segs = SHOTS.map((sh, i) => {
   tourEls.track.appendChild(b);
   return b.querySelector('b');
 });
-$('tour-len').textContent = `${Math.round(SHOTS.reduce((a, s) => a + s.dur, 0))} s`;
+document.querySelectorAll('.film-len').forEach((el) => { el.textContent = `${Math.round(SHOTS.reduce((a, s) => a + s.dur, 0))} s`; });
 
 const deg = THREE.MathUtils.degToRad;
 const val = (v) => (typeof v === 'function' ? v() : v);
@@ -1598,8 +1851,9 @@ function markActive() {
 }
 addEventListener('pointermove', markActive);
 
-function startTour() {
+function startTour(src) {
   if (!modelReady || tour.active) return;
+  tour.returnFocus = src instanceof HTMLElement ? src : document.activeElement;
   tour.active = true; setTourPaused(false);
   wasAutoRotate = controls.autoRotate; setAutoRotate(false);
   controls.enabled = false; fly.t = 1;
@@ -1613,27 +1867,20 @@ function endTour(completed) {
   tour.active = false;
   document.body.classList.remove('touring', 'idle');
   tourEls.fade.style.opacity = 0; tourEls.cap.classList.remove('show');
-  controls.enabled = true;
-  if (!completed) {
-    if (explodeTarget) setExploded(false);
-    if (lp.to !== PRESETS.studio) setPreset('studio');
-    resetView();
-  } else setAutoRotate(wasAutoRotate);
-  select(0, false);
-  $('btn-tour').focus({ preventScroll: true });
+  if (mode === 'viewer') {
+    controls.enabled = true;
+    if (!completed) {
+      if (explodeTarget) setExploded(false);
+      if (lp.to !== PRESETS.studio) setPreset('studio');
+      resetView();
+    } else setAutoRotate(wasAutoRotate);
+    select(0, false);
+  } else storyNear = -1; // the story re-applies its lighting and assembly for wherever the reader is
+  if (tour.returnFocus && tour.returnFocus.focus) tour.returnFocus.focus({ preventScroll: true });
 }
 
 const _tg = new THREE.Vector3();
 function updateTour(dt, time) {
-  // The fill light that lets the underside read in the BGA shot eases in and out on its own.
-  const wantFill = tour.active && SHOTS[tour.i].under ? 1.5 : 0;
-  tour.fill += (wantFill - tour.fill) * Math.min(1, dt * 2.5);
-  tourFill.intensity = tour.fill;
-  const wantMix = tour.active && !SHOTS[tour.i].home ? 1 : 0;
-  if (Math.abs(wantMix - tourMix) > 0.0005) {
-    tourMix += (wantMix - tourMix) * Math.min(1, dt * (wantMix ? 3 : 1.1));
-    applyViewOffset();
-  }
   if (!tour.active) return;
 
   if (!tour.paused) tour.t += dt;
@@ -1671,9 +1918,171 @@ function updateTour(dt, time) {
   segs[tour.i].style.width = (k * 100).toFixed(2) + '%';
 }
 
-$('btn-tour').addEventListener('click', startTour);
+document.querySelectorAll('[data-film]').forEach((b) => b.addEventListener('click', () => startTour(b)));
 $('tour-pause').addEventListener('click', () => setTourPaused(!tour.paused));
 $('tour-exit').addEventListener('click', () => endTour(false));
+
+/* ───────────────────────── Scroll story ─────────────────────────
+   Each section carries a camera pose. The page's scroll position picks the two poses either
+   side of the viewport centre and blends them; each pose holds while its section is centred. */
+
+let mode = 'story';
+const STORY = [
+  { target: MID(0.2), sph: [-30, 18, 27], side: 'right', spin: true, state: { x: false, p: 'studio', field: false } },
+  { target: AT('die', -0.9, 0, 1.1), sph: [62, 50, 7.2], side: 'right', state: { x: false, p: 'studio', field: false } },
+  { target: AT('hbm', 0, -0.1, -0.2), sph: [-112, 22, 5.6], side: 'left', state: { x: false, p: 'studio', field: false } },
+  { target: MID(0.45), sph: [34, 22, 17], side: 'right', state: { x: true, p: 'hall', field: false } },
+  { target: AT('caps', -2.83, -0.02, 1.87), sph: [180, 28, 2.7], side: 'left', state: { x: false, p: 'studio', field: false } },
+  { target: AT('bga', -1.4, 0, -1.4), sph: [128, -20, 6.8], side: 'right', state: { x: false, p: 'studio', field: false, under: true } },
+  { target: MID(0.3), sph: [-24, 30, 16], side: 'left', state: { x: false, p: 'thermal', field: false } },
+  { target: MID(0.2), sph: [8, 70, 20], side: 'right', state: { x: false, p: 'studio', field: false } },
+  { target: MID(0.1), sph: [36, 28, 50], side: 'right', state: { x: false, p: 'hall', field: true } },
+  { target: MID(0.25), sph: [39, 24, 27], side: 'centre', spin: true, state: { x: false, p: 'studio', field: false } },
+];
+const NAV_OF = ['', 'anatomy', 'anatomy', 'anatomy', 'anatomy', 'anatomy', 'anatomy', 'specs', 'scale', 'explore'];
+const storyEls = [...document.querySelectorAll('[data-shot]')];
+const navLinks = [...document.querySelectorAll('[data-nav]')];
+const storyCentre = new THREE.Vector2(innerWidth / 2, innerHeight / 2);
+let storyNear = -1;
+const _sa = new THREE.Vector3(), _sb = new THREE.Vector3(), _sp = new THREE.Vector3();
+
+function sideCentre(side, out) {
+  const W = innerWidth, H = innerHeight;
+  if (W <= 860) return out.set(W * 0.5, H * (side === 'centre' ? 0.36 : 0.3));
+  return out.set(W * (side === 'right' ? 0.69 : side === 'left' ? 0.31 : 0.5), H * (side === 'centre' ? 0.33 : 0.5));
+}
+function applyStoryState(st) {
+  if ((explodeTarget === 1) !== st.x) setExploded(st.x);
+  if (lp.to !== PRESETS[st.p]) setPreset(st.p);
+  fieldTarget = st.field ? 1 : 0;
+}
+const _c1 = new THREE.Vector2(), _c2 = new THREE.Vector2();
+function updateStory(dt, time) {
+  const vc = innerHeight / 2;
+  const off = storyEls.map((el) => { const r = el.getBoundingClientRect(); return r.top + r.height / 2 - vc; });
+  let i = 0;
+  while (i < off.length - 1 && off[i + 1] <= 0) i++;
+  const j = Math.min(i + 1, STORY.length - 1);
+  const raw = i < off.length - 1 && off[i] <= 0 ? -off[i] / (off[j] - off[i]) : 0;
+  const e = THREE.MathUtils.smoothstep(THREE.MathUtils.clamp(raw, 0, 1), 0.18, 0.82);
+  const near = e < 0.5 ? i : j;
+  if (near !== storyNear) {
+    storyNear = near; applyStoryState(STORY[near].state);
+    navLinks.forEach((a) => a.classList.toggle('on', a.dataset.nav === NAV_OF[near]));
+  }
+  const A = STORY[i], B = STORY[j];
+  A.target(_sa); B.target(_sb);
+  const target = _sa.lerp(_sb, e);
+  const spin = reduceMotion ? 0 : time * 4;
+  // Wide screens put text beside the model rather than below it, so the camera stands further back.
+  const ds = innerWidth > 860 ? 1.4 : Math.max(1, fitScale * 0.8);
+  const az = lerpAngle(A.sph[0] + (A.spin ? spin : 0), B.sph[0] + (B.spin ? spin : 0), e);
+  const el = A.sph[1] + (B.sph[1] - A.sph[1]) * e;
+  const d = (A.sph[2] + (B.sph[2] - A.sph[2]) * e) * ds;
+  const ca = Math.cos(deg(el));
+  _sp.set(target.x + d * ca * Math.sin(deg(az)), target.y + d * Math.sin(deg(el)), target.z + d * ca * Math.cos(deg(az)));
+  storyCentre.copy(sideCentre(A.side, _c1).lerp(sideCentre(B.side, _c2), e));
+  const k = reduceMotion ? 1 : 1 - Math.exp(-dt * 3.2);
+  camera.position.lerp(_sp, k);
+  controls.target.lerp(target, k);
+  camera.lookAt(controls.target);
+}
+
+/* Shared per-frame state: the underside fill light and where on screen the model is centred. */
+const viewCentre = new THREE.Vector2(innerWidth / 2, innerHeight / 2), _want = new THREE.Vector2();
+function updateAmbient(dt) {
+  const under = tour.active ? SHOTS[tour.i].under : mode === 'story' && storyNear >= 0 && STORY[storyNear].state.under;
+  tour.fill += ((under ? 1.5 : 0) - tour.fill) * Math.min(1, dt * 2.5);
+  tourFill.intensity = tour.fill;
+  const W = innerWidth, H = innerHeight;
+  if (tour.active && !SHOTS[tour.i].home) _want.set(W * (W > 860 ? 0.56 : 0.5), H * 0.44);
+  else if (tour.active) _want.copy(mode === 'viewer' ? layoutCentre : storyCentre);
+  else _want.copy(mode === 'viewer' ? layoutCentre : storyCentre);
+  viewCentre.lerp(_want, reduceMotion ? 1 : 1 - Math.exp(-dt * 3.5));
+  camera.setViewOffset(W, H, W / 2 - viewCentre.x, H / 2 - viewCentre.y, W, H);
+  camera.updateProjectionMatrix();
+}
+
+/* ───────────────────────── The field: 224 more packages for the scale section ───────────────────────── */
+
+let field = null, fieldT = 0, fieldTarget = 0;
+function buildField() {
+  const N = 7, S = 13, cells = [];
+  for (let i = -N; i <= N; i++) for (let j = -N; j <= N; j++) if (i || j) cells.push({ x: i * S, z: j * S, r: Math.hypot(i, j) / (N * Math.SQRT2) });
+  const g = new THREE.Group(); g.visible = false; scene.add(g);
+  const mk = (geo, mat, per, shadow = true) => { const m = new THREE.InstancedMesh(geo, mat, cells.length * per); m.frustumCulled = false; m.castShadow = m.receiveShadow = shadow; g.add(m); return m; };
+  const blobCv = document.createElement('canvas'); blobCv.width = blobCv.height = 128;
+  const bx = blobCv.getContext('2d'), gr = bx.createRadialGradient(64, 64, 0, 64, 64, 64);
+  gr.addColorStop(0, 'rgba(0,0,0,0.9)'); gr.addColorStop(0.45, 'rgba(0,0,0,0.55)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+  bx.fillStyle = gr; bx.fillRect(0, 0, 128, 128);
+  const blobGeo = new THREE.PlaneGeometry(15, 15); blobGeo.rotateX(-Math.PI / 2);
+  field = {
+    g, cells,
+    sub: mk(new THREE.BoxGeometry(D.sub.w, D.sub.t, D.sub.d), [MAT.subSide, MAT.subSide, MAT.subTop, MAT.subBottom, MAT.subSide, MAT.subSide], 1),
+    ring: mk(GEO.ring, MAT.stiff, 1),
+    die: mk(new THREE.BoxGeometry(D.die.w, D.die.t, D.die.d), [MAT.dieSide, MAT.dieSide, MAT.dieTop, MAT.dieSide, MAT.dieSide, MAT.dieSide], 1),
+    hbm: mk(new THREE.BoxGeometry(D.hbm.w, 0.16, D.hbm.d), [MAT.hbmLayer, MAT.hbmLayer, MAT.hbmTop, MAT.hbmLayer, MAT.hbmLayer, MAT.hbmLayer], 6),
+    blob: mk(blobGeo, new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(blobCv), transparent: true, depthWrite: false, opacity: 0.8 }), 1, false),
+    hs: [-1, 1].flatMap((s) => hbmZ.map((z) => [s * hbmX, z])),
+  };
+}
+const _fm = new THREE.Matrix4(), _fq = new THREE.Quaternion(), _fs = new THREE.Vector3(), _fp = new THREE.Vector3();
+function updateField(dt) {
+  if (!field) return;
+  const dir = Math.sign(fieldTarget - fieldT);
+  if (!dir) return;
+  fieldT = THREE.MathUtils.clamp(fieldT + dir * dt / (reduceMotion ? 0.01 : 2.6), 0, 1);
+  field.g.visible = fieldT > 0;
+  field.cells.forEach((c, k) => {
+    // Packages rise out of the floor in a ripple spreading from the centre.
+    const s = ease(THREE.MathUtils.clamp(fieldT * 1.8 - c.r * 0.8, 0, 1)), sc = Math.max(s, 0.0001);
+    const by = chipLift - (1 - s) * 1.6;
+    const put = (mesh, idx, lx, ly, lz) => { _fm.compose(_fp.set(c.x + lx * sc, by + ly * sc, c.z + lz * sc), _fq, _fs.set(sc, sc, sc)); mesh.setMatrixAt(idx, _fm); };
+    put(field.sub, k, 0, D.sub.t / 2, 0);
+    put(field.ring, k, 0, D.y.subTop + 0.015, 0);
+    put(field.die, k, 0, D.y.dieBot + D.die.t / 2, 0);
+    field.hs.forEach(([hx, hz], h) => put(field.hbm, k * 6 + h, hx, D.y.dieBot + 0.08, hz));
+    _fm.compose(_fp.set(c.x, 0.012, c.z), _fq, _fs.set(sc, 1, sc)); field.blob.setMatrixAt(k, _fm);
+  });
+  for (const m of [field.sub, field.ring, field.die, field.hbm, field.blob]) m.instanceMatrix.needsUpdate = true;
+}
+
+/* ───────────────────────── Modes: the scrolling story and the full viewer ───────────────────────── */
+
+function setMode(m) {
+  if (m === mode || tour.active) return;
+  mode = m;
+  document.body.classList.toggle('mode-viewer', m === 'viewer');
+  controls.enabled = m === 'viewer';
+  fly.t = 1;
+  if (m === 'viewer') {
+    if (explodeTarget) setExploded(false);
+    if (lp.to !== PRESETS.studio) setPreset('studio');
+    fieldTarget = 0;
+    setAutoRotate(!reduceMotion);
+    flyTo(HOME.pos, HOME.target, 1.8);
+    select(0, false);
+    $('btn-back').focus({ preventScroll: true });
+    if (location.hash !== '#viewer') history.replaceState(null, '', '#viewer');
+  } else {
+    setAutoRotate(false);
+    storyNear = -1;
+    if (location.hash === '#viewer') history.replaceState(null, '', location.pathname + location.search);
+    const src = document.querySelector('#explore [data-viewer]');
+    if (src) src.focus({ preventScroll: true });
+  }
+}
+document.querySelectorAll('[data-viewer]').forEach((b) => b.addEventListener('click', () => setMode('viewer')));
+$('btn-back').addEventListener('click', () => setMode('story'));
+addEventListener('hashchange', () => { if (modelReady) setMode(location.hash === '#viewer' ? 'viewer' : 'story'); });
+
+const progressEl = $('progress');
+function onScroll() {
+  const max = document.documentElement.scrollHeight - innerHeight;
+  progressEl.style.transform = `scaleX(${max > 0 ? Math.min(1, scrollY / max) : 0})`;
+}
+addEventListener('scroll', onScroll, { passive: true });
+onScroll();
 
 /* ───────────────────────── Boot ───────────────────────── */
 
@@ -1702,6 +2111,7 @@ async function boot() {
   MAXD = Math.max(...Object.values(parts).map((p) => p.delay));
   setAutoRotate(!reduceMotion);
   $('spec-die').textContent = `${Math.round(D.die.w * MM * D.die.d * MM)} mm²`;
+  buildField();
   select(0, false);
 
   await stage(`Compiling shaders for ${partCount.toLocaleString()} parts`, 88);
@@ -1711,16 +2121,21 @@ async function boot() {
 
   const clock = new THREE.Clock();
   let first = true;
-  if (!reduceMotion) { camera.position.copy(HOME.pos).multiplyScalar(1.5); flyTo(HOME.pos, HOME.target, 3.2); }
-  else camera.position.copy(HOME.pos);
+  camera.position.copy(HOME.pos).multiplyScalar(reduceMotion ? 1 : 1.6);
+  controls.target.copy(HOME.target);
+  controls.enabled = false;
+  setAutoRotate(false);
 
   renderer.setAnimationLoop(() => {
     const dt = Math.min(clock.getDelta(), 0.1), t = clock.elapsedTime;
     updatePreset(dt);
     updateExplode(dt);
+    updateField(dt);
     chip.position.y = chipLift + (reduceMotion ? 0 : Math.sin(t * 0.8) * 0.035);
-    updateTour(dt, t);
-    if (!tour.active) { updateFly(dt); controls.update(dt); }
+    if (tour.active) updateTour(dt, t);
+    else if (mode === 'viewer') { updateFly(dt); controls.update(dt); }
+    else updateStory(dt, t);
+    updateAmbient(dt);
     // Fog only ever eats the floor's horizon, never the model, whatever the zoom.
     const camD = camera.position.distanceTo(controls.target);
     scene.fog.near = camD + 6; scene.fog.far = camD + 40;
@@ -1729,9 +2144,14 @@ async function boot() {
     renderContactShadow();
     renderer.shadowMap.needsUpdate = true;
     composer.render(dt);
-    if (!tour.active) updateHotspots();
+    if (mode === 'viewer' && !tour.active) updateHotspots();
     autoQuality(dt);
-    if (first) { first = false; modelReady = true; $('btn-tour').disabled = false; $('loader').classList.add('done'); }
+    if (first) {
+      first = false; modelReady = true;
+      document.querySelectorAll('[data-film], [data-viewer]').forEach((b) => { b.disabled = false; });
+      $('loader').classList.add('done'); $('stage').classList.add('ready');
+      if (location.hash === '#viewer') setMode('viewer');
+    }
   });
 }
 
