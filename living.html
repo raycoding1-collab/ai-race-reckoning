@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<meta name="description" content="Part II of The Reckoning: a research-backed answer to the problem of living in the modern age — what is worth focusing on most, ranked by evidence.">
+<title>What's Worth Focusing On</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #050505;
+    --surface: #0c0c0c;
+    --card: #101010;
+    --border: #1e1e1e;
+    --text: #eaeaea;
+    --text-soft: #b4b4b4;
+    --text-dim: #7a7a7a;
+    --red: #ff3020;
+    --orange: #ff9500;
+    --amber: #ffcc00;
+    --green: #34c759;
+    --cyan: #00c7be;
+    --blue: #3d9bff;
+    --purple: #af52de;
+    --accent: var(--amber);
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { overflow-x: hidden; scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 15% 0%, rgba(255,204,0,0.07), transparent 70%),
+      radial-gradient(ellipse 50% 40% at 90% 60%, rgba(0,199,190,0.05), transparent 70%),
+      radial-gradient(ellipse 50% 40% at 20% 100%, rgba(255,149,0,0.05), transparent 70%);
+  }
+
+  a { color: var(--amber); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+  a:hover { color: #fff; }
+  a:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; border-radius: 4px; }
+
+  /* ─── NAV ─── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+    padding: 0.9rem clamp(16px, 4vw, 2rem);
+    background: rgba(5,5,5,0.82);
+    backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .logo {
+    font-weight: 900; letter-spacing: -0.02em; font-size: 1.05rem;
+    background: linear-gradient(90deg, var(--amber), var(--orange));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    text-decoration: none; white-space: nowrap;
+  }
+  .nav-links { display: flex; gap: 1.2rem; list-style: none; font-family: var(--mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; overflow-x: auto; scrollbar-width: none; }
+  .nav-links::-webkit-scrollbar { display: none; }
+  .nav-links a { color: var(--text-dim); text-decoration: none; white-space: nowrap; }
+  .nav-links a:hover { color: var(--text); }
+  @media (max-width: 720px) { .nav-links .opt { display: none; } }
+
+  /* ─── LAYOUT ─── */
+  main { position: relative; z-index: 1; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 2rem); }
+  section { padding: clamp(4rem, 9vw, 7rem) 0; border-top: 1px solid var(--border); }
+  section:first-of-type { border-top: 0; }
+
+  .eyebrow {
+    font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 1rem; display: block;
+  }
+  h1 {
+    font-size: clamp(2.6rem, 8vw, 5.4rem); font-weight: 900; line-height: 1.0; letter-spacing: -0.04em;
+    margin-bottom: 1.5rem;
+  }
+  h1 .grad { background: linear-gradient(90deg, var(--amber), var(--orange)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  h2 { font-size: clamp(1.7rem, 4.4vw, 2.6rem); font-weight: 800; line-height: 1.12; letter-spacing: -0.03em; margin-bottom: 1.25rem; }
+  h3 { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.01em; margin: 2rem 0 0.75rem; }
+  p { color: var(--text-soft); margin-bottom: 1.1rem; font-size: 1.04rem; }
+  p strong, li strong { color: var(--text); font-weight: 600; }
+  .lede { font-size: clamp(1.1rem, 2.4vw, 1.3rem); color: var(--text-soft); max-width: 40em; }
+
+  /* ─── HERO ─── */
+  .hero { padding-top: clamp(4rem, 12vw, 8rem); }
+  .hero-meta { font-family: var(--mono); font-size: 0.72rem; color: var(--text-dim); margin-top: 2rem; display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; }
+
+  /* ─── STATS ─── */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin: 2.5rem 0; }
+  .stat { background: var(--surface); padding: 1.4rem 1.4rem 1.2rem; }
+  .stat .num { font-family: var(--mono); font-weight: 700; font-size: 2rem; letter-spacing: -0.03em; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .stat .lbl { font-size: 0.88rem; color: var(--text-soft); margin-top: 0.4rem; line-height: 1.45; }
+  .stat .src { font-family: var(--mono); font-size: 0.64rem; color: var(--text-dim); margin-top: 0.6rem; }
+  .stat .src a { color: var(--text-dim); }
+  .stat.good .num { color: var(--green); }
+  .stat.bad .num { color: var(--orange); }
+  .stats-caption { font-family: var(--mono); font-size: 0.7rem; color: var(--text-dim); display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: -1.6rem; margin-bottom: 2rem; }
+  .stats-caption span::before { content: '■ '; }
+  .stats-caption .g::before { color: var(--green); }
+  .stats-caption .o::before { color: var(--orange); }
+
+  /* ─── THESIS ─── */
+  .thesis {
+    border: 1px solid rgba(255,204,0,0.25); border-radius: 16px; padding: clamp(1.5rem, 4vw, 2.5rem);
+    background: linear-gradient(180deg, rgba(255,204,0,0.06), rgba(255,204,0,0.01));
+    margin: 2.5rem 0;
+  }
+  .thesis p { font-size: clamp(1.15rem, 2.6vw, 1.45rem); color: var(--text); line-height: 1.5; font-weight: 500; margin: 0; }
+  .thesis p + p { margin-top: 1rem; }
+  .thesis em { color: var(--amber); font-style: normal; }
+
+  /* ─── RANKED LIST ─── */
+  .toc { list-style: none; counter-reset: r; margin: 2rem 0; display: grid; gap: 0.5rem; }
+  .toc li { counter-increment: r; }
+  .toc a {
+    display: grid; grid-template-columns: 2.6rem 1fr auto; align-items: baseline; gap: 0.5rem;
+    padding: 0.85rem 1rem; border: 1px solid var(--border); border-radius: 10px; background: var(--surface);
+    color: var(--text); text-decoration: none; transition: border-color 0.2s, background 0.2s;
+  }
+  .toc a:hover { border-color: #3a3a3a; background: #131313; color: var(--text); }
+  .toc a::before { content: counter(r, decimal-leading-zero); font-family: var(--mono); color: var(--amber); font-size: 0.85rem; }
+  .toc .t { font-weight: 600; }
+  .toc .t small { display: block; font-weight: 400; color: var(--text-dim); font-size: 0.85rem; margin-top: 0.15rem; }
+
+  .pill { font-family: var(--mono); font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.22rem 0.55rem; border-radius: 99px; border: 1px solid; white-space: nowrap; }
+  .pill.strong { color: var(--green); border-color: rgba(52,199,89,0.4); }
+  .pill.moderate { color: var(--amber); border-color: rgba(255,204,0,0.4); }
+  .pill.emerging { color: var(--blue); border-color: rgba(61,155,255,0.45); }
+
+  /* ─── PRIORITY SECTIONS ─── */
+  .prio-head { display: flex; align-items: center; gap: 0.9rem; flex-wrap: wrap; margin-bottom: 0.6rem; }
+  .prio-num { font-family: var(--mono); font-size: 0.8rem; color: var(--amber); }
+  .claim { font-size: clamp(1.1rem, 2.4vw, 1.25rem); color: var(--text); font-weight: 500; margin-bottom: 1.6rem; }
+
+  .evidence { list-style: none; display: grid; gap: 0.8rem; margin: 1rem 0 1.5rem; }
+  .evidence li {
+    padding: 1rem 1.1rem 1rem 1.2rem; border-left: 2px solid #2a2a2a; background: rgba(255,255,255,0.015); border-radius: 0 10px 10px 0;
+    color: var(--text-soft); font-size: 0.98rem;
+  }
+  .evidence li .fig { font-family: var(--mono); color: var(--text); font-weight: 700; }
+  .evidence li .cite { display: block; font-family: var(--mono); font-size: 0.66rem; color: var(--text-dim); margin-top: 0.45rem; }
+  .evidence li .cite a { color: var(--text-dim); }
+  .evidence li.counter { border-left-color: rgba(61,155,255,0.5); }
+  .evidence li.counter::before { content: 'Counterpoint — '; font-family: var(--mono); font-size: 0.72rem; color: var(--blue); text-transform: uppercase; letter-spacing: 0.06em; }
+
+  .practice {
+    border: 1px solid var(--border); border-radius: 14px; padding: 1.3rem 1.4rem; background: var(--surface); margin-top: 1.5rem;
+  }
+  .practice h4 { font-family: var(--mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--green); margin-bottom: 0.8rem; font-weight: 500; }
+  .practice ul { list-style: none; display: grid; gap: 0.6rem; }
+  .practice li { position: relative; padding-left: 1.4rem; color: var(--text-soft); font-size: 0.98rem; }
+  .practice li::before { content: '→'; position: absolute; left: 0; color: var(--green); font-family: var(--mono); }
+
+  .takeaway { margin-top: 1.4rem; font-style: italic; color: var(--text); border-left: 2px solid var(--amber); padding-left: 1rem; }
+
+  /* ─── IGNORE LIST ─── */
+  .ignore { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-top: 2rem; }
+  .ignore div { border: 1px solid var(--border); border-radius: 12px; padding: 1.2rem; background: var(--surface); }
+  .ignore h4 { font-size: 1rem; margin-bottom: 0.5rem; text-decoration: line-through; text-decoration-color: rgba(255,48,32,0.7); text-decoration-thickness: 2px; }
+  .ignore p { font-size: 0.93rem; margin: 0; }
+
+  /* ─── PROTOCOL TABLE ─── */
+  .protocol { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-top: 2rem; }
+  .protocol .col { border: 1px solid var(--border); border-radius: 14px; background: var(--surface); padding: 1.3rem; }
+  .protocol h4 { font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.12em; font-size: 0.72rem; color: var(--amber); margin-bottom: 0.9rem; font-weight: 500; }
+  .protocol ul { list-style: none; display: grid; gap: 0.65rem; }
+  .protocol li { font-size: 0.94rem; color: var(--text-soft); padding-left: 1.1rem; position: relative; }
+  .protocol li::before { content: ''; position: absolute; left: 0; top: 0.6em; width: 5px; height: 5px; border-radius: 50%; background: var(--amber); }
+  .protocol li .tag { font-family: var(--mono); font-size: 0.62rem; color: var(--text-dim); margin-left: 0.3rem; }
+
+  /* ─── AUDIT ─── */
+  .audit { border: 1px solid var(--border); border-radius: 16px; background: var(--surface); padding: clamp(1.2rem, 3vw, 2rem); margin-top: 2rem; }
+  .audit-row { display: grid; grid-template-columns: 1fr auto; gap: 0.4rem 1rem; align-items: center; padding: 0.9rem 0; border-bottom: 1px solid var(--border); }
+  .audit-row:last-of-type { border-bottom: 0; }
+  .audit-row label { font-weight: 600; font-size: 0.98rem; }
+  .audit-row .q { grid-column: 1 / -1; font-size: 0.86rem; color: var(--text-dim); margin-top: -0.2rem; }
+  .audit-row output { font-family: var(--mono); font-size: 0.9rem; color: var(--amber); min-width: 2.5rem; text-align: right; font-variant-numeric: tabular-nums; }
+  .audit-row input[type=range] { grid-column: 1 / -1; width: 100%; accent-color: var(--amber); height: 28px; }
+  .audit-result { margin-top: 1.5rem; padding: 1.2rem 1.3rem; border-radius: 12px; background: rgba(255,204,0,0.06); border: 1px solid rgba(255,204,0,0.25); }
+  .audit-result .k { font-family: var(--mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--amber); }
+  .audit-result .v { font-size: 1.25rem; font-weight: 700; margin: 0.3rem 0 0.4rem; }
+  .audit-result p { margin: 0; font-size: 0.95rem; }
+  .audit-actions { display: flex; gap: 0.75rem; margin-top: 1rem; flex-wrap: wrap; }
+  .btn { font: inherit; font-size: 0.85rem; padding: 0.55rem 1rem; border-radius: 8px; border: 1px solid #333; background: #151515; color: var(--text); cursor: pointer; }
+  .btn:hover { border-color: #555; }
+  .note { font-size: 0.8rem; color: var(--text-dim); margin-top: 0.8rem; }
+
+  /* ─── FINAL ─── */
+  .final { text-align: center; }
+  .final .big { font-size: clamp(1.5rem, 4vw, 2.3rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.25; color: var(--text); max-width: 26em; margin: 0 auto 1.5rem; }
+  .final .big em { font-style: normal; color: var(--amber); }
+  blockquote { max-width: 38em; margin: 2.5rem auto 0; color: var(--text-soft); font-size: 1.05rem; }
+  blockquote cite { display: block; font-family: var(--mono); font-size: 0.72rem; font-style: normal; color: var(--text-dim); margin-top: 0.6rem; }
+
+  /* ─── SOURCES ─── */
+  .sources { columns: 2 320px; column-gap: 2rem; font-size: 0.82rem; color: var(--text-dim); list-style: none; counter-reset: s; margin-top: 1.5rem; }
+  .sources li { break-inside: avoid; margin-bottom: 0.7rem; padding-left: 2rem; position: relative; counter-increment: s; }
+  .sources li::before { content: '[' counter(s) ']'; position: absolute; left: 0; font-family: var(--mono); font-size: 0.72rem; color: #555; }
+  .sources a { color: var(--text-soft); }
+
+  footer { border-top: 1px solid var(--border); padding: 2.5rem clamp(16px, 4vw, 2rem); text-align: center; font-size: 0.78rem; color: var(--text-dim); position: relative; z-index: 1; }
+  footer a { color: var(--text-dim); }
+
+  /* ─── REVEAL ─── */
+  .reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; transition: none; } }
+  .no-js .reveal { opacity: 1; transform: none; }
+</style>
+</head>
+<body class="no-js">
+
+<nav aria-label="Primary">
+  <a class="logo" href="index.html" title="Back to Part I">/// RECKONING · II</a>
+  <ul class="nav-links">
+    <li><a href="#problem">Problem</a></li>
+    <li><a href="#ranking">Ranking</a></li>
+    <li class="opt"><a href="#ignore">Ignore</a></li>
+    <li><a href="#protocol">Protocol</a></li>
+    <li><a href="#audit">Audit</a></li>
+    <li class="opt"><a href="#sources">Sources</a></li>
+  </ul>
+</nav>
+
+<main>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section class="hero">
+  <div class="wrap">
+    <span class="eyebrow">Part II · After the Reckoning</span>
+    <h1>What's worth <span class="grad">focusing on.</span></h1>
+    <p class="lede">
+      <a href="index.html">Part I</a> was the diagnosis: power concentrating, attention harvested,
+      reality getting harder to verify, work being automated. Part I ended with <em>"That choice is still ours to make."</em>
+      This part is about making it. What does the evidence say a person should
+      actually put their limited time and attention into, here and now?
+    </p>
+    <div class="hero-meta">
+      <span>~20 min read</span>
+      <span>30+ studies · 8 decades of data</span>
+      <span>Every claim sourced · strength-rated</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ THE PROBLEM ═══════════════ -->
+<section id="problem">
+  <div class="wrap">
+    <span class="eyebrow">01 · The problem, precisely stated</span>
+    <h2>We solved scarcity and built a problem of abundance.</h2>
+    <p>
+      By almost any material measure, this is the best time in history to be alive.
+      But the same numbers show something else. The things that matter most for a
+      good life are declining, and they're declining because of what modern life
+      makes easy.
+    </p>
+
+    <div class="stats reveal">
+      <div class="stat good"><div class="num">4%</div><div class="lbl">of children die before adulthood, down from roughly 1 in 2 two centuries ago</div><div class="src"><a href="https://ourworldindata.org/child-mortality">Our World in Data</a></div></div>
+      <div class="stat good"><div class="num">71 yrs</div><div class="lbl">global life expectancy in 2021, up from 32 in 1900</div><div class="src"><a href="https://ourworldindata.org/child-mortality">Our World in Data</a></div></div>
+      <div class="stat bad"><div class="num">&lt;50 min</div><div class="lbl">a day with friends for Americans aged 15–24 in 2020, down from ~150 min in 2003</div><div class="src"><a href="https://www.sciencedirect.com/science/article/pii/S235282732200310X">American Time Use Survey</a></div></div>
+      <div class="stat bad"><div class="num">1 in 6</div><div class="lbl">people worldwide are lonely. Loneliness is linked to ~871,000 deaths a year</div><div class="src"><a href="https://who.int/news/item/30-06-2025-social-connection-linked-to-improved-heath-and-reduced-risk-of-early-death">WHO Commission, 2025</a></div></div>
+      <div class="stat bad"><div class="num">47 sec</div><div class="lbl">average time on one screen before switching, down from ~2.5 min in 2004</div><div class="src"><a href="https://gloriamark.com/attention-span/">Gloria Mark, UC Irvine</a></div></div>
+      <div class="stat bad"><div class="num">30.5%</div><div class="lbl">of US adults sleep under 7 hours a night</div><div class="src"><a href="https://www.cdc.gov/nchs/products/databriefs/db559.htm">CDC / NCHS, 2024</a></div></div>
+    </div>
+    <div class="stats-caption"><span class="g">Material progress</span><span class="o">Human-scale decline</span></div>
+
+    <p>
+      We have too much food, information, stimulation and choice. We have too little
+      sleep, movement, sustained attention, and each other. None of that is a
+      personal failing. It's the result of <strong>defaults</strong>. Your phone's home screen, your
+      feed, your commute, your calendar, your food supply and your work tools were
+      mostly designed by people optimizing for something other than your life going well.
+    </p>
+    <p>
+      So the modern problem isn't "how do I get more?" It's <strong>"how do I choose
+      what to leave out, when everything is built to be hard to leave out?"</strong>
+    </p>
+
+    <div class="thesis reveal">
+      <p>Your life is, in the end, what you paid attention to. The modern economy is
+         built to capture that attention. So the most important skill is <em>deciding
+         on purpose where your attention goes</em>.</p>
+      <p>The research is surprisingly consistent about where it should go. People come first.
+         Then a body that can carry you. Then work that uses your own mind and matters to someone else.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ RANKING ═══════════════ -->
+<section id="ranking">
+  <div class="wrap">
+    <span class="eyebrow">02 · The ranking</span>
+    <h2>Seven things, in order of leverage.</h2>
+    <p>
+      Ranked by how large and how consistent the evidence is, and by how much each one
+      supports the others. Each has an evidence-strength rating, so you can see where the ground is
+      solid and where it's still being mapped.
+    </p>
+    <ol class="toc">
+      <li><a href="#p1"><span class="t">Other people<small>Relationships are the strongest predictor of a long, good life</small></span><span class="pill strong">Strong</span></a></li>
+      <li><a href="#p2"><span class="t">Your attention<small>The resource every other priority depends on</small></span><span class="pill moderate">Moderate</span></a></li>
+      <li><a href="#p3"><span class="t">Your body<small>Sleep, fitness, strength, daylight. The cheapest large effects in medicine</small></span><span class="pill strong">Strong</span></a></li>
+      <li><a href="#p4"><span class="t">Your own mind, in the age of AI<small>Think first, then use the machine</small></span><span class="pill emerging">Emerging</span></a></li>
+      <li><a href="#p5"><span class="t">Meaning &amp; contribution<small>Something bigger than you that others benefit from</small></span><span class="pill moderate">Moderate</span></a></li>
+      <li><a href="#p6"><span class="t">Money: enough, then time<small>A floor of security, then buy back your hours</small></span><span class="pill moderate">Moderate</span></a></li>
+      <li><a href="#p7"><span class="t">Your information diet<small>Fewer, better sources, and knowing how to check them</small></span><span class="pill moderate">Moderate</span></a></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ─── 1. PEOPLE ─── -->
+<section id="p1">
+  <div class="wrap">
+    <div class="prio-head"><span class="prio-num">PRIORITY 01</span><span class="pill strong">Evidence: strong</span></div>
+    <h2>Other people.</h2>
+    <p class="claim">If you focus on only one thing, focus on this. The evidence here is larger, more consistent and older than for anything else on this page.</p>
+
+    <ul class="evidence">
+      <li>The <span class="fig">Harvard Study of Adult Development</span> has followed its participants since 1938.
+        It found that how satisfied people were with their relationships at 50 predicted their physical health at 80
+        <strong>better than their cholesterol did</strong>. The quality of close relationships beat wealth, fame, social class, IQ and genes as a predictor of long-term health and happiness.
+        <span class="cite"><a href="https://news.harvard.edu/gazette/story/2017/04/over-nearly-80-years-harvard-study-has-been-showing-how-to-live-a-healthy-and-happy-life/">Harvard Gazette</a> · Waldinger &amp; Schulz, <em>The Good Life</em> (2023)</span></li>
+      <li>A meta-analysis of <span class="fig">148 studies and 308,849 people</span> found a
+        <span class="fig">50%</span> higher likelihood of survival for people with stronger social relationships.
+        That effect is comparable to well-known risk factors such as smoking.
+        <span class="cite"><a href="https://journals.plos.org/plosmedicine/article?id=10.1371%2Fjournal.pmed.1000316">Holt-Lunstad et al., PLoS Medicine, 2010</a></span></li>
+      <li>Lacking social connection raises the risk of early death by <span class="fig">more than 60%</span>, according to the WHO's 2025 Commission on Social Connection.
+        It's linked to heart disease, stroke, dementia and depression.
+        <span class="cite"><a href="https://who.int/news/item/30-06-2025-social-connection-linked-to-improved-heath-and-reduced-risk-of-early-death">WHO, June 2025</a></span></li>
+      <li>How often people share meals predicts their wellbeing <span class="fig">about as strongly as income or unemployment does</span>, across 142 countries.
+        Meanwhile, about 1 in 4 Americans ate every meal alone the previous day in 2023, <span class="fig">up 53%</span> since 2003.
+        <span class="cite"><a href="https://www.worldhappiness.report/ed/2025/sharing-meals-with-others-how-sharing-meals-supports-happiness-and-social-connections/">World Happiness Report 2025</a></span></li>
+      <li class="counter">Most of this evidence is observational. Healthier, happier people may simply find it easier to
+        keep friends. But the result has held across decades, countries and study designs, and there are plausible
+        biological mechanisms (stress hormones, inflammation, health behaviors). Few findings in the social sciences are sturdier.</li>
+    </ul>
+
+    <div class="practice">
+      <h4>What to actually do</h4>
+      <ul>
+        <li><strong>Make seeing people the default, not a decision.</strong> Set up a recurring, same-time, same-people commitment: a weekly dinner, a run club, a game night, a congregation, a team. Regular contact beats occasional big gestures.</li>
+        <li><strong>Eat with others</strong> as often as you can. It's the cheapest intervention on this page.</li>
+        <li><strong>Be the one who reaches out.</strong> Most people are waiting for someone else to go first. The 2025 World Happiness Report also found that people are much kinder than we expect.</li>
+        <li><strong>Go deep, not wide.</strong> A few relationships where you can be fully known matter more than a big network. Repair conflicts quickly. Ask better questions.</li>
+        <li><strong>Protect the people who are physically near you</strong> (partner, kids, neighbors) from the device in your hand.</li>
+      </ul>
+    </div>
+    <p class="takeaway">Loneliness is now a public-health emergency on the scale of smoking. Showing up for people is one of the few remedies that also makes you happier along the way.</p>
+  </div>
+</section>
+
+<!-- ─── 2. ATTENTION ─── -->
+<section id="p2">
+  <div class="wrap">
+    <div class="prio-head"><span class="prio-num">PRIORITY 02</span><span class="pill moderate">Evidence: moderate</span></div>
+    <h2>Your attention.</h2>
+    <p class="claim">Attention isn't just one priority among the others. Every other priority depends on it, and it's the one that's being contested most aggressively.</p>
+
+    <ul class="evidence">
+      <li>People's minds are elsewhere <span class="fig">46.9%</span> of their waking hours.
+        Whether someone's mind was wandering explained more of their momentary happiness
+        (<span class="fig">10.8%</span>) than what they were actually doing (<span class="fig">4.6%</span>).
+        <em>"A wandering mind is an unhappy mind."</em>
+        <span class="cite"><a href="https://www.science.org/doi/10.1126/science.1192439">Killingsworth &amp; Gilbert, Science, 2010</a> · 250,000 experience samples</span></li>
+      <li>In office work, the average stretch of attention on one screen fell from about <span class="fig">2.5 minutes</span> (2004) to <span class="fig">47 seconds</span> in studies from about 2016 onward.
+        That's time before switching, not a biological limit, but it shows how fragmented a typical workday has become.
+        <span class="cite"><a href="https://gloriamark.com/attention-span/">Gloria Mark, <em>Attention Span</em> (2023)</a></span></li>
+      <li>In a randomized trial, <span class="fig">467 adults</span> had all mobile internet blocked on their phones for two weeks. Calls and texts still worked.
+        <span class="fig">91%</span> improved on at least one of three measures: mental health, wellbeing or sustained attention.
+        The drop in depressive symptoms was larger than typical antidepressant effects and similar to CBT.
+        The improvements came through more time offline, more face-to-face contact and <strong>more sleep</strong>.
+        <span class="cite"><a href="https://academic.oup.com/pnasnexus/article/4/2/pgaf017/8016017">Castelo et al., PNAS Nexus, 2025</a></span></li>
+      <li class="counter">Not every study finds large effects. Deactivating Facebook for six weeks improved an index of emotional state by just
+        <span class="fig">0.06 SD</span>, and the Instagram result (0.04 SD) wasn't statistically significant.
+        In teenagers, digital-technology use explains at most about <span class="fig">0.4%</span> of the variation in wellbeing in one large analysis.
+        Jonathan Haidt and colleagues dispute that framing, particularly for girls and social media.
+        <span class="cite"><a href="https://www.nber.org/papers/w33697">Allcott et al., NBER 2025</a> · <a href="https://www.nature.com/articles/s41562-018-0506-1">Orben &amp; Przybylski, Nature Human Behaviour, 2019</a></span></li>
+    </ul>
+
+    <p>
+      <strong>Here's how to reconcile these.</strong> The phone probably isn't a poison. Its main effect is
+      <strong>displacement</strong>. The damage comes from what it crowds out: sleep, people,
+      unbroken focus, boredom that turns into ideas. That's why interventions that give those hours back (like blocking
+      mobile internet) work better than quitting a single app, where the time just goes to another one.
+    </p>
+
+    <div class="practice">
+      <h4>What to actually do</h4>
+      <ul>
+        <li><strong>Make the phone boring.</strong> Turn off every notification that doesn't come from a real person. Delete feed apps from the phone, or use them only on a laptop. Try grayscale.</li>
+        <li><strong>The phone sleeps outside the bedroom.</strong> This one habit protects your sleep, the first hour of your day and your relationship.</li>
+        <li><strong>Protect one deep block a day</strong> (60–120 min, one task, nothing else open) before you check feeds or email.</li>
+        <li><strong>Leave some gaps unfilled.</strong> Walk, commute or wait without audio sometimes. A lot of thinking happens in those moments.</li>
+        <li><strong>Ask one question:</strong> <em>"Did I choose this, or was it chosen for me?"</em> Use it on every screen session.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ─── 3. BODY ─── -->
+<section id="p3">
+  <div class="wrap">
+    <div class="prio-head"><span class="prio-num">PRIORITY 03</span><span class="pill strong">Evidence: strong</span></div>
+    <h2>Your body.</h2>
+    <p class="claim">Sleep, fitness, strength and time outdoors are the biggest cheap effects in medicine. They also improve your mood, focus and patience with other people.</p>
+
+    <ul class="evidence">
+      <li>In <span class="fig">122,007 patients</span> given treadmill tests, the least-fit group had a
+        <span class="fig">5×</span> higher adjusted mortality than the most fit (HR 5.04). The risk from low fitness was
+        <strong>as large as or larger than smoking, diabetes or coronary artery disease</strong>. There was no upper limit to the benefit.
+        <span class="cite"><a href="https://caringambassadors.org/wp-content/uploads/2018/10/Mandsager_2018_Exercise_Mortality.pdf">Mandsager et al., JAMA Network Open, 2018</a></span></li>
+      <li>The benefit of walking levels off at <span class="fig">~8,000–10,000 steps/day</span> for adults under 60 and
+        <span class="fig">~6,000–8,000</span> for those 60 and over. You don't need extreme volumes.
+        <span class="cite"><a href="https://www.thelancet.com/journals/lanpub/article/PIIS2468-2667(21)00302-9/fulltext">Paluch et al., Lancet Public Health, 2022</a> · 15 cohorts</span></li>
+      <li>Just <span class="fig">30–60 minutes/week</span> of strength training was associated with a 10–20% lower risk of death
+        from all causes, as well as lower rates of heart disease, cancer and diabetes.
+        <span class="cite"><a href="https://doi.org/10.1136/bjsports-2021-105061">Momma et al., BJSM, 2022</a></span></li>
+      <li>Sleep that's consistently short (and, as a marker of illness, sleep that's unusually long) predicts all-cause mortality.
+        That's from 1.38 million participants. Nearly a third of US adults are short sleepers.
+        <span class="cite"><a href="https://pubmed.ncbi.nlm.nih.gov/20469800/">Cappuccio et al., Sleep, 2010</a> · <a href="https://www.cdc.gov/nchs/products/databriefs/db559.htm">CDC 2024</a></span></li>
+      <li>People who spent <span class="fig">120+ minutes a week</span> in nature reported better health and wellbeing. It didn't matter whether that came in one visit or several.
+        Below 120 minutes there was no measurable benefit.
+        <span class="cite"><a href="https://www.nature.com/articles/s41598-019-44097-3">White et al., Scientific Reports, 2019</a> · n = 19,806</span></li>
+    </ul>
+
+    <div class="practice">
+      <h4>The minimum effective dose</h4>
+      <ul>
+        <li><strong>Sleep:</strong> 7–9 hours, at a <em>consistent</em> time. Keep the bedroom dark, cool and free of phones.</li>
+        <li><strong>Walk:</strong> ~8,000 steps a day, much of it outside. Walking to things counts.</li>
+        <li><strong>Lift:</strong> two sessions a week, 20–30 minutes each, covering the big movements (push, pull, squat, hinge, carry).</li>
+        <li><strong>Breathe hard:</strong> one or two sessions a week that raise your cardio fitness. It's the strongest single fitness predictor of lifespan.</li>
+        <li><strong>Stack priorities:</strong> a long walk with a friend on a trail covers people, attention, movement and nature in one go.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ─── 4. MIND / AI ─── -->
+<section id="p4">
+  <div class="wrap">
+    <div class="prio-head"><span class="prio-num">PRIORITY 04</span><span class="pill emerging">Evidence: emerging</span></div>
+    <h2>Your own mind, in the age of AI.</h2>
+    <p class="claim">
+      AI is the defining technology of this period. The personal question isn't whether to use it. It's
+      whether you're getting more capable because of it or handing over the capacities that make you valuable.
+    </p>
+
+    <ul class="evidence">
+      <li>Since generative AI arrived, workers aged <span class="fig">22–25</span> in the most AI-exposed occupations have seen a
+        <span class="fig">13%</span> relative drop in employment. The August 2026 update puts the gap near <span class="fig">19%</span>.
+        Job losses cluster where AI <em>automates</em> tasks rather than <em>augments</em> the people doing them.
+        <span class="cite"><a href="https://digitaleconomy.stanford.edu/publications/canaries-in-the-coal-mine">Brynjolfsson, Chandar &amp; Chen, Stanford Digital Economy Lab</a></span></li>
+      <li>Among <span class="fig">319 knowledge workers</span>, the more they trusted AI to do a task, the less critical thinking they reported doing (β = −0.69).
+        Workers who were more confident in <em>their own</em> abilities reported doing more.
+        <span class="cite"><a href="https://www.microsoft.com/en-us/research/publication/the-impact-of-generative-ai-on-critical-thinking-self-reported-reductions-in-cognitive-effort-and-confidence-effects-from-a-survey-of-knowledge-workers/">Lee et al., Microsoft Research &amp; CMU, CHI 2025</a></span></li>
+      <li>Essay writers who used an LLM from the start showed the weakest brain connectivity on EEG, and <span class="fig">83%</span> couldn't quote a line from essays they'd just written.
+        People who wrote on their own first and <em>then</em> used AI showed <strong>more</strong> neural engagement.
+        <span class="cite"><a href="https://arxiv.org/abs/2506.08872">Kosmyna et al., MIT Media Lab, 2025</a></span></li>
+      <li class="counter">The MIT study was small (n = 54), came out as a preprint and has published critiques. The Microsoft/CMU data is self-reported.
+        Treat these as early warnings, not settled findings. What they agree on is that <strong>the order you do things in matters</strong>.</li>
+    </ul>
+
+    <div class="practice">
+      <h4>What to actually do</h4>
+      <ul>
+        <li><strong>Think first, then prompt.</strong> Draft, outline or attempt the solution yourself. Then use AI to critique, extend or check it. That way it adds to your thinking instead of replacing it.</li>
+        <li><strong>Keep at least one skill you practice without help</strong>, like writing, math, an instrument or a craft, as a baseline for your own ability.</li>
+        <li><strong>Build what compounds and is hard to automate:</strong> judgment and taste, deep knowledge of one area, relationships built on trust, physical-world skills, and the ability to learn quickly.</li>
+        <li><strong>Aim for jobs that augment you.</strong> Look for roles where AI makes you more valuable rather than a cheaper substitute for you.</li>
+        <li><strong>Stay a citizen, not just a user.</strong> The risks in <a href="index.html">Part I</a> are political. Vote, organize and support the groups working on AI governance.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ─── 5. MEANING ─── -->
+<section id="p5">
+  <div class="wrap">
+    <div class="prio-head"><span class="prio-num">PRIORITY 05</span><span class="pill moderate">Evidence: moderate</span></div>
+    <h2>Meaning &amp; contribution.</h2>
+    <p class="claim">Pleasure doesn't last because we adapt to it. Purpose holds up better. It's having something to do that someone else benefits from.</p>
+
+    <ul class="evidence">
+      <li>In <span class="fig">6,985 US adults over 50</span>, those with the lowest sense of life purpose were
+        <span class="fig">2.4×</span> as likely to die during follow-up as those with the highest (HR 2.43),
+        after adjusting for other factors.
+        <span class="cite"><a href="https://pubmed.ncbi.nlm.nih.gov/31125099/">Alimujiang et al., JAMA Network Open, 2019</a></span></li>
+      <li>Regrets follow a time pattern: <strong>things we did</strong> sting more in the short term, but <strong>things we didn't do</strong>
+        weigh more over a lifetime. Replications find the same pattern with weaker effects.
+        <span class="cite"><a href="https://pubmed.ncbi.nlm.nih.gov/7965599/">Gilovich &amp; Medvec, 1994</a> · <a href="https://online.ucpress.edu/collabra/article/8/1/37122/190272/Revisiting-the-Temporal-Pattern-of-Regret-in">Collabra replication, 2022</a></span></li>
+      <li class="counter">Purpose is hard to measure, and sick people may report less of it, which would reverse the causation.
+        Still, the pattern shows up across cohorts, and philosophy has said the same for millennia, from Aristotle's eudaimonia to Frankl's logotherapy.</li>
+    </ul>
+
+    <div class="practice">
+      <h4>What to actually do</h4>
+      <ul>
+        <li><strong>Have one project bigger than yourself</strong> that someone else benefits from: a craft, a cause, a community role, raising people well.</li>
+        <li><strong>Make more than you consume.</strong> Writing, building, teaching, gardening and cooking for others all count.</li>
+        <li><strong>Run the regret test</strong> once a quarter: <em>"What will I regret not having tried?"</em> Then do the smallest real version of it.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ─── 6. MONEY ─── -->
+<section id="p6">
+  <div class="wrap">
+    <div class="prio-head"><span class="prio-num">PRIORITY 06</span><span class="pill moderate">Evidence: moderate</span></div>
+    <h2>Money: enough, then time.</h2>
+    <p class="claim">Money matters more than the "$75k plateau" myth suggests. It matters most as a floor, and it goes furthest when it buys back time.</p>
+
+    <ul class="evidence">
+      <li>An adversarial collaboration between former opponents settled the debate. <strong>For most people, emotional wellbeing keeps rising with income past $100,000.</strong>
+        But for the least happy ~20%, it rises only until about $100k and then flattens: more money doesn't fix what's actually wrong.
+        <span class="cite"><a href="https://www.pnas.org/doi/10.1073/pnas.2208661120">Killingsworth, Kahneman &amp; Mellers, PNAS, 2023</a></span></li>
+      <li>In surveys of <span class="fig">6,271 people</span> in four countries, those who spent money to save time (outsourcing chores they disliked) reported higher life satisfaction.
+        A field experiment showed the effect was causal: a time-saving purchase beat a material one.
+        <span class="cite"><a href="https://www.pnas.org/doi/10.1073/pnas.1706541114">Whillans et al., PNAS, 2017</a></span></li>
+    </ul>
+
+    <div class="practice">
+      <h4>What to actually do</h4>
+      <ul>
+        <li><strong>Build a cash buffer first.</strong> Financial slack is also mental slack.</li>
+        <li><strong>Spend on time and shared experiences</strong> rather than things. Buy back hours from chores you hate, and put them into priorities 1–5.</li>
+        <li><strong>Watch lifestyle inflation.</strong> It can lock you into work that costs you everything above this line.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ─── 7. INFORMATION ─── -->
+<section id="p7">
+  <div class="wrap">
+    <div class="prio-head"><span class="prio-num">PRIORITY 07</span><span class="pill moderate">Evidence: moderate</span></div>
+    <h2>Your information diet.</h2>
+    <p class="claim">In a world of synthetic media (see <a href="index.html#manipulation">Part I</a>), knowing how to check what you read has become a basic survival skill.</p>
+
+    <ul class="evidence">
+      <li>Professional fact-checkers beat both PhD historians and Stanford students at judging websites because they <strong>read laterally</strong>.
+        They left the page almost immediately to see what <em>other</em> sources said about it.
+        Asked to compare a real pediatrics association with an advocacy group using a similar name, <span class="fig">65%</span> of students and <span class="fig">50%</span> of historians
+        picked the wrong one. Every fact-checker got it right, and faster.
+        <span class="cite"><a href="https://news.stanford.edu/stories/2017/10/fact-checkers-outperform-historians-evaluating-online-information">Wineburg &amp; McGrew, Stanford, 2017/2019</a></span></li>
+      <li>The same Stanford group found that lateral reading <strong>can be taught quickly</strong>. It's a skill, not a talent.
+        <span class="cite"><a href="https://ed.stanford.edu/news/it-doesn-t-take-long-learn-how-spot-misinformation-online-stanford-study-finds">Stanford GSE</a></span></li>
+    </ul>
+
+    <div class="practice">
+      <h4>What to actually do</h4>
+      <ul>
+        <li><strong>Leave the page to check the source.</strong> Before you believe or share something, look up who's behind it.</li>
+        <li><strong>Read slow news:</strong> a weekly summary or long-form source instead of an hourly feed. Most breaking news isn't something you can act on.</li>
+        <li><strong>Follow fewer, better sources,</strong> including at least one you often disagree with that argues in good faith.</li>
+        <li><strong>Assume emotional virality is a warning sign.</strong> Content built to make you furious is built to be shared, not to be true.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ IGNORE ═══════════════ -->
+<section id="ignore">
+  <div class="wrap">
+    <span class="eyebrow">03 · The other half of focus</span>
+    <h2>What to stop focusing on.</h2>
+    <p>Focusing on something means turning down everything else. These are the most common drains on attention that don't give much back.</p>
+    <div class="ignore">
+      <div><h4>Getting on top of everything</h4><p>An 80-year life is about 4,000 weeks. You'll never clear the queue, so choose what you'll neglect. (Oliver Burkeman's <em>Four Thousand Weeks</em> makes this case well.)</p></div>
+      <div><h4>Outrage you can't act on</h4><p>Separate what you can influence from what you can't, as Epictetus did. Put your energy into the first and keep an informed peace with the second.</p></div>
+      <div><h4>Status comparison online</h4><p>You're comparing your unedited life with other people's highlights. Nobody wins that.</p></div>
+      <div><h4>Optimizing everything</h4><p>Tracking every metric can become its own distraction. The goal is a life, not a dashboard. Get the basics right and stop there.</p></div>
+      <div><h4>Doom as a hobby</h4><p>The large-scale risks are real (Part I is 11 chapters on them). Scrolling about them isn't action. Build, organize, vote and live well.</p></div>
+      <div><h4>More stuff</h4><p>People adapt quickly to new possessions. Experiences, especially shared ones, and free time last longer.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ PROTOCOL ═══════════════ -->
+<section id="protocol">
+  <div class="wrap">
+    <span class="eyebrow">04 · Putting it together</span>
+    <h2>The whole thing on one page.</h2>
+    <p>Everything above, reduced to routines. The idea is to <strong>redesign your defaults</strong> so the right thing is the easy thing and you don't have to rely on willpower.</p>
+    <div class="protocol">
+      <div class="col">
+        <h4>Daily</h4>
+        <ul>
+          <li>Consistent sleep window, phone outside the bedroom <span class="tag">P2 P3</span></li>
+          <li>One deep-focus block before feeds or email <span class="tag">P2</span></li>
+          <li>~8,000 steps, some of it outdoors <span class="tag">P3</span></li>
+          <li>One real conversation, not just messages <span class="tag">P1</span></li>
+          <li>Think first, then prompt <span class="tag">P4</span></li>
+        </ul>
+      </div>
+      <div class="col">
+        <h4>Weekly</h4>
+        <ul>
+          <li>A standing social ritual with the same people <span class="tag">P1</span></li>
+          <li>Several shared meals <span class="tag">P1</span></li>
+          <li>2 strength sessions + 1–2 hard cardio sessions <span class="tag">P3</span></li>
+          <li>120+ minutes in nature (combine with P1) <span class="tag">P3</span></li>
+          <li>Half a day offline <span class="tag">P2</span></li>
+          <li>Hours on your "bigger than me" project <span class="tag">P5</span></li>
+        </ul>
+      </div>
+      <div class="col">
+        <h4>Quarterly</h4>
+        <ul>
+          <li>Who do I want to be closer to? Plan how. <span class="tag">P1</span></li>
+          <li>What skill am I building that AI makes <em>more</em> valuable? <span class="tag">P4</span></li>
+          <li>The regret test: what haven't I tried yet? <span class="tag">P5</span></li>
+          <li>Prune apps, subscriptions, sources and commitments <span class="tag">P2 P7</span></li>
+          <li>Retake the audit below <span class="tag">all</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ AUDIT ═══════════════ -->
+<section id="audit">
+  <div class="wrap">
+    <span class="eyebrow">05 · Your version of the answer</span>
+    <h2>Where should <em style="font-style:normal;color:var(--amber)">you</em> focus first?</h2>
+    <p>
+      The ranking above is based on averages. Your best next step is wherever a high-ranked
+      area is currently weakest for you. Rate each area honestly for the last month.
+      The audit weights your gaps by each area's rank and names your biggest point of leverage.
+    </p>
+
+    <form class="audit" id="audit-form" onsubmit="return false;">
+      <div id="audit-rows"></div>
+      <div class="audit-result" aria-live="polite">
+        <div class="k">Your highest-leverage focus</div>
+        <div class="v" id="audit-focus">—</div>
+        <p id="audit-why"></p>
+      </div>
+      <div class="audit-actions">
+        <button type="button" class="btn" id="audit-reset">Reset</button>
+      </div>
+      <p class="note">Your answers are saved only in this browser, if it allows it, and are never sent anywhere.</p>
+    </form>
+  </div>
+</section>
+
+<!-- ═══════════════ HONESTY ═══════════════ -->
+<section id="limits">
+  <div class="wrap">
+    <span class="eyebrow">06 · Intellectual honesty</span>
+    <h2>What the evidence can and can't tell you.</h2>
+    <p><strong>Much of it is correlational.</strong> Healthy people socialize more, happy people report more purpose, and fit people may have been healthier to begin with. Randomized trials exist for some findings (phone blocking, deactivation, buying time) and not for others.</p>
+    <p><strong>Samples skew toward rich Western countries.</strong> The meal-sharing and loneliness data are global. Much of the rest isn't.</p>
+    <p><strong>Effect sizes are disputed</strong>, especially for social media, where serious researchers disagree in public and in good faith.</p>
+    <p><strong>Averages aren't you.</strong> An introvert needs fewer, deeper ties. A shift worker can't have a perfect sleep schedule. A caregiver's "bigger than me" project may already fill the week.</p>
+    <p>
+      So why be confident at all? Because <strong>independent lines of evidence converge</strong>. Longitudinal cohorts, meta-analyses,
+      randomized trials, cross-cultural surveys and 2,500 years of philosophy all point to the same few things:
+      people, presence, a body that works and a purpose outside yourself. When evidence from very different
+      methods agrees, it deserves more weight than any single study.
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════ FINAL ═══════════════ -->
+<section class="final">
+  <div class="wrap">
+    <span class="eyebrow">If you remember one thing</span>
+    <p class="big">
+      Guard your attention. Spend it on <em>people</em>, on a <em>body that carries you</em>, and on
+      <em>work that uses your own mind for something beyond yourself</em>, roughly in that order.
+      Everything else in the modern world is competing to spend it for you.
+    </p>
+    <blockquote>
+      "Once men turned their thinking over to machines in the hope that this would set them free.
+      But that only permitted other men with machines to enslave them."
+      <cite>Frank Herbert, <em>Dune</em> (1965)</cite>
+    </blockquote>
+    <p style="margin-top:2rem;">The choice is still ours to make. <a href="index.html">← Back to Part I: The Reckoning</a></p>
+  </div>
+</section>
+
+<!-- ═══════════════ SOURCES ═══════════════ -->
+<section id="sources">
+  <div class="wrap">
+    <span class="eyebrow">Sources</span>
+    <h2>Read the primary work.</h2>
+    <ol class="sources">
+      <li><a href="https://news.harvard.edu/gazette/story/2017/04/over-nearly-80-years-harvard-study-has-been-showing-how-to-live-a-healthy-and-happy-life/">Harvard Study of Adult Development</a>, Harvard Gazette; Waldinger &amp; Schulz, <em>The Good Life</em> (2023)</li>
+      <li><a href="https://journals.plos.org/plosmedicine/article?id=10.1371%2Fjournal.pmed.1000316">Holt-Lunstad, Smith &amp; Layton — Social Relationships and Mortality Risk</a>, PLoS Medicine (2010)</li>
+      <li><a href="https://who.int/news/item/30-06-2025-social-connection-linked-to-improved-heath-and-reduced-risk-of-early-death">WHO Commission on Social Connection — From loneliness to social connection</a> (2025)</li>
+      <li><a href="https://www.worldhappiness.report/ed/2025/sharing-meals-with-others-how-sharing-meals-supports-happiness-and-social-connections/">World Happiness Report 2025 — Sharing meals with others</a></li>
+      <li><a href="https://www.sciencedirect.com/science/article/pii/S235282732200310X">Kannan &amp; Veazie — US trends in social isolation &amp; companionship, 2003–2020</a>, SSM – Population Health (2023)</li>
+      <li><a href="https://www.science.org/doi/10.1126/science.1192439">Killingsworth &amp; Gilbert — A Wandering Mind Is an Unhappy Mind</a>, Science (2010)</li>
+      <li><a href="https://gloriamark.com/attention-span/">Gloria Mark — Attention Span</a> (2023)</li>
+      <li><a href="https://academic.oup.com/pnasnexus/article/4/2/pgaf017/8016017">Castelo et al. — Blocking mobile internet on smartphones improves sustained attention, mental health, and wellbeing</a>, PNAS Nexus (2025)</li>
+      <li><a href="https://www.nber.org/papers/w33697">Allcott et al. — The Effect of Deactivating Facebook and Instagram on Users' Emotional State</a>, NBER (2025)</li>
+      <li><a href="https://www.nature.com/articles/s41562-018-0506-1">Orben &amp; Przybylski — Adolescent well-being and digital technology use</a>, Nature Human Behaviour (2019)</li>
+      <li><a href="https://caringambassadors.org/wp-content/uploads/2018/10/Mandsager_2018_Exercise_Mortality.pdf">Mandsager et al. — Cardiorespiratory Fitness and Long-term Mortality</a>, JAMA Network Open (2018)</li>
+      <li><a href="https://www.thelancet.com/journals/lanpub/article/PIIS2468-2667(21)00302-9/fulltext">Paluch et al. — Daily steps and all-cause mortality</a>, Lancet Public Health (2022)</li>
+      <li><a href="https://doi.org/10.1136/bjsports-2021-105061">Momma et al. — Muscle-strengthening activities and risk of mortality and major non-communicable diseases</a>, BJSM (2022)</li>
+      <li><a href="https://pubmed.ncbi.nlm.nih.gov/20469800/">Cappuccio et al. — Sleep duration and all-cause mortality</a>, Sleep (2010)</li>
+      <li><a href="https://www.cdc.gov/nchs/products/databriefs/db559.htm">CDC / NCHS — Short Sleep Duration Among Adults, 2024</a></li>
+      <li><a href="https://www.nature.com/articles/s41598-019-44097-3">White et al. — 120 minutes a week in nature</a>, Scientific Reports (2019)</li>
+      <li><a href="https://digitaleconomy.stanford.edu/publications/canaries-in-the-coal-mine">Brynjolfsson, Chandar &amp; Chen — Canaries in the Coal Mine?</a> Stanford Digital Economy Lab (2025, updated Aug 2026)</li>
+      <li><a href="https://www.microsoft.com/en-us/research/publication/the-impact-of-generative-ai-on-critical-thinking-self-reported-reductions-in-cognitive-effort-and-confidence-effects-from-a-survey-of-knowledge-workers/">Lee et al. — The Impact of Generative AI on Critical Thinking</a>, CHI (2025)</li>
+      <li><a href="https://arxiv.org/abs/2506.08872">Kosmyna et al. — Your Brain on ChatGPT</a>, MIT Media Lab (2025)</li>
+      <li><a href="https://pubmed.ncbi.nlm.nih.gov/31125099/">Alimujiang et al. — Life Purpose and Mortality Among US Adults Older Than 50</a>, JAMA Network Open (2019)</li>
+      <li><a href="https://pubmed.ncbi.nlm.nih.gov/7965599/">Gilovich &amp; Medvec — The temporal pattern to the experience of regret</a> (1994); <a href="https://online.ucpress.edu/collabra/article/8/1/37122/190272/Revisiting-the-Temporal-Pattern-of-Regret-in">replication</a>, Collabra (2022)</li>
+      <li><a href="https://www.pnas.org/doi/10.1073/pnas.2208661120">Killingsworth, Kahneman &amp; Mellers — Income and emotional well-being: A conflict resolved</a>, PNAS (2023)</li>
+      <li><a href="https://www.pnas.org/doi/10.1073/pnas.1706541114">Whillans et al. — Buying time promotes happiness</a>, PNAS (2017)</li>
+      <li><a href="https://news.stanford.edu/stories/2017/10/fact-checkers-outperform-historians-evaluating-online-information">Wineburg &amp; McGrew — Lateral Reading and the Nature of Expertise</a>, Teachers College Record (2019)</li>
+      <li><a href="https://ourworldindata.org/child-mortality">Our World in Data — Child and Infant Mortality; Life Expectancy</a></li>
+    </ol>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p>Part II of <a href="index.html">The AI Race — A Reckoning</a>. Research compiled September 2026. This is not medical or financial advice. Talk to a professional about your own situation.</p>
+</footer>
+
+<script>
+document.body.classList.remove('no-js');
+
+// ─── Reveal on scroll ───
+(function () {
+  const els = document.querySelectorAll('.reveal');
+  if (!('IntersectionObserver' in window)) { els.forEach(e => e.classList.add('in')); return; }
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(en => { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } });
+  }, { threshold: 0.15 });
+  els.forEach(e => io.observe(e));
+})();
+
+// ─── Self-audit ───
+(function () {
+  const AREAS = [
+    { id: 'people',    name: 'Other people',          q: 'Regular, in-person time with people who know you well.', link: '#p1', weight: 7 },
+    { id: 'attention', name: 'Your attention',        q: 'You choose where your attention goes; feeds rarely choose for you.', link: '#p2', weight: 6 },
+    { id: 'body',      name: 'Your body',             q: '7+ hrs sleep, daily movement, strength & cardio weekly, time outside.', link: '#p3', weight: 6 },
+    { id: 'mind',      name: 'Your own mind',         q: 'You think before you prompt; you are building skills AI makes more valuable.', link: '#p4', weight: 4 },
+    { id: 'meaning',   name: 'Meaning & contribution',q: 'You spend real time on something bigger than you that helps others.', link: '#p5', weight: 4 },
+    { id: 'money',     name: 'Money & time',          q: 'You have a buffer and spend money to buy time and shared experiences.', link: '#p6', weight: 3 },
+    { id: 'info',      name: 'Information diet',      q: 'Few, good sources; you check before you believe or share.', link: '#p7', weight: 2 },
+  ];
+  const LABELS = ['Neglected', 'Weak', 'Mixed', 'Decent', 'Solid', 'Thriving'];
+  const KEY = 'reckoning-ii-audit';
+  const rowsEl = document.getElementById('audit-rows');
+  const focusEl = document.getElementById('audit-focus');
+  const whyEl = document.getElementById('audit-why');
+
+  let saved = {};
+  try { saved = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { saved = {}; }
+
+  AREAS.forEach(a => {
+    const v = Number.isInteger(saved[a.id]) ? saved[a.id] : 3;
+    const row = document.createElement('div');
+    row.className = 'audit-row';
+    row.innerHTML =
+      '<label for="a-' + a.id + '">' + a.name + '</label>' +
+      '<output id="o-' + a.id + '" for="a-' + a.id + '"></output>' +
+      '<div class="q">' + a.q + '</div>' +
+      '<input type="range" id="a-' + a.id + '" min="0" max="5" step="1" value="' + v + '" aria-describedby="o-' + a.id + '">';
+    rowsEl.appendChild(row);
+  });
+
+  function update() {
+    const state = {};
+    let best = null;
+    AREAS.forEach(a => {
+      const v = parseInt(document.getElementById('a-' + a.id).value, 10);
+      state[a.id] = v;
+      document.getElementById('o-' + a.id).textContent = v + ' · ' + LABELS[v];
+      const leverage = (5 - v) * a.weight;
+      if (!best || leverage > best.leverage) best = { a, v, leverage };
+    });
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* storage unavailable */ }
+
+    if (best.leverage === 0) {
+      focusEl.textContent = 'Keep doing what you are doing.';
+      whyEl.innerHTML = 'Every area scores high. Protect the routines that got you here, and help someone else build theirs. That counts for <a href="#p1">priority 1</a> and <a href="#p5">priority 5</a>.';
+    } else {
+      focusEl.innerHTML = '<a href="' + best.a.link + '">' + best.a.name + '</a>';
+      whyEl.textContent = 'You rated it ' + best.v + '/5, and it ranks high on the evidence list. Pick one practice from that section and turn it into a default this week.';
+    }
+  }
+
+  rowsEl.addEventListener('input', update);
+  document.getElementById('audit-reset').addEventListener('click', () => {
+    AREAS.forEach(a => { document.getElementById('a-' + a.id).value = 3; });
+    try { localStorage.removeItem(KEY); } catch (e) { /* storage unavailable */ }
+    update();
+  });
+  update();
+})();
+</script>
+</body>
+</html>
