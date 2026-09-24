@@ -23,7 +23,8 @@ const cssCode = css.outputFiles[0].contents;
 const cssName = `assets/styles.${hash(cssCode)}.css`;
 writeFileSync(`${out}/${cssName}`, cssCode);
 
-const fill = (s) => s.replaceAll('%SITE_URL%', SITE_URL).replaceAll('%APP_JS%', `/${jsName}`).replaceAll('%STYLES%', `/${cssName}`);
+// Relative asset paths, so the build works at a domain root or in a subfolder.
+const fill = (s) => s.replaceAll('%SITE_URL%', SITE_URL).replaceAll('%APP_JS%', jsName).replaceAll('%STYLES%', cssName);
 const html = fill(readFileSync('src/index.html', 'utf8'))
   .replace(/\n\s*\n/g, '\n');
 writeFileSync(`${out}/index.html`, html);
