@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Accelerator Anatomy</title>
+<meta name="description" content="A to-scale 3D model of an AI accelerator package. Scroll through the compute die, stacked memory, interposer and solder balls, then explore it yourself.">
+<meta name="theme-color" content="#0a0a0b">
+<meta name="color-scheme" content="dark">
+<link rel="canonical" href="%SITE_URL%/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Accelerator Anatomy">
+<meta property="og:title" content="Accelerator Anatomy">
+<meta property="og:description" content="A to-scale 3D model of the hardware frontier AI models are trained on.">
+<meta property="og:url" content="%SITE_URL%/">
+<meta property="og:image" content="%SITE_URL%/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Rendering of an AI accelerator package: a compute die flanked by six memory stacks inside a brushed metal frame.">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="%STYLES%">
+<link rel="modulepreload" href="%APP_JS%">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<noscript><p class="noscript">This site renders a 3D model and needs JavaScript. The text below is still readable without it.</p></noscript>
+
+<header class="nav">
+  <a class="brand" href="#top" aria-label="Accelerator Anatomy, back to top">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="1.5"/><rect x="8.5" y="7.5" width="7" height="9"/><path d="M3.5 7h-2M3.5 12h-2M3.5 17h-2M22.5 7h-2M22.5 12h-2M22.5 17h-2"/></svg>
+    <span>Accelerator Anatomy</span>
+  </a>
+  <nav aria-label="Sections">
+    <ul class="nav-links">
+      <li><a href="#anatomy" data-nav="anatomy">Anatomy</a></li>
+      <li><a href="#specs" data-nav="specs">Specifications</a></li>
+      <li><a href="#scale" data-nav="scale">Scale</a></li>
+      <li><a href="#explore" data-nav="explore">Viewer</a></li>
+    </ul>
+  </nav>
+  <button type="button" class="btn btn-quiet" data-film disabled><svg class="ico" viewBox="0 0 10 12" aria-hidden="true"><path d="M0 0l10 6-10 6z"/></svg>Play film</button>
+</header>
+
+<div class="site" id="site">
+<main id="main">
+  <section class="sec hero" id="top" data-shot="0">
+    <div class="copy">
+      <p class="label">A to-scale model</p>
+      <h1>Inside an AI accelerator</h1>
+      <p class="deck">Frontier AI models are trained on packages like this one. Scroll to take it apart, from the compute die down to the 3,456 solder balls underneath.</p>
+      <div class="actions">
+        <button type="button" class="btn btn-primary" data-film disabled><svg class="ico" viewBox="0 0 10 12" aria-hidden="true"><path d="M0 0l10 6-10 6z"/></svg>Play film <span class="film-len">1:04</span></button>
+        <button type="button" class="btn btn-secondary" data-viewer disabled>Open 3D viewer</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec chapter left" id="anatomy" data-shot="1" aria-labelledby="h-die">
+    <div class="copy">
+      <p class="label">Detail A <span>Scale 3&#8202;:&#8202;1</span></p>
+      <h2 id="h-die">The compute die</h2>
+      <p>A single piece of silicon about 25 by 32&nbsp;mm, close to the largest area a lithography scanner can expose in one pass. The outer regions hold the matrix engines; the band across the middle is on-chip cache.</p>
+      <dl class="params">
+        <dt>Process</dt><dd>3&nbsp;nm class</dd>
+        <dt>Area</dt><dd>787&nbsp;mm²</dd>
+        <dt>Transistors</dt><dd>About 170 billion</dd>
+      </dl>
+    </div>
+  </section>
+
+  <section class="sec chapter right" data-shot="2" aria-labelledby="h-hbm">
+    <div class="copy">
+      <p class="label">Detail B <span>Scale 4&#8202;:&#8202;1</span></p>
+      <h2 id="h-hbm">Stacked memory</h2>
+      <p>Six stacks of high-bandwidth memory sit beside the die. Each has eight DRAM layers, thinned to about 30&nbsp;µm and connected vertically by through-silicon vias. Most AI workloads are limited by how quickly data reaches the die, which is why so much of the package is memory.</p>
+      <dl class="params">
+        <dt>Stacks</dt><dd>6 × 8-high</dd>
+        <dt>Capacity</dt><dd>144&nbsp;GB</dd>
+        <dt>Bandwidth</dt><dd>About 7.2&nbsp;TB/s</dd>
+      </dl>
+    </div>
+  </section>
+
+  <section class="sec chapter left" data-shot="3" aria-labelledby="h-int">
+    <div class="copy">
+      <p class="label">Section C–C <span>Exploded</span></p>
+      <h2 id="h-int">The interposer</h2>
+      <p>Die and memory are mounted side by side on a passive slab of silicon with its own fine wiring. The short connections through it are what make that memory bandwidth possible. Here the layers are separated to show the bump arrays between them.</p>
+      <dl class="params">
+        <dt>Size</dt><dd>46 × 35&nbsp;mm</dd>
+        <dt>Microbump pitch</dt><dd>About 45&nbsp;µm</dd>
+      </dl>
+    </div>
+  </section>
+
+  <section class="sec chapter right" data-shot="4" aria-labelledby="h-caps">
+    <div class="copy">
+      <p class="label">Detail D <span>Scale 8&#8202;:&#8202;1</span></p>
+      <h2 id="h-caps">Decoupling capacitors</h2>
+      <p>The die's current draw can change by hundreds of amps within microseconds. Ceramic capacitors placed around it supply those short bursts and keep the core voltage stable.</p>
+      <dl class="params">
+        <dt>Count</dt><dd>368 top, 72 underside</dd>
+        <dt>Size</dt><dd>0402 (1.0 × 0.5&nbsp;mm)</dd>
+      </dl>
+    </div>
+  </section>
+
+  <section class="sec chapter left" data-shot="5" aria-labelledby="h-bga">
+    <div class="copy">
+      <p class="label">View E <span>From below</span></p>
+      <h2 id="h-bga">Ball grid array</h2>
+      <p>All power and signals reach the board through solder balls on the underside. Most of them carry power and ground: at a core voltage below 1&nbsp;V, a 1,000&nbsp;W package draws well over 1,000&nbsp;A.</p>
+      <dl class="params">
+        <dt>Balls</dt><dd>3,456</dd>
+        <dt>Pitch</dt><dd>1.0&nbsp;mm</dd>
+      </dl>
+    </div>
+  </section>
+
+  <section class="sec chapter right" data-shot="6" aria-labelledby="h-heat">
+    <div class="copy">
+      <p class="label">Detail F <span>Thermal</span></p>
+      <h2 id="h-heat">Power and heat</h2>
+      <p>Almost all of the electrical power ends up as heat in a few square centimetres. At this density, fans give way to liquid cold plates, and data centres are increasingly planned around water supply as well as electricity.</p>
+      <dl class="params">
+        <dt>Board power</dt><dd>1,000&nbsp;W</dd>
+        <dt>Cooling</dt><dd>Direct liquid</dd>
+      </dl>
+    </div>
+  </section>
+
+  <section class="sec left specs-sec" id="specs" data-shot="7" aria-labelledby="h-specs">
+    <div class="copy">
+      <p class="label">Table 1</p>
+      <h2 id="h-specs">Specifications</h2>
+      <table class="sheet">
+        <tbody>
+          <tr><th scope="row">Process</th><td>3&nbsp;nm class</td></tr>
+          <tr><th scope="row">Compute die</th><td>787&nbsp;mm², 24.7 × 31.9&nbsp;mm</td></tr>
+          <tr><th scope="row">Transistors</th><td>About 170 billion</td></tr>
+          <tr><th scope="row">Memory</th><td>6 × HBM, 8-high, 144&nbsp;GB</td></tr>
+          <tr><th scope="row">Memory bandwidth</th><td>About 7.2&nbsp;TB/s</td></tr>
+          <tr><th scope="row">Interposer</th><td>46 × 35&nbsp;mm silicon</td></tr>
+          <tr><th scope="row">Package</th><td>65 × 65&nbsp;mm</td></tr>
+          <tr><th scope="row">Capacitors</th><td>440 MLCC</td></tr>
+          <tr><th scope="row">Solder balls</th><td>3,456 at 1.0&nbsp;mm pitch</td></tr>
+          <tr><th scope="row">Board power</th><td>1,000&nbsp;W</td></tr>
+        </tbody>
+      </table>
+      <p class="small">R1 is a composite, built to scale from published packaging practice. It does not represent a specific product.</p>
+    </div>
+  </section>
+
+  <section class="sec left scale-sec" id="scale" data-shot="8" aria-labelledby="h-scale">
+    <div class="copy">
+      <p class="label">Array <span>224 packages</span></p>
+      <h2 id="h-scale">At cluster scale</h2>
+      <p>This view shows 224 packages. Training a frontier model uses tens of thousands of accelerators at once, and the largest clusters exceed 100,000, running for weeks or months.</p>
+      <dl class="figures">
+        <div><dt>Per eight-accelerator server<sup><a href="#n1" id="r1">1</a></sup></dt><dd>10&nbsp;kW</dd></div>
+        <div><dt>100,000 accelerators, cooling included<sup><a href="#n2" id="r2">2</a></sup></dt><dd>150&nbsp;MW</dd></div>
+        <div><dt>US homes drawing the same power<sup><a href="#n3" id="r3">3</a></sup></dt><dd>120,000</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="sec explore-sec" id="explore" data-shot="9" aria-labelledby="h-explore">
+    <div class="copy">
+      <p class="label">Viewer</p>
+      <h2 id="h-explore">Explore the model</h2>
+      <p>Orbit and zoom, separate the layers, change the lighting and inspect each part.</p>
+      <div class="actions">
+        <button type="button" class="btn btn-primary" data-viewer disabled>Open 3D viewer</button>
+        <button type="button" class="btn btn-secondary" data-film disabled><svg class="ico" viewBox="0 0 10 12" aria-hidden="true"><path d="M0 0l10 6-10 6z"/></svg>Play film <span class="film-len">1:04</span></button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="foot-col">
+    <p class="foot-name">Accelerator Anatomy</p>
+    <p>An interactive, to-scale model of an AI accelerator package.</p>
+    <p class="foot-meta">© 2026</p>
+  </div>
+  <div class="foot-col">
+    <p class="foot-head">Notes</p>
+    <ol class="notes">
+      <li id="n1">Eight 1,000&nbsp;W accelerators plus processors, networking and fans, typical of current AI servers.&nbsp;<a href="#r1" aria-label="Back to reference 1">↩</a></li>
+      <li id="n2">About 1.2&nbsp;kW per accelerator at server level, at a power usage effectiveness of about 1.25.&nbsp;<a href="#r2" aria-label="Back to reference 2">↩</a></li>
+      <li id="n3">Average US household use of about 10,800&nbsp;kWh a year (US Energy Information Administration), or 1.23&nbsp;kW continuous.&nbsp;<a href="#r3" aria-label="Back to reference 3">↩</a></li>
+    </ol>
+  </div>
+  <div class="foot-col">
+    <p class="foot-head">Colophon</p>
+    <p>Set in Archivo and IBM Plex. Rendered in real time with three.js; every texture is generated in the browser.</p>
+    <p>A companion to <a href="https://raycoding1-collab.github.io/ai-race-reckoning/">The AI Race: A Reckoning</a>.</p>
+  </div>
+</footer>
+</div>
+
+<aside class="tblock" aria-hidden="true">
+  <div><span>Drawing</span><b>AA-R1-001</b></div>
+  <div><span>Rev</span><b>C</b></div>
+  <div><span>View</span><b id="tb-view">General arrangement</b></div>
+  <div><span>Scale</span><b id="tb-scale">1&#8202;:&#8202;1</b></div>
+  <div><span>Sheet</span><b id="tb-sheet">1 of 10</b></div>
+</aside>
+
+<div class="stage" id="stage"></div>
+<div class="hotspots" id="hotspots" aria-label="Parts"></div>
+
+<div class="hud">
+  <div class="title-block" id="title-block">
+    <button type="button" class="back" id="btn-back"><svg class="ico" viewBox="0 0 12 10" aria-hidden="true"><path d="M5 1L1 5l4 4M1 5h10"/></svg>Back to the page</button>
+    <h2>3D viewer</h2>
+    <p class="lede">Drag to orbit, scroll or pinch to zoom, and select a marker to inspect a part.</p>
+    <button type="button" class="btn btn-quiet" id="btn-tour" data-film disabled><svg class="ico" viewBox="0 0 10 12" aria-hidden="true"><path d="M0 0l10 6-10 6z"/></svg>Play film <span class="film-len">1:04</span></button>
+  </div>
+
+  <aside class="controls panel" id="controls" aria-label="View controls">
+    <div class="ctl">
+      <div class="ctl-label" id="lbl-view">Assembly</div>
+      <div class="seg" role="group" aria-labelledby="lbl-view">
+        <button type="button" id="btn-assembled" aria-pressed="true">Assembled</button>
+        <button type="button" id="btn-exploded" aria-pressed="false">Exploded</button>
+      </div>
+    </div>
+    <div class="ctl">
+      <div class="ctl-label" id="lbl-light">Lighting</div>
+      <div class="seg" role="group" aria-labelledby="lbl-light">
+        <button type="button" id="btn-studio" data-preset="studio" aria-pressed="true">Studio</button>
+        <button type="button" id="btn-hall" data-preset="hall" aria-pressed="false">Data hall</button>
+        <button type="button" id="btn-thermal" data-preset="thermal" aria-pressed="false">Thermal</button>
+      </div>
+    </div>
+    <div class="ctl ctl-camera">
+      <div class="ctl-label">Camera</div>
+      <div class="row">
+        <button type="button" class="btn btn-secondary" id="btn-rotate" aria-pressed="true">Auto-orbit</button>
+        <button type="button" class="btn btn-secondary" id="btn-reset">Reset</button>
+      </div>
+    </div>
+    <div class="ctl ctl-quality">
+      <div class="ctl-label" id="lbl-quality">Render quality</div>
+      <div class="seg" role="group" aria-labelledby="lbl-quality">
+        <button type="button" id="q-high" data-quality="high" aria-pressed="true">High</button>
+        <button type="button" id="q-balanced" data-quality="balanced" aria-pressed="false">Balanced</button>
+        <button type="button" id="q-fast" data-quality="fast" aria-pressed="false">Fast</button>
+      </div>
+    </div>
+    <dl class="keys" aria-label="Keyboard shortcuts">
+      <dt><kbd>E</kbd></dt><dd>Separate or assemble</dd>
+      <dt><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd></dt><dd>Lighting</dd>
+      <dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>Previous or next part</dd>
+      <dt><kbd>P</kbd></dt><dd>Play film</dd>
+      <dt><kbd>Esc</kbd></dt><dd>Reset view</dd>
+    </dl>
+  </aside>
+
+  <section class="detail panel" id="detail" aria-live="polite">
+    <div class="detail-top">
+      <h3 id="detail-title">Compute die</h3>
+      <span class="count" id="detail-count">1 of 6</span>
+    </div>
+    <p id="detail-body"></p>
+    <ul id="detail-specs"></ul>
+    <div class="detail-nav">
+      <button type="button" class="btn btn-secondary" id="btn-prev" aria-label="Previous part">Previous</button>
+      <button type="button" class="btn btn-secondary" id="btn-next" aria-label="Next part">Next</button>
+      <button type="button" class="btn btn-secondary narrow-only" id="btn-reset-2">Reset</button>
+    </div>
+  </section>
+
+  <div class="specs panel" aria-label="Package summary">
+    <div class="spec"><b id="spec-die">787&nbsp;mm²</b><span>Compute die</span></div>
+    <div class="spec"><b>6 × 8-high</b><span>HBM stacks</span></div>
+    <div class="spec"><b>65 × 65&nbsp;mm</b><span>Package</span></div>
+    <div class="spec"><b>1,000&nbsp;W</b><span>Board power</span></div>
+  </div>
+</div>
+
+<div class="tour" id="tour" aria-live="polite">
+  <div class="tour-scrim"></div>
+  <div class="tour-fade" id="tour-fade"></div>
+  <div class="tour-cap" id="tour-cap">
+    <div class="tc-eyebrow" id="tc-eyebrow"></div>
+    <div class="tc-title" id="tc-title"></div>
+    <p class="tc-sub" id="tc-sub"></p>
+  </div>
+  <div class="lb lb-top">
+    <span class="tour-brand">Accelerator Anatomy</span>
+    <span class="tour-chapter" id="tour-chapter">1 of 10</span>
+  </div>
+  <div class="lb lb-bottom">
+    <button type="button" class="tour-ctl" id="tour-pause">Pause</button>
+    <div class="tour-track" id="tour-track" role="group" aria-label="Chapters"></div>
+    <button type="button" class="tour-ctl" id="tour-exit">Close</button>
+  </div>
+</div>
+
+<div class="loader" id="loader" role="status">
+  <div class="loader-inner">
+    <div id="loader-text">Loading</div>
+    <div class="bar"><div id="loader-bar"></div></div>
+  </div>
+</div>
+
+<script type="module" src="%APP_JS%"></script>
+</body>
+</html>
