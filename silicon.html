@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<meta name="description" content="An interactive, studio-lit 3D model of an AI accelerator package: compute die, HBM stacks, interposer, capacitors and solder balls, down to the bumps.">
+<title>Accelerator Anatomy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #050505;
+    --ink: #ece9e6;
+    --dim: #8a8480;
+    --faint: #57524f;
+    --line: rgba(255, 240, 232, 0.09);
+    --glass: rgba(12, 11, 11, 0.58);
+    --glass-strong: rgba(14, 12, 12, 0.82);
+    --red: #ff3020;
+    --red-soft: rgba(255, 48, 32, 0.16);
+    --amber: #ffb000;
+    --sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+    --gutter: clamp(16px, 2.4vw, 32px);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+  }
+
+  .stage { position: fixed; inset: 0; }
+  .stage canvas { display: block; width: 100%; height: 100%; touch-action: none; outline: none; }
+
+  /* Film-plane overlays */
+  .hud {
+    position: fixed; inset: 0;
+    pointer-events: none;
+    padding: calc(env(safe-area-inset-top, 0px) + var(--gutter)) var(--gutter) calc(env(safe-area-inset-bottom, 0px) + var(--gutter));
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto 1fr auto;
+    gap: 16px;
+  }
+  .hud > * { pointer-events: auto; }
+
+  .title-block { grid-column: 1; grid-row: 1; max-width: 30rem; display: grid; gap: 6px; align-content: start; }
+  .back {
+    font: 500 11px/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--dim); text-decoration: none; justify-self: start;
+    padding: 6px 0;
+  }
+  .back:hover, .back:focus-visible { color: var(--ink); }
+  .eyebrow { font: 500 11px/1.2 var(--mono); letter-spacing: 0.16em; text-transform: uppercase; color: var(--red); }
+  h1 {
+    margin: 0;
+    font-weight: 900; font-size: clamp(28px, 4.2vw, 52px); line-height: 0.98; letter-spacing: -0.035em;
+    text-wrap: balance;
+  }
+  .lede { margin: 4px 0 0; color: var(--dim); font-size: 14px; max-width: 34rem; text-wrap: pretty; }
+
+  .panel {
+    background: var(--glass);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    backdrop-filter: blur(18px) saturate(1.2);
+    -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  }
+
+  .controls { grid-column: 2; grid-row: 1 / span 2; align-self: start; padding: 14px; display: grid; gap: 14px; width: 244px; }
+  .ctl { display: grid; gap: 7px; }
+  .ctl-label { font: 500 10px/1 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); }
+  .seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 2px; padding: 2px; border-radius: 7px; background: rgba(255,255,255,0.04); border: 1px solid var(--line); }
+  .seg button, .btn {
+    appearance: none; border: 0; cursor: pointer;
+    font: 500 12px/1 var(--sans); color: var(--dim);
+    background: transparent; border-radius: 5px; padding: 8px 6px;
+    transition: background-color .2s, color .2s;
+    white-space: nowrap;
+  }
+  .seg button:hover { color: var(--ink); }
+  .seg button[aria-pressed="true"] { background: rgba(255,255,255,0.1); color: var(--ink); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06); }
+  .seg button[aria-pressed="true"].hot { background: var(--red-soft); color: #ffd9d4; box-shadow: inset 0 0 0 1px rgba(255,48,32,0.35); }
+  .row { display: flex; gap: 6px; }
+  .btn { flex: 1; border: 1px solid var(--line); background: rgba(255,255,255,0.03); padding: 9px 8px; }
+  .btn:hover { color: var(--ink); background: rgba(255,255,255,0.07); }
+  .btn[aria-pressed="true"] { color: var(--ink); }
+  button:focus-visible, a:focus-visible, .hotspot:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+  .keys { display: grid; grid-template-columns: auto 1fr; gap: 5px 10px; align-items: center; font: 400 10.5px/1.3 var(--mono); color: var(--faint); padding-top: 2px; border-top: 1px solid var(--line); padding-top: 12px; }
+  .keys kbd { font: inherit; color: var(--dim); border: 1px solid var(--line); border-radius: 3px; padding: 1px 4px; margin-right: 2px; }
+
+  .detail { grid-column: 1; grid-row: 3; align-self: end; max-width: 25rem; padding: 16px 18px; display: grid; gap: 8px; }
+  .detail-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  .detail h2 { margin: 0; font-size: 18px; font-weight: 800; letter-spacing: -0.015em; }
+  .detail .count { font: 500 10.5px/1 var(--mono); color: var(--faint); font-variant-numeric: tabular-nums; letter-spacing: 0.08em; }
+  .detail p { margin: 0; color: #bdb7b2; font-size: 13.5px; text-wrap: pretty; }
+  .detail ul { margin: 2px 0 0; padding: 0; list-style: none; display: grid; gap: 3px; }
+  .detail li { font: 400 12px/1.45 var(--mono); color: var(--ink); font-variant-numeric: tabular-nums; display: flex; gap: 8px; }
+  .detail li::before { content: ""; flex: none; width: 5px; height: 5px; margin-top: 7px; background: var(--red); border-radius: 1px; }
+  .detail-nav { display: flex; gap: 6px; margin-top: 4px; }
+  .detail-nav .btn { flex: 0 0 auto; padding: 7px 10px; font-size: 11.5px; }
+  .detail-nav .narrow-only { display: none; margin-left: auto; }
+
+  .specs {
+    grid-column: 2; grid-row: 3; align-self: end; justify-self: end;
+    display: grid; grid-template-columns: repeat(2, auto); gap: 10px 22px; padding: 14px 16px;
+  }
+  .spec { display: grid; gap: 3px; }
+  .spec b { font: 700 16px/1 var(--mono); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+  .spec span { font: 500 9.5px/1 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); }
+  .specs .note { grid-column: 1 / -1; font: 400 10px/1.4 var(--mono); color: var(--faint); max-width: 17rem; }
+
+  /* Hotspots anchored to the model */
+  .hotspots { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+  .hotspot {
+    position: absolute; left: 0; top: 0;
+    pointer-events: auto; cursor: pointer;
+    display: flex; align-items: center; gap: 8px;
+    background: none; border: 0; padding: 6px; margin: -12px 0 0 -12px;
+    font: 500 11px/1 var(--mono); color: var(--ink); letter-spacing: 0.06em; text-transform: uppercase;
+    will-change: transform, opacity;
+    transition: opacity .35s;
+  }
+  .hotspot i {
+    position: relative; width: 12px; height: 12px; border-radius: 50%; flex: none;
+    background: rgba(5,5,5,0.55); border: 1.5px solid rgba(255,255,255,0.85);
+    box-shadow: 0 0 0 4px rgba(0,0,0,0.18);
+  }
+  .hotspot i::after {
+    content: ""; position: absolute; inset: -6px; border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.35);
+    animation: ping 2.6s cubic-bezier(.2,.6,.3,1) infinite;
+  }
+  .hotspot span {
+    padding: 5px 7px; border-radius: 4px; background: var(--glass-strong); border: 1px solid var(--line);
+    opacity: 0; transform: translateX(-4px); transition: opacity .2s, transform .2s;
+    white-space: nowrap;
+  }
+  .hotspot:hover span, .hotspot:focus-visible span, .hotspot.active span { opacity: 1; transform: none; }
+  .hotspot.active i { background: var(--red); border-color: #ffd0ca; }
+  .hotspot.hidden { opacity: 0; pointer-events: none; }
+  .hotspot.dim { opacity: 0.35; }
+  @keyframes ping { 0% { transform: scale(.6); opacity: .9; } 80%, 100% { transform: scale(1.6); opacity: 0; } }
+
+  .loader {
+    position: fixed; inset: 0; z-index: 10; display: grid; place-items: center;
+    background: var(--bg); transition: opacity .9s ease, visibility .9s;
+  }
+  .loader.done { opacity: 0; visibility: hidden; }
+  .loader-inner { display: grid; gap: 12px; justify-items: center; font: 500 11px/1.4 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); text-align: center; padding-inline: 16px; }
+  .bar { width: 180px; height: 1px; background: var(--line); overflow: hidden; }
+  .bar > div { height: 100%; width: 0; background: var(--red); transition: width .3s ease; box-shadow: 0 0 10px var(--red); }
+  .fallback { color: var(--ink); text-transform: none; letter-spacing: 0; font: 400 14px/1.5 var(--sans); max-width: 26rem; }
+
+  @media (max-width: 860px) {
+    .hud { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr auto auto; gap: 10px; }
+    .title-block { grid-column: 1; }
+    .lede { display: none; }
+    .controls {
+      grid-column: 1; grid-row: 4; width: auto; padding: 10px;
+      grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px;
+    }
+    .controls .ctl-quality, .controls .keys { display: none; }
+    .detail { grid-row: 3; max-width: none; padding: 12px 14px; gap: 6px; }
+    .detail p { font-size: 12.5px; }
+    .specs { display: none; }
+  }
+  @media (max-width: 480px) {
+    .controls { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+    .controls .ctl-camera { display: none; }
+    .detail-nav .narrow-only { display: inline-block; }
+    .detail ul { display: none; }
+    .seg button { font-size: 11.5px; padding: 8px 4px; }
+  }
+  @media (min-width: 861px) and (max-height: 760px) {
+    .lede, .keys, .ctl-quality, .specs { display: none; }
+    h1 { font-size: clamp(26px, 3.2vw, 40px); }
+    .detail { max-width: 22rem; padding: 12px 14px; gap: 6px; }
+    .detail ul { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hotspot i::after { animation: none; }
+    .loader, .hotspot, .hotspot span { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage"></div>
+<div class="hotspots" id="hotspots" aria-label="Parts"></div>
+
+<div class="hud">
+  <header class="title-block" id="title-block">
+    <!--repo-only--><a class="back" href="index.html">&larr; The AI Race, a reckoning</a><!--/repo-only-->
+    <div class="eyebrow">Exhibit &middot; The hardware</div>
+    <h1>Accelerator Anatomy</h1>
+    <p class="lede">Every frontier model is trained on packages like this one: a single slab of logic, walled in by stacked memory, drawing as much power as a space heater. Drag to orbit, scroll to zoom, and pick a part to inspect it.</p>
+  </header>
+
+  <aside class="controls panel" id="controls" aria-label="View controls">
+    <div class="ctl">
+      <div class="ctl-label" id="lbl-view">Assembly</div>
+      <div class="seg" role="group" aria-labelledby="lbl-view">
+        <button type="button" id="btn-assembled" aria-pressed="true">Assembled</button>
+        <button type="button" id="btn-exploded" aria-pressed="false">Exploded</button>
+      </div>
+    </div>
+    <div class="ctl">
+      <div class="ctl-label" id="lbl-light">Lighting</div>
+      <div class="seg" role="group" aria-labelledby="lbl-light">
+        <button type="button" id="btn-studio" data-preset="studio" aria-pressed="true">Studio</button>
+        <button type="button" id="btn-hall" data-preset="hall" aria-pressed="false">Data hall</button>
+        <button type="button" id="btn-thermal" data-preset="thermal" class="hot" aria-pressed="false">Thermal</button>
+      </div>
+    </div>
+    <div class="ctl ctl-camera">
+      <div class="ctl-label">Camera</div>
+      <div class="row">
+        <button type="button" class="btn" id="btn-rotate" aria-pressed="true">Auto-orbit</button>
+        <button type="button" class="btn" id="btn-reset">Reset view</button>
+      </div>
+    </div>
+    <div class="ctl ctl-quality">
+      <div class="ctl-label" id="lbl-quality">Render quality</div>
+      <div class="seg" role="group" aria-labelledby="lbl-quality">
+        <button type="button" id="q-high" data-quality="high" aria-pressed="true">High</button>
+        <button type="button" id="q-balanced" data-quality="balanced" aria-pressed="false">Balanced</button>
+        <button type="button" id="q-fast" data-quality="fast" aria-pressed="false">Fast</button>
+      </div>
+    </div>
+    <div class="keys" aria-label="Keyboard shortcuts">
+      <span><kbd>E</kbd></span><span>Explode or assemble</span>
+      <span><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd></span><span>Lighting</span>
+      <span><kbd>&larr;</kbd><kbd>&rarr;</kbd></span><span>Step through parts</span>
+      <span><kbd>R</kbd> <kbd>Esc</kbd></span><span>Orbit, reset view</span>
+    </div>
+  </aside>
+
+  <section class="detail panel" id="detail" aria-live="polite">
+    <div class="detail-top">
+      <h2 id="detail-title">Compute die</h2>
+      <span class="count" id="detail-count">01 / 06</span>
+    </div>
+    <p id="detail-body"></p>
+    <ul id="detail-specs"></ul>
+    <div class="detail-nav">
+      <button type="button" class="btn" id="btn-prev" aria-label="Previous part">&larr; Prev</button>
+      <button type="button" class="btn" id="btn-next" aria-label="Next part">Next &rarr;</button>
+      <button type="button" class="btn narrow-only" id="btn-reset-2">Reset view</button>
+    </div>
+  </section>
+
+  <div class="specs panel" aria-label="Package specifications">
+    <div class="spec"><b id="spec-die">787 mm²</b><span>Compute die</span></div>
+    <div class="spec"><b>6 × 8-high</b><span>HBM stacks</span></div>
+    <div class="spec"><b>65 × 65 mm</b><span>Package</span></div>
+    <div class="spec"><b>1,000 W</b><span>Board power</span></div>
+    <div class="note" id="spec-note">Illustrative model built to scale from public packaging norms. Not a specific product.</div>
+  </div>
+</div>
+
+<div class="loader" id="loader">
+  <div class="loader-inner">
+    <div id="loader-text">Etching die layout</div>
+    <div class="bar"><div id="loader-bar"></div></div>
+  </div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { FullScreenQuad } from 'three/addons/postprocessing/Pass.js';
+import { HorizontalBlurShader } from 'three/addons/shaders/HorizontalBlurShader.js';
+import { VerticalBlurShader } from 'three/addons/shaders/VerticalBlurShader.js';
+
+/* ───────────────────────── Setup ───────────────────────── */
+
+const $ = (id) => document.getElementById(id);
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const loaderText = $('loader-text'), loaderBar = $('loader-bar');
+const nextFrame = () => new Promise((r) => requestAnimationFrame(() => r()));
+async function stage(text, pct) { loaderText.textContent = text; loaderBar.style.width = pct + '%'; await nextFrame(); }
+
+function fail(msg) {
+  loaderText.innerHTML = '<div class="fallback">' + msg + '</div>';
+  loaderBar.parentElement.hidden = true;
+}
+
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance', alpha: false });
+} catch (e) {
+  fail('This model needs WebGL 2, which this browser or device has turned off. Try a current version of Chrome, Safari, Edge or Firefox with hardware acceleration enabled.');
+  throw e;
+}
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.toneMapping = THREE.NeutralToneMapping;
+renderer.toneMappingExposure = 1.0;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.autoUpdate = false;
+$('stage').appendChild(renderer.domElement);
+renderer.domElement.setAttribute('aria-label', '3D model of an AI accelerator package. Drag to orbit, scroll or pinch to zoom.');
+renderer.domElement.setAttribute('role', 'img');
+
+const MAX_ANISO = renderer.capabilities.getMaxAnisotropy();
+const BG = new THREE.Color('#060606');
+
+const scene = new THREE.Scene();
+scene.background = BG.clone();
+scene.fog = new THREE.Fog(BG.clone(), 26, 62);
+
+const camera = new THREE.PerspectiveCamera(28, innerWidth / innerHeight, 0.1, 200);
+const HOME_DIR = new THREE.Vector3(15.4, 11.3, 19.1).normalize();
+const REF_DIST = 27;
+const HOME = { pos: HOME_DIR.clone().multiplyScalar(REF_DIST), target: new THREE.Vector3(0, 1.25, 0) };
+let fitScale = 1; // camera distances scale with how much free screen the layout leaves
+camera.position.set(26, 21, 36);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.06;
+controls.minDistance = 4.5;
+controls.maxDistance = 42;
+controls.maxPolarAngle = Math.PI * 0.64;
+controls.autoRotate = !reduceMotion;
+controls.autoRotateSpeed = 0.45;
+controls.target.copy(HOME.target);
+controls.enablePan = true;
+controls.screenSpacePanning = true;
+
+/* Seeded RNG so the layout is identical on every load. */
+function rng(seed) {
+  return function () {
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/* ───────────────────────── Procedural texture painter ─────────────────────────
+   Paints colour, roughness, metalness, height and emission in lockstep, then derives
+   a tangent-space normal map from the height field. */
+
+class Painter {
+  constructor(w, h, base) {
+    this.w = w; this.h = h; this.cv = {}; this.ctx = {};
+    for (const k of ['c', 'r', 'm', 'h', 'e']) {
+      const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+      this.cv[k] = cv; this.ctx[k] = cv.getContext('2d', { willReadFrequently: k === 'h' || k === 'r' || k === 'm' });
+    }
+    this.ctx.e.fillStyle = '#000'; this.ctx.e.fillRect(0, 0, w, h);
+    this.paint(base, (x) => x.fillRect(0, 0, w, h));
+  }
+  static g(v) { const n = Math.round(Math.max(0, Math.min(1, v)) * 255); return `rgb(${n},${n},${n})`; }
+  paint(p, fn) {
+    for (const k of ['c', 'r', 'm', 'h', 'e']) {
+      if (p[k] == null) continue;
+      const x = this.ctx[k];
+      const style = k === 'c' ? p.c : (typeof p[k] === 'string' ? p[k] : Painter.g(p[k]));
+      x.save(); x.fillStyle = style; x.strokeStyle = style;
+      if (p.a != null) x.globalAlpha = p.a;
+      fn(x); x.restore();
+    }
+  }
+  rect(x, y, w, h, p) { this.paint(p, (c) => c.fillRect(x, y, w, h)); }
+  circle(x, y, r, p) { this.paint(p, (c) => { c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fill(); }); }
+  ring(x, y, r, lw, p) { this.paint(p, (c) => { c.lineWidth = lw; c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.stroke(); }); }
+  poly(pts, lw, p) {
+    this.paint(p, (c) => {
+      c.lineWidth = lw; c.lineCap = 'round'; c.lineJoin = 'round';
+      c.beginPath(); c.moveTo(pts[0][0], pts[0][1]);
+      for (let i = 1; i < pts.length; i++) c.lineTo(pts[i][0], pts[i][1]);
+      c.stroke();
+    });
+  }
+  text(str, x, y, font, p, align = 'left', spacing = 0) {
+    this.paint(p, (c) => {
+      c.font = font; c.textAlign = align; c.textBaseline = 'middle';
+      if ('letterSpacing' in c) c.letterSpacing = spacing + 'px';
+      c.fillText(str, x, y);
+    });
+  }
+  /* Soft blotches in roughness: the thumbprints and handling marks that make a surface read as real. */
+  smudge(rand, n, strength) {
+    const x = this.ctx.r;
+    for (let i = 0; i < n; i++) {
+      const cx = rand() * this.w, cy = rand() * this.h, rad = (0.05 + rand() * 0.18) * Math.max(this.w, this.h);
+      const gr = x.createRadialGradient(cx, cy, 0, cx, cy, rad);
+      const v = rand() < 0.5 ? 255 : 0;
+      gr.addColorStop(0, `rgba(${v},${v},${v},${strength * (0.4 + rand() * 0.6)})`);
+      gr.addColorStop(1, `rgba(${v},${v},${v},0)`);
+      x.fillStyle = gr; x.fillRect(cx - rad, cy - rad, rad * 2, rad * 2);
+    }
+  }
+  grain(rand, amount, keys = ['r', 'h']) {
+    for (const k of keys) {
+      const x = this.ctx[k];
+      const img = x.getImageData(0, 0, this.w, this.h), d = img.data;
+      for (let i = 0; i < d.length; i += 4) {
+        const n = (rand() - 0.5) * amount * 255;
+        d[i] += n; d[i + 1] += n; d[i + 2] += n;
+      }
+      x.putImageData(img, 0, 0);
+    }
+  }
+  _tex(canvas, srgb) {
+    const t = new THREE.CanvasTexture(canvas);
+    t.colorSpace = srgb ? THREE.SRGBColorSpace : THREE.NoColorSpace;
+    t.anisotropy = MAX_ANISO;
+    t.generateMipmaps = true;
+    t.minFilter = THREE.LinearMipmapLinearFilter;
+    t.needsUpdate = true;
+    return t;
+  }
+  build(normalStrength = 2.0, blur = 0.7) {
+    const { w, h } = this;
+    // Combined roughness (G) / metalness (B) map, the layout three.js expects.
+    const rd = this.ctx.r.getImageData(0, 0, w, h).data, md = this.ctx.m.getImageData(0, 0, w, h).data;
+    const ormCv = document.createElement('canvas'); ormCv.width = w; ormCv.height = h;
+    const ormCtx = ormCv.getContext('2d'); const orm = ormCtx.createImageData(w, h);
+    for (let i = 0; i < orm.data.length; i += 4) { orm.data[i] = 255; orm.data[i + 1] = rd[i]; orm.data[i + 2] = md[i]; orm.data[i + 3] = 255; }
+    ormCtx.putImageData(orm, 0, 0);
+
+    // Height → normal (Sobel), after a slight blur so edges bevel instead of alias.
+    const hb = document.createElement('canvas'); hb.width = w; hb.height = h;
+    const hbx = hb.getContext('2d', { willReadFrequently: true });
+    hbx.filter = `blur(${blur}px)`; hbx.drawImage(this.cv.h, 0, 0); hbx.filter = 'none';
+    const hd = hbx.getImageData(0, 0, w, h).data;
+    const nCv = document.createElement('canvas'); nCv.width = w; nCv.height = h;
+    const nCtx = nCv.getContext('2d'); const nImg = nCtx.createImageData(w, h); const nd = nImg.data;
+    const H = (x, y) => hd[(((y + h) % h) * w + ((x + w) % w)) * 4] / 255;
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const dx = (H(x + 1, y - 1) + 2 * H(x + 1, y) + H(x + 1, y + 1)) - (H(x - 1, y - 1) + 2 * H(x - 1, y) + H(x - 1, y + 1));
+        const dy = (H(x - 1, y + 1) + 2 * H(x, y + 1) + H(x + 1, y + 1)) - (H(x - 1, y - 1) + 2 * H(x, y - 1) + H(x + 1, y - 1));
+        let nx = -dx * normalStrength, ny = dy * normalStrength, nz = 1;
+        const l = Math.hypot(nx, ny, nz); nx /= l; ny /= l; nz /= l;
+        const i = (y * w + x) * 4;
+        nd[i] = (nx * 0.5 + 0.5) * 255; nd[i + 1] = (ny * 0.5 + 0.5) * 255; nd[i + 2] = (nz * 0.5 + 0.5) * 255; nd[i + 3] = 255;
+      }
+    }
+    nCtx.putImageData(nImg, 0, 0);
+    return {
+      map: this._tex(this.cv.c, true),
+      orm: this._tex(ormCv, false),
+      normal: this._tex(nCv, false),
+      emissive: this._tex(this.cv.e, true),
+    };
+  }
+}
+
+/* ───────────────────────── Dimensions (1 unit ≈ 6.5 mm) ───────────────────────── */
+
+const MM = 6.5;
+const D = {
+  sub: { w: 10, d: 10, t: 0.26 },
+  stiff: { ow: 9.6, od: 9.6, iw: 8.3, id: 7.0, t: 0.24 },
+  inter: { w: 7.12, d: 5.34, t: 0.08 },
+  die: { w: 3.8, d: 4.9, t: 0.16 },
+  hbm: { w: 1.3, d: 1.55, gap: 0.12, base: 0.024, layer: 0.013, bond: 0.004, n: 8 },
+  bga: { n: 60, pitch: 0.155, r: 0.058, hole: 12 },
+};
+D.y = {};
+D.y.subTop = D.sub.t;
+D.y.c4 = D.y.subTop;                 // 0.26 → 0.30
+D.y.interBot = D.y.subTop + 0.04;
+D.y.interTop = D.y.interBot + D.inter.t;
+D.y.dieBot = D.y.interTop + 0.02;
+D.y.dieTop = D.y.dieBot + D.die.t;
+const hbmX = D.die.w / 2 + 0.14 + D.hbm.w / 2;
+const hbmZ = [-(D.hbm.d + D.hbm.gap), 0, D.hbm.d + D.hbm.gap];
+
+/* ───────────────────────── Textures ───────────────────────── */
+
+function paintDie() {
+  const PX = 400, W = Math.round(D.die.w * PX), H = Math.round(D.die.d * PX);
+  const r = rng(7);
+  const P = new Painter(W, H, { c: '#8e96a6', r: 0.2, m: 0.88, h: 0.5 });
+  const m = Math.round(W * 0.035);
+
+  // I/O ring and bond pads
+  P.rect(0, 0, W, m, { c: '#747c8c', r: 0.32, h: 0.46 }); P.rect(0, H - m, W, m, { c: '#747c8c', r: 0.32, h: 0.46 });
+  P.rect(0, 0, m, H, { c: '#747c8c', r: 0.32, h: 0.46 }); P.rect(W - m, 0, m, H, { c: '#747c8c', r: 0.32, h: 0.46 });
+  const pad = { c: '#cfa75a', r: 0.28, m: 1, h: 0.7 };
+  for (let x = m * 0.6; x < W - m * 0.6; x += 21) { P.rect(x, m * 0.25, 11, m * 0.5, pad); P.rect(x, H - m * 0.75, 11, m * 0.5, pad); }
+  for (let y = m * 1.3; y < H - m * 1.3; y += 21) { P.rect(m * 0.25, y, m * 0.5, 11, pad); P.rect(W - m * 0.75, y, m * 0.5, 11, pad); }
+  // Seal ring
+  P.paint({ c: '#a9b0bd', r: 0.14, h: 0.62 }, (c) => { c.lineWidth = 4; c.strokeRect(m + 6, m + 6, W - 2 * m - 12, H - 2 * m - 12); });
+
+  const x0 = m + 22, x1 = W - m - 22, y0 = m + 22, y1 = H - m - 22;
+  const bandH = (y1 - y0) * 0.15, bandY = (y0 + y1) / 2 - bandH / 2;
+
+  // L2 cache band: SRAM macros, a fine regular lattice that glints at grazing angles
+  const phyW = (x1 - x0) * 0.11;
+  P.rect(x0, bandY, x1 - x0, bandH, { c: '#687286', r: 0.16, h: 0.52 });
+  const macros = 8, mw = (x1 - x0 - 2 * phyW - 20) / macros;
+  for (let i = 0; i < macros; i++) {
+    const mx = x0 + phyW + 10 + i * mw + 3, mwid = mw - 6;
+    for (const half of [0, 1]) {
+      const my = bandY + 8 + half * (bandH / 2), mh = bandH / 2 - 16;
+      P.rect(mx, my, mwid, mh, { c: '#5f6a80', r: 0.12, h: 0.55 });
+      for (let yy = my + 2; yy < my + mh - 3; yy += 5) {
+        const shade = 88 + ((yy / 5) % 2) * 10;
+        P.rect(mx + 2, yy, mwid - 4, 2.4, { c: `rgb(${shade},${shade + 8},${shade + 24})`, h: 0.58, r: 0.1 });
+      }
+      P.rect(mx + mwid / 2 - 3, my, 6, mh, { c: '#7a8498', h: 0.5, r: 0.2 });
+    }
+  }
+  // PHY blocks at either end of the band
+  for (const px of [x0, x1 - phyW]) {
+    P.rect(px, bandY, phyW, bandH, { c: '#57607a', r: 0.3, h: 0.54 });
+    for (let xx = px + 6; xx < px + phyW - 6; xx += 7) P.rect(xx, bandY + 6, 3, bandH - 12, { c: '#9aa3b4', h: 0.62, r: 0.16 });
+  }
+
+  // Compute clusters (two halves), each block subdivided into tensor tiles and register files
+  const cols = 6, rows = 4, street = 12;
+  const tints = ['#5c6680', '#58647e', '#606d87', '#5a6883', '#636a85'];
+  for (const [ya, yb] of [[y0, bandY - street], [bandY + bandH + street, y1]]) {
+    const bw = (x1 - x0 - (cols - 1) * street) / cols, bh = (yb - ya - (rows - 1) * street) / rows;
+    for (let cx = 0; cx < cols; cx++) for (let cy = 0; cy < rows; cy++) {
+      const bx = x0 + cx * (bw + street), by = ya + cy * (bh + street);
+      const glow = 0.28 + r() * 0.55;
+      P.rect(bx, by, bw, bh, { c: tints[(r() * tints.length) | 0], r: 0.24 + r() * 0.08, h: 0.56, e: glow * 0.35 });
+      // four tensor tiles
+      const tw = (bw - 18) / 2, th = (bh - 30) / 2;
+      for (let i = 0; i < 2; i++) for (let j = 0; j < 2; j++) {
+        const tx = bx + 6 + i * (tw + 6), ty = by + 6 + j * (th + 18);
+        P.rect(tx, ty, tw, th, { c: '#4b556d', r: 0.2, h: 0.6, e: glow });
+        for (let k = 0; k < 7; k++) {
+          const lx = tx + 3 + r() * (tw - 16), ly = ty + 3 + r() * (th - 12);
+          P.rect(lx, ly, 4 + r() * 12, 2 + r() * 6, { c: r() < 0.5 ? '#6d7892' : '#434b61', h: 0.56 + r() * 0.1 });
+        }
+        for (let yy = ty + 4; yy < ty + th - 3; yy += 4) P.rect(tx + 3, yy, tw * 0.28, 1.6, { c: '#76819b', h: 0.63 });
+      }
+      // register file strip between tile rows
+      P.rect(bx + 6, by + 6 + th + 4, bw - 12, 10, { c: '#7d879c', r: 0.12, h: 0.6, e: glow * 0.5 });
+    }
+  }
+  // Global interconnect running along the streets
+  for (let i = 0; i < 60; i++) {
+    const y = y0 + r() * (y1 - y0);
+    P.rect(x0, y, x1 - x0, 1.2, { c: '#a7afbd', h: 0.53, r: 0.14, a: 0.35 });
+  }
+  P.smudge(r, 10, 0.12);
+  P.grain(r, 0.03);
+  return P.build(2.4, 0.6);
+}
+
+function paintInterposer() {
+  const PX = 180, W = Math.round(D.inter.w * PX), H = Math.round(D.inter.d * PX);
+  const r = rng(11);
+  const P = new Painter(W, H, { c: '#7f8898', r: 0.22, m: 0.9, h: 0.5 });
+  const toPx = (x, z) => [(x / D.inter.w + 0.5) * W, (z / D.inter.d + 0.5) * H];
+  // Redistribution wiring bridging the die and each HBM site
+  for (const s of [-1, 1]) for (const z of hbmZ) {
+    const [ax] = toPx(s * (D.die.w / 2 - 0.1), 0), [bx] = toPx(s * (hbmX - D.hbm.w / 2 + 0.1), 0);
+    const [, zy] = toPx(0, z);
+    const hh = D.hbm.d * PX * 0.8;
+    for (let k = 0; k < hh; k += 3.2) P.rect(Math.min(ax, bx), zy - hh / 2 + k, Math.abs(bx - ax), 1.3, { c: '#b9965a', m: 1, r: 0.3, h: 0.56, a: 0.7 });
+  }
+  // Microbump landing pads under the die and memory
+  const pad = { c: '#caa257', m: 1, r: 0.3, h: 0.66 };
+  for (const [cx, cz, w, d] of [[0, 0, D.die.w, D.die.d], ...[-1, 1].flatMap((s) => hbmZ.map((z) => [s * hbmX, z, D.hbm.w, D.hbm.d]))]) {
+    for (let x = cx - w / 2 + 0.08; x < cx + w / 2 - 0.05; x += 0.1) for (let z = cz - d / 2 + 0.08; z < cz + d / 2 - 0.05; z += 0.1) {
+      const [px, py] = toPx(x, z); P.circle(px, py, 3.2, pad);
+    }
+  }
+  // Through-silicon vias in the margins
+  for (let i = 0; i < 900; i++) {
+    const [px, py] = [r() * W, r() * H];
+    const lx = Math.abs(px / W - 0.5) * D.inter.w, lz = Math.abs(py / H - 0.5) * D.inter.d;
+    if (lx < D.inter.w / 2 - 0.2 && lz < D.inter.d / 2 - 0.2) continue;
+    P.circle(px, py, 1.8, { c: '#5f6778', h: 0.44 });
+  }
+  P.grain(r, 0.03);
+  return P.build(2.0, 0.5);
+}
+
+function capLayout() {
+  const r = rng(23), caps = [];
+  const L = 0.15;
+  // Along the left/right edges: long axis on X
+  for (const s of [-1, 1]) for (const x of [3.72, 3.94]) {
+    for (let z = -2.56; z <= 2.56; z += 0.16) if (r() > 0.07) caps.push({ x: s * x, z, rot: 0 });
+  }
+  // Along the front/back edges: long axis on Z
+  for (const s of [-1, 1]) for (const z of [2.86, 3.08, 3.3]) {
+    for (let x = -3.98; x <= 3.98; x += 0.16) {
+      if (Math.round((x + 3.98) / 0.16) % 9 === 4) continue;
+      if (r() > 0.06) caps.push({ x, z: s * z, rot: Math.PI / 2 });
+    }
+  }
+  // Land-side capacitors in the BGA keep-out, underneath
+  const land = [];
+  for (let i = 0; i < 8; i++) for (let j = 0; j < 9; j++) land.push({ x: -0.7 + i * 0.2, z: -0.8 + j * 0.2, rot: (i + j) % 2 ? 0 : Math.PI / 2 });
+  return { caps, land, L };
+}
+const CAPS = capLayout();
+
+function paintSubstrate() {
+  const PX = 204.8, W = 2048, H = 2048;
+  const r = rng(3);
+  const P = new Painter(W, H, { c: '#132019', r: 0.4, m: 0, h: 0.5 });
+  const toPx = (x, z) => [(x / D.sub.w + 0.5) * W, (z / D.sub.d + 0.5) * H];
+
+  // Buried power planes, faintly visible through the solder mask
+  for (let i = 0; i < 14; i++) {
+    const [px, py] = toPx((r() - 0.5) * 9, (r() - 0.5) * 9);
+    P.rect(px, py, 100 + r() * 400, 60 + r() * 300, { c: '#16261e', h: 0.515, a: 0.9 });
+  }
+  // Signal traces fanning out from the interposer footprint: Manhattan runs with 45° jogs
+  const trace = { c: '#1e3a2b', h: 0.57, r: 0.34 };
+  for (let i = 0; i < 700; i++) {
+    const side = (r() * 4) | 0;
+    let x, z;
+    if (side < 2) { x = (side ? 1 : -1) * D.inter.w / 2; z = (r() - 0.5) * D.inter.d; }
+    else { z = (side === 3 ? 1 : -1) * D.inter.d / 2; x = (r() - 0.5) * D.inter.w; }
+    const pts = [toPx(x, z)];
+    const out = side < 2 ? [Math.sign(x), 0] : [0, Math.sign(z)];
+    let len = 0.2 + r() * 0.6;
+    x += out[0] * len; z += out[1] * len; pts.push(toPx(x, z));
+    const jog = (r() - 0.5) * 1.2;
+    if (side < 2) { x += out[0] * Math.abs(jog); z += jog; } else { z += out[1] * Math.abs(jog); x += jog; }
+    pts.push(toPx(x, z));
+    len = 0.3 + r() * 1.6;
+    x += out[0] * len; z += out[1] * len; pts.push(toPx(x, z));
+    x = Math.max(-4.9, Math.min(4.9, x)); z = Math.max(-4.9, Math.min(4.9, z));
+    P.poly(pts, 2.6, trace);
+    const [ex, ey] = pts[pts.length - 1];
+    P.circle(ex, ey, 6, { c: '#284a37', h: 0.6 }); P.circle(ex, ey, 2.4, { c: '#0c1510', h: 0.42 });
+  }
+  // Stiffener adhesive band (exposed only in the exploded view)
+  P.paint({ c: '#2a2b28', r: 0.7, h: 0.53 }, (c) => {
+    const [ax, ay] = toPx(-D.stiff.ow / 2, -D.stiff.od / 2), [bx, by] = toPx(D.stiff.ow / 2, D.stiff.od / 2);
+    const [ix, iy] = toPx(-D.stiff.iw / 2, -D.stiff.id / 2), [jx, jy] = toPx(D.stiff.iw / 2, D.stiff.id / 2);
+    c.beginPath(); c.rect(ax, ay, bx - ax, by - ay); c.rect(jx, iy, ix - jx, jy - iy); c.fill('evenodd');
+  });
+  // C4 landing pads under the interposer
+  for (let x = -D.inter.w / 2 + 0.12; x < D.inter.w / 2 - 0.08; x += 0.15) for (let z = -D.inter.d / 2 + 0.12; z < D.inter.d / 2 - 0.08; z += 0.15) {
+    const [px, py] = toPx(x, z); P.circle(px, py, 7, { c: '#c9a05a', m: 1, r: 0.32, h: 0.62 });
+  }
+  // Capacitor lands
+  const land = { c: '#d2a95a', m: 1, r: 0.26, h: 0.6 };
+  for (const c of CAPS.caps) {
+    const along = c.rot === 0 ? [1, 0] : [0, 1];
+    for (const s of [-1, 1]) {
+      const [px, py] = toPx(c.x + along[0] * s * 0.058, c.z + along[1] * s * 0.058);
+      const w = (c.rot === 0 ? 0.045 : 0.085) * PX, h = (c.rot === 0 ? 0.085 : 0.045) * PX;
+      P.rect(px - w / 2, py - h / 2, w, h, land);
+    }
+  }
+  // Silkscreen and fiducials on the exposed rim
+  const silk = { c: '#d9d8cc', r: 0.62, h: 0.56 };
+  const [fx, fy] = toPx(0, D.sub.d / 2 - 0.1);
+  P.text('R1-A0  ·  65×65  ·  LOT 2639-0417  ·  PB-FREE', fx, fy, '600 20px "JetBrains Mono", monospace', silk, 'center', 3);
+  const [bxx, byy] = toPx(0, -D.sub.d / 2 + 0.1);
+  P.text('SUBSTRATE 14-2-14  ·  ABF  ·  REV C', bxx, byy, '600 18px "JetBrains Mono", monospace', silk, 'center', 3);
+  for (const [sx, sz] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) {
+    const [px, py] = toPx(sx * 4.9, sz * 4.9);
+    P.circle(px, py, 11, { c: '#d7ad5c', m: 1, r: 0.2, h: 0.6 }); P.ring(px, py, 17, 3, { c: '#0c140f', h: 0.46 });
+  }
+  const [p1x, p1y] = toPx(-4.9, 4.72);
+  P.paint(silk, (c) => { c.beginPath(); c.moveTo(p1x - 14, p1y - 10); c.lineTo(p1x + 14, p1y - 10); c.lineTo(p1x - 14, p1y + 16); c.fill(); });
+  // 2D matrix code
+  const [qx, qy] = toPx(4.6, 4.83);
+  for (let i = 0; i < 12; i++) for (let j = 0; j < 12; j++) if (i === 0 || j === 11 || (i === 11 && j % 2) || (j === 0 && i % 2) || r() < 0.45) P.rect(qx + i * 2.6 - 16, qy + j * 2.6 - 16, 2.6, 2.6, silk);
+  P.smudge(r, 8, 0.1);
+  P.grain(r, 0.04);
+  return P.build(3.0, 0.8);
+}
+
+function paintSubstrateEdge() {
+  const W = 64, H = 256;
+  const P = new Painter(W, H, { c: '#233026', r: 0.55, m: 0, h: 0.5 });
+  const layers = [[0, 8, '#15221a'], [8, 3, '#b87a4b'], [11, 9, '#2d2b21'], [20, 3, '#b87a4b'], [23, 9, '#2d2b21'], [32, 3, '#b87a4b'], [35, 9, '#2d2b21'], [44, 4, '#b87a4b'],
+    [48, 160, '#6e6246'], [208, 4, '#b87a4b'], [212, 9, '#2d2b21'], [221, 3, '#b87a4b'], [224, 9, '#2d2b21'], [233, 3, '#b87a4b'], [236, 12, '#2d2b21'], [248, 8, '#15221a']];
+  for (const [y, h, c] of layers) {
+    const metal = c === '#b87a4b';
+    P.rect(0, y, W, h, { c, m: metal ? 1 : 0, r: metal ? 0.35 : 0.6, h: metal ? 0.58 : 0.5 });
+  }
+  // Glass-weave texture in the core
+  for (let y = 52; y < 204; y += 6) for (let x = (y / 6) % 2 ? 0 : 4; x < W; x += 8) P.rect(x, y, 5, 3, { c: '#7c6f51', h: 0.54 });
+  const t = P.build(1.5, 0.4);
+  for (const k of ['map', 'orm', 'normal']) { t[k].wrapS = THREE.RepeatWrapping; t[k].repeat.set(40, 1); }
+  return t;
+}
+
+function paintStiffener() {
+  const W = 1536, H = 1536, S = D.stiff.ow;
+  const r = rng(5);
+  const P = new Painter(W, H, { c: '#bdbab2', r: 0.3, m: 1, h: 0.5 });
+  // Brushing: long, faint streaks in roughness and height
+  for (let i = 0; i < 2600; i++) {
+    const y = r() * H, v = r();
+    P.rect(0, y, W, 0.6 + r() * 1.4, { r: 0.22 + v * 0.2, h: 0.47 + v * 0.06, a: 0.35 });
+  }
+  const toPx = (x, z) => [(x / S + 0.5) * W, (z / S + 0.5) * H];
+  const etch = { c: '#6e6a63', r: 0.66, h: 0.44 };
+  // Front band (toward +z) — laser marking
+  const [tx, ty] = toPx(-D.stiff.ow / 2 + 0.5, 4.08);
+  P.text('RECKONING', tx, ty, '900 64px Inter, sans-serif', etch, 'left', 2);
+  const [sx, sy] = toPx(-D.stiff.ow / 2 + 0.5, 4.52);
+  P.text('R1  ·  3NM-CLASS  ·  1000 W  ·  WW39’26  ·  ENG SAMPLE', sx, sy, '500 26px "JetBrains Mono", monospace', etch, 'left', 3);
+  // Data matrix
+  const [qx, qy] = toPx(3.7, 3.95);
+  const cell = 7.5;
+  for (let i = 0; i < 16; i++) for (let j = 0; j < 16; j++) {
+    if (i === 0 || j === 15 || (i === 15 && j % 2 === 0) || (j === 0 && i % 2 === 0) || r() < 0.46) P.rect(qx + i * cell, qy + j * cell, cell, cell, etch);
+  }
+  // Back band: handling note
+  const [bx, by] = toPx(0, -4.15);
+  P.text('DO NOT PRESS ON DIE  ·  ESD SENSITIVE', bx, by, '500 24px "JetBrains Mono", monospace', etch, 'center', 5);
+  // Pin-1 triangle, front-left corner
+  const [px, py] = toPx(-4.3, 4.3);
+  P.paint(etch, (c) => { c.beginPath(); c.moveTo(px - 26, py + 26); c.lineTo(px + 22, py + 26); c.lineTo(px - 26, py - 22); c.fill(); });
+  P.smudge(r, 14, 0.14);
+  P.grain(r, 0.03);
+  const t = P.build(1.6, 0.5);
+  for (const k of ['map', 'orm', 'normal']) { t[k].repeat.set(1 / S, 1 / S); t[k].offset.set(0.5, 0.5); }
+  return t;
+}
+
+function paintHBMTop() {
+  const W = 390, H = 465;
+  const r = rng(17);
+  const P = new Painter(W, H, { c: '#17191e', r: 0.12, m: 0.55, h: 0.5 });
+  const etch = { c: '#3c3f47', r: 0.5, h: 0.46 };
+  P.text('HBM', 34, 60, '800 44px Inter, sans-serif', etch, 'left', 2);
+  P.text('24 GB · 8-HI', 34, 104, '500 22px "JetBrains Mono", monospace', etch, 'left', 1);
+  P.text('9.2 GT/s', 34, 134, '500 22px "JetBrains Mono", monospace', etch, 'left', 1);
+  P.circle(W - 40, H - 40, 12, etch);
+  P.smudge(r, 5, 0.12);
+  P.grain(r, 0.03);
+  return P.build(1.2, 0.4);
+}
+
+/* ───────────────────────── Studio environment ─────────────────────────
+   A small scene of emissive "light formers", pre-filtered into an environment map.
+   This is what gives the metals their soft-box reflections. */
+
+const pmrem = new THREE.PMREMGenerator(renderer);
+
+function buildEnvironment(kind) {
+  const s = new THREE.Scene();
+  const shell = new THREE.Mesh(new THREE.SphereGeometry(50, 32, 16), new THREE.ShaderMaterial({
+    side: THREE.BackSide, depthWrite: false,
+    uniforms: { top: { value: new THREE.Color(kind === 'hall' ? '#0b1318' : '#121212') }, bottom: { value: new THREE.Color('#010101') } },
+    vertexShader: 'varying vec3 vP; void main(){ vP = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
+    fragmentShader: 'uniform vec3 top; uniform vec3 bottom; varying vec3 vP; void main(){ float t = smoothstep(-0.2, 0.9, vP.y); gl_FragColor = vec4(mix(bottom, top, t), 1.0); }',
+  }));
+  s.add(shell);
+  const g = new THREE.PlaneGeometry(1, 1);
+  const panel = (hex, k, pos, scale, rotY = 0) => {
+    const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: new THREE.Color(hex).multiplyScalar(k), side: THREE.DoubleSide }));
+    m.position.set(...pos); m.scale.set(...scale); m.lookAt(0, 0, 0); m.rotateZ(rotY);
+    s.add(m); return m;
+  };
+  if (kind === 'hall') {
+    // Rows of cold LED strips like a data-hall aisle, plus a teal status wash
+    for (let i = -3; i <= 3; i++) panel('#cfe6ff', 5, [i * 3.2, 12, 0], [0.5, 26, 1]);
+    panel('#39d0ff', 3.5, [-14, 3, 2], [0.8, 10, 1]);
+    panel('#39d0ff', 3.5, [14, 3, -2], [0.8, 10, 1]);
+    panel('#9ff3ff', 1.8, [0, 6, -16], [18, 1.2, 1]);
+    panel('#ff3020', 1.6, [0, 1.5, 16], [10, 0.4, 1]);
+  } else {
+    // Product setup: overhead soft box, a broken ring of soft boxes at ~35° elevation so
+    // flat metal catches a highlight from any orbit angle, two tall strips, one red kicker.
+    panel('#ffffff', 2.6, [0, 15, 0], [12, 8, 1]);
+    const ring = [[0, 3.4, 11, '#ffffff'], [70, 1.6, 7, '#fff3e6'], [140, 2.6, 9, '#eef3ff'], [215, 1.2, 6, '#ffffff'], [285, 2.2, 8, '#fff6ee']];
+    for (const [deg, k, wdt, hex] of ring) {
+      const a = THREE.MathUtils.degToRad(deg);
+      panel(hex, k, [Math.sin(a) * 14, 9, Math.cos(a) * 14], [wdt, 4.5, 1]);
+    }
+    panel('#fff4ea', 5, [-13, 4, 6], [1.4, 10, 1]);
+    panel('#eef4ff', 4, [13, 5, 4], [1.1, 10, 1]);
+    panel('#ff3020', 3.2, [-7, 1.6, -14], [8, 0.7, 1]);
+  }
+  const tex = pmrem.fromScene(s, 0.035).texture;
+  s.traverse((o) => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); });
+  return tex;
+}
+
+/* ───────────────────────── Model ───────────────────────── */
+
+const chip = new THREE.Group();
+scene.add(chip);
+const parts = {}; // name → { obj, base: y, off: exploded y offset, delay }
+function register(name, obj, off, delay) { parts[name] = { obj, base: obj.position.y, off, delay }; }
+
+function shadowed(o, cast = true, recv = true) { o.traverse((m) => { if (m.isMesh) { m.castShadow = cast; m.receiveShadow = recv; } }); return o; }
+
+let partCount = 0; // instances + meshes, reported on the loader
+let MAT = {};
+
+async function buildModel() {
+  await stage('Etching die layout', 8);
+  const dieT = paintDie();
+  await stage('Routing interposer', 26);
+  const intT = paintInterposer();
+  await stage('Laminating substrate', 40);
+  const subT = paintSubstrate();
+  const edgeT = paintSubstrateEdge();
+  await stage('Machining stiffener', 56);
+  const stT = paintStiffener();
+  const hbmT = paintHBMTop();
+  await stage('Lighting the studio', 66);
+
+  const ENV = { studio: buildEnvironment('studio'), hall: buildEnvironment('hall') };
+  scene.environment = ENV.studio;
+
+  /* Materials */
+  MAT = {
+    dieTop: new THREE.MeshPhysicalMaterial({
+      map: dieT.map, roughnessMap: dieT.orm, metalnessMap: dieT.orm, normalMap: dieT.normal, normalScale: new THREE.Vector2(0.55, 0.55),
+      emissiveMap: dieT.emissive, emissive: new THREE.Color('#ff3020'), emissiveIntensity: 0.0,
+      roughness: 1, metalness: 1,
+      iridescence: 0.55, iridescenceIOR: 1.9, iridescenceThicknessRange: [180, 620],
+      clearcoat: 0.55, clearcoatRoughness: 0.06,
+    }),
+    dieSide: new THREE.MeshPhysicalMaterial({ color: '#4a505b', metalness: 0.75, roughness: 0.34, iridescence: 0.3, iridescenceThicknessRange: [200, 500] }),
+    interTop: new THREE.MeshPhysicalMaterial({ map: intT.map, roughnessMap: intT.orm, metalnessMap: intT.orm, normalMap: intT.normal, roughness: 1, metalness: 1, iridescence: 0.35, iridescenceThicknessRange: [240, 520] }),
+    interSide: new THREE.MeshStandardMaterial({ color: '#5e6674', metalness: 0.8, roughness: 0.3 }),
+    subTop: new THREE.MeshPhysicalMaterial({ map: subT.map, roughnessMap: subT.orm, metalnessMap: subT.orm, normalMap: subT.normal, normalScale: new THREE.Vector2(0.8, 0.8), roughness: 1, metalness: 1, clearcoat: 0.35, clearcoatRoughness: 0.25 }),
+    subSide: new THREE.MeshStandardMaterial({ map: edgeT.map, roughnessMap: edgeT.orm, metalnessMap: edgeT.orm, normalMap: edgeT.normal, roughness: 1, metalness: 1 }),
+    subBottom: new THREE.MeshStandardMaterial({ color: '#12201a', roughness: 0.45 }),
+    stiff: new THREE.MeshPhysicalMaterial({ map: stT.map, roughnessMap: stT.orm, metalnessMap: stT.orm, normalMap: stT.normal, normalScale: new THREE.Vector2(0.5, 0.5), roughness: 1, metalness: 1, anisotropy: 0.65, anisotropyRotation: 0 }),
+    hbmLayer: new THREE.MeshPhysicalMaterial({ color: '#50565f', metalness: 0.8, roughness: 0.28, iridescence: 0.45, iridescenceThicknessRange: [220, 560] }),
+    hbmBond: new THREE.MeshStandardMaterial({ color: '#0b0a09', roughness: 0.5, metalness: 0 }),
+    hbmTop: new THREE.MeshPhysicalMaterial({ map: hbmT.map, roughnessMap: hbmT.orm, metalnessMap: hbmT.orm, normalMap: hbmT.normal, roughness: 1, metalness: 1, clearcoat: 0.8, clearcoatRoughness: 0.04, emissive: new THREE.Color('#ff3020'), emissiveIntensity: 0 }),
+    underfill: new THREE.MeshPhysicalMaterial({ color: '#15100c', roughness: 0.22, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.08 }),
+    capBody: new THREE.MeshPhysicalMaterial({ color: '#ffffff', roughness: 0.62, metalness: 0, sheen: 0.3, sheenColor: new THREE.Color('#a08060'), sheenRoughness: 0.6 }),
+    capEnd: new THREE.MeshStandardMaterial({ color: '#d4d3cc', roughness: 0.3, metalness: 1 }),
+    solder: new THREE.MeshStandardMaterial({ color: '#d7d9dc', roughness: 0.22, metalness: 1 }),
+    copper: new THREE.MeshStandardMaterial({ color: '#d98a57', roughness: 0.3, metalness: 1 }),
+  };
+
+  // Animated per-tile activity flicker on the die's emission (visible in Thermal)
+  MAT.dieTop.userData.uTime = { value: 0 };
+  MAT.dieTop.onBeforeCompile = (sh) => {
+    sh.uniforms.uTime = MAT.dieTop.userData.uTime;
+    sh.fragmentShader = 'uniform float uTime;\nfloat hash12(vec2 p){ vec3 p3 = fract(vec3(p.xyx) * .1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }\n' +
+      sh.fragmentShader.replace('#include <emissivemap_fragment>', `
+        #include <emissivemap_fragment>
+        vec2 cell = floor(vEmissiveMapUv * vec2(6.0, 9.0));
+        float ph = hash12(cell) * 6.2831;
+        float act = 0.55 + 0.45 * sin(uTime * (1.2 + hash12(cell + 7.0) * 2.4) + ph);
+        totalEmissiveRadiance *= mix(0.35, 1.25, act);
+      `);
+  };
+
+  await stage('Assembling parts', 76);
+
+  /* Substrate */
+  const sub = new THREE.Mesh(new THREE.BoxGeometry(D.sub.w, D.sub.t, D.sub.d), [MAT.subSide, MAT.subSide, MAT.subTop, MAT.subBottom, MAT.subSide, MAT.subSide]);
+  sub.position.y = D.sub.t / 2;
+  const subG = new THREE.Group(); subG.add(sub); chip.add(subG);
+  shadowed(subG);
+  register('substrate', subG, 0, 0);
+
+  /* Capacitors (top side, on the substrate group) */
+  const capBodyGeo = new RoundedBoxGeometry(0.086, 0.07, 0.074, 2, 0.012);
+  const capEndGeo = new RoundedBoxGeometry(0.034, 0.075, 0.078, 2, 0.012);
+  function capMeshes(list, y, parent) {
+    const body = new THREE.InstancedMesh(capBodyGeo, MAT.capBody, list.length);
+    const ends = new THREE.InstancedMesh(capEndGeo, MAT.capEnd, list.length * 2);
+    const m = new THREE.Matrix4(), q = new THREE.Quaternion(), p = new THREE.Vector3(), sc = new THREE.Vector3(1, 1, 1), col = new THREE.Color();
+    const r = rng(41);
+    list.forEach((c, i) => {
+      q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), c.rot);
+      p.set(c.x, y, c.z); m.compose(p, q, sc); body.setMatrixAt(i, m);
+      col.setHSL(0.075 + r() * 0.02, 0.32 + r() * 0.1, 0.24 + r() * 0.06); body.setColorAt(i, col);
+      for (const s of [-1, 1]) {
+        const dx = Math.cos(c.rot) * s * 0.058, dz = -Math.sin(c.rot) * s * 0.058;
+        p.set(c.x + dx, y, c.z + dz); m.compose(p, q, sc); ends.setMatrixAt(i * 2 + (s > 0), m);
+      }
+    });
+    body.instanceMatrix.needsUpdate = true; ends.instanceMatrix.needsUpdate = true;
+    parent.add(shadowed(body), shadowed(ends));
+    partCount += list.length * 3;
+  }
+  capMeshes(CAPS.caps, D.y.subTop + 0.037, subG);
+  capMeshes(CAPS.land, -0.038, subG);
+
+  /* Stiffener ring */
+  const rr = (w, h, rad) => {
+    const s = new THREE.Shape(); const x = -w / 2, y = -h / 2;
+    s.moveTo(x + rad, y); s.lineTo(x + w - rad, y); s.quadraticCurveTo(x + w, y, x + w, y + rad);
+    s.lineTo(x + w, y + h - rad); s.quadraticCurveTo(x + w, y + h, x + w - rad, y + h);
+    s.lineTo(x + rad, y + h); s.quadraticCurveTo(x, y + h, x, y + h - rad);
+    s.lineTo(x, y + rad); s.quadraticCurveTo(x, y, x + rad, y); return s;
+  };
+  const ringShape = rr(D.stiff.ow - 0.03, D.stiff.od - 0.03, 0.34);
+  ringShape.holes.push(rr(D.stiff.iw + 0.03, D.stiff.id + 0.03, 0.28));
+  const bev = 0.015;
+  const ringGeo = new THREE.ExtrudeGeometry(ringShape, { depth: D.stiff.t - 2 * bev, bevelEnabled: true, bevelThickness: bev, bevelSize: bev, bevelSegments: 3, curveSegments: 18 });
+  ringGeo.rotateX(-Math.PI / 2);
+  const ring = new THREE.Mesh(ringGeo, MAT.stiff);
+  ring.position.y = D.y.subTop + bev;
+  const stiffG = new THREE.Group(); stiffG.add(shadowed(ring)); chip.add(stiffG);
+  register('stiffener', stiffG, 0.62, 0.04);
+
+  /* BGA balls */
+  const ballGeo = new THREE.SphereGeometry(D.bga.r, 14, 10);
+  const balls = [];
+  const half = (D.bga.n - 1) / 2;
+  for (let i = 0; i < D.bga.n; i++) for (let j = 0; j < D.bga.n; j++) {
+    if (Math.abs(i - half) < D.bga.hole / 2 && Math.abs(j - half) < D.bga.hole / 2) continue;
+    balls.push([(i - half) * D.bga.pitch, (j - half) * D.bga.pitch]);
+  }
+  const bga = new THREE.InstancedMesh(ballGeo, MAT.solder, balls.length);
+  { const m = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3(1, 0.82, 1), p = new THREE.Vector3();
+    balls.forEach(([x, z], i) => { p.set(x, -0.042, z); m.compose(p, q, sc); bga.setMatrixAt(i, m); }); }
+  const bgaG = new THREE.Group(); bgaG.add(shadowed(bga)); chip.add(bgaG);
+  register('bga', bgaG, -0.75, 0);
+  partCount += balls.length;
+
+  /* Bump arrays */
+  function bumpField(fields, pitch, radius, height, y, mat) {
+    const pts = [];
+    for (const [cx, cz, w, d] of fields) for (let x = cx - w / 2 + 0.08; x < cx + w / 2 - 0.05; x += pitch) for (let z = cz - d / 2 + 0.08; z < cz + d / 2 - 0.05; z += pitch) pts.push([x, z]);
+    const g = new THREE.CylinderGeometry(radius, radius, height, 10, 1);
+    const im = new THREE.InstancedMesh(g, mat, pts.length);
+    const m = new THREE.Matrix4();
+    pts.forEach(([x, z], i) => { m.makeTranslation(x, y + height / 2, z); im.setMatrixAt(i, m); });
+    partCount += pts.length;
+    return shadowed(im);
+  }
+  const c4G = new THREE.Group();
+  c4G.add(bumpField([[0, 0, D.inter.w, D.inter.d]], 0.15, 0.034, 0.04, D.y.c4, MAT.solder));
+  chip.add(c4G); register('c4', c4G, 0.5, 0.08);
+
+  const ubG = new THREE.Group();
+  const hbmSites = [-1, 1].flatMap((s) => hbmZ.map((z) => [s * hbmX, z, D.hbm.w, D.hbm.d]));
+  ubG.add(bumpField([[0, 0, D.die.w, D.die.d], ...hbmSites], 0.1, 0.022, 0.02, D.y.interTop, MAT.copper));
+  chip.add(ubG); register('ubump', ubG, 1.4, 0.2);
+
+  /* Interposer */
+  const inter = new THREE.Mesh(new THREE.BoxGeometry(D.inter.w, D.inter.t, D.inter.d), [MAT.interSide, MAT.interSide, MAT.interTop, MAT.interSide, MAT.interSide, MAT.interSide]);
+  inter.position.y = D.y.interBot + D.inter.t / 2;
+  const interG = new THREE.Group(); interG.add(shadowed(inter)); chip.add(interG);
+  register('interposer', interG, 0.95, 0.14);
+
+  /* Underfill fillets */
+  const ufG = new THREE.Group();
+  const ufDie = new THREE.Mesh(new RoundedBoxGeometry(D.die.w + 0.1, 0.05, D.die.d + 0.1, 3, 0.022), MAT.underfill);
+  ufDie.position.y = D.y.interTop + 0.022;
+  ufG.add(ufDie);
+  for (const [x, z] of hbmSites.map((h) => [h[0], h[1]])) {
+    const f = new THREE.Mesh(new RoundedBoxGeometry(D.hbm.w + 0.08, 0.045, D.hbm.d + 0.08, 3, 0.02), MAT.underfill);
+    f.position.set(x, D.y.interTop + 0.02, z); ufG.add(f);
+  }
+  chip.add(shadowed(ufG)); register('underfill', ufG, 1.55, 0.26);
+
+  /* Compute die */
+  const die = new THREE.Mesh(new THREE.BoxGeometry(D.die.w, D.die.t, D.die.d), [MAT.dieSide, MAT.dieSide, MAT.dieTop, MAT.dieSide, MAT.dieSide, MAT.dieSide]);
+  die.position.y = D.y.dieBot + D.die.t / 2;
+  const dieG = new THREE.Group(); dieG.add(shadowed(die)); chip.add(dieG);
+  register('die', dieG, 1.85, 0.32);
+
+  /* HBM stacks: base logic die + 8 DRAM dies with bond layers between them */
+  const hbmLayerGeo = new THREE.BoxGeometry(D.hbm.w, D.hbm.layer, D.hbm.d);
+  const hbmBondGeo = new THREE.BoxGeometry(D.hbm.w - 0.04, D.hbm.bond, D.hbm.d - 0.04);
+  const hbmBaseGeo = new THREE.BoxGeometry(D.hbm.w, D.hbm.base, D.hbm.d);
+  const topMats = [MAT.hbmLayer, MAT.hbmLayer, MAT.hbmTop, MAT.hbmLayer, MAT.hbmLayer, MAT.hbmLayer];
+  hbmSites.forEach(([x, z], si) => {
+    const baseG = new THREE.Group();
+    const base = new THREE.Mesh(hbmBaseGeo, MAT.dieSide);
+    base.position.set(x, D.y.dieBot + D.hbm.base / 2, z); baseG.add(shadowed(base));
+    chip.add(baseG); register('hbm' + si + '_base', baseG, 1.85, 0.34 + si * 0.02);
+    let y = D.y.dieBot + D.hbm.base;
+    for (let k = 0; k < D.hbm.n; k++) {
+      const lg = new THREE.Group();
+      const bond = new THREE.Mesh(hbmBondGeo, MAT.hbmBond); bond.position.set(x, y + D.hbm.bond / 2, z);
+      const layer = new THREE.Mesh(hbmLayerGeo, k === D.hbm.n - 1 ? topMats : MAT.hbmLayer);
+      layer.position.set(x, y + D.hbm.bond + D.hbm.layer / 2, z);
+      lg.add(shadowed(bond), shadowed(layer));
+      y += D.hbm.bond + D.hbm.layer;
+      chip.add(lg);
+      register('hbm' + si + '_' + k, lg, 1.85 + (k + 1) * 0.085, 0.36 + si * 0.02 + k * 0.012);
+      partCount += 2;
+    }
+    partCount += 1;
+  });
+  partCount += 5 + hbmSites.length;
+
+  return ENV;
+}
+
+/* ───────────────────────── Floor with contact shadow ───────────────────────── */
+
+const CS = { size: 16, res: 512, far: 4.5, blur: 2.6, darkness: 1.6, opacity: 0.92 };
+const csRT = new THREE.WebGLRenderTarget(CS.res, CS.res);
+const csBlurRT = new THREE.WebGLRenderTarget(CS.res, CS.res);
+csRT.texture.generateMipmaps = csBlurRT.texture.generateMipmaps = false;
+const csCam = new THREE.OrthographicCamera(-CS.size / 2, CS.size / 2, CS.size / 2, -CS.size / 2, 0, CS.far);
+csCam.rotation.x = Math.PI / 2;
+const csDepth = new THREE.MeshDepthMaterial();
+csDepth.userData.darkness = { value: CS.darkness };
+csDepth.onBeforeCompile = (sh) => {
+  sh.uniforms.darkness = csDepth.userData.darkness;
+  sh.fragmentShader = 'uniform float darkness;\n' + sh.fragmentShader.replace(
+    'gl_FragColor = vec4( vec3( 1.0 - fragCoordZ ), opacity );',
+    'gl_FragColor = vec4( vec3( 0.0 ), pow( 1.0 - fragCoordZ, 1.6 ) * darkness );');
+};
+csDepth.depthTest = false; csDepth.depthWrite = false;
+const hBlur = new FullScreenQuad(new THREE.ShaderMaterial(HorizontalBlurShader)); hBlur.material.depthTest = false;
+const vBlur = new FullScreenQuad(new THREE.ShaderMaterial(VerticalBlurShader)); vBlur.material.depthTest = false;
+
+const floorMat = new THREE.MeshStandardMaterial({ color: '#181615', roughness: 0.7, metalness: 0, envMapIntensity: 0.14 });
+floorMat.onBeforeCompile = (sh) => {
+  sh.uniforms.uCs = { value: csRT.texture };
+  sh.uniforms.uCsSize = { value: CS.size };
+  sh.uniforms.uCsOpacity = { value: CS.opacity };
+  sh.vertexShader = 'uniform float uCsSize;\nvarying vec2 vCsUv;\n' + sh.vertexShader.replace('#include <project_vertex>',
+    '#include <project_vertex>\n vCsUv = (modelMatrix * vec4(transformed, 1.0)).xz / uCsSize + 0.5;');
+  sh.fragmentShader = 'uniform sampler2D uCs;\nuniform float uCsOpacity;\nvarying vec2 vCsUv;\n' + sh.fragmentShader.replace('#include <opaque_fragment>', `
+    float csIn = step(0.0, vCsUv.x) * step(vCsUv.x, 1.0) * step(0.0, vCsUv.y) * step(vCsUv.y, 1.0);
+    float csA = texture2D(uCs, clamp(vCsUv, 0.0, 1.0)).a * csIn;
+    outgoingLight *= 1.0 - clamp(csA, 0.0, 1.0) * uCsOpacity;
+    #include <opaque_fragment>`);
+};
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(140, 140), floorMat);
+floor.rotation.x = -Math.PI / 2;
+scene.add(floor);
+
+function renderContactShadow() {
+  const bg = scene.background, fog = scene.fog;
+  scene.background = null; scene.fog = null; floor.visible = false;
+  const prevClear = renderer.getClearAlpha(); const cc = renderer.getClearColor(new THREE.Color());
+  renderer.setClearColor(0x000000, 0);
+  scene.overrideMaterial = csDepth;
+  renderer.setRenderTarget(csRT); renderer.clear(); renderer.render(scene, csCam);
+  scene.overrideMaterial = null;
+  for (const amt of [CS.blur, CS.blur * 0.45]) {
+    hBlur.material.uniforms.tDiffuse.value = csRT.texture; hBlur.material.uniforms.h.value = amt / 256;
+    renderer.setRenderTarget(csBlurRT); hBlur.render(renderer);
+    vBlur.material.uniforms.tDiffuse.value = csBlurRT.texture; vBlur.material.uniforms.v.value = amt / 256;
+    renderer.setRenderTarget(csRT); vBlur.render(renderer);
+  }
+  renderer.setRenderTarget(null);
+  renderer.setClearColor(cc, prevClear);
+  scene.background = bg; scene.fog = fog; floor.visible = true;
+}
+
+/* ───────────────────────── Lights ───────────────────────── */
+
+const key = new THREE.SpotLight('#fff1e2', 3.2, 0, 0.4, 0.9, 0);
+key.position.set(6.5, 15, 8);
+key.target.position.set(0, 0.8, 0);
+key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+key.shadow.camera.near = 8; key.shadow.camera.far = 30;
+key.shadow.bias = -0.00015; key.shadow.normalBias = 0.012;
+key.shadow.radius = 3;
+scene.add(key, key.target);
+
+const rim = new THREE.SpotLight('#ff3020', 1.6, 0, 0.2, 0.9, 0);
+rim.position.set(-9, 3.6, -10);
+rim.target.position.set(0, 3.6, 0);
+scene.add(rim, rim.target);
+
+const fillL = new THREE.DirectionalLight('#cfd9ff', 0.25);
+fillL.position.set(-6, 4, 8);
+scene.add(fillL);
+
+const heat = new THREE.PointLight('#ff4a14', 0, 7, 2);
+heat.position.set(0, 2.1, 0);
+scene.add(heat);
+
+/* ───────────────────────── Post-processing ───────────────────────── */
+
+let composer, gtao, bloom, finish;
+function buildComposer() {
+  const pr = renderer.getPixelRatio();
+  const rt = new THREE.WebGLRenderTarget(innerWidth * pr, innerHeight * pr, { type: THREE.HalfFloatType, samples: 4 });
+  composer = new EffectComposer(renderer, rt);
+  composer.addPass(new RenderPass(scene, camera));
+  gtao = new GTAOPass(scene, camera, innerWidth, innerHeight);
+  gtao.updateGtaoMaterial({ radius: 0.35, distanceExponent: 2, thickness: 1.2, scale: 1.0, samples: 16 });
+  gtao.updatePdMaterial({ lumaPhi: 10, depthPhi: 2, normalPhi: 3, radius: 6, rings: 2, samples: 16 });
+  gtao.blendIntensity = 0.9;
+  composer.addPass(gtao);
+  bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth / 2, innerHeight / 2), 0.32, 0.55, 0.92);
+  composer.addPass(bloom);
+  composer.addPass(new OutputPass());
+  finish = new ShaderPass({
+    uniforms: { tDiffuse: { value: null }, uTime: { value: 0 }, uRes: { value: new THREE.Vector2(innerWidth * pr, innerHeight * pr) }, uGrain: { value: 0.032 }, uVig: { value: 0.55 }, uCA: { value: 0.006 } },
+    vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+    fragmentShader: `
+      uniform sampler2D tDiffuse; uniform float uTime, uGrain, uVig, uCA; uniform vec2 uRes; varying vec2 vUv;
+      float hash(vec2 p){ vec3 p3 = fract(vec3(p.xyx) * .1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
+      void main(){
+        vec2 d = vUv - 0.5;
+        float r2 = dot(d, d);
+        vec2 off = d * r2 * uCA;
+        vec3 col = vec3(texture2D(tDiffuse, vUv - off).r, texture2D(tDiffuse, vUv).g, texture2D(tDiffuse, vUv + off).b);
+        vec2 dv = d * vec2(uRes.x / uRes.y, 1.0);
+        float vig = smoothstep(1.15, 0.25, length(dv));
+        col *= mix(1.0, vig, uVig);
+        float lum = dot(col, vec3(0.2126, 0.7152, 0.0722));
+        float n = hash(vUv * uRes + fract(uTime * 7.13) * 400.0) - 0.5;
+        col += n * uGrain * (1.0 - lum * 0.7);
+        col += (hash(vUv * uRes * 1.37) - 0.5) / 255.0;
+        gl_FragColor = vec4(col, 1.0);
+      }`,
+  });
+  composer.addPass(finish);
+}
+
+/* ───────────────────────── Lighting presets ───────────────────────── */
+
+const PRESETS = {
+  studio: { env: 'studio', envI: 1.0, key: 3.2, keyC: '#fff1e2', rim: 1.6, rimC: '#ff3020', fill: 0.25, heat: 0, dieE: 0.0, hbmE: 0, eC: '#ff3020', bloom: 0.32, exp: 1.0, bg: '#060606' },
+  hall: { env: 'hall', envI: 1.1, key: 1.4, keyC: '#d6e6ff', rim: 3.4, rimC: '#20c8ff', fill: 0.4, heat: 0, dieE: 0.35, hbmE: 0, eC: '#36c8ff', bloom: 0.45, exp: 1.05, bg: '#04070a' },
+  thermal: { env: 'studio', envI: 0.28, key: 0.45, keyC: '#ffd9c2', rim: 4.0, rimC: '#ff5a1f', fill: 0.05, heat: 9, dieE: 5.5, hbmE: 0.06, eC: '#ff4a14', bloom: 0.95, exp: 1.0, bg: '#0a0504' },
+};
+let ENVMAPS = null;
+const lp = { t: 1, from: null, to: PRESETS.studio, swapEnv: false };
+let curEnvName = 'studio';
+const cur = { envI: 1, key: 3.2, rim: 1.6, fill: 0.25, heat: 0, dieE: 0, hbmE: 0, bloom: 0.32, exp: 1, keyC: new THREE.Color(), rimC: new THREE.Color(), eC: new THREE.Color(), bg: new THREE.Color() };
+function snapshot() {
+  return { envI: scene.environmentIntensity, key: key.intensity, rim: rim.intensity, fill: fillL.intensity, heat: heat.intensity, dieE: MAT.dieTop.emissiveIntensity, hbmE: MAT.hbmTop.emissiveIntensity,
+    bloom: bloom.strength, exp: renderer.toneMappingExposure, keyC: key.color.clone(), rimC: rim.color.clone(), eC: MAT.dieTop.emissive.clone(), bg: scene.background.clone() };
+}
+function setPreset(name) {
+  lp.from = snapshot(); lp.to = PRESETS[name]; lp.t = 0; lp.swapEnv = PRESETS[name].env !== curEnvName;
+  document.querySelectorAll('[data-preset]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.preset === name)));
+}
+const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+function updatePreset(dt) {
+  if (lp.t >= 1) return;
+  lp.t = Math.min(1, lp.t + dt / (reduceMotion ? 0.01 : 1.1));
+  const k = ease(lp.t), a = lp.from, b = lp.to;
+  const L = (x, y) => x + (y - x) * k;
+  // Environment swap happens through a dip in its intensity so it never pops.
+  if (lp.swapEnv && lp.t >= 0.5 && curEnvName !== b.env) { scene.environment = ENVMAPS[b.env]; curEnvName = b.env; }
+  scene.environmentIntensity = L(a.envI, b.envI) * (lp.swapEnv ? 1 - Math.sin(Math.PI * lp.t) * 0.85 : 1);
+  key.intensity = L(a.key, b.key); rim.intensity = L(a.rim, b.rim); fillL.intensity = L(a.fill, b.fill); heat.intensity = L(a.heat, b.heat);
+  MAT.dieTop.emissiveIntensity = L(a.dieE, b.dieE); MAT.hbmTop.emissiveIntensity = L(a.hbmE, b.hbmE);
+  bloom.strength = L(a.bloom, b.bloom); renderer.toneMappingExposure = L(a.exp, b.exp);
+  key.color.copy(a.keyC).lerp(cur.keyC.set(b.keyC), k); rim.color.copy(a.rimC).lerp(cur.rimC.set(b.rimC), k);
+  MAT.dieTop.emissive.copy(a.eC).lerp(cur.eC.set(b.eC), k); MAT.hbmTop.emissive.copy(MAT.dieTop.emissive);
+  scene.background.copy(a.bg).lerp(cur.bg.set(b.bg), k); scene.fog.color.copy(scene.background);
+}
+
+/* ───────────────────────── Explode ───────────────────────── */
+
+let explodeTarget = 0, explodeT = 0;
+function setExploded(on) {
+  explodeTarget = on ? 1 : 0;
+  $('btn-assembled').setAttribute('aria-pressed', String(!on));
+  $('btn-exploded').setAttribute('aria-pressed', String(on));
+}
+let MAXD = 0;
+function updateExplode(dt) {
+  const dir = Math.sign(explodeTarget - explodeT);
+  if (dir === 0) return;
+  const before = ease(explodeT);
+  explodeT = THREE.MathUtils.clamp(explodeT + dir * dt / (reduceMotion ? 0.01 : 2.2), 0, 1);
+  for (const p of Object.values(parts)) {
+    // Stagger: lower parts lead when opening, upper parts lead when closing.
+    const local = THREE.MathUtils.clamp(explodeT * (1 + MAXD) - p.delay, 0, 1);
+    p.obj.position.y = p.base + p.off * ease(local);
+  }
+  // Raise the camera with the stack's centre so the framing holds.
+  const lift = (ease(explodeT) - before) * 0.9;
+  if (fly.t >= 1) { controls.target.y += lift; camera.position.y += lift; }
+}
+
+/* ───────────────────────── Parts / hotspots ───────────────────────── */
+
+const HOTSPOTS = [
+  { id: 'die', part: 'die', title: 'Compute die', at: [0.9, D.y.dieTop, -1.1], view: [0.45, 0.9, 0.75], dist: 8,
+    body: 'One piece of silicon, as large as a lithography scanner can print in a single exposure. Matrix engines fill the two halves; the band across the middle is on-chip cache.',
+    specs: () => [`${Math.round(D.die.w * MM * D.die.d * MM)} mm² at the reticle limit`, '3 nm-class process', 'Roughly 200 billion transistors'] },
+  { id: 'hbm', part: 'hbm2_7', title: 'HBM stacks', at: [-hbmX, D.y.dieTop, hbmZ[2]], view: [-0.75, 0.75, 0.7], dist: 6.5,
+    body: 'Memory dies thinned to about 30 µm and stacked eight high, wired vertically by through-silicon vias. Moving data, rather than the arithmetic, sets the pace of most AI workloads.',
+    specs: () => ['6 stacks × 8 DRAM dies + 1 base die', '≈1.2 TB/s per stack', '144 GB total'] },
+  { id: 'interposer', part: 'interposer', title: 'Silicon interposer', at: [0, D.y.interTop, D.inter.d / 2 - 0.05], view: [0.25, 0.4, 1], dist: 6.5,
+    body: 'A slab of passive silicon wired like a miniature circuit board, so logic and memory talk across millimetres rather than centimetres. Switch to Exploded to see the bump arrays.',
+    specs: () => [`${Math.round(D.inter.w * MM * D.inter.d * MM).toLocaleString()} mm² of silicon`, 'Microbumps at 40–55 µm pitch', 'Thousands of wires per millimetre'] },
+  { id: 'caps', part: 'substrate', title: 'Decoupling capacitors', at: [3.83, D.y.subTop + 0.075, 1.2], view: [1, 0.55, 0.45], dist: 4.8,
+    body: 'Current demand swings by hundreds of amps within microseconds as work starts and stops. These ceramic capacitors hold the core voltage steady while it does.',
+    specs: () => [`${CAPS.caps.length} on top, ${CAPS.land.length} under the package`, '0402 size: 1.0 × 0.5 mm', 'Multilayer ceramic (MLCC)'] },
+  { id: 'stiffener', part: 'stiffener', title: 'Stiffener ring', at: [-1.6, D.y.subTop + D.stiff.t, 4.1], view: [0.05, 0.75, 1], dist: 7.5,
+    body: 'A plated copper frame bonded to the substrate. It keeps the thin organic laminate flat as the package heats and cools through thousands of power cycles.',
+    specs: () => ['Nickel-plated copper, brushed', `${Math.round(D.sub.w * MM)} × ${Math.round(D.sub.d * MM)} mm package`, 'Laser-marked lot and date code'] },
+  { id: 'bga', part: 'bga', title: 'Ball grid array', at: [3.2, -0.09, 3.2], view: [0.8, -0.42, 0.9], dist: 8,
+    body: 'Every watt and every signal reaches the board through these solder balls. Most of them carry power and ground, because the die draws current at under one volt.',
+    specs: () => [`${(D.bga.n * D.bga.n - D.bga.hole * D.bga.hole).toLocaleString()} solder balls`, '1.0 mm pitch', '≈1,000 A at under 1 V'] },
+];
+
+const hsLayer = $('hotspots');
+const anchors = HOTSPOTS.map((h, i) => {
+  const btn = document.createElement('button');
+  btn.type = 'button'; btn.className = 'hotspot';
+  btn.innerHTML = `<i></i><span>${h.title}</span>`;
+  btn.setAttribute('aria-label', `Inspect ${h.title}`);
+  btn.addEventListener('click', () => select(i, true));
+  hsLayer.appendChild(btn);
+  return { el: btn, obj: null, h };
+});
+
+let selected = 0;
+function select(i, fly) {
+  selected = (i + HOTSPOTS.length) % HOTSPOTS.length;
+  const h = HOTSPOTS[selected];
+  $('detail-title').textContent = h.title;
+  $('detail-count').textContent = String(selected + 1).padStart(2, '0') + ' / ' + String(HOTSPOTS.length).padStart(2, '0');
+  $('detail-body').textContent = h.body;
+  const ul = $('detail-specs'); ul.innerHTML = '';
+  for (const s of h.specs()) { const li = document.createElement('li'); li.textContent = s; ul.appendChild(li); }
+  anchors.forEach((a, j) => a.el.classList.toggle('active', j === selected));
+  if (fly) flyToPart(selected);
+}
+
+const fly = { t: 1, dur: 1.6, p0: new THREE.Vector3(), p1: new THREE.Vector3(), t0: new THREE.Vector3(), t1: new THREE.Vector3() };
+function flyTo(pos, target, dur = 1.6) {
+  fly.p0.copy(camera.position); fly.t0.copy(controls.target);
+  fly.p1.copy(pos); fly.t1.copy(target); fly.t = 0; fly.dur = reduceMotion ? 0.01 : dur;
+}
+function flyToPart(i) {
+  const a = anchors[i]; const h = a.h;
+  const target = new THREE.Vector3(); a.obj.getWorldPosition(target);
+  const dir = new THREE.Vector3(...h.view).normalize();
+  setAutoRotate(false);
+  flyTo(target.clone().add(dir.multiplyScalar(h.dist * Math.max(1, fitScale * 0.85))), target);
+}
+function resetView() { setAutoRotate(!reduceMotion); flyTo(HOME.pos, HOME.target.clone().setY(HOME.target.y + ease(explodeTarget) * 0.9), 1.8); }
+function updateFly(dt) {
+  if (fly.t >= 1) return;
+  fly.t = Math.min(1, fly.t + dt / fly.dur);
+  const k = ease(fly.t);
+  // Arc the camera slightly outward mid-flight so it never cuts through the model.
+  const mid = Math.sin(Math.PI * k) * 0.12;
+  camera.position.lerpVectors(fly.p0, fly.p1, k);
+  camera.position.addScaledVector(camera.position.clone().sub(controls.target).normalize(), mid * camera.position.distanceTo(controls.target));
+  controls.target.lerpVectors(fly.t0, fly.t1, k);
+}
+
+function setAutoRotate(on) { controls.autoRotate = on; $('btn-rotate').setAttribute('aria-pressed', String(on)); }
+
+/* Hotspot projection: follow parts as they move; fade when facing away. */
+const _v = new THREE.Vector3(), _n = new THREE.Vector3(), _c = new THREE.Vector3();
+function updateHotspots() {
+  const w = innerWidth, h = innerHeight;
+  for (const a of anchors) {
+    a.obj.getWorldPosition(_v);
+    _n.copy(camera.position).sub(_v).normalize();
+    const facing = a.h.id === 'bga' ? _n.y < 0.05 : _n.y > -0.05;
+    _c.copy(_v).project(camera);
+    const off = _c.z > 1 || Math.abs(_c.x) > 1.05 || Math.abs(_c.y) > 1.05;
+    a.el.classList.toggle('hidden', off);
+    a.el.classList.toggle('dim', !off && !facing);
+    a.el.style.transform = `translate(${((_c.x + 1) / 2) * w}px, ${((1 - _c.y) / 2) * h}px)`;
+  }
+}
+
+/* ───────────────────────── Quality ───────────────────────── */
+
+let quality = 'high';
+function setQuality(q, manual) {
+  quality = q;
+  const pr = q === 'high' ? Math.min(devicePixelRatio, 2) : q === 'balanced' ? Math.min(devicePixelRatio, 1.5) : Math.min(devicePixelRatio, 1);
+  renderer.setPixelRatio(pr);
+  composer.setPixelRatio(pr);
+  composer.setSize(innerWidth, innerHeight);
+  finish.uniforms.uRes.value.set(innerWidth * pr, innerHeight * pr);
+  gtao.enabled = q === 'high';
+  bloom.enabled = q !== 'fast';
+  key.shadow.mapSize.setScalar(q === 'fast' ? 1024 : 2048);
+  if (key.shadow.map) { key.shadow.map.dispose(); key.shadow.map = null; }
+  document.querySelectorAll('[data-quality]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.quality === q)));
+  if (manual) perf.locked = true;
+}
+const perf = { frames: 0, acc: 0, locked: false, settle: 0 };
+function autoQuality(dt) {
+  if (perf.locked) return;
+  perf.settle += dt; if (perf.settle < 3) return; // let shaders compile and the intro finish
+  perf.frames++; perf.acc += dt;
+  if (perf.frames < 60) return;
+  const avg = perf.acc / perf.frames; perf.frames = 0; perf.acc = 0;
+  if (avg > 1 / 32 && quality === 'high') setQuality('balanced');
+  else if (avg > 1 / 26 && quality === 'balanced') { setQuality('fast'); perf.locked = true; }
+  else perf.locked = true;
+}
+
+/* ───────────────────────── UI wiring ───────────────────────── */
+
+$('btn-assembled').addEventListener('click', () => setExploded(false));
+$('btn-exploded').addEventListener('click', () => setExploded(true));
+document.querySelectorAll('[data-preset]').forEach((b) => b.addEventListener('click', () => setPreset(b.dataset.preset)));
+document.querySelectorAll('[data-quality]').forEach((b) => b.addEventListener('click', () => setQuality(b.dataset.quality, true)));
+$('btn-rotate').addEventListener('click', () => setAutoRotate(!controls.autoRotate));
+$('btn-reset').addEventListener('click', resetView);
+$('btn-reset-2').addEventListener('click', resetView);
+$('btn-prev').addEventListener('click', () => select(selected - 1, true));
+$('btn-next').addEventListener('click', () => select(selected + 1, true));
+controls.addEventListener('start', () => { fly.t = 1; });
+addEventListener('keydown', (e) => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const k = e.key.toLowerCase();
+  if (k === 'e') setExploded(explodeTarget === 0);
+  else if (k === '1') setPreset('studio');
+  else if (k === '2') setPreset('hall');
+  else if (k === '3') setPreset('thermal');
+  else if (k === 'r') setAutoRotate(!controls.autoRotate);
+  else if (e.key === 'ArrowRight') select(selected + 1, true);
+  else if (e.key === 'ArrowLeft') select(selected - 1, true);
+  else if (e.key === 'Escape') resetView();
+});
+
+/* Frame the model inside the screen area the interface leaves free: shift the projection
+   centre there and pick a home distance that fits the package into it. */
+function frameModel() {
+  const W = innerWidth, H = innerHeight, R = 6.0;
+  let fx = 0, fy = 0, fw = W, fh = H;
+  if (W <= 860) {
+    const top = $('title-block').getBoundingClientRect().bottom, bot = $('detail').getBoundingClientRect().top;
+    fy = top; fh = Math.max(140, bot - top);
+  } else {
+    fw = $('controls').getBoundingClientRect().left;
+  }
+  const cx = fx + fw / 2, cy = fy + fh / 2;
+  camera.setViewOffset(W, H, W / 2 - cx, H / 2 - cy, W, H);
+  const ppu = Math.min(fw * 0.86, fh * 1.45) / (2 * R);
+  const dist = (H / ppu) / 2 / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+  const atHome = camera.position.distanceTo(HOME.pos) < 0.01;
+  fitScale = dist / REF_DIST;
+  HOME.pos.copy(HOME_DIR).multiplyScalar(dist).add(new THREE.Vector3(0, HOME.target.y, 0));
+  controls.maxDistance = Math.max(42, dist * 1.7);
+  if (atHome) camera.position.copy(HOME.pos);
+}
+
+function onResize() {
+  camera.aspect = innerWidth / innerHeight;
+  camera.fov = innerWidth / innerHeight < 0.8 ? 34 : 28;
+  frameModel();
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+  if (composer) {
+    composer.setSize(innerWidth, innerHeight);
+    const pr = renderer.getPixelRatio();
+    finish.uniforms.uRes.value.set(innerWidth * pr, innerHeight * pr);
+  }
+}
+addEventListener('resize', onResize);
+
+/* ───────────────────────── Boot ───────────────────────── */
+
+const chipLift = 1.0;
+chip.position.y = chipLift;
+
+async function boot() {
+  try {
+    await Promise.race([
+      Promise.all([document.fonts.load('900 64px Inter'), document.fonts.load('500 24px "JetBrains Mono"'), document.fonts.load('600 20px "JetBrains Mono"')]),
+      new Promise((r) => setTimeout(r, 2500)),
+    ]);
+  } catch (e) { /* fonts are a nicety for the laser marks */ }
+
+  ENVMAPS = await buildModel();
+  buildComposer();
+  onResize();
+
+  anchors.forEach((a) => {
+    const p = parts[a.h.part].obj;
+    const o = new THREE.Object3D(); o.position.set(...a.h.at);
+    p.add(o); a.obj = o;
+  });
+  MAXD = Math.max(...Object.values(parts).map((p) => p.delay));
+  setAutoRotate(!reduceMotion);
+  $('spec-die').textContent = `${Math.round(D.die.w * MM * D.die.d * MM)} mm²`;
+  select(0, false);
+
+  await stage(`Compiling shaders for ${partCount.toLocaleString()} parts`, 88);
+  try { await renderer.compileAsync(scene, camera); } catch (e) { /* older drivers: compile on first frame */ }
+  if (innerWidth < 860) setQuality('balanced'); else setQuality('high');
+  await stage('Ready', 100);
+
+  const clock = new THREE.Clock();
+  let first = true;
+  if (!reduceMotion) { camera.position.copy(HOME.pos).multiplyScalar(1.5); flyTo(HOME.pos, HOME.target, 3.2); }
+  else camera.position.copy(HOME.pos);
+
+  renderer.setAnimationLoop(() => {
+    const dt = Math.min(clock.getDelta(), 0.1), t = clock.elapsedTime;
+    updateFly(dt);
+    updatePreset(dt);
+    updateExplode(dt);
+    chip.position.y = chipLift + (reduceMotion ? 0 : Math.sin(t * 0.8) * 0.035);
+    controls.update(dt);
+    // Fog only ever eats the floor's horizon, never the model, whatever the zoom.
+    const camD = camera.position.distanceTo(controls.target);
+    scene.fog.near = camD + 6; scene.fog.far = camD + 40;
+    MAT.dieTop.userData.uTime.value = t;
+    finish.uniforms.uTime.value = t;
+    renderContactShadow();
+    renderer.shadowMap.needsUpdate = true;
+    composer.render(dt);
+    updateHotspots();
+    autoQuality(dt);
+    if (first) { first = false; $('loader').classList.add('done'); }
+  });
+}
+
+boot().catch((e) => {
+  console.error(e);
+  fail('The model could not be built on this device. Reloading usually fixes it; if not, try a desktop browser with hardware acceleration turned on.');
+});
+</script>
+</body>
+</html>
