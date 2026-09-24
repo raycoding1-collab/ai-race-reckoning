@@ -310,21 +310,17 @@ body.touring .lb { transform: none; }
 @media (max-width: 860px) {
   :root { --nav-h: 56px; }
   .stage { height: 100lvh; bottom: auto; }
-  .sec:not(.hero) { display: block; padding: 0; min-height: 175svh; }
+  /* Full-screen model; captions scroll over it on a soft dark field */
+  .sec:not(.hero) { display: block; min-height: 0; padding: 0 0 14svh; }
   .sec:not(.hero)::before { display: none; }
-  .sec:not(.hero) .pin {
-    position: sticky; top: 0; height: 100svh; isolation: isolate;
-    display: flex; flex-direction: column; justify-content: flex-end;
-    padding: 0 var(--gutter) calc(28px + env(safe-area-inset-bottom, 0px));
+  .sec:not(.hero) .pin { display: block; padding: 100svh var(--gutter) 0; }
+  .sec:not(.hero) .copy { isolation: isolate; }
+  .sec:not(.hero) .copy::before {
+    content: ""; position: absolute; z-index: -1; pointer-events: none;
+    top: -96px; bottom: -72px; left: calc(-1 * var(--gutter)); right: calc(-1 * var(--gutter));
+    background: linear-gradient(to bottom, rgba(10,10,11,0) 0, rgba(10,10,11,0.8) 96px, rgba(10,10,11,0.84) calc(100% - 72px), rgba(10,10,11,0) 100%);
   }
-  .sec:not(.hero) .pin::before {
-    content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
-    background: linear-gradient(to top, rgba(10,10,11,0.96) 0%, rgba(10,10,11,0.82) 30%, rgba(10,10,11,0.35) 50%, rgba(10,10,11,0) 62%);
-  }
-  .specs-sec .pin::before, .scale-sec .pin::before { background: linear-gradient(to top, rgba(10,10,11,0.97) 0%, rgba(10,10,11,0.88) 55%, rgba(10,10,11,0.4) 72%, rgba(10,10,11,0) 84%) !important; }
-  .specs-sec { min-height: 150svh !important; }
-  .scale-sec { min-height: 190svh !important; }
-  .explore-sec { min-height: 130svh !important; }
+  .explore-sec .copy { margin-inline: auto; }
   .copy { gap: 14px; }
   h1 { font-size: clamp(38px, 10.5vw, 56px); }
   h2 { font-size: clamp(28px, 8vw, 40px); }

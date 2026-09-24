@@ -735,7 +735,7 @@ async function buildModel() {
 
 /* ───────────────────────── Floor with contact shadow ───────────────────────── */
 
-const CS = { size: 16, res: MOBILE ? 256 : 512, far: 4.5, blur: 2.6, darkness: 1.6, opacity: 0.92 };
+const CS = { size: 16, res: 512, far: 4.5, blur: 2.6, darkness: 1.6, opacity: 0.92 };
 const csRT = new THREE.WebGLRenderTarget(CS.res, CS.res);
 const csBlurRT = new THREE.WebGLRenderTarget(CS.res, CS.res);
 csRT.texture.generateMipmaps = csBlurRT.texture.generateMipmaps = false;
@@ -796,7 +796,7 @@ const key = new THREE.SpotLight('#fff1e2', 3.2, 0, 0.4, 0.9, 0);
 key.position.set(6.5, 15, 8);
 key.target.position.set(0, 0.8, 0);
 key.castShadow = true;
-key.shadow.mapSize.setScalar(MOBILE ? 1024 : 2048);
+key.shadow.mapSize.setScalar(2048);
 key.shadow.camera.near = 8; key.shadow.camera.far = 30;
 key.shadow.bias = -0.00015; key.shadow.normalBias = 0.012;
 key.shadow.radius = 3;
@@ -820,7 +820,7 @@ scene.add(heat);
 let composer, gtao, bloom, finish;
 function buildComposer() {
   const pr = renderer.getPixelRatio();
-  const rt = new THREE.WebGLRenderTarget(innerWidth * pr, innerHeight * pr, { type: THREE.HalfFloatType, samples: MOBILE ? 2 : 4 });
+  const rt = new THREE.WebGLRenderTarget(innerWidth * pr, innerHeight * pr, { type: THREE.HalfFloatType, samples: 4 });
   composer = new EffectComposer(renderer, rt);
   composer.addPass(new RenderPass(scene, camera));
   gtao = new GTAOPass(scene, camera, innerWidth, innerHeight);
@@ -1008,7 +1008,17 @@ function updateHotspots() {
 /* ───────────────────────── Quality ───────────────────────── */
 
 let quality = 'high';
-const dyn = { pr: Math.min(devicePixelRatio, 2), max: Math.min(devicePixelRatio, 2), frames: 0, acc: 0, cool: 0 };
+// Phones start at full desktop quality and step down this ladder only if frame time demands it:
+// first a little resolution, then ambient occlusion, then more resolution.
+const LADDER = (() => {
+  const m = Math.min(devicePixelRatio, 2), l = [{ pr: m, ao: true }];
+  if (m > 1.75) l.push({ pr: 1.75, ao: true });
+  if (m > 1.5) l.push({ pr: 1.5, ao: true });
+  l.push({ pr: Math.min(m, 1.5), ao: false }, { pr: Math.min(m, 1.25), ao: false }, { pr: 1, ao: false });
+  return l;
+})();
+const dyn = { lvl: 0, frames: 0, acc: 0, cool: 3 };
+function applyLevel() { const L = LADDER[dyn.lvl]; applyPixelRatio(L.pr); gtao.enabled = L.ao; }
 function applyPixelRatio(pr) {
   renderer.setPixelRatio(pr);
   composer.setPixelRatio(pr);
@@ -1017,11 +1027,11 @@ function applyPixelRatio(pr) {
 }
 function setQuality(q, manual) {
   quality = q;
-  const pr = q === 'mobile' ? dyn.pr : q === 'high' ? Math.min(devicePixelRatio, 2) : q === 'balanced' ? Math.min(devicePixelRatio, 1.5) : Math.min(devicePixelRatio, 1);
+  const pr = q === 'mobile' ? LADDER[dyn.lvl].pr : q === 'high' ? Math.min(devicePixelRatio, 2) : q === 'balanced' ? Math.min(devicePixelRatio, 1.5) : Math.min(devicePixelRatio, 1);
   applyPixelRatio(pr);
-  gtao.enabled = q === 'high';
+  gtao.enabled = q === 'high' || (q === 'mobile' && LADDER[dyn.lvl].ao);
   bloom.enabled = q !== 'fast';
-  key.shadow.mapSize.setScalar(q === 'fast' || q === 'mobile' ? 1024 : 2048);
+  key.shadow.mapSize.setScalar(q === 'fast' ? 1024 : 2048);
   if (key.shadow.map) { key.shadow.map.dispose(); key.shadow.map = null; }
   shadowsDirty = true;
   document.querySelectorAll('[data-quality]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.quality === q)));
@@ -1035,10 +1045,8 @@ function dynamicResolution(dt) {
   if (dyn.frames < 40) return;
   const avg = dyn.acc / dyn.frames; dyn.frames = 0; dyn.acc = 0;
   if (dyn.cool > 0) return;
-  let next = dyn.pr;
-  if (avg > 1 / 40) next = Math.max(1, dyn.pr - 0.25);
-  else if (avg < 1 / 57) next = Math.min(dyn.max, dyn.pr + 0.25);
-  if (next !== dyn.pr) { dyn.pr = next; applyPixelRatio(next); dyn.cool = 2.5; }
+  if (avg > 1 / 40 && dyn.lvl < LADDER.length - 1) { dyn.lvl++; applyLevel(); dyn.cool = 2.5; }
+  else if (avg < 1 / 57 && dyn.lvl > 0) { dyn.lvl--; applyLevel(); dyn.cool = 6; }
 }
 function autoQuality(dt) {
   if (quality === 'mobile') { dynamicResolution(dt); return; }
@@ -1331,7 +1339,7 @@ const _sa = new THREE.Vector3(), _sb = new THREE.Vector3(), _sp = new THREE.Vect
 
 function sideCentre(side, out) {
   const W = vp.w, H = vp.h;
-  if (W <= 860) return out.set(W * 0.5, H * (side === 'centre' ? 0.36 : 0.3));
+  if (W <= 860) return out.set(W * 0.5, H * (side === 'centre' ? 0.38 : 0.42));
   return out.set(W * (side === 'right' ? 0.69 : side === 'left' ? 0.31 : 0.5), H * (side === 'centre' ? 0.33 : 0.5));
 }
 function applyStoryState(st) {
