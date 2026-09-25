@@ -90,6 +90,14 @@ function rng(seed) {
 // Desktop textures are painted at 1.5x; drawing code works in the same logical units either way.
 const TEX_SCALE = MOBILE ? 1 : 1.5;
 const MAX_TEX = renderer.capabilities.maxTextureSize;
+// Heavy texture loops hand control back to the browser every ~12 ms so the page keeps
+// scrolling while the model is generated. The pixels produced are identical.
+let sliceStart = performance.now();
+const yieldNow = () => new Promise((r) => setTimeout(r, 0));
+async function maybeYield() {
+  if (performance.now() - sliceStart > 12) { await yieldNow(); sliceStart = performance.now(); }
+}
+
 class Painter {
   constructor(w, h, base, scale = TEX_SCALE) {
     const s = Math.min(scale, MAX_TEX / Math.max(w, h));
@@ -144,20 +152,23 @@ class Painter {
       x.fillStyle = gr; x.fillRect(cx - rad, cy - rad, rad * 2, rad * 2);
     }
   }
-  grain(rand, amount, keys = ['r', 'h']) {
+  async grain(rand, amount, keys = ['r', 'h']) {
+    const row = this.w * 4;
     for (const k of keys) {
       const x = this.ctx[k];
       const img = x.getImageData(0, 0, this.w, this.h), d = img.data;
       for (let i = 0; i < d.length; i += 4) {
         const n = (rand() - 0.5) * amount * 255;
         d[i] += n; d[i + 1] += n; d[i + 2] += n;
+        if (i % (row * 32) === 0) await maybeYield();
       }
       x.putImageData(img, 0, 0);
     }
   }
   _tex(canvas, srgb) {
     const t = new THREE.CanvasTexture(canvas);
-    if (canvas.width * canvas.height > 4e6) t.onUpdate = () => { canvas.width = canvas.height = 1; };
+    // Once the pixels are on the GPU the CPU copy is not needed; freeing it keeps peak memory down.
+    t.onUpdate = () => { canvas.width = canvas.height = 1; };
     t.colorSpace = srgb ? THREE.SRGBColorSpace : THREE.NoColorSpace;
     t.anisotropy = MAX_ANISO;
     t.generateMipmaps = true;
@@ -165,24 +176,29 @@ class Painter {
     t.needsUpdate = true;
     return t;
   }
-  build(normalStrength = 2.0, blur = 0.7) {
+  async build(normalStrength = 2.0, blur = 0.7, emissive = false) {
     const { w, h } = this;
+    await maybeYield();
     // Combined roughness (G) / metalness (B) map, the layout three.js expects.
     const rd = this.ctx.r.getImageData(0, 0, w, h).data, md = this.ctx.m.getImageData(0, 0, w, h).data;
     const ormCv = document.createElement('canvas'); ormCv.width = w; ormCv.height = h;
     const ormCtx = ormCv.getContext('2d'); const orm = ormCtx.createImageData(w, h);
     for (let i = 0; i < orm.data.length; i += 4) { orm.data[i] = 255; orm.data[i + 1] = rd[i]; orm.data[i + 2] = md[i]; orm.data[i + 3] = 255; }
     ormCtx.putImageData(orm, 0, 0);
+    this.cv.r.width = this.cv.m.width = 0; // intermediate layers are no longer needed
+    await maybeYield();
 
     // Height → normal (Sobel), after a slight blur so edges bevel instead of alias.
     const hb = document.createElement('canvas'); hb.width = w; hb.height = h;
     const hbx = hb.getContext('2d', { willReadFrequently: true });
     hbx.filter = `blur(${blur}px)`; hbx.drawImage(this.cv.h, 0, 0); hbx.filter = 'none';
     const hd = hbx.getImageData(0, 0, w, h).data;
+    hb.width = 0; this.cv.h.width = 0;
     const nCv = document.createElement('canvas'); nCv.width = w; nCv.height = h;
     const nCtx = nCv.getContext('2d'); const nImg = nCtx.createImageData(w, h); const nd = nImg.data;
     const H = (x, y) => hd[(((y + h) % h) * w + ((x + w) % w)) * 4] / 255;
     for (let y = 0; y < h; y++) {
+      if ((y & 15) === 0) await maybeYield();
       for (let x = 0; x < w; x++) {
         const dx = (H(x + 1, y - 1) + 2 * H(x + 1, y) + H(x + 1, y + 1)) - (H(x - 1, y - 1) + 2 * H(x - 1, y) + H(x - 1, y + 1));
         const dy = (H(x - 1, y + 1) + 2 * H(x, y + 1) + H(x + 1, y + 1)) - (H(x - 1, y - 1) + 2 * H(x, y - 1) + H(x + 1, y - 1));
@@ -197,7 +213,7 @@ class Painter {
       map: this._tex(this.cv.c, true),
       orm: this._tex(ormCv, false),
       normal: this._tex(nCv, false),
-      emissive: this._tex(this.cv.e, true),
+      emissive: emissive ? this._tex(this.cv.e, true) : (this.cv.e.width = 0, null),
     };
   }
 }
@@ -314,7 +330,7 @@ const hbmZ = [-(D.hbm.d + D.hbm.gap), 0, D.hbm.d + D.hbm.gap];
 
 /* ───────────────────────── Textures ───────────────────────── */
 
-function paintDie() {
+async function paintDie() {
   const PX = 400, W = Math.round(D.die.w * PX), H = Math.round(D.die.d * PX);
   const r = rng(7);
   const P = new Painter(W, H, { c: '#8e96a6', r: 0.2, m: 0.88, h: 0.5 });
@@ -337,6 +353,7 @@ function paintDie() {
   P.rect(x0, bandY, x1 - x0, bandH, { c: '#687286', r: 0.16, h: 0.52 });
   const macros = 8, mw = (x1 - x0 - 2 * phyW - 20) / macros;
   for (let i = 0; i < macros; i++) {
+    await maybeYield();
     const mx = x0 + phyW + 10 + i * mw + 3, mwid = mw - 6;
     for (const half of [0, 1]) {
       const my = bandY + 8 + half * (bandH / 2), mh = bandH / 2 - 16;
@@ -360,6 +377,7 @@ function paintDie() {
   for (const [ya, yb] of [[y0, bandY - street], [bandY + bandH + street, y1]]) {
     const bw = (x1 - x0 - (cols - 1) * street) / cols, bh = (yb - ya - (rows - 1) * street) / rows;
     for (let cx = 0; cx < cols; cx++) for (let cy = 0; cy < rows; cy++) {
+      await maybeYield();
       const bx = x0 + cx * (bw + street), by = ya + cy * (bh + street);
       const glow = 0.28 + r() * 0.55;
       P.rect(bx, by, bw, bh, { c: tints[(r() * tints.length) | 0], r: 0.24 + r() * 0.08, h: 0.56, e: glow * 0.35 });
@@ -384,11 +402,11 @@ function paintDie() {
     P.rect(x0, y, x1 - x0, 1.2, { c: '#a7afbd', h: 0.53, r: 0.14, a: 0.35 });
   }
   P.smudge(r, 10, 0.12);
-  P.grain(r, 0.03);
-  return P.build(2.4, 0.6);
+  await P.grain(r, 0.03);
+  return P.build(2.4, 0.6, true);
 }
 
-function paintInterposer() {
+async function paintInterposer() {
   const PX = 180, W = Math.round(D.inter.w * PX), H = Math.round(D.inter.d * PX);
   const r = rng(11);
   const P = new Painter(W, H, { c: '#7f8898', r: 0.22, m: 0.9, h: 0.5 });
@@ -414,7 +432,7 @@ function paintInterposer() {
     if (lx < D.inter.w / 2 - 0.2 && lz < D.inter.d / 2 - 0.2) continue;
     P.circle(px, py, 1.8, { c: '#5f6778', h: 0.44 });
   }
-  P.grain(r, 0.03);
+  await P.grain(r, 0.03);
   return P.build(2.0, 0.5);
 }
 
@@ -439,7 +457,7 @@ function capLayout() {
 }
 const CAPS = capLayout();
 
-function paintSubstrate() {
+async function paintSubstrate() {
   const PX = 204.8, W = 2048, H = 2048;
   const r = rng(3);
   const P = new Painter(W, H, { c: '#132019', r: 0.4, m: 0, h: 0.5 });
@@ -453,6 +471,7 @@ function paintSubstrate() {
   // Signal traces fanning out from the interposer footprint: Manhattan runs with 45° jogs
   const trace = { c: '#1e3a2b', h: 0.57, r: 0.34 };
   for (let i = 0; i < 700; i++) {
+    if ((i & 31) === 0) await maybeYield();
     const side = (r() * 4) | 0;
     let x, z;
     if (side < 2) { x = (side ? 1 : -1) * D.inter.w / 2; z = (r() - 0.5) * D.inter.d; }
@@ -484,6 +503,7 @@ function paintSubstrate() {
   // Capacitor lands
   const land = { c: '#d2a95a', m: 1, r: 0.26, h: 0.6 };
   for (const c of CAPS.caps) {
+    await maybeYield();
     const along = c.rot === 0 ? [1, 0] : [0, 1];
     for (const s of [-1, 1]) {
       const [px, py] = toPx(c.x + along[0] * s * 0.058, c.z + along[1] * s * 0.058);
@@ -507,11 +527,11 @@ function paintSubstrate() {
   const [qx, qy] = toPx(4.6, 4.83);
   for (let i = 0; i < 12; i++) for (let j = 0; j < 12; j++) if (i === 0 || j === 11 || (i === 11 && j % 2) || (j === 0 && i % 2) || r() < 0.45) P.rect(qx + i * 2.6 - 16, qy + j * 2.6 - 16, 2.6, 2.6, silk);
   P.smudge(r, 8, 0.1);
-  P.grain(r, 0.04);
+  await P.grain(r, 0.04);
   return P.build(3.0, 0.8);
 }
 
-function paintSubstrateEdge() {
+async function paintSubstrateEdge() {
   const W = 64, H = 256;
   const P = new Painter(W, H, { c: '#233026', r: 0.55, m: 0, h: 0.5 });
   const layers = [[0, 8, '#15221a'], [8, 3, '#b87a4b'], [11, 9, '#2d2b21'], [20, 3, '#b87a4b'], [23, 9, '#2d2b21'], [32, 3, '#b87a4b'], [35, 9, '#2d2b21'], [44, 4, '#b87a4b'],
@@ -522,17 +542,18 @@ function paintSubstrateEdge() {
   }
   // Glass-weave texture in the core
   for (let y = 52; y < 204; y += 6) for (let x = (y / 6) % 2 ? 0 : 4; x < W; x += 8) P.rect(x, y, 5, 3, { c: '#7c6f51', h: 0.54 });
-  const t = P.build(1.5, 0.4);
+  const t = await P.build(1.5, 0.4);
   for (const k of ['map', 'orm', 'normal']) { t[k].wrapS = THREE.RepeatWrapping; t[k].repeat.set(40, 1); }
   return t;
 }
 
-function paintStiffener() {
+async function paintStiffener() {
   const W = 1536, H = 1536, S = D.stiff.ow;
   const r = rng(5);
   const P = new Painter(W, H, { c: '#bdbab2', r: 0.3, m: 1, h: 0.5 });
   // Brushing: long, faint streaks in roughness and height
   for (let i = 0; i < 2600; i++) {
+    if ((i & 127) === 0) await maybeYield();
     const y = r() * H, v = r();
     P.rect(0, y, W, 0.6 + r() * 1.4, { r: 0.22 + v * 0.2, h: 0.47 + v * 0.06, a: 0.35 });
   }
@@ -556,13 +577,13 @@ function paintStiffener() {
   const [px, py] = toPx(-4.3, 4.3);
   P.paint(etch, (c) => { c.beginPath(); c.moveTo(px - 26, py + 26); c.lineTo(px + 22, py + 26); c.lineTo(px - 26, py - 22); c.fill(); });
   P.smudge(r, 14, 0.14);
-  P.grain(r, 0.03);
-  const t = P.build(1.6, 0.5);
+  await P.grain(r, 0.03);
+  const t = await P.build(1.6, 0.5);
   for (const k of ['map', 'orm', 'normal']) { t[k].repeat.set(1 / S, 1 / S); t[k].offset.set(0.5, 0.5); }
   return t;
 }
 
-function paintHBMTop() {
+async function paintHBMTop() {
   const W = 390, H = 465;
   const r = rng(17);
   const P = new Painter(W, H, { c: '#17191e', r: 0.12, m: 0.55, h: 0.5 });
@@ -572,7 +593,7 @@ function paintHBMTop() {
   P.text('9.2 GT/s', 34, 134, '500 22px "IBM Plex Mono", monospace', etch, 'left', 1);
   P.circle(W - 40, H - 40, 12, etch);
   P.smudge(r, 5, 0.12);
-  P.grain(r, 0.03);
+  await P.grain(r, 0.03);
   return P.build(1.2, 0.4);
 }
 
@@ -637,18 +658,19 @@ let MAT = {};
 
 async function buildModel() {
   await stage('Generating die texture', 8);
-  const dieT = paintDie();
+  const dieT = await paintDie();
   await stage('Generating interposer', 26);
-  const intT = paintInterposer();
+  const intT = await paintInterposer();
   await stage('Generating substrate', 40);
-  const subT = paintSubstrate();
-  const edgeT = paintSubstrateEdge();
+  const subT = await paintSubstrate();
+  const edgeT = await paintSubstrateEdge();
   await stage('Generating stiffener', 56);
-  const stT = paintStiffener();
-  const hbmT = paintHBMTop();
+  const stT = await paintStiffener();
+  const hbmT = await paintHBMTop();
   await stage('Preparing lighting', 66);
 
   const ENV = { studio: buildEnvironment('studio'), hall: buildEnvironment('hall') };
+  pmrem.dispose(); // the environment maps are kept; the generator's working targets are not
   scene.environment = ENV.studio;
 
   /* Materials */
@@ -1130,6 +1152,7 @@ const dyn = { lvl: 0, frames: 0, acc: 0, cool: 3 };
 function applyLevel() { const L = LADDER[dyn.lvl]; applyPixelRatio(L.pr); gtao.enabled = L.ao; }
 const dofAllowed = () => quality === 'high' || (quality === 'mobile' && LADDER[dyn.lvl].dof);
 function applyPixelRatio(pr) {
+  if (typeof forceFrames !== 'undefined') forceFrames = 3;
   renderer.setPixelRatio(pr);
   composer.setPixelRatio(pr);
   composer.setSize(vp.w, vp.h);
@@ -1609,6 +1632,32 @@ addEventListener('hashchange', () => { if (modelReady) setMode(location.hash ===
 
 let modelReady = false;
 
+const lastSig = new Float64Array(16);
+let stillFrames = 0, forceFrames = 2;
+function frameIsStill() {
+  const q = camera.quaternion, p = camera.position, tg = controls.target;
+  const sig = [p.x, p.y, p.z, q.x, q.y, q.z, q.w, tg.x, tg.y, tg.z, viewCentre.x, viewCentre.y, explodeT, fieldT, lp.t, dofA];
+  let moved = false;
+  for (let i = 0; i < sig.length; i++) { if (Math.abs(sig[i] - lastSig[i]) > 1e-6) moved = true; lastSig[i] = sig[i]; }
+  // Things that animate on their own even with a still camera
+  const animating = tour.active || fly.t < 1 || shadowsDirty || MAT.dieTop.emissiveIntensity > 0.001 || MAT.hbmTop.emissiveIntensity > 0.001
+    || (mode === 'viewer' && controls.autoRotate) || (!reduceMotion && !MOBILE);
+  if (moved || animating || forceFrames > 0) { stillFrames = 0; if (forceFrames > 0) forceFrames--; return false; }
+  return ++stillFrames > 2;
+}
+addEventListener('resize', () => { forceFrames = 3; });
+
+// If the browser drops the WebGL context (usually to reclaim memory), say so plainly.
+renderer.domElement.addEventListener('webglcontextlost', (e) => {
+  e.preventDefault();
+  renderer.setAnimationLoop(null);
+  const l = $('loader');
+  l.classList.remove('done');
+  loaderText.innerHTML = '<div class="fallback">The browser paused the 3D view to free up memory. <button type="button" class="btn btn-secondary" id="btn-reload">Reload</button></div>';
+  loaderBar.parentElement.hidden = true;
+  $('btn-reload').addEventListener('click', () => location.reload());
+});
+
 const chipLift = 1.0;
 chip.position.y = chipLift;
 
@@ -1663,6 +1712,9 @@ async function boot() {
     scene.fog.near = camD + 6; scene.fog.far = camD + 40;
     MAT.dieTop.userData.uTime.value = t;
     finish.uniforms.uTime.value = t;
+    // Skip frames that would be pixel-identical to the last one: the camera has settled and
+    // nothing is animating. Saves battery and heat (and the throttling that follows) on phones.
+    if (frameIsStill() && !first) { if (mode === 'viewer' && !tour.active) updateHotspots(); return; }
     if (shadowsDirty) { renderContactShadow(); renderer.shadowMap.needsUpdate = true; shadowsDirty = false; }
     composer.render(dt);
     if (mode === 'viewer' && !tour.active) updateHotspots();
