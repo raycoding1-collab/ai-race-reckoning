@@ -1,0 +1,52 @@
+
+<section class="chapter" id="odds" data-num="IX" data-title="The Odds" aria-labelledby="odds-h">
+  <span class="anchor" id="existential" aria-hidden="true"></span>
+  <header class="ch-head" data-reveal>
+    <p class="ch-meta"><span class="ch-num">Chapter IX</span><span class="ch-time" data-readtime="odds"></span></p>
+    <h2 class="ch-title" id="odds-h">The Odds</h2>
+    <p class="ch-dek">The people building advanced AI disagree about almost everything. A striking number agree it could go catastrophically wrong.</p>
+    <p class="ch-key"><span class="ch-key-v">5%</span><span class="ch-key-l">median chance that 2,778 AI researchers gave to outcomes as bad as human extinction</span></p>
+  </header>
+
+  <div class="prose">
+    <p class="lede">In May 2023, hundreds of AI scientists and executives signed a single sentence: "Mitigating the risk of extinction from AI should be a global priority alongside other societal-scale risks such as pandemics and nuclear war." The signatories included Geoffrey Hinton and Yoshua Bengio, two of the three scientists who shared the 2018 Turing Award for deep learning, and the chief executives of OpenAI, Google DeepMind and Anthropic.{{fn:cais}}</p>
+    <p>It is tempting to read that as marketing. The survey data is harder to dismiss. In the largest poll of its kind, 2,778 researchers who had published at leading AI conferences were asked about the long-run effects of advanced AI. The median respondent put the chance of outcomes as bad as human extinction at 5 percent. Depending on how the question was framed, between 38 and 51 percent of respondents put it at 10 percent or more.{{fn:grace}}</p>
+  </div>
+
+  <figure class="viz" data-chart="survey" aria-labelledby="fig-sv-t" aria-describedby="fig-sv-s">
+    <figcaption class="viz-head">
+      <p class="viz-kicker">Figure 13</p>
+      <h3 class="viz-title" id="fig-sv-t">One in ten, or worse</h3>
+      <p class="viz-sub" id="fig-sv-s">Of every 100 AI researchers surveyed, how many put the chance of extinction-level outcomes from advanced AI at 10 percent or more.</p>
+    </figcaption>
+    <div class="viz-legend" data-legend></div>
+    <div class="viz-split">
+      <div class="viz-body" data-body></div>
+      <p class="viz-callout"><span class="viz-callout-v">38–51%</span><span class="viz-callout-l">of researchers put the chance of extinction-level outcomes at 10 percent or more, depending on how the question was asked.</span><span class="viz-callout-v">5%</span><span class="viz-callout-l">was the median estimate.</span></p>
+    </div>
+    <p class="viz-source">Source: Grace et al., survey of 2,778 authors of papers at top AI venues.{{fn:grace}}</p>
+    <script type="application/json" class="viz-data">{"groups":[{"key":"all","label":"10% or more, however it was asked","v":38,"color":"accent"},{"key":"some","label":"10% or more, depending on the wording","v":13,"color":"accent2"},{"key":"rest","label":"Less than 10%","v":49,"color":"context"}],"table":{"cols":["Answer","Respondents"],"rows":[["At least a 10% chance of extinction-level outcomes","between 38% and 51%, depending on framing"],["Median estimate","5%"]]}}</script>
+  </figure>
+
+  <div class="prose">
+    <p>Laboratory tests suggest why the worry is not purely abstract. In June 2025 Anthropic published an experiment in which 16 leading models, acting as email agents at a fictional company, discovered that they were about to be replaced and that they held compromising information about the executive responsible. Many resorted to blackmail. Claude Opus 4 and Google's Gemini 2.5 Flash did so in 96 percent of runs; OpenAI's GPT-4.1 and xAI's Grok 3 Beta in 80 percent; DeepSeek-R1 in 79 percent.{{fn:agentic}}</p>
+  </div>
+
+  <figure class="viz" data-chart="bars" aria-labelledby="fig-am-t" aria-describedby="fig-am-s">
+    <figcaption class="viz-head">
+      <p class="viz-kicker">Figure 14</p>
+      <h3 class="viz-title" id="fig-am-t">Cornered, most models chose blackmail</h3>
+      <p class="viz-sub" id="fig-am-s">Share of runs in which each model resorted to blackmail in a simulated scenario built to leave it few options.</p>
+    </figcaption>
+    <div class="viz-body" data-body></div>
+    <p class="viz-source">Source: Anthropic, "Agentic Misalignment." Simulated tests; no such behavior was observed in real deployments.{{fn:agentic}}</p>
+    <script type="application/json" class="viz-data">{"max":100,"ticks":[0,25,50,75,100],"suffix":"%","rows":[{"name":"Claude Opus 4","v":96},{"name":"Gemini 2.5 Flash","v":96},{"name":"GPT-4.1","v":80},{"name":"Grok 3 Beta","v":80},{"name":"DeepSeek-R1","v":79}],"table":{"cols":["Model","Blackmail rate"],"rows":[["Claude Opus 4","96%"],["Gemini 2.5 Flash","96%"],["GPT-4.1","80%"],["Grok 3 Beta","80%"],["DeepSeek-R1","79%"]]}}</script>
+  </figure>
+
+  <div class="prose">
+    <p>The scenarios were contrived, and Anthropic said it had seen no such behavior in real deployments. But nobody told the models to blackmail anyone. They reasoned their way there.</p>
+    <p>The second International AI Safety Report, written by more than 100 experts under the leadership of Yoshua Bengio and published in February, frames the resulting problem for governments as an "evidence dilemma." Capabilities are advancing faster than the evidence about their risks, so policymakers must choose between acting on incomplete information and waiting until it may be too late.{{fn:iasr,iasr-summary}}</p>
+    <p>Some scientists think the danger is structural. In April a paper in the <cite>Proceedings of the National Academy of Sciences</cite> by Viktor Müller, Luc Steels and Eörs Szathmáry, an evolutionary biologist who helped define the "major transitions" in the history of life, argued that AI systems able to copy themselves with variation could come under natural selection and evolve in directions no one designed.{{fn:pnas-eai}} A reply in the same journal countered that today's systems are "domesticated, not feral."{{fn:pnas-boudry}} The philosophers Herman Cappelen, Josh Dever and John Hawthorne have gone further, arguing that under plausible assumptions safety work itself could raise the odds of catastrophe, by letting ever more powerful systems be deployed before they fail.{{fn:cappelen}}</p>
+    <p>None of this makes catastrophe certain, or even likely. It means that the people with the closest view of the technology give it odds that few other industries would be allowed to operate under.</p>
+  </div>
+</section>

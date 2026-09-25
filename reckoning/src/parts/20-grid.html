@@ -1,0 +1,62 @@
+
+<section class="chapter" id="grid" data-num="II" data-title="The Grid" aria-labelledby="grid-h">
+  <span class="anchor" id="environment" aria-hidden="true"></span>
+  <header class="ch-head" data-reveal>
+    <p class="ch-meta"><span class="ch-num">Chapter II</span><span class="ch-time" data-readtime="grid"></span></p>
+    <h2 class="ch-title" id="grid-h">The Grid</h2>
+    <p class="ch-dek">AI runs on electricity, and the demand is arriving faster than grids, or climate pledges, were built for.</p>
+    <p class="ch-key"><span class="ch-key-v">950 TWh</span><span class="ch-key-l">projected data-center electricity use in 2030, slightly more than Japan uses today</span></p>
+  </header>
+
+  <div class="prose">
+    <p class="lede">The International Energy Agency estimates that the world's data centers used about 415 terawatt-hours of electricity in 2024, around 1.5 percent of all the electricity consumed on Earth.{{fn:iea-2025}} In 2025 their consumption rose 17 percent, and at facilities built for AI it rose by half.{{fn:iea-2026}} The agency expects the total to roughly double by 2030, to about 950 terawatt-hours, which is slightly more than Japan uses today.{{fn:iea-2025,iea-2026}} In the United States, data centers are on course to use more electricity by the end of the decade than the country's production of aluminum, steel, cement and chemicals combined.{{fn:iea-2025}}</p>
+  </div>
+
+  <figure class="viz viz-wide" data-chart="line" aria-labelledby="fig-iea-t" aria-describedby="fig-iea-s">
+    <figcaption class="viz-head">
+      <p class="viz-kicker">Figure 2</p>
+      <h3 class="viz-title" id="fig-iea-t">Data centers' electricity use is set to double</h3>
+      <p class="viz-sub" id="fig-iea-s">Worldwide consumption, terawatt-hours per year. The dashed line is the IEA's central projection.</p>
+    </figcaption>
+    <div class="viz-body" data-body></div>
+    <p class="viz-source">Source: International Energy Agency.{{fn:iea-2025,iea-2026}}</p>
+    <script type="application/json" class="viz-data">{"unit":"TWh","yMax":1000,"yTicks":[0,250,500,750,1000],"xMin":2024,"xMax":2030,"points":[{"x":2024,"y":415,"label":"415"},{"x":2025,"y":485,"label":"485"},{"x":2030,"y":950,"proj":true,"label":"≈950","note":"≈ Japan's total use today"}],"table":{"cols":["Year","Electricity use (TWh)"],"rows":[["2024","415"],["2025","about 485"],["2030, projected","about 950"]]}}</script>
+  </figure>
+
+  <div class="prose">
+    <p>Global averages hide the pressure points. In Ireland, data centers used 5 percent of the country's metered electricity in 2015. By 2024 the figure was 22 percent, and in 2025 it reached 23 percent.{{fn:cso-2024,rte-2025}} In the United States, researchers at Lawrence Berkeley National Laboratory found that data centers consumed 4.4 percent of the country's electricity in 2023, and projected a share of between 6.7 and 12 percent by 2028.{{fn:lbnl}}</p>
+  </div>
+
+  <figure class="viz" data-chart="meter" aria-labelledby="fig-ie-t" aria-describedby="fig-ie-s">
+    <figcaption class="viz-head">
+      <p class="viz-kicker">Figure 3</p>
+      <h3 class="viz-title" id="fig-ie-t">Almost a quarter of Ireland's electricity</h3>
+      <p class="viz-sub" id="fig-ie-s">Share of metered electricity consumed by data centers in Ireland.</p>
+    </figcaption>
+    <div class="viz-body" data-body></div>
+    <p class="viz-source">Source: Central Statistics Office, Ireland.{{fn:cso-2024,rte-2025}}</p>
+    <script type="application/json" class="viz-data">{"value":23,"valueLabel":"23% in 2025","marks":[{"v":5,"label":"2015","sub":"5%"},{"v":22,"label":"2024","sub":"22%"}],"table":{"cols":["Year","Share of metered electricity"],"rows":[["2015","5%"],["2024","22%"],["2025","23%"]]}}</script>
+  </figure>
+
+  <div class="prose">
+    <p>The industry expects to need far more. In a March 2025 submission to the White House, Anthropic estimated that training a single frontier AI model would require about five gigawatts of power by 2027, and urged the government to help build 50 gigawatts of new capacity dedicated to AI.{{fn:anthropic-ostp,dcd-anthropic}}</p>
+    <p>Emissions follow the electricity. Google's 2026 environmental report shows its greenhouse-gas footprint rose 18 percent in 2025 and now stands 81 percent above its 2019 baseline; its electricity use grew 37 percent in a single year, the steepest increase in the company's history.{{fn:google-2026,esgdive-google}} Microsoft, which has pledged to be carbon negative by 2030, reported emissions of about 20 million tonnes for 2025, up a quarter in one year and more than half above its 2020 baseline.{{fn:msft-fortune,msft-register}}</p>
+  </div>
+
+  <figure class="viz" data-chart="dumbbell" aria-labelledby="fig-em-t" aria-describedby="fig-em-s">
+    <figcaption class="viz-head">
+      <p class="viz-kicker">Figure 4</p>
+      <h3 class="viz-title" id="fig-em-t">Climate pledges, going the wrong way</h3>
+      <p class="viz-sub" id="fig-em-s">Total greenhouse-gas emissions in 2025, indexed to each company's own baseline year (baseline = 100).</p>
+    </figcaption>
+    <div class="viz-legend" data-legend></div>
+    <div class="viz-body" data-body></div>
+    <p class="viz-source">Sources: Google 2026 Environmental Report; Microsoft, as reported by Fortune and The Register.{{fn:google-2026,msft-fortune,msft-register}}</p>
+    <script type="application/json" class="viz-data">{"xMin":50,"xMax":200,"xTicks":[50,100,150,200],"rows":[{"name":"Google","base":"2019","v":181},{"name":"Microsoft","base":"2020","v":154}],"table":{"cols":["Company","Baseline year","2025 emissions (baseline = 100)"],"rows":[["Google","2019","181"],["Microsoft","2020","about 154"]]}}</script>
+  </figure>
+
+  <div class="prose">
+    <p>Per question asked, the footprint can look trivial. Google says the median text prompt to its Gemini assistant uses 0.24 watt-hours of electricity and about five drops of water, and that the energy per prompt fell 33-fold in a year.{{fn:google-inference}} The efficiency gains are real. So is the arithmetic: cheaper answers invite more questions, and the totals keep rising. American data centers consumed an estimated 17 billion gallons of water directly for cooling in 2023, according to the Berkeley lab.{{fn:lbnl}}</p>
+    <p class="bridge">The power bill is physical, and it can be measured. The next cost is harder to count: what all this computation is doing to the information we live in.</p>
+  </div>
+</section>
