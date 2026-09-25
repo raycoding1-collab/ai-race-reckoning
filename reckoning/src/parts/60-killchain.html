@@ -1,0 +1,80 @@
+
+<section class="chapter chapter-dark" id="killchain" data-num="VI" data-title="The Kill Chain" aria-labelledby="killchain-h">
+  <span class="anchor" id="killer-robots" aria-hidden="true"></span>
+  <header class="ch-head" data-reveal>
+    <p class="ch-meta"><span class="ch-num">Chapter VI</span><span class="ch-time" data-readtime="killchain"></span></p>
+    <h2 class="ch-title" id="killchain-h">The Kill Chain</h2>
+    <p class="ch-dek">Artificial intelligence has moved from the lab to the targeting cell. Its speed is the selling point, and the danger.</p>
+    <p class="ch-key"><span class="ch-key-v">13,000+</span><span class="ch-key-l">targets struck in the first 38 days of the US and Israeli campaign against Iran</span></p>
+  </header>
+
+  <div class="prose">
+    <p class="lede">On February 28, 2026, the United States and Israel began a bombing campaign against Iran that the Pentagon called Operation Epic Fury. At its center was the Maven Smart System, a platform built by Palantir that fuses satellite imagery, intercepted signals and other intelligence, and proposes targets for human approval.{{fn:defensescoop,csis-maven}} American forces struck about 1,000 targets in the first 24 hours. By early April, the White House said, more than 13,000 had been hit.{{fn:aca-iran}} As use of Maven surged, the Pentagon's chief AI officer described an "insatiable appetite" for AI.{{fn:breakingdef}} Among the AI models running inside Maven, according to several reports, was Anthropic's Claude.{{fn:cnbc-claude-iran,bloomberg-minab}}</p>
+  </div>
+
+  <div class="tiles" data-reveal role="group" aria-label="The pace of Operation Epic Fury">
+    <div class="tile"><p class="tile-l">First 24 hours</p><p class="tile-v">~1,000</p><p class="tile-n">targets struck</p></div>
+    <div class="tile"><p class="tile-l">First 38 days</p><p class="tile-v">13,000+</p><p class="tile-n">targets struck</p></div>
+    <div class="tile tile-accent"><p class="tile-l">Average pace</p><p class="tile-v">1 every 4 min</p><p class="tile-n">around the clock, for 38 days</p></div>
+  </div>
+
+  <div class="prose">
+    <p>On the first morning of the campaign, two Tomahawk missiles struck the Shajarah Tayyebeh elementary school in Minab, a town in southern Iran. Local prosecutors put the final death toll at 156, including 120 schoolchildren.{{fn:un-minab}} Measured by the number of children killed, Bloomberg called it the deadliest American targeting error of the 21st century.{{fn:bloomberg-minab}}</p>
+    <p>The school stood on land that had once been part of a Revolutionary Guard naval base, and American databases had listed the compound as a military site for years. Commercial satellite images from 2018 already showed brightly painted walls, a soccer field and playground markings. According to Bloomberg's reconstruction of the Pentagon's internal investigation, flawed intelligence, outdated imagery and an overreliance on AI all contributed. Preparing lists of proposed targets, work that had taken staff hours in earlier wars, had been condensed into minutes with Maven, while the team at Central Command responsible for assessing harm to civilians had been cut from ten people to one. No one from that team reviewed the Minab site before the strike.{{fn:bloomberg-minab}}</p>
+    <p>In September a United Nations fact-finding mission said there were reasonable grounds to believe the attack was a war crime.{{fn:un-minab,cbc-un}} The Pentagon has since changed how it refreshes and vets planned targets, and ordered dozens of changes to Maven.{{fn:bloomberg-fix}}</p>
+    <p>No machine decided to bomb a school. People fed a stale record into a system designed for speed, and the people whose job was to catch that kind of mistake had been taken out of the loop. That is the realistic danger of military AI. It is less likely to go rogue than to do what institutions already do, errors included, much faster.</p>
+    <p>The pattern had been described before. In April 2024 the Israeli-Palestinian publications +972 Magazine and Local Call reported, citing six Israeli intelligence officers, that the army had used an AI system called Lavender to mark as many as 37,000 Palestinians as suspected militants. Officers said they often spent about 20 seconds on each target before authorizing a strike, in some cases only to confirm that the target was male.{{fn:972}} The Israeli military denied that it uses AI to identify militants, saying its information systems are "merely tools for analysts in the target identification process."{{fn:guardian-lavender}}</p>
+  </div>
+
+  <figure class="viz viz-timer" data-chart="timer" aria-labelledby="fig-t20-t" aria-describedby="fig-t20-s">
+    <figcaption class="viz-head">
+      <p class="viz-kicker">Figure 9</p>
+      <h3 class="viz-title" id="fig-t20-t">Twenty seconds</h3>
+      <p class="viz-sub" id="fig-t20-s">The time officers said they often spent on each target marked by Lavender. Press start to sit through one.</p>
+    </figcaption>
+    <div class="viz-body" data-body></div>
+    <p class="viz-source">Source: +972 Magazine and Local Call.{{fn:972}}</p>
+    <script type="application/json" class="viz-data">{"seconds":20}</script>
+  </figure>
+
+  <div class="prose">
+    <p>The companies that build these models have not agreed on where the line is, and the government has made clear that it does not want suppliers setting terms. Anthropic signed a $200 million contract with the Pentagon in July 2025 but asked for assurances that its models would not be used for fully autonomous weapons or for mass surveillance of Americans; the Pentagon wanted the freedom to use them for "all lawful purposes."{{fn:qz-scr,cnbc-appeal}} On February 27, 2026, the day before the Iran strikes began, President Trump ordered federal agencies to stop using Anthropic's products.{{fn:tc-trump}} The next day OpenAI announced its own Pentagon agreement, for all lawful purposes with three stated red lines, which it later amended after criticism to bar intentional domestic surveillance of Americans.{{fn:tc-openai,nbc-openai}} Elon Musk's xAI had signed a deal days earlier.{{fn:axios-xai}}</p>
+    <p>In March the Pentagon formally designated Anthropic a supply-chain risk, the first time the label, created to keep foreign adversaries out of military systems, had been applied to an American company.{{fn:tc-scr,qz-scr}} It bars the military and its contractors from using Anthropic's models in their defense work. In August a federal judge in San Francisco ruled the designation unlawful and ordered it lifted; on September 25 a divided federal appeals court in Washington upheld it, two votes to one.{{fn:cnn-judge,cnbc-appeal}} Whether a company may refuse some military uses of what it sells is now a question for the courts. No law yet answers it.</p>
+  </div>
+
+  <figure class="timeline-fig" data-reveal aria-labelledby="tl-t">
+    <figcaption class="viz-head">
+      <p class="viz-kicker">Timeline</p>
+      <h3 class="viz-title" id="tl-t">Anthropic and the Pentagon</h3>
+    </figcaption>
+    <ol class="timeline">
+      <li><time datetime="2025-07">July 2025</time><p>Anthropic signs a $200 million Pentagon contract. Claude becomes the first frontier model cleared for classified networks.{{fn:qz-scr}}</p></li>
+      <li><time datetime="2026-02-23">February 23, 2026</time><p>xAI reaches a deal for its Grok models with the Defense Department.{{fn:axios-xai}}</p></li>
+      <li><time datetime="2026-02-27">February 27</time><p>President Trump orders federal agencies to stop using Anthropic.{{fn:tc-trump}}</p></li>
+      <li class="is-key"><time datetime="2026-02-28">February 28</time><p>Strikes on Iran begin. OpenAI announces its Pentagon agreement.{{fn:tc-openai}}</p></li>
+      <li><time datetime="2026-03-05">March 5</time><p>The Pentagon designates Anthropic a supply-chain risk.{{fn:tc-scr}}</p></li>
+      <li><time datetime="2026-08-27">August 27</time><p>A federal judge in San Francisco rules the designation unlawful.{{fn:cnn-judge}}</p></li>
+      <li class="is-key"><time datetime="2026-09-25">September 25</time><p>A federal appeals court in Washington upholds it, 2–1.{{fn:cnbc-appeal}}</p></li>
+    </ol>
+  </figure>
+
+  <div class="prose">
+    <p>At the United Nations, 166 countries voted in December 2024 for a General Assembly resolution on lethal autonomous weapons; three voted against.{{fn:skr-unga}} Secretary-General António Guterres has asked governments to agree a legally binding instrument by 2026, and has called machines with "the power and discretion to take human lives without human control" "politically unacceptable" and "morally repugnant."{{fn:un-sg}} With three months of 2026 left, there is no treaty.</p>
+  </div>
+
+  <figure class="viz" data-chart="seats" aria-labelledby="fig-un-t" aria-describedby="fig-un-s">
+    <figcaption class="viz-head">
+      <p class="viz-kicker">Figure 10</p>
+      <h3 class="viz-title" id="fig-un-t">Near-unanimous, and not binding</h3>
+      <p class="viz-sub" id="fig-un-s">UN General Assembly vote on lethal autonomous weapons systems, December 2024. Each square is one country.</p>
+    </figcaption>
+    <div class="viz-legend" data-legend></div>
+    <div class="viz-body" data-body></div>
+    <p class="viz-source">Source: Stop Killer Robots, from UN voting records.{{fn:skr-unga}}</p>
+    <script type="application/json" class="viz-data">{"groups":[{"key":"yes","label":"In favor","v":166,"color":"cool"},{"key":"no","label":"Against","v":3,"color":"accent"},{"key":"abs","label":"Abstained","v":15,"color":"context"}],"cols":{"wide":46,"narrow":23},"table":{"cols":["Vote","Countries"],"rows":[["In favor","166"],["Against","3"],["Abstained","15"]]}}</script>
+  </figure>
+
+  <div class="prose">
+    <p class="bridge">Weapons point outward. The same tools are increasingly pointed at citizens.</p>
+  </div>
+</section>
