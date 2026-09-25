@@ -87,12 +87,18 @@ function rng(seed) {
    Paints colour, roughness, metalness, height and emission in lockstep, then derives
    a tangent-space normal map from the height field. */
 
+// Desktop textures are painted at 1.5x; drawing code works in the same logical units either way.
+const TEX_SCALE = MOBILE ? 1 : 1.5;
+const MAX_TEX = renderer.capabilities.maxTextureSize;
 class Painter {
-  constructor(w, h, base) {
-    this.w = w; this.h = h; this.cv = {}; this.ctx = {};
+  constructor(w, h, base, scale = TEX_SCALE) {
+    const s = Math.min(scale, MAX_TEX / Math.max(w, h));
+    this.lw = w; this.lh = h; this.s = s;
+    this.w = Math.round(w * s); this.h = Math.round(h * s); this.cv = {}; this.ctx = {};
     for (const k of ['c', 'r', 'm', 'h', 'e']) {
-      const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+      const cv = document.createElement('canvas'); cv.width = this.w; cv.height = this.h;
       this.cv[k] = cv; this.ctx[k] = cv.getContext('2d', { willReadFrequently: k === 'h' || k === 'r' || k === 'm' });
+      this.ctx[k].scale(s, s);
     }
     this.ctx.e.fillStyle = '#000'; this.ctx.e.fillRect(0, 0, w, h);
     this.paint(base, (x) => x.fillRect(0, 0, w, h));
@@ -130,7 +136,7 @@ class Painter {
   smudge(rand, n, strength) {
     const x = this.ctx.r;
     for (let i = 0; i < n; i++) {
-      const cx = rand() * this.w, cy = rand() * this.h, rad = (0.05 + rand() * 0.18) * Math.max(this.w, this.h);
+      const cx = rand() * this.lw, cy = rand() * this.lh, rad = (0.05 + rand() * 0.18) * Math.max(this.lw, this.lh);
       const gr = x.createRadialGradient(cx, cy, 0, cx, cy, rad);
       const v = rand() < 0.5 ? 255 : 0;
       gr.addColorStop(0, `rgba(${v},${v},${v},${strength * (0.4 + rand() * 0.6)})`);
@@ -151,6 +157,7 @@ class Painter {
   }
   _tex(canvas, srgb) {
     const t = new THREE.CanvasTexture(canvas);
+    if (canvas.width * canvas.height > 4e6) t.onUpdate = () => { canvas.width = canvas.height = 1; };
     t.colorSpace = srgb ? THREE.SRGBColorSpace : THREE.NoColorSpace;
     t.anisotropy = MAX_ANISO;
     t.generateMipmaps = true;
@@ -193,6 +200,95 @@ class Painter {
       emissive: this._tex(this.cv.e, true),
     };
   }
+}
+
+/* ───────────────────────── Detail maps ─────────────────────────
+   Tiling micro-normal maps blended over the base normal map, so surfaces keep
+   resolving new detail when the camera gets very close. */
+
+function detailTexture(size, draw, strength) {
+  const cv = document.createElement('canvas'); cv.width = cv.height = size;
+  const x = cv.getContext('2d', { willReadFrequently: true });
+  x.fillStyle = 'rgb(128,128,128)'; x.fillRect(0, 0, size, size);
+  draw(x, size, rng(size + 7));
+  const hd = x.getImageData(0, 0, size, size).data;
+  const out = x.createImageData(size, size), nd = out.data;
+  const H = (i, j) => hd[(((j + size) % size) * size + ((i + size) % size)) * 4] / 255;
+  for (let j = 0; j < size; j++) for (let i = 0; i < size; i++) {
+    let nx = -(H(i + 1, j) - H(i - 1, j)) * strength, ny = (H(i, j + 1) - H(i, j - 1)) * strength, nz = 1;
+    const l = Math.hypot(nx, ny, nz); const k = (j * size + i) * 4;
+    nd[k] = (nx / l * 0.5 + 0.5) * 255; nd[k + 1] = (ny / l * 0.5 + 0.5) * 255; nd[k + 2] = (nz / l * 0.5 + 0.5) * 255; nd[k + 3] = 255;
+  }
+  x.putImageData(out, 0, 0);
+  const t = new THREE.CanvasTexture(cv);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = MAX_ANISO; t.colorSpace = THREE.NoColorSpace;
+  return t;
+}
+const g8 = (v) => { const n = Math.round(Math.max(0, Math.min(1, v)) * 255); return `rgb(${n},${n},${n})`; };
+const DETAIL = {
+  // Standard-cell rows: cells of varying width, with metal tracks running along each row
+  cells: () => detailTexture(256, (x, S, r) => {
+    for (let y = 0; y < S; y += 16) {
+      let cx = 0;
+      while (cx < S) {
+        const w = Math.min(S - cx, 3 + Math.floor(r() * 22));
+        x.fillStyle = g8(0.44 + r() * 0.16); x.fillRect(cx, y + 1, w - 1, 14);
+        cx += w;
+      }
+      x.fillStyle = g8(0.62); x.fillRect(0, y + 4, S, 1); x.fillRect(0, y + 11, S, 1);
+      x.fillStyle = g8(0.36); x.fillRect(0, y, S, 1);
+    }
+  }, 2.2),
+  // Brushing: fine streaks running along the rows
+  brushed: () => detailTexture(256, (x, S, r) => {
+    let v = 0.5;
+    for (let y = 0; y < S; y++) { v = 0.5 + (v - 0.5) * 0.35 + (r() - 0.5) * 0.22; x.fillStyle = g8(v); x.fillRect(0, y, S, 1); }
+    for (let i = 0; i < 90; i++) { x.fillStyle = g8(0.5 + (r() - 0.5) * 0.5); x.fillRect(r() * S, r() * S, 20 + r() * 120, 1); }
+  }, 1.6),
+  // Solder-mask orange peel: soft, overlapping dimples
+  peel: () => detailTexture(128, (x, S, r) => {
+    for (let i = 0; i < 260; i++) {
+      const cx = r() * S, cy = r() * S, rad = 3 + r() * 7, up = r() < 0.5;
+      for (const ox of [-S, 0, S]) for (const oy of [-S, 0, S]) {
+        const gr = x.createRadialGradient(cx + ox, cy + oy, 0, cx + ox, cy + oy, rad);
+        gr.addColorStop(0, up ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.18)'); gr.addColorStop(1, 'rgba(128,128,128,0)');
+        x.fillStyle = gr; x.fillRect(cx + ox - rad, cy + oy - rad, rad * 2, rad * 2);
+      }
+    }
+  }, 3.0),
+};
+function addDetail(mat, tex, repeat, scale, key) {
+  const prev = mat.onBeforeCompile;
+  mat.onBeforeCompile = (sh, r) => {
+    if (prev && prev !== THREE.Material.prototype.onBeforeCompile) prev(sh, r);
+    sh.uniforms.detailMap = { value: tex };
+    sh.uniforms.detailRepeat = { value: new THREE.Vector2(repeat[0], repeat[1]) };
+    sh.uniforms.detailScale = { value: scale };
+    sh.fragmentShader = 'uniform sampler2D detailMap;\nuniform vec2 detailRepeat;\nuniform float detailScale;\n' + sh.fragmentShader.replace('#include <normal_fragment_maps>', `
+      #ifdef USE_NORMALMAP_TANGENTSPACE
+        vec3 mapN = texture2D( normalMap, vNormalMapUv ).xyz * 2.0 - 1.0;
+        mapN.xy *= normalScale;
+        vec3 dN = texture2D( detailMap, vNormalMapUv * detailRepeat ).xyz * 2.0 - 1.0;
+        mapN = normalize( vec3( mapN.xy + dN.xy * detailScale, mapN.z ) );
+        normal = normalize( tbn * mapN );
+      #else
+        #include <normal_fragment_maps>
+      #endif`);
+  };
+  mat.customProgramCacheKey = () => 'detail-' + key;
+}
+
+/* Thin slabs with a microscopic edge radius, so diced silicon catches light on its edges.
+   Top-face UVs are rebuilt to match BoxGeometry, which the painted layouts assume. */
+function slab(w, h, d, r) {
+  const g = new RoundedBoxGeometry(w, h, d, 2, r);
+  const p = g.attributes.position, n = g.attributes.normal, uv = g.attributes.uv;
+  for (let i = 0; i < p.count; i++) {
+    const ny = n.getY(i);
+    if (Math.abs(ny) > 0.5) uv.setXY(i, p.getX(i) / w + 0.5, ny > 0 ? 0.5 - p.getZ(i) / d : 0.5 + p.getZ(i) / d);
+  }
+  uv.needsUpdate = true;
+  return g;
 }
 
 /* ───────────────────────── Dimensions (1 unit ≈ 6.5 mm) ───────────────────────── */
@@ -595,10 +691,17 @@ async function buildModel() {
       `);
   };
 
+  const cells = DETAIL.cells(), brushed = DETAIL.brushed(), peel = DETAIL.peel();
+  addDetail(MAT.dieTop, cells, [12, 15.5], 0.32, 'die');
+  addDetail(MAT.interTop, cells, [22, 16.5], 0.22, 'inter');
+  addDetail(MAT.stiff, brushed, [3, 11], 0.3, 'stiff');
+  addDetail(MAT.subTop, peel, [44, 44], 0.35, 'sub');
+  addDetail(MAT.hbmTop, peel, [5, 6], 0.18, 'hbm');
+
   await stage('Building geometry', 76);
 
   /* Substrate */
-  const sub = new THREE.Mesh(new THREE.BoxGeometry(D.sub.w, D.sub.t, D.sub.d), [MAT.subSide, MAT.subSide, MAT.subTop, MAT.subBottom, MAT.subSide, MAT.subSide]);
+  const sub = new THREE.Mesh(slab(D.sub.w, D.sub.t, D.sub.d, 0.02), [MAT.subSide, MAT.subSide, MAT.subTop, MAT.subBottom, MAT.subSide, MAT.subSide]);
   sub.position.y = D.sub.t / 2;
   const subG = new THREE.Group(); subG.add(sub); chip.add(subG);
   shadowed(subG);
@@ -683,7 +786,7 @@ async function buildModel() {
   chip.add(ubG); register('ubump', ubG, 1.4, 0.2);
 
   /* Interposer */
-  const inter = new THREE.Mesh(new THREE.BoxGeometry(D.inter.w, D.inter.t, D.inter.d), [MAT.interSide, MAT.interSide, MAT.interTop, MAT.interSide, MAT.interSide, MAT.interSide]);
+  const inter = new THREE.Mesh(slab(D.inter.w, D.inter.t, D.inter.d, 0.008), [MAT.interSide, MAT.interSide, MAT.interTop, MAT.interSide, MAT.interSide, MAT.interSide]);
   inter.position.y = D.y.interBot + D.inter.t / 2;
   const interG = new THREE.Group(); interG.add(shadowed(inter)); chip.add(interG);
   register('interposer', interG, 0.95, 0.14);
@@ -700,15 +803,15 @@ async function buildModel() {
   chip.add(shadowed(ufG)); register('underfill', ufG, 1.55, 0.26);
 
   /* Compute die */
-  const die = new THREE.Mesh(new THREE.BoxGeometry(D.die.w, D.die.t, D.die.d), [MAT.dieSide, MAT.dieSide, MAT.dieTop, MAT.dieSide, MAT.dieSide, MAT.dieSide]);
+  const die = new THREE.Mesh(slab(D.die.w, D.die.t, D.die.d, 0.01), [MAT.dieSide, MAT.dieSide, MAT.dieTop, MAT.dieSide, MAT.dieSide, MAT.dieSide]);
   die.position.y = D.y.dieBot + D.die.t / 2;
   const dieG = new THREE.Group(); dieG.add(shadowed(die)); chip.add(dieG);
   register('die', dieG, 1.85, 0.32);
 
   /* HBM stacks: base logic die + 8 DRAM dies with bond layers between them */
-  const hbmLayerGeo = new THREE.BoxGeometry(D.hbm.w, D.hbm.layer, D.hbm.d);
+  const hbmLayerGeo = slab(D.hbm.w, D.hbm.layer, D.hbm.d, 0.004);
   const hbmBondGeo = new THREE.BoxGeometry(D.hbm.w - 0.04, D.hbm.bond, D.hbm.d - 0.04);
-  const hbmBaseGeo = new THREE.BoxGeometry(D.hbm.w, D.hbm.base, D.hbm.d);
+  const hbmBaseGeo = slab(D.hbm.w, D.hbm.base, D.hbm.d, 0.006);
   const topMats = [MAT.hbmLayer, MAT.hbmLayer, MAT.hbmTop, MAT.hbmLayer, MAT.hbmLayer, MAT.hbmLayer];
   hbmSites.forEach(([x, z], si) => {
     const baseG = new THREE.Group();
@@ -1034,7 +1137,7 @@ function applyPixelRatio(pr) {
 }
 function setQuality(q, manual) {
   quality = q;
-  const pr = q === 'mobile' ? LADDER[dyn.lvl].pr : q === 'high' ? Math.min(devicePixelRatio, 2) : q === 'balanced' ? Math.min(devicePixelRatio, 1.5) : Math.min(devicePixelRatio, 1);
+  const pr = q === 'mobile' ? LADDER[dyn.lvl].pr : q === 'high' ? Math.max(Math.min(devicePixelRatio, 2), 1.5) : q === 'balanced' ? Math.min(devicePixelRatio, 1.5) : Math.min(devicePixelRatio, 1);
   applyPixelRatio(pr);
   gtao.enabled = q === 'high' || (q === 'mobile' && LADDER[dyn.lvl].ao);
   bloom.enabled = q !== 'fast';
