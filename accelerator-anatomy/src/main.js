@@ -5,6 +5,7 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { BokehPass } from 'three/addons/postprocessing/BokehPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { FullScreenQuad } from 'three/addons/postprocessing/Pass.js';
@@ -817,7 +818,7 @@ scene.add(heat);
 
 /* ───────────────────────── Post-processing ───────────────────────── */
 
-let composer, gtao, bloom, finish;
+let composer, gtao, bloom, finish, bokeh;
 function buildComposer() {
   const pr = renderer.getPixelRatio();
   const rt = new THREE.WebGLRenderTarget(innerWidth * pr, innerHeight * pr, { type: THREE.HalfFloatType, samples: 4 });
@@ -828,6 +829,10 @@ function buildComposer() {
   gtao.updatePdMaterial({ lumaPhi: 10, depthPhi: 2, normalPhi: 3, radius: 6, rings: 2, samples: 16 });
   gtao.blendIntensity = 0.9;
   composer.addPass(gtao);
+  // Macro depth of field; enabled only while a close-up asks for it
+  bokeh = new BokehPass(scene, camera, { focus: 20, aperture: 0, maxblur: 0.009 });
+  bokeh.enabled = false;
+  composer.addPass(bokeh);
   bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth / 2, innerHeight / 2), 0.32, 0.55, 0.92);
   composer.addPass(bloom);
   composer.addPass(new OutputPass());
@@ -1011,14 +1016,16 @@ let quality = 'high';
 // Phones start at full desktop quality and step down this ladder only if frame time demands it:
 // first a little resolution, then ambient occlusion, then more resolution.
 const LADDER = (() => {
-  const m = Math.min(devicePixelRatio, 2), l = [{ pr: m, ao: true }];
-  if (m > 1.75) l.push({ pr: 1.75, ao: true });
-  if (m > 1.5) l.push({ pr: 1.5, ao: true });
-  l.push({ pr: Math.min(m, 1.5), ao: false }, { pr: Math.min(m, 1.25), ao: false }, { pr: 1, ao: false });
+  const m = Math.min(devicePixelRatio, 2), l = [{ pr: m, ao: true, dof: true }];
+  if (m > 1.75) l.push({ pr: 1.75, ao: true, dof: true });
+  l.push({ pr: Math.min(m, 1.75), ao: true, dof: false });
+  if (m > 1.5) l.push({ pr: 1.5, ao: true, dof: false });
+  l.push({ pr: Math.min(m, 1.5), ao: false, dof: false }, { pr: Math.min(m, 1.25), ao: false, dof: false }, { pr: 1, ao: false, dof: false });
   return l;
 })();
 const dyn = { lvl: 0, frames: 0, acc: 0, cool: 3 };
 function applyLevel() { const L = LADDER[dyn.lvl]; applyPixelRatio(L.pr); gtao.enabled = L.ao; }
+const dofAllowed = () => quality === 'high' || (quality === 'mobile' && LADDER[dyn.lvl].dof);
 function applyPixelRatio(pr) {
   renderer.setPixelRatio(pr);
   composer.setPixelRatio(pr);
@@ -1154,17 +1161,17 @@ const SHOTS = [
     dur: 6.5, cut: true, target: MID(0.25), from: [-72, 5, 22], to: [-22, 15, 17], state: { x: false, p: 'studio' } },
   { eyebrow: 'Detail', title: 'Stiffener ring', sub: 'A plated copper frame keeps the substrate flat through thermal cycling.',
     dur: 5.5, cut: false, target: AT('stiffener', 0.4, 0, -0.1), to: [8, 30, 6] },
-  { eyebrow: 'Detail A', title: 'Compute die', sub: () => `${dieMM()}\u00a0mm² of logic, close to the largest area a scanner can expose.`,
+  { dof: 1, eyebrow: 'Detail A', title: 'Compute die', sub: () => `${dieMM()}\u00a0mm² of logic, close to the largest area a scanner can expose.`,
     dur: 6.5, cut: true, target: AT('die', -0.9, 0, 1.1), from: [58, 58, 7.5], to: [112, 36, 5.2] },
-  { eyebrow: 'Detail D', title: 'Decoupling capacitors', sub: () => `${CAPS.caps.length + CAPS.land.length} ceramic capacitors keep the core voltage stable.`,
-    dur: 5, cut: true, target: AT('caps', -2.83, -0.02, 1.87), from: [206, 24, 2.7], to: [158, 31, 2.3] },
+  { dof: 1.3, eyebrow: 'Detail D', title: 'Decoupling capacitors', sub: () => `${CAPS.caps.length + CAPS.land.length} ceramic capacitors keep the core voltage stable.`,
+    dur: 5, cut: true, target: AT('caps', -2.83, -0.02, -4.27), from: [30, 24, 2.7], to: [-18, 31, 2.3] },
   { eyebrow: 'Section C–C', title: 'Exploded view', sub: () => `${partCount.toLocaleString()} parts, separated by layer.`,
     dur: 8.5, cut: true, target: MID(0.4), from: [24, 18, 21], to: [78, 27, 20], state: { x: false, p: 'hall' }, events: [[0.9, () => setExploded(true)]] },
-  { eyebrow: 'Detail B', title: 'Stacked memory', sub: 'Eight DRAM layers per stack, connected by through-silicon vias.',
+  { dof: 1, eyebrow: 'Detail B', title: 'Stacked memory', sub: 'Eight DRAM layers per stack, connected by through-silicon vias.',
     dur: 6, cut: true, target: AT('hbm', 0, -0.35, 0), from: [-100, 6, 4.4], to: [-58, 16, 4.0], state: { x: true } },
-  { eyebrow: 'Section C–C', title: 'Silicon interposer', sub: 'Microbump arrays join die and memory at about 45\u00a0µm pitch.',
+  { dof: 1, eyebrow: 'Section C–C', title: 'Silicon interposer', sub: 'Microbump arrays join die and memory at about 45\u00a0µm pitch.',
     dur: 5.5, cut: true, target: AT('interposer', 0.6, 0, -0.4), from: [26, 11, 5.4], to: [-8, 17, 4.6], state: { x: true } },
-  { eyebrow: 'View E', title: 'Ball grid array', sub: () => `${(D.bga.n * D.bga.n - D.bga.hole * D.bga.hole).toLocaleString()} solder balls carry power and signals to the board.`,
+  { dof: 1, eyebrow: 'View E', title: 'Ball grid array', sub: () => `${(D.bga.n * D.bga.n - D.bga.hole * D.bga.hole).toLocaleString()} solder balls carry power and signals to the board.`,
     dur: 5.5, cut: true, target: AT('bga', -1.4, 0, -1.4), from: [150, -26, 6.4], to: [104, -16, 5.8], state: { x: true }, under: true },
   { eyebrow: 'Detail F', title: 'Power and heat', sub: 'About 1,000\u00a0W, almost all of it released as heat.',
     dur: 8.5, cut: true, target: MID(0.3), from: [-34, 34, 16], to: [18, 26, 13], state: { x: true, p: 'thermal' }, events: [[0.4, () => setExploded(false)]] },
@@ -1307,11 +1314,11 @@ $('tour-exit').addEventListener('click', () => endTour(false));
 let mode = 'story';
 const STORY = [
   { m: 1.45, view: 'General arrangement', scale: '1 : 1', target: MID(0.2), sph: [-30, 18, 27], side: 'right', spin: true, state: { x: false, p: 'studio', field: false } },
-  { view: 'Detail A, compute die', scale: '3 : 1', target: AT('die', -0.9, 0, 1.1), sph: [62, 50, 7.2], side: 'right', state: { x: false, p: 'studio', field: false } },
-  { view: 'Detail B, HBM stack', scale: '4 : 1', target: AT('hbm', 0, -0.1, -0.2), sph: [-112, 22, 5.6], side: 'left', state: { x: false, p: 'studio', field: false } },
+  { dof: 1, view: 'Detail A, compute die', scale: '3 : 1', target: AT('die', -0.9, 0, 1.1), sph: [62, 50, 7.2], side: 'right', state: { x: false, p: 'studio', field: false } },
+  { dof: 1, view: 'Detail B, HBM stack', scale: '4 : 1', target: AT('hbm', 0, -0.1, -0.2), sph: [-112, 22, 5.6], side: 'left', state: { x: false, p: 'studio', field: false } },
   { m: 1.6, view: 'Section C–C, exploded', scale: '1 : 1', target: MID(0.45), sph: [34, 22, 17], side: 'right', state: { x: true, p: 'hall', field: false } },
-  { view: 'Detail D, capacitors', scale: '8 : 1', target: AT('caps', -2.83, -0.02, 1.87), sph: [180, 28, 2.7], side: 'left', state: { x: false, p: 'studio', field: false } },
-  { view: 'View E, underside', scale: '3 : 1', target: AT('bga', -1.4, 0, -1.4), sph: [128, -20, 6.8], side: 'right', state: { x: false, p: 'studio', field: false, under: true } },
+  { dof: 1.3, view: 'Detail D, capacitors', scale: '8 : 1', target: AT('caps', -2.83, -0.02, -4.27), sph: [8, 28, 2.7], side: 'left', state: { x: false, p: 'studio', field: false } },
+  { dof: 0.8, view: 'View E, underside', scale: '3 : 1', target: AT('bga', -1.4, 0, -1.4), sph: [128, -20, 6.8], side: 'right', state: { x: false, p: 'studio', field: false, under: true } },
   { m: 1.2, view: 'Detail F, thermal', scale: '1.5 : 1', target: MID(0.3), sph: [-24, 30, 16], side: 'left', state: { x: false, p: 'thermal', field: false } },
   { m: 2.3, view: 'Plan view', scale: '1 : 1', target: MID(0.2), sph: [8, 70, 20], side: 'right', state: { x: false, p: 'studio', field: false } },
   { m: 1.5, view: 'Array, 224 packages', scale: '1 : 6', target: MID(0.1), sph: [36, 28, 50], side: 'right', state: { x: false, p: 'hall', field: true } },
@@ -1370,8 +1377,9 @@ function updateStory(dt, time) {
   const spin = reduceMotion ? 0 : time * 4;
   // Wide screens put text beside the model rather than below it, so the camera stands further back.
   const ds = vp.w > 860 ? 1.4 : Math.max(0.9, fitScale * 0.7);
-  const az = lerpAngle(A.sph[0] + (A.spin ? spin : 0), B.sph[0] + (B.spin ? spin : 0), e);
-  const el = A.sph[1] + (B.sph[1] - A.sph[1]) * e;
+  par.x += (parTarget.x - par.x) * Math.min(1, dt * 2); par.y += (parTarget.y - par.y) * Math.min(1, dt * 2);
+  const az = lerpAngle(A.sph[0] + (A.spin ? spin : 0), B.sph[0] + (B.spin ? spin : 0), e) + par.x * 2.4;
+  const el = A.sph[1] + (B.sph[1] - A.sph[1]) * e - par.y * 1.4;
   // Phones get per-shot distances: the wide establishing shots pull back so the whole package reads.
   const mA = vp.w > 860 ? 1 : A.m || 1, mB = vp.w > 860 ? 1 : B.m || 1;
   const d = (A.sph[2] * mA + (B.sph[2] * mB - A.sph[2] * mA) * e) * ds;
@@ -1386,6 +1394,26 @@ function updateStory(dt, time) {
 
 /* Shared per-frame state: the underside fill light and where on screen the model is centred. */
 const viewCentre = new THREE.Vector2(innerWidth / 2, innerHeight / 2), _want = new THREE.Vector2();
+// A slight camera drift toward the pointer on desktop, while reading
+const par = { x: 0, y: 0 }, parTarget = { x: 0, y: 0 };
+if (matchMedia('(pointer: fine)').matches && !reduceMotion) {
+  addEventListener('pointermove', (e) => { parTarget.x = e.clientX / innerWidth * 2 - 1; parTarget.y = e.clientY / innerHeight * 2 - 1; }, { passive: true });
+}
+
+let dofA = 0;
+function updateFocus(dt) {
+  let want = 0;
+  if (dofAllowed()) {
+    if (tour.active) want = SHOTS[tour.i].dof || 0;
+    else if (mode === 'story') want = storyNear >= 0 ? STORY[storyNear].dof || 0 : 0;
+    else { const d = camera.position.distanceTo(controls.target); want = d < 10 ? (10 - Math.max(d, 4.5)) / 5.5 : 0; }
+  }
+  dofA += (want - dofA) * Math.min(1, dt * (reduceMotion ? 60 : 2.2));
+  bokeh.enabled = dofA > 0.03;
+  bokeh.uniforms.aperture.value = dofA * 0.0021;
+  bokeh.uniforms.focus.value = camera.position.distanceTo(controls.target);
+}
+
 function updateAmbient(dt) {
   const under = tour.active ? SHOTS[tour.i].under : mode === 'story' && storyNear >= 0 && STORY[storyNear].state.under;
   tour.fill += ((under ? 1.5 : 0) - tour.fill) * Math.min(1, dt * 2.5);
@@ -1526,6 +1554,7 @@ async function boot() {
     else if (mode === 'viewer') { updateFly(dt); controls.update(dt); }
     else updateStory(dt, t);
     updateAmbient(dt);
+    updateFocus(dt);
     // Fog only ever eats the floor's horizon, never the model, whatever the zoom.
     const camD = camera.position.distanceTo(controls.target);
     scene.fog.near = camD + 6; scene.fog.far = camD + 40;

@@ -86,8 +86,8 @@ a { color: inherit; }
 .site { position: relative; z-index: 1; transition: opacity .6s ease; }
 .sec { position: relative; min-height: 100vh; min-height: 100svh; display: grid; align-items: center; padding: calc(var(--nav-h) + 48px) var(--gutter) 72px; }
 .sec::before { content: ""; position: absolute; inset: 0; pointer-events: none; }
-.sec.left::before { background: linear-gradient(to right, rgba(10,10,11,0.86) 0%, rgba(10,10,11,0.62) 30%, rgba(10,10,11,0) 56%); }
-.sec.right::before { background: linear-gradient(to left, rgba(10,10,11,0.86) 0%, rgba(10,10,11,0.62) 30%, rgba(10,10,11,0) 56%); }
+.sec.left::before { background: linear-gradient(to right, rgba(10,10,11,0.9) 0%, rgba(10,10,11,0.72) 32%, rgba(10,10,11,0) 60%); }
+.sec.right::before { background: linear-gradient(to left, rgba(10,10,11,0.9) 0%, rgba(10,10,11,0.72) 32%, rgba(10,10,11,0) 60%); }
 .chapter { min-height: 140vh; }
 .copy { position: relative; width: 100%; max-width: 30rem; display: grid; gap: 20px; justify-items: start; }
 .pin { display: contents; }
