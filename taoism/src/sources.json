@@ -1,0 +1,418 @@
+{
+ "shiji63": {
+  "org": "Sima Qian, Shiji 63 (Chinese Text Project)",
+  "t": "Biographies of Laozi and Han Fei (老子韓非列傳)",
+  "url": "https://ctext.org/shiji/lao-zi-han-fei-lie-zhuan"
+ },
+ "sep-laozi": {
+  "org": "Stanford Encyclopedia of Philosophy",
+  "t": "Laozi",
+  "url": "https://plato.stanford.edu/entries/laozi/"
+ },
+ "sep-religious": {
+  "org": "Stanford Encyclopedia of Philosophy",
+  "t": "Religious Daoism",
+  "url": "https://plato.stanford.edu/entries/daoism-religion/"
+ },
+ "kirkland": {
+  "org": "Russell Kirkland, Journal of Chinese Religions 25",
+  "t": "The Historical Contours of Taoism in China: Thoughts on Issues of Classification and Terminology",
+  "url": "https://wesleyac.com/dao/refs/kirkland1997jcr.pdf",
+  "date": "1997"
+ },
+ "sima-tan": {
+  "org": "Wikipedia",
+  "t": "Sima Tan",
+  "url": "https://en.wikipedia.org/wiki/Sima_Tan"
+ },
+ "dao-char": {
+  "org": "Oregon College of Oriental Medicine, digital collections",
+  "t": "Etymology of the ideogram 'Dao'",
+  "url": "https://odc.ocom.edu/s/jai/item/3345"
+ },
+ "ctext-ddj": {
+  "org": "Chinese Text Project",
+  "t": "Dao De Jing (道德經)",
+  "url": "https://ctext.org/dao-de-jing"
+ },
+ "mwd-ctext": {
+  "org": "Chinese Text Project",
+  "t": "Mawangdui Laozi A, Dao jing (老子甲道經)",
+  "url": "https://ctext.org/mawangdui/lao-zi-jia-dao-jing"
+ },
+ "emperor-wen": {
+  "org": "Wikipedia",
+  "t": "Emperor Wen of Han",
+  "url": "https://en.wikipedia.org/wiki/Emperor_Wen_of_Han"
+ },
+ "guodian": {
+  "org": "Wikipedia",
+  "t": "Bamboo Texts of Guodian",
+  "url": "https://en.wikipedia.org/wiki/Bamboo_Texts_of_Guodian"
+ },
+ "mawangdui": {
+  "org": "Wikipedia",
+  "t": "Mawangdui Silk Texts",
+  "url": "https://en.wikipedia.org/wiki/Mawangdui_Silk_Texts"
+ },
+ "beida": {
+  "org": "Early China (Cambridge University Press)",
+  "t": "Introduction to the Peking University Han Bamboo Strips: On the Authentication and Study of Purchased Manuscripts",
+  "url": "https://www.cambridge.org/core/product/0CFFFE9DCB366886481848438E895431/core-reader"
+ },
+ "beida-77": {
+  "org": "Journal of Zhejiang University (Humanities and Social Sciences)",
+  "t": "The Origin of the 81-Chapter Edition of Laozi",
+  "url": "https://www.zjujournals.com/soc/EN/Y2021/V51/I6/42",
+  "date": "2021"
+ },
+ "wagner": {
+  "org": "Rudolf G. Wagner, Early China 14",
+  "t": "The Wang Bi Recension of the Laozi",
+  "url": "https://www.cambridge.org/core/journals/early-china/article/abs/wang-bi-recension-of-the-laozi/292CA6565782AC8706E87953F3D56E1F",
+  "date": "1989"
+ },
+ "jesuit-latin": {
+  "org": "Nankai University",
+  "t": "Nankai University Scholar Publishes a Transcription of the Earliest Foreign Translation of Daodejing",
+  "url": "https://en.nankai.edu.cn/2026/0104/c22795a588245/page.htm",
+  "date": "4 January 2026"
+ },
+ "julien": {
+  "org": "Religions (MDPI)",
+  "t": "Challenge and Revolution: An Analysis of Stanislas Julien's Translation of the Daodejing",
+  "url": "https://www.mdpi.com/2077-1444/13/8/724",
+  "date": "2022"
+ },
+ "chalmers": {
+  "org": "Wikipedia",
+  "t": "John Chalmers (missionary)",
+  "url": "https://en.wikipedia.org/wiki/John_Chalmers_(missionary)"
+ },
+ "tadd": {
+  "org": "Nankai University, College of Philosophy",
+  "t": "Misha Andrew Tadd",
+  "url": "https://phil.nankai.edu.cn/enn/2022/1008/c29842a484167/page.htm"
+ },
+ "zhuangzi-book": {
+  "org": "Wikipedia",
+  "t": "Zhuangzi (book)",
+  "url": "https://en.wikipedia.org/wiki/Zhuangzi_(book)"
+ },
+ "iep-zhuangzi": {
+  "org": "Internet Encyclopedia of Philosophy",
+  "t": "Zhuangzi (Chuang-Tzu, 369—298 B.C.E.)",
+  "url": "https://iep.utm.edu/zhuangzi/"
+ },
+ "zz1": {
+  "org": "Zhuangzi 1 (Chinese Text Project)",
+  "t": "Free and Easy Wandering (逍遙遊)",
+  "url": "https://ctext.org/zhuangzi/enjoyment-in-untroubled-ease"
+ },
+ "zz2": {
+  "org": "Zhuangzi 2 (Chinese Text Project)",
+  "t": "The Adjustment of Controversies (齊物論)",
+  "url": "https://ctext.org/zhuangzi/adjustment-of-controversies"
+ },
+ "zz3": {
+  "org": "Zhuangzi 3 (Chinese Text Project)",
+  "t": "Nourishing the Lord of Life (養生主)",
+  "url": "https://ctext.org/zhuangzi/nourishing-the-lord-of-life"
+ },
+ "zz7": {
+  "org": "Zhuangzi 7 (Chinese Text Project)",
+  "t": "The Normal Course for Rulers and Kings (應帝王)",
+  "url": "https://ctext.org/zhuangzi/normal-course-for-rulers-and-kings"
+ },
+ "zz17": {
+  "org": "Zhuangzi 17 (Chinese Text Project)",
+  "t": "The Floods of Autumn (秋水)",
+  "url": "https://ctext.org/zhuangzi/floods-of-autumn"
+ },
+ "zz18": {
+  "org": "Zhuangzi 18 (Chinese Text Project)",
+  "t": "Perfect Enjoyment (至樂)",
+  "url": "https://ctext.org/zhuangzi/perfect-enjoyment"
+ },
+ "zz": {
+  "org": "Chinese Text Project",
+  "t": "Zhuangzi (莊子), full text",
+  "url": "https://ctext.org/zhuangzi"
+ },
+ "yinyang": {
+  "org": "Wikipedia",
+  "t": "Yin and yang",
+  "url": "https://en.wikipedia.org/wiki/Yin_and_yang"
+ },
+ "taijitu": {
+  "org": "Wikipedia",
+  "t": "Taijitu",
+  "url": "https://en.wikipedia.org/wiki/Taijitu"
+ },
+ "zhou-dunyi": {
+  "org": "Encyclopaedia Britannica",
+  "t": "Zhou Dunyi",
+  "url": "https://www.britannica.com/biography/Zhou-Dunyi"
+ },
+ "huainanzi": {
+  "org": "Wikipedia",
+  "t": "Huainanzi",
+  "url": "https://en.wikipedia.org/wiki/Huainanzi"
+ },
+ "laojun": {
+  "org": "Fabrizio Pregadio, Golden Elixir",
+  "t": "Laojun (Lord Lao): Laozi as a God",
+  "url": "https://goldenelixir.com/taoism/laojun.html"
+ },
+ "tianshi": {
+  "org": "The Encyclopedia of Taoism (Golden Elixir)",
+  "t": "Tianshi dao",
+  "url": "https://www.goldenelixir.com/publications/eot_tianshi_dao.html"
+ },
+ "five-pecks": {
+  "org": "Wikipedia",
+  "t": "Way of the Five Pecks of Rice",
+  "url": "https://en.wikipedia.org/wiki/Way_of_the_Five_Pecks_of_Rice"
+ },
+ "yellow-turban": {
+  "org": "Wikipedia",
+  "t": "Yellow Turban Rebellion",
+  "url": "https://en.wikipedia.org/wiki/Yellow_Turban_Rebellion"
+ },
+ "ge-hong": {
+  "org": "Encyclopaedia Britannica",
+  "t": "Ge Hong",
+  "url": "https://www.britannica.com/biography/Ge-Hong"
+ },
+ "yang-xi": {
+  "org": "Wikipedia",
+  "t": "Yang Xi (mystic)",
+  "url": "https://en.wikipedia.org/wiki/Yang_Xi_(mystic)"
+ },
+ "tao-hongjing": {
+  "org": "Wikipedia",
+  "t": "Tao Hongjing",
+  "url": "https://en.wikipedia.org/wiki/Tao_Hongjing"
+ },
+ "lingbao": {
+  "org": "Wikipedia",
+  "t": "Lingbao School",
+  "url": "https://en.wikipedia.org/wiki/Lingbao_School"
+ },
+ "lu-xiujing": {
+  "org": "Wikipedia",
+  "t": "Lu Xiujing",
+  "url": "https://en.wikipedia.org/wiki/Lu_Xiujing"
+ },
+ "kou-qianzhi": {
+  "org": "Wikipedia",
+  "t": "Kou Qianzhi",
+  "url": "https://en.wikipedia.org/wiki/Kou_Qianzhi"
+ },
+ "gaozong": {
+  "org": "Wikipedia",
+  "t": "Emperor Gaozong of Tang",
+  "url": "https://en.wikipedia.org/wiki/Emperor_Gaozong_of_Tang"
+ },
+ "ddj-guide": {
+  "org": "Oxford University Press",
+  "t": "The Daode Jing: A Guide",
+  "url": "https://academic.oup.com/book/41504/chapter/352919076"
+ },
+ "elixir": {
+  "org": "Wikipedia",
+  "t": "Chinese alchemical elixir poisoning",
+  "url": "https://en.wikipedia.org/wiki/Chinese_alchemical_elixir_poisoning"
+ },
+ "wuzhen": {
+  "org": "Wikipedia",
+  "t": "Wuzhen pian",
+  "url": "https://en.wikipedia.org/wiki/Wuzhen_pian"
+ },
+ "wang-chongyang": {
+  "org": "Wikipedia",
+  "t": "Wang Chongyang",
+  "url": "https://en.wikipedia.org/wiki/Wang_Chongyang"
+ },
+ "qiu-chuji": {
+  "org": "Wikipedia",
+  "t": "Qiu Chuji",
+  "url": "https://en.wikipedia.org/wiki/Qiu_Chuji"
+ },
+ "phagpa": {
+  "org": "Sam van Schaik, Early Tibet",
+  "t": "Phagpa's Arrow, or Buddhists vs Daoists",
+  "url": "https://earlytibet.com/2008/09/30/phagpas-arrow/",
+  "date": "30 September 2008"
+ },
+ "wudang": {
+  "org": "UNESCO World Heritage Centre",
+  "t": "Ancient Building Complex in the Wudang Mountains",
+  "url": "https://whc.unesco.org/en/list/705"
+ },
+ "daozang": {
+  "org": "Daoinfo (Chinese Taoist Association)",
+  "t": "The Daoist Canon",
+  "url": "https://en.daoinfo.org/wiki/The_Daoist_Canon"
+ },
+ "baiyunguan": {
+  "org": "Wikipedia",
+  "t": "White Cloud Temple",
+  "url": "https://en.wikipedia.org/wiki/White_Cloud_Temple"
+ },
+ "cta": {
+  "org": "Wikipedia",
+  "t": "Chinese Taoist Association",
+  "url": "https://en.wikipedia.org/wiki/Chinese_Taoist_Association"
+ },
+ "zhang-enpu": {
+  "org": "Daoinfo (Chinese Taoist Association)",
+  "t": "Zhang Enpu",
+  "url": "https://en.daoinfo.org/wiki/Zhang_Enpu"
+ },
+ "schools": {
+  "org": "Wikipedia",
+  "t": "Daoist schools",
+  "url": "https://en.wikipedia.org/wiki/Daoist_schools"
+ },
+ "quanzhen": {
+  "org": "The Encyclopedia of Taoism (Golden Elixir)",
+  "t": "Quanzhen",
+  "url": "https://goldenelixir.com/publications/eot_quanzhen.html"
+ },
+ "whitepaper": {
+  "org": "AsiaNews",
+  "t": "White Paper on Religions: Beijing defends itself",
+  "url": "https://www.asianews.it/news-en/White-Paper-on-Religions:-Beijing-defends-itself-43516.html",
+  "date": "3 April 2018"
+ },
+ "pew-china": {
+  "org": "Pew Research Center",
+  "t": "Measuring Religion in China",
+  "url": "https://www.pewresearch.org/religion/2023/08/30/measuring-religion-in-china/",
+  "date": "30 August 2023"
+ },
+ "pew-taiwan": {
+  "org": "Pew Research Center",
+  "t": "4 facts about religion and diversity in Taiwan",
+  "url": "https://www.pewresearch.org/short-reads/2024/07/29/4-facts-about-religion-and-diversity-in-taiwan/",
+  "date": "29 July 2024"
+ },
+ "three-pure": {
+  "org": "Wikipedia",
+  "t": "Three Pure Ones",
+  "url": "https://en.wikipedia.org/wiki/Three_Pure_Ones"
+ },
+ "daoyin": {
+  "org": "Wellcome Collection",
+  "t": "Daoyin tu: chart for leading and guiding people in exercise",
+  "url": "https://wellcomecollection.org/works/sybqrqu7"
+ },
+ "taijiquan": {
+  "org": "UNESCO Intangible Cultural Heritage",
+  "t": "Taijiquan",
+  "url": "https://ich.unesco.org/en/RL/taijiquan-00424"
+ },
+ "zuowang": {
+  "org": "Wikipedia",
+  "t": "Zuowang",
+  "url": "https://en.wikipedia.org/wiki/Zuowang"
+ },
+ "neidan": {
+  "org": "Fabrizio Pregadio, Golden Elixir",
+  "t": "The Four Stages",
+  "url": "https://goldenelixir.com/jindan/wm_stages.html"
+ },
+ "golden-flower": {
+  "org": "Cambridge University Library",
+  "t": "Alchemical Connections in the UL: Jung and Eastern Alchemy",
+  "url": "https://languagecollections-blog.lib.cam.ac.uk/2022/09/16/alchemical-connections-in-the-ul-jung-and-eastern-alchemy/",
+  "date": "16 September 2022"
+ },
+ "zmy": {
+  "org": "Wikipedia",
+  "t": "Zhenyuan Miaodao Yaolue",
+  "url": "https://en.wikipedia.org/wiki/Zhenyuan_Miaodao_Yaolue"
+ },
+ "gunpowder": {
+  "org": "Wikipedia",
+  "t": "History of gunpowder",
+  "url": "https://en.wikipedia.org/wiki/History_of_gunpowder"
+ },
+ "grotto": {
+  "org": "Wikipedia",
+  "t": "Grotto-heavens",
+  "url": "https://en.wikipedia.org/wiki/Grotto-heavens"
+ },
+ "qingcheng": {
+  "org": "UNESCO World Heritage Centre",
+  "t": "Mount Qingcheng and the Dujiangyan Irrigation System",
+  "url": "https://whc.unesco.org/en/list/1001"
+ },
+ "sanqing": {
+  "org": "UNESCO World Heritage Centre",
+  "t": "Mount Sanqingshan National Park",
+  "url": "https://whc.unesco.org/en/list/1292"
+ },
+ "chinese-painting": {
+  "org": "Wikipedia",
+  "t": "Chinese painting",
+  "url": "https://en.wikipedia.org/wiki/Chinese_painting"
+ },
+ "guo-xi": {
+  "org": "Wikipedia",
+  "t": "Guo Xi",
+  "url": "https://en.wikipedia.org/wiki/Guo_Xi"
+ },
+ "li-bai": {
+  "org": "EBSCO Research Starters",
+  "t": "Li Bo",
+  "url": "https://www.ebsco.com/research-starters/biography/li-bo"
+ },
+ "tolstoy": {
+  "org": "University of Zurich, China and the West",
+  "t": "Chronology: Lev Nikolaevich Tolstoy",
+  "url": "https://e-aoi.uzh.ch/apps/china-west/chronologies/30023"
+ },
+ "brecht": {
+  "org": "University of Wisconsin–Madison, Brecht Guide",
+  "t": "Legend of the origin of the book Tao-te-Ching on Lao-Tsu's road into exile",
+  "url": "https://brechtguide.library.wisc.edu/catalog/01047"
+ },
+ "heidegger": {
+  "org": "Graham Parkes",
+  "t": "Rising Sun over Black Forest: Heidegger's Japanese Connections",
+  "url": "https://www.grahamparkes.net/wp-content/uploads/2023/04/Parkes_-_Rising_Sun_over_Black_Forest.pdf"
+ },
+ "inner-light": {
+  "org": "Wikipedia",
+  "t": "The Inner Light (song)",
+  "url": "https://en.wikipedia.org/wiki/The_Inner_Light_(song)"
+ },
+ "reagan": {
+  "org": "Teaching American History",
+  "t": "State of the Union Address (1988)",
+  "url": "https://teachingamericanhistory.org/document/state-of-the-union-address-1988/",
+  "date": "25 January 1988"
+ },
+ "wuxing": {
+  "org": "Wikipedia",
+  "t": "Wuxing (Chinese philosophy)",
+  "url": "https://en.wikipedia.org/wiki/Wuxing_(Chinese_philosophy)"
+ },
+ "zhang-sanfeng": {
+  "org": "Wikipedia",
+  "t": "Zhang Sanfeng",
+  "url": "https://en.wikipedia.org/wiki/Zhang_Sanfeng"
+ },
+ "yijing": {
+  "org": "Chinese Text Project",
+  "t": "Book of Changes, Xi Ci I (繫辭上)",
+  "url": "https://ctext.org/book-of-changes/xi-ci-shang"
+ },
+ "zong-bing": {
+  "org": "Wikipedia",
+  "t": "Zong Bing",
+  "url": "https://en.wikipedia.org/wiki/Zong_Bing"
+ }
+}

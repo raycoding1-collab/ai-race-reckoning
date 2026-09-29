@@ -1,0 +1,121 @@
+# Passages from the Zhuangzi (莊子), Guo Xiang's 33-chapter text, translated for this site.
+# Each passage: "§ id | chapter number | chapter title | English title | source key",
+# then the Chinese lines, a line "---", then the English paragraphs (one per line).
+
+§ kun | 1 | 逍遙遊 | The great fish and the great bird | zz1
+北冥有魚，其名為鯤。鯤之大，不知其幾千里也；化而為鳥，其名為鵬。
+鵬之背，不知其幾千里也；怒而飛，其翼若垂天之雲。
+---
+In the dark sea of the north there is a fish called Kun. Kun is so big that no one knows how many thousand li it measures. It changes into a bird called Peng. Peng's back is so broad that no one knows how many thousand li it spans. When Peng rises in flight, its wings are like clouds hanging from the sky.
+
+§ butterfly | 2 | 齊物論 | The butterfly dream | zz2
+昔者莊周夢為胡蝶，栩栩然胡蝶也，自喻適志與！不知周也。
+俄然覺，則蘧蘧然周也。
+不知周之夢為胡蝶與，胡蝶之夢為周與？
+周與胡蝶，則必有分矣。此之謂物化。
+---
+Once Zhuang Zhou dreamed he was a butterfly, a butterfly fluttering about, happy with itself and doing as it pleased. It did not know it was Zhou.
+Suddenly he woke, and there he was, solidly Zhou.
+He did not know whether he was Zhou who had dreamed of being a butterfly, or a butterfly dreaming of being Zhou.
+Between Zhou and the butterfly there must be some distinction. This is called the transformation of things.
+
+§ cook | 3 | 養生主 | Cook Ding carves an ox | zz3
+庖丁為文惠君解牛，手之所觸，肩之所倚，足之所履，膝之所踦，砉然嚮然，奏刀騞然，莫不中音。合於桑林之舞，乃中經首之會。
+文惠君曰：「譆，善哉！技蓋至此乎？」
+庖丁釋刀對曰：「臣之所好者道也，進乎技矣。始臣之解牛之時，所見無非牛者。三年之後，未嘗見全牛也。方今之時，臣以神遇而不以目視，官知止而神欲行。依乎天理，批大郤，導大窾，因其固然。……良庖歲更刀，割也；族庖月更刀，折也。今臣之刀十九年矣，所解數千牛矣，而刀刃若新發於硎。彼節者有閒，而刀刃者無厚；以無厚入有閒，恢恢乎其於遊刃必有餘地矣。……」
+文惠君曰：「善哉！吾聞庖丁之言，得養生焉。」
+---
+Cook Ding was carving an ox for Lord Wenhui. Wherever his hand touched, wherever his shoulder leaned, wherever his foot stepped, wherever his knee pressed, the flesh fell away with a hiss, and the knife swished through it, never missing a beat, as if dancing the Mulberry Grove dance or keeping time to the Jingshou music.
+"Ah, wonderful!" said Lord Wenhui. "Can skill really go this far?"
+Cook Ding put down his knife and answered, "What I care about is the Way, which goes beyond skill. When I first began carving oxen, all I could see was the ox. After three years I no longer saw the whole ox. Now I meet it with my spirit and do not look with my eyes. My senses stop, and my spirit moves as it wishes. I follow the natural grain, cut into the great hollows, guide the blade through the great openings, going by how the thing actually is. … A good cook changes his knife once a year, because he cuts. An ordinary cook changes his knife once a month, because he hacks. I have had this knife for nineteen years and carved thousands of oxen, and its edge is as fresh as if it had just come from the whetstone. There are spaces between the joints, and the blade has no thickness. Put what has no thickness into what has space, and there is room, more than enough, for the blade to play. …"
+"Wonderful!" said Lord Wenhui. "I have heard the words of Cook Ding, and learned how to nourish life."
+
+§ tree | 1 | 逍遙遊 | The useless tree | zz1
+惠子謂莊子曰：「吾有大樹，人謂之樗。其大本擁腫而不中繩墨，其小枝卷曲而不中規矩，立之塗，匠者不顧。今子之言，大而無用，眾所同去也。」
+莊子曰：「……今子有大樹，患其無用，何不樹之於無何有之鄉，廣莫之野，彷徨乎無為其側，逍遙乎寢臥其下？不夭斤斧，物無害者，無所可用，安所困苦哉！」
+---
+Huizi said to Zhuangzi, "I have a big tree that people call a stinktree. Its trunk is too knotted and swollen for a carpenter's line; its branches are too twisted for a square or a compass. It stands by the road and no carpenter looks at it twice. Your words are the same: big and useless, and everyone turns away from them."
+Zhuangzi said, "… Now, you have a big tree and you are worried that it is useless. Why not plant it in the village of Nothing-at-All, in the wide and empty wilds, where you could wander idly beside it doing nothing, and lie down to sleep beneath it, free and easy? No axe will cut its life short, nothing will harm it. If it is of no use, how can it come to grief?"
+
+§ hundun | 7 | 應帝王 | The death of Hundun | zz7
+南海之帝為儵，北海之帝為忽，中央之帝為渾沌。
+儵與忽時相與遇於渾沌之地，渾沌待之甚善。
+儵與忽謀報渾沌之德，曰：「人皆有七竅以視聽食息，此獨無有，嘗試鑿之。」
+日鑿一竅，七日而渾沌死。
+---
+The emperor of the southern sea was called Shu, Brief. The emperor of the northern sea was called Hu, Sudden. The emperor of the center was called Hundun, Chaos.
+Shu and Hu often met in the land of Hundun, and Hundun treated them very well.
+Shu and Hu talked over how to repay Hundun's kindness. "Everyone has seven openings, to see, to hear, to eat and to breathe," they said. "This one alone has none. Let's try boring some."
+Every day they bored one opening. On the seventh day, Hundun died.
+
+§ fish | 17 | 秋水 | The happiness of fish | zz17
+莊子與惠子遊於濠梁之上。
+莊子曰：「儵魚出遊從容，是魚之樂也。」
+惠子曰：「子非魚，安知魚之樂？」
+莊子曰：「子非我，安知我不知魚之樂？」
+惠子曰：「我非子，固不知子矣；子固非魚也，子之不知魚之樂，全矣。」
+莊子曰：「請循其本。子曰『汝安知魚樂』云者，既已知吾知之而問我，我知之濠上也。」
+---
+Zhuangzi and Huizi were strolling on the bridge over the Hao river.
+Zhuangzi said, "Out swim the minnows, so free and easy. That is the happiness of fish."
+Huizi said, "You are not a fish. How do you know the happiness of fish?"
+Zhuangzi said, "You are not me. How do you know I don't know the happiness of fish?"
+Huizi said, "I am not you, so I certainly don't know about you. And you are certainly not a fish, so that settles it: you don't know the happiness of fish."
+Zhuangzi said, "Let's go back to where we started. When you said, 'How do you know the happiness of fish?' you asked because you already knew that I knew it. I know it here, above the Hao."
+
+§ basin | 18 | 至樂 | Drumming on a basin | zz18
+莊子妻死，惠子弔之，莊子則方箕踞鼓盆而歌。
+惠子曰：「與人居，長子老身，死不哭亦足矣，又鼓盆而歌，不亦甚乎！」
+莊子曰：「不然。是其始死也，我獨何能無概然！察其始而本無生，非徒無生也而本無形，非徒無形也而本無氣。雜乎芒芴之間，變而有氣，氣變而有形，形變而有生，今又變而之死，是相與為春秋冬夏四時行也。人且偃然寢於巨室，而我噭噭然隨而哭之，自以為不通乎命，故止也。」
+---
+When Zhuangzi's wife died, Huizi came to offer his condolences and found Zhuangzi sitting with his legs sprawled out, drumming on a basin and singing.
+"She lived with you," said Huizi. "She raised your children and grew old with you. Not to weep at her death would be enough. But drumming on a basin and singing: isn't that going too far?"
+"Not so," said Zhuangzi. "When she first died, how could I not grieve? But then I looked back to her beginning. Before she was born there was no life; not only no life, but no form; not only no form, but no breath. Somewhere in the blur and the haze there was a change and there was breath; the breath changed and there was form; the form changed and there was life. Now there has been another change, and she is dead. It is like the round of the four seasons, spring and autumn, winter and summer. She is lying at rest in the great chamber, and if I followed her sobbing and wailing, I would show that I understood nothing of fate. So I stopped."
+
+§ trap | 26 | 外物 | The fish trap | zz
+荃者所以在魚，得魚而忘荃；蹄者所以在兔，得兔而忘蹄；言者所以在意，得意而忘言。
+吾安得夫忘言之人而與之言哉！
+---
+The fish trap is there for the fish; once you have the fish, you can forget the trap. The snare is there for the rabbit; once you have the rabbit, you can forget the snare. Words are there for the meaning; once you have the meaning, you can forget the words.
+Where can I find someone who has forgotten words, so that I can have a word with them?
+
+# Quotations used in the chapters (not shown in the story reader).
+
+§ one | 2 | 齊物論 | Heaven, earth and I | zz2 | quote
+天地與我並生，而萬物與我為一。
+---
+Heaven and earth were born together with me, and the ten thousand things and I are one.
+
+§ tortoise | 17 | 秋水 | The tortoise in the mud | zz17 | quote
+吾聞楚有神龜，死已三千歲矣，王巾笥而藏之廟堂之上。此龜者，寧其死為留骨而貴乎？寧其生而曳尾於塗中乎？
+往矣！吾將曳尾於塗中。
+---
+I hear that Chu has a sacred tortoise, dead these three thousand years, which the king keeps wrapped in cloth in a box in the ancestral hall. Would this tortoise rather be dead and have its bones honored, or alive and dragging its tail in the mud?
+Go away! I will drag my tail in the mud.
+
+§ strawdogs | 14 | 天運 | Straw dogs | zz | quote
+夫芻狗之未陳也，盛以篋衍，巾以文繡，尸祝齊戒以將之。及其已陳也，行者踐其首脊，蘇者取而爨之而已。
+---
+Before the straw dogs are set out at the sacrifice, they are kept in boxes and baskets and wrapped in embroidered cloth, and the priest fasts before carrying them in. Once they have been set out, passers-by trample their heads and backs, and grass-cutters take them to light their fires.
+
+§ qi | 22 | 知北遊 | Gathering and dispersing | zz | quote
+人之生，氣之聚也；聚則為生，散則為死。
+---
+A person's life is a gathering of qi. When it gathers, there is life; when it disperses, there is death.
+
+§ daoyin | 15 | 刻意 | Huffing and puffing | zz | quote
+吹呴呼吸，吐故納新，熊經鳥申，為壽而已矣；此道引之士，養形之人，彭祖壽考者之所好也。
+---
+To huff and puff, breathe out the old and draw in the new, hang like a bear and stretch like a bird, all for the sake of long life: this is what the masters of guiding and pulling love, the nourishers of the body, the seekers of Pengzu's great age.
+
+§ xinzhai | 4 | 人間世 | The fasting of the heart | zz | quote
+若一志，無聽之以耳而聽之以心，無聽之以心而聽之以氣。
+聽止於耳，心止於符。氣也者，虛而待物者也。唯道集虛。虛者，心齋也。
+---
+Unify your will. Do not listen with your ears; listen with your heart. Do not listen with your heart; listen with your qi.
+Listening stops at the ears; the heart stops at matching. Qi is empty and waits on all things. The Way gathers in emptiness alone. Emptiness is the fasting of the heart.
+
+§ zuowang | 6 | 大宗師 | Sitting and forgetting | zz | quote
+墮肢體，黜聰明，離形去知，同於大通，此謂坐忘。
+---
+I let my limbs and body fall away, dismiss my hearing and sight, leave my form behind and cast off knowledge, and become one with the Great Pervader. This is called sitting and forgetting.
