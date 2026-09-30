@@ -1,0 +1,652 @@
+{
+  "odai": {
+    "org": "Wikipedia",
+    "t": "Ōdai Yamamoto I Site",
+    "url": "https://en.wikipedia.org/wiki/%C5%8Cdai_Yamamoto_I_Site"
+  },
+  "morse": {
+    "org": "Wikipedia",
+    "t": "Jōmon people",
+    "url": "https://en.wikipedia.org/wiki/J%C5%8Dmon_people"
+  },
+  "omori": {
+    "org": "Shinagawa City",
+    "t": "Ōmori Shell Mound (commentary sheet)",
+    "url": "https://www.city.shinagawa.tokyo.jp/jigyo/06/historyhp/en/pdf/tagengo_commentary_sheet/tagengo_commentary_sheet_eng/PDF_eng/eng02.pdf"
+  },
+  "sannai": {
+    "org": "Wikipedia",
+    "t": "Sannai-Maruyama Site",
+    "url": "https://en.wikipedia.org/wiki/Sannai-Maruyama_Site"
+  },
+  "jomon-whs": {
+    "org": "Government of Japan, Kizuna",
+    "t": "The charm of the prehistoric Jomon period",
+    "url": "https://www.japan.go.jp/kizuna/2021/08/charm_of_prehistoric_jomon_period.html"
+  },
+  "yayoi": {
+    "org": "Wikipedia",
+    "t": "Yayoi period",
+    "url": "https://en.wikipedia.org/wiki/Yayoi_period"
+  },
+  "gold-seal": {
+    "org": "Wikipedia",
+    "t": "King of Na gold seal",
+    "url": "https://en.wikipedia.org/wiki/King_of_Na_gold_seal"
+  },
+  "himiko": {
+    "org": "Wikipedia",
+    "t": "Himiko",
+    "url": "https://en.wikipedia.org/wiki/Himiko"
+  },
+  "wajinden": {
+    "org": "Aozora Bunko",
+    "t": "Chen Shou, 魏志倭人傳 (the Wa section of the Records of Wei)",
+    "url": "https://www.aozora.gr.jp/cards/001477/card50926.html"
+  },
+  "mozu": {
+    "org": "nippon.com",
+    "t": "Ancient burial mounds added to UNESCO list",
+    "url": "https://www.nippon.com/en/japan-data/h00492/"
+  },
+  "inariyama": {
+    "org": "Wikipedia",
+    "t": "Inariyama Sword",
+    "url": "https://en.wikipedia.org/wiki/Inariyama_Sword"
+  },
+  "buddhism": {
+    "org": "Wikipedia",
+    "t": "Buddhism in Japan",
+    "url": "https://en.wikipedia.org/wiki/Buddhism_in_Japan"
+  },
+  "seventeen": {
+    "org": "Wikipedia",
+    "t": "Seventeen-article constitution",
+    "url": "https://en.wikipedia.org/wiki/Seventeen-article_constitution"
+  },
+  "sui-letter": {
+    "org": "Wikipedia",
+    "t": "Japanese missions to Imperial China",
+    "url": "https://en.wikipedia.org/wiki/Japanese_missions_to_Imperial_China"
+  },
+  "horyuji": {
+    "org": "Wikipedia",
+    "t": "Buddhist Monuments in the Hōryū-ji Area",
+    "url": "https://en.wikipedia.org/wiki/Buddhist_Monuments_in_the_H%C5%8Dry%C5%AB-ji_Area"
+  },
+  "isshi": {
+    "org": "Wikipedia",
+    "t": "Isshi incident",
+    "url": "https://en.wikipedia.org/wiki/Isshi_incident"
+  },
+  "asuka": {
+    "org": "Wikipedia",
+    "t": "Asuka period",
+    "url": "https://en.wikipedia.org/wiki/Asuka_period"
+  },
+  "taiho": {
+    "org": "Wikipedia",
+    "t": "Taihō (era)",
+    "url": "https://en.wikipedia.org/wiki/Taih%C5%8D_(era)"
+  },
+  "heijo": {
+    "org": "Wikipedia",
+    "t": "Heijō-kyō",
+    "url": "https://en.wikipedia.org/wiki/Heij%C5%8D-ky%C5%8D"
+  },
+  "kojiki": {
+    "org": "Wikipedia",
+    "t": "Ō no Yasumaro",
+    "url": "https://en.wikipedia.org/wiki/%C5%8C_no_Yasumaro"
+  },
+  "kojiki-text": {
+    "org": "Aozora Bunko",
+    "t": "古事記, edited and annotated by Takeda Yūkichi",
+    "url": "https://www.aozora.gr.jp/cards/001518/card51731.html"
+  },
+  "nihon-shoki": {
+    "org": "Wikipedia",
+    "t": "Nihon Shoki",
+    "url": "https://en.wikipedia.org/wiki/Nihon_Shoki"
+  },
+  "todaiji": {
+    "org": "Wikipedia",
+    "t": "Tōdai-ji",
+    "url": "https://en.wikipedia.org/wiki/T%C5%8Ddai-ji"
+  },
+  "ganjin": {
+    "org": "Britannica",
+    "t": "Ganjin",
+    "url": "https://www.britannica.com/biography/Ganjin"
+  },
+  "manyoshu": {
+    "org": "Nara Prefecture",
+    "t": "Man'yōshū",
+    "url": "https://www.pref.nara.lg.jp/manyo/en/manyo-shu/index.html"
+  },
+  "reiwa": {
+    "org": "nippon.com",
+    "t": "New era name to be “Reiwa”",
+    "url": "https://www.nippon.com/en/news/l00250/"
+  },
+  "reiwa-dazaifu": {
+    "org": "Japan Tourism Agency",
+    "t": "Reiwa: the dawn of an era",
+    "url": "https://www.mlit.go.jp/tagengo-db/en/R1-01831.html"
+  },
+  "heiankyo": {
+    "org": "Wikipedia",
+    "t": "Heian-kyō",
+    "url": "https://en.wikipedia.org/wiki/Heian-ky%C5%8D"
+  },
+  "manyogana": {
+    "org": "Wikipedia",
+    "t": "Man'yōgana",
+    "url": "https://en.wikipedia.org/wiki/Man%27y%C5%8Dgana"
+  },
+  "hiragana": {
+    "org": "Wikipedia",
+    "t": "Hiragana",
+    "url": "https://en.wikipedia.org/wiki/Hiragana"
+  },
+  "iroha": {
+    "org": "Wikipedia",
+    "t": "Iroha",
+    "url": "https://en.wikipedia.org/wiki/Iroha"
+  },
+  "kana-preface": {
+    "org": "Wikipedia",
+    "t": "Kana preface",
+    "url": "https://en.wikipedia.org/wiki/Kana_preface"
+  },
+  "tosa": {
+    "org": "Aozora Bunko",
+    "t": "Ki no Tsurayuki, 土佐日記",
+    "url": "https://www.aozora.gr.jp/cards/000155/card832.html"
+  },
+  "genji": {
+    "org": "University of Virginia Library",
+    "t": "Genji monogatari, Kiritsubo (Japanese text)",
+    "url": "https://jti.lib.virginia.edu/japanese/genji/Mur01GO.html"
+  },
+  "genji-iz2": {
+    "org": "Kyoto Prefecture, Tale of Genji Millennium",
+    "t": "What is the Tale of Genji",
+    "url": "https://www.iz2.or.jp/english/what"
+  },
+  "pillow": {
+    "org": "World History Encyclopedia",
+    "t": "The Pillow Book",
+    "url": "https://www.worldhistory.org/The_Pillow_Book/"
+  },
+  "michinaga": {
+    "org": "nippon.com",
+    "t": "Fujiwara no Michinaga: powerful statesman and emotional diarist",
+    "url": "https://www.nippon.com/en/japan-topics/g02368/fujiwara-no-michinaga-powerful-statesman-and-emotional-diarist.html"
+  },
+  "byodoin": {
+    "org": "Wikipedia",
+    "t": "Byōdō-in",
+    "url": "https://en.wikipedia.org/wiki/By%C5%8Dd%C5%8D-in"
+  },
+  "heike": {
+    "org": "Wikipedia",
+    "t": "The Tale of the Heike",
+    "url": "https://en.wikipedia.org/wiki/The_Tale_of_the_Heike"
+  },
+  "kamakura": {
+    "org": "Wikipedia",
+    "t": "Kamakura period",
+    "url": "https://en.wikipedia.org/wiki/Kamakura_period"
+  },
+  "mongol": {
+    "org": "Wikipedia",
+    "t": "Mongol invasions of Japan",
+    "url": "https://en.wikipedia.org/wiki/Mongol_invasions_of_Japan"
+  },
+  "kamikaze": {
+    "org": "Britannica",
+    "t": "Kamikaze of 1274 and 1281",
+    "url": "https://britannica.com/print/article/1483622"
+  },
+  "borui": {
+    "org": "Wikipedia",
+    "t": "Genkō Bōrui",
+    "url": "https://en.wikipedia.org/wiki/Genk%C5%8D_B%C5%8Drui"
+  },
+  "hojoki": {
+    "org": "Wikipedia",
+    "t": "Hōjōki",
+    "url": "https://en.wikipedia.org/wiki/H%C5%8Dj%C5%8Dki"
+  },
+  "hojoki-text": {
+    "org": "Aozora Bunko",
+    "t": "Kamo no Chōmei, 方丈記",
+    "url": "https://www.aozora.gr.jp/cards/000196/card975.html"
+  },
+  "honen": {
+    "org": "Britannica",
+    "t": "Hōnen",
+    "url": "https://www.britannica.com/biography/Honen"
+  },
+  "tsurezure": {
+    "org": "Wikipedia",
+    "t": "Tsurezuregusa",
+    "url": "https://en.wikipedia.org/wiki/Tsurezuregusa"
+  },
+  "kinkaku": {
+    "org": "Britannica",
+    "t": "Kinkaku-ji",
+    "url": "https://www.britannica.com/place/Kinkaku-ji"
+  },
+  "ginkaku": {
+    "org": "japan-guide.com",
+    "t": "Ginkakuji (Silver Pavilion)",
+    "url": "https://www.japan-guide.com/e/e3907.html"
+  },
+  "ryoanji": {
+    "org": "Wikipedia",
+    "t": "Ryōan-ji",
+    "url": "https://en.wikipedia.org/wiki/Ry%C5%8Dan-ji"
+  },
+  "zeami": {
+    "org": "the-noh.com",
+    "t": "Fūshi kaden",
+    "url": "https://db2.the-noh.com/edic/2010/01/fushi_kaden.html"
+  },
+  "onin": {
+    "org": "World History Encyclopedia",
+    "t": "Sengoku period",
+    "url": "https://www.worldhistory.org/Sengoku_Period"
+  },
+  "firearms": {
+    "org": "Wikipedia",
+    "t": "Firearms of Japan",
+    "url": "https://en.wikipedia.org/wiki/Firearms_of_Japan"
+  },
+  "portugal": {
+    "org": "Wikipedia",
+    "t": "Japan–Portugal relations",
+    "url": "https://en.wikipedia.org/wiki/Japan%E2%80%93Portugal_relations"
+  },
+  "okehazama": {
+    "org": "Wikipedia",
+    "t": "Battle of Okehazama",
+    "url": "https://en.wikipedia.org/wiki/Battle_of_Okehazama"
+  },
+  "azuchi": {
+    "org": "Wikipedia",
+    "t": "Azuchi Castle",
+    "url": "https://en.wikipedia.org/wiki/Azuchi_Castle"
+  },
+  "sword-hunt": {
+    "org": "Wikipedia",
+    "t": "Sword hunt",
+    "url": "https://en.wikipedia.org/wiki/Sword_hunt"
+  },
+  "imjin": {
+    "org": "World History Encyclopedia",
+    "t": "The Japanese invasion of Korea, 1592–8",
+    "url": "https://www.worldhistory.org/article/1398/the-japanese-invasion-of-korea-1592-8-ce"
+  },
+  "rikyu": {
+    "org": "Wikipedia",
+    "t": "Sen no Rikyū",
+    "url": "https://en.wikipedia.org/wiki/Sen_no_Riky%C5%AB"
+  },
+  "martyrs": {
+    "org": "Wikipedia",
+    "t": "26 Martyrs of Japan",
+    "url": "https://en.wikipedia.org/wiki/26_Martyrs_of_Japan"
+  },
+  "sekigahara": {
+    "org": "EBSCO Research Starters",
+    "t": "Battle of Sekigahara",
+    "url": "https://www.ebsco.com/research-starters/military-history-and-science/battle-sekigahara"
+  },
+  "himeji": {
+    "org": "Wikipedia",
+    "t": "Himeji Castle",
+    "url": "https://en.wikipedia.org/wiki/Himeji_Castle"
+  },
+  "sankin": {
+    "org": "nippon.com",
+    "t": "Exploring Japan’s sankin kōtai system",
+    "url": "https://nippon.com/en/japan-topics/c08601"
+  },
+  "sakoku": {
+    "org": "Wikipedia",
+    "t": "Sakoku",
+    "url": "https://en.wikipedia.org/wiki/Sakoku"
+  },
+  "shimabara": {
+    "org": "Wikipedia",
+    "t": "Shimabara Rebellion",
+    "url": "https://en.wikipedia.org/wiki/Shimabara_Rebellion"
+  },
+  "dejima": {
+    "org": "Wikipedia",
+    "t": "Dejima",
+    "url": "https://en.wikipedia.org/wiki/Dejima"
+  },
+  "edo": {
+    "org": "Wikipedia",
+    "t": "Edo",
+    "url": "https://en.wikipedia.org/wiki/Edo"
+  },
+  "nihonbashi": {
+    "org": "Tokyo Metropolitan Government, Edo Legacy",
+    "t": "The origin of today’s Shinkansen and expressways lies in Edo",
+    "url": "https://edolegacytravel.metro.tokyo.lg.jp/films/edo-five-highways-the-roads-that-built-japan/"
+  },
+  "hiroshige-nihonbashi": {
+    "org": "Honolulu Museum of Art",
+    "t": "Hiroshige, Morning View at Nihonbashi Bridge",
+    "url": "https://honolulu.emuseum.com/objects/2962/morning-view-at-nihonbashi-bridge"
+  },
+  "great-wave": {
+    "org": "Wikipedia",
+    "t": "The Great Wave off Kanagawa",
+    "url": "https://en.wikipedia.org/wiki/The_Great_Wave_off_Kanagawa"
+  },
+  "aizuri": {
+    "org": "Wikipedia",
+    "t": "Aizuri-e",
+    "url": "https://en.wikipedia.org/wiki/Aizuri-e"
+  },
+  "basho": {
+    "org": "Wikipedia",
+    "t": "Oku no Hosomichi",
+    "url": "https://en.wikipedia.org/wiki/Oku_no_Hosomichi"
+  },
+  "basho-frog": {
+    "org": "nippon.com",
+    "t": "Bashō and the old pond (Japanese)",
+    "url": "https://www.nippon.com/ja/japan-topics/g02001/"
+  },
+  "perry": {
+    "org": "PBS",
+    "t": "Japan: Memoirs of a Secret Empire, timeline",
+    "url": "https://www.pbs.org/empires/japan/timeline_1800.html"
+  },
+  "charter-oath": {
+    "org": "Wikipedia",
+    "t": "Charter Oath",
+    "url": "https://en.wikipedia.org/wiki/Charter_Oath"
+  },
+  "takanawa": {
+    "org": "Wikipedia",
+    "t": "Takanawa Embankment",
+    "url": "https://en.wikipedia.org/wiki/Takanawa_Embankment"
+  },
+  "calendar-1873": {
+    "org": "Wikipedia",
+    "t": "1873",
+    "url": "https://en.wikipedia.org/wiki/1873"
+  },
+  "gakumon": {
+    "org": "Aozora Bunko",
+    "t": "Fukuzawa Yukichi, 学問のすすめ",
+    "url": "https://www.aozora.gr.jp/cards/000296/card47061.html"
+  },
+  "meiji-constitution": {
+    "org": "Wikipedia",
+    "t": "Meiji Constitution",
+    "url": "https://en.wikipedia.org/wiki/Meiji_Constitution"
+  },
+  "meiji-constitution-text": {
+    "org": "Aozora Bunko",
+    "t": "大日本帝国憲法",
+    "url": "https://www.aozora.gr.jp/cards/001528/card825.html"
+  },
+  "iwakura": {
+    "org": "Wikipedia",
+    "t": "Iwakura Mission",
+    "url": "https://en.wikipedia.org/wiki/Iwakura_Mission"
+  },
+  "satsuma": {
+    "org": "Wikipedia",
+    "t": "Satsuma Rebellion",
+    "url": "https://en.wikipedia.org/wiki/Satsuma_Rebellion"
+  },
+  "tomioka": {
+    "org": "Japan Tourism Agency",
+    "t": "Tomioka Silk Mill and Japanese industrialization",
+    "url": "https://www.mlit.go.jp/tagengo-db/en/H30-00385.html"
+  },
+  "ainu": {
+    "org": "Wikipedia",
+    "t": "Hokkaido",
+    "url": "https://en.wikipedia.org/wiki/Hokkaido"
+  },
+  "ainu-act": {
+    "org": "Japanese Law Translation, Ministry of Justice",
+    "t": "Act on Promoting Measures to Realize a Society in Which the Pride of the Ainu People Is Respected",
+    "url": "https://www.japaneselawtranslation.go.jp/en/laws/view/4538"
+  },
+  "ryukyu": {
+    "org": "SamuraiWiki",
+    "t": "Okinawa prefecture",
+    "url": "https://samurai-archives.com/wiki/Okinawa_prefecture"
+  },
+  "tsushima": {
+    "org": "Wikipedia",
+    "t": "Battle of Tsushima",
+    "url": "https://en.wikipedia.org/wiki/Battle_of_Tsushima"
+  },
+  "yosano": {
+    "org": "Wikipedia",
+    "t": "Yosano Akiko",
+    "url": "https://en.wikipedia.org/wiki/Yosano_Akiko"
+  },
+  "korea-1910": {
+    "org": "Wikipedia",
+    "t": "Japan–Korea Treaty of 1910",
+    "url": "https://en.wikipedia.org/wiki/Japan%E2%80%93Korea_Treaty_of_1910"
+  },
+  "kanto": {
+    "org": "AFP (via AFPBB)",
+    "t": "“It hurts my heart”: Japan’s Kanto massacre, 100 years on",
+    "url": "https://www.afpbb.com/articles/-/3479761"
+  },
+  "mukden": {
+    "org": "Britannica",
+    "t": "Mukden Incident",
+    "url": "https://www.britannica.com/event/Mukden-Incident"
+  },
+  "league": {
+    "org": "EBSCO Research Starters",
+    "t": "Japan withdraws from the League of Nations",
+    "url": "https://www.ebsco.com/research-starters/history/japan-withdraws-league-nations"
+  },
+  "marco-polo": {
+    "org": "Wikipedia",
+    "t": "Marco Polo Bridge incident",
+    "url": "https://en.wikipedia.org/wiki/Marco_Polo_Bridge_incident"
+  },
+  "nanjing": {
+    "org": "Britannica",
+    "t": "Nanjing Massacre",
+    "url": "https://www.britannica.com/event/Nanjing-Massacre"
+  },
+  "tokyo-raid": {
+    "org": "Air & Space Magazine",
+    "t": "The deadliest air raid in history",
+    "url": "https://www.airspacemag.com/daily-planet/deadliest-air-raid-history-180954512/"
+  },
+  "okinawa-battle": {
+    "org": "History Hit",
+    "t": "Why were casualties so high in the Battle of Okinawa?",
+    "url": "https://www.historyhit.com/casualties-battle-of-okinawa/"
+  },
+  "war-dead": {
+    "org": "The Asia-Pacific Journal",
+    "t": "The battlefield experience of Japanese soldiers in the Asia-Pacific War",
+    "url": "https://apjjf.org/?p=7432"
+  },
+  "atomic-deaths": {
+    "org": "Bulletin of the Atomic Scientists",
+    "t": "Counting the dead at Hiroshima and Nagasaki",
+    "url": "https://thebulletin.org/2020/08/counting-the-dead-at-hiroshima-and-nagasaki/"
+  },
+  "gyokuon": {
+    "org": "National Archives of Japan",
+    "t": "終戦の詔書 (the Imperial Rescript ending the war)",
+    "url": "https://www.archives.go.jp/exhibition/jousetsu_08_08.html"
+  },
+  "gyokuon-en": {
+    "org": "Atomic Heritage Foundation",
+    "t": "Jewel Voice Broadcast",
+    "url": "https://ahf.nuclearmuseum.org/ahf/key-documents/jewel-voice-broadcast/"
+  },
+  "dome": {
+    "org": "Web Japan",
+    "t": "Japan Atlas: Hiroshima Peace Memorial (Genbaku Dome)",
+    "url": "https://web-japan.org/atlas/historical/his17.html"
+  },
+  "cenotaph": {
+    "org": "Hiroshima Peace Media Center",
+    "t": "The cenotaph and its epitaph",
+    "url": "https://www.hiroshimapeacemedia.jp/hiroshima-koku/en/exploration/index_20070723.html"
+  },
+  "oleander": {
+    "org": "City of Hiroshima",
+    "t": "The city flower of Hiroshima",
+    "url": "https://www.city.hiroshima.lg.jp/site/english/7401.html"
+  },
+  "constitution": {
+    "org": "HISTORY",
+    "t": "New Japanese constitution goes into effect",
+    "url": "https://www.history.com/this-day-in-history/May-3/new-japanese-constitution-goes-into-effect"
+  },
+  "constitution-text": {
+    "org": "Aozora Bunko",
+    "t": "日本国憲法",
+    "url": "https://www.aozora.gr.jp/cards/001528/card474.html"
+  },
+  "women-1946": {
+    "org": "Foreign Correspondents’ Club of Japan",
+    "t": "Miles to go and promises unkept",
+    "url": "https://www.fccj.or.jp/number-1-shimbun-article/miles-go-and-promises-unkept"
+  },
+  "occupation": {
+    "org": "Wikipedia",
+    "t": "Occupation of Japan",
+    "url": "https://en.wikipedia.org/wiki/Occupation_of_Japan"
+  },
+  "okinawa-1972": {
+    "org": "Ryukyu Shimpo",
+    "t": "Removal of nuclear weapons from Okinawa delayed its reversion to Japan",
+    "url": "https://english.ryukyushimpo.jp/2012/01/09/4686/"
+  },
+  "growth": {
+    "org": "Akihabara History (Chapter 4)",
+    "t": "The end of high economic growth and the oil crisis",
+    "url": "https://akiba.or.jp/wp_en/archives/history04"
+  },
+  "shinkansen": {
+    "org": "Wikipedia",
+    "t": "Tōkaidō Shinkansen",
+    "url": "https://en.wikipedia.org/wiki/Tokaido_Shinkansen"
+  },
+  "nikkei": {
+    "org": "Bloomberg",
+    "t": "Japan’s Nikkei hits intraday high, surging past 1989 record",
+    "url": "https://www.bloomberg.com/news/articles/2024-02-22/japan-s-nikkei-hits-intraday-high-surging-past-1989-record"
+  },
+  "hanshin": {
+    "org": "Wikipedia",
+    "t": "1995 Hanshin earthquake",
+    "url": "https://en.wikipedia.org/wiki/1995_Hanshin_earthquake"
+  },
+  "tohoku": {
+    "org": "USGS",
+    "t": "M 9.1, 2011 Great Tohoku Earthquake, Japan",
+    "url": "https://earthquake.usgs.gov/earthquakes/eventpage/official20110311054624120_30/impact"
+  },
+  "population": {
+    "org": "Wikipedia",
+    "t": "Demographics of Japan",
+    "url": "https://en.wikipedia.org/wiki/Demographics_of_Japan"
+  },
+  "abdication": {
+    "org": "The Week",
+    "t": "Japanese emperor Akihito to abdicate in April 2019",
+    "url": "https://www.theweek.in/news/world/japanese-emperor-akihito-to-abdicate-in-april-2019.html"
+  },
+  "hinoeuma": {
+    "org": "Wikipedia",
+    "t": "Fire Horse",
+    "url": "https://en.wikipedia.org/wiki/Fire_Horse"
+  },
+  "hinoeuma-2026": {
+    "org": "ISVD",
+    "t": "Hinoeuma 2026: superstition vs structural decline",
+    "url": "https://isvd.or.jp/en/columns/hinoeuma-2026-superstition-vs-structural-decline"
+  },
+  "gengo": {
+    "org": "Japan Experience",
+    "t": "Gengō, Japanese imperial era names",
+    "url": "https://www.japan-experience.com/plan-your-trip/to-know/understanding-japan/gengo"
+  },
+  "harumi": {
+    "org": "Code for History",
+    "t": "Harumi: Japanese–Western calendar open data (npm package harumi 1.0.0)",
+    "url": "https://www.npmjs.com/package/harumi"
+  },
+  "hyakunin": {
+    "org": "JAANUS",
+    "t": "Hyakunin isshu",
+    "url": "https://aisf.or.jp/~jaanus/deta/h/hyakuninisshu.htm"
+  },
+  "hyakunin-origin": {
+    "org": "Monumenta Nipponica",
+    "t": "Tabuchi Kumiko, Revisiting the origins of Hyakunin isshu",
+    "url": "https://dept.sophia.ac.jp/monumenta/article/revisiting-the-origins-of-hyakunin-isshu-teikas-gift-to-the-utsunomiya/"
+  },
+  "karuta": {
+    "org": "FUN! JAPAN",
+    "t": "Competitive karuta",
+    "url": "https://www.fun-japan.jp/en/articles/9561"
+  },
+  "hyakunin-data": {
+    "org": "npm",
+    "t": "ogura-hyakunin-isshu 1.0.2, hyakunin-isshu 1.1.0 and kimariji_karuta 1.0.5 (three independent transcriptions, cross-checked at build time)",
+    "url": "https://www.npmjs.com/package/ogura-hyakunin-isshu"
+  },
+  "sino-japanese": {
+    "org": "Wikipedia",
+    "t": "First Sino-Japanese War",
+    "url": "https://en.wikipedia.org/wiki/First_Sino-Japanese_War"
+  },
+  "pearl-harbor": {
+    "org": "US National Park Service",
+    "t": "Pearl Harbor: military casualties",
+    "url": "https://www.nps.gov/valr/learn/historyculture/military-casualties.htm"
+  },
+  "nanbokucho": {
+    "org": "Wikipedia",
+    "t": "Nanboku-chō period",
+    "url": "https://en.wikipedia.org/wiki/Nanboku-ch%C5%8D_period"
+  },
+  "tokyo-1868": {
+    "org": "Wikipedia",
+    "t": "1868 in Japan",
+    "url": "https://en.wikipedia.org/wiki/1868_in_Japan"
+  },
+  "toro-nagashi": {
+    "org": "Japan Tourism Agency",
+    "t": "Toro Nagashi (lantern floating), Hiroshima",
+    "url": "https://www.mlit.go.jp/tagengo-db/en/R1-00499.html"
+  },
+  "china-dead": {
+    "org": "HistoryNet",
+    "t": "Review of Rana Mitter, Forgotten Ally: China’s World War II",
+    "url": "https://historynet.com/wwii-book-review-forgotten-ally/"
+  },
+  "census-2025": {
+    "org": "Deccan Herald",
+    "t": "How Japan lost 3 million people in five years",
+    "url": "https://www.deccanherald.com/world/asia/how-japan-lost-3-million-people-in-five-years-3-4024515"
+  }
+}

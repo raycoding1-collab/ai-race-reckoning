@@ -1,0 +1,12 @@
+{
+  "name": "nihon-site",
+  "private": true,
+  "description": "Source for Where the Sun Rises, a history of Japan (published at /japan/)",
+  "devDependencies": {
+    "@expo-google-fonts/shippori-mincho": "^0.4.1",
+    "@expo-google-fonts/yuji-syuku": "^0.4.1",
+    "@fontsource-variable/bodoni-moda": "^5.3.0",
+    "@fontsource-variable/literata": "^5.3.0",
+    "esbuild": "^0.24.2"
+  }
+}

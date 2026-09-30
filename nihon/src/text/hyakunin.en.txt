@@ -1,0 +1,516 @@
+# The Ogura Hyakunin Isshu, translated for this site.
+# Format: "§N | poet as usually known in English", then the translation,
+# then an optional line beginning "note:".
+
+§1 | Emperor Tenji
+The autumn rice fields: in the watchman's hut
+the rush thatch is so coarse
+my sleeves are wet with dew, and wet again.
+
+§2 | Empress Jitō
+Spring has gone, and summer, it seems, has come:
+they say white robes are spread to dry
+on Heavenly Mount Kagu.
+
+§3 | Kakinomoto no Hitomaro
+Long as the trailing tail of the mountain pheasant
+is this long, long night.
+Must I sleep through it alone?
+
+§4 | Yamabe no Akahito
+I come out onto the shore at Tago and look up:
+on the high peak of Fuji, white as cloth,
+the snow is falling.
+
+§5 | Sarumaru no Taifu
+Deep in the mountains, treading through fallen maple leaves,
+a stag cries out:
+when I hear that voice, autumn is sad.
+
+§6 | Ōtomo no Yakamochi
+When I see the frost lie white
+on the bridge the magpies spread across the sky,
+I know the night has grown late.
+note: In the Chinese legend the Weaver and the Herdsman, two stars, meet once a year on a bridge of magpies' wings.
+
+§7 | Abe no Nakamaro
+I gaze far out across the plain of heaven:
+is that the moon that rose
+over Mount Mikasa at Kasuga?
+note: Written in China, where the poet had lived for decades and where he died.
+
+§8 | Kisen Hōshi
+My hut lies southeast of the capital,
+and here I live, just so.
+People say I fled the world's gloom to Uji mountain.
+note: Uji sounds like ushi, "gloomy".
+
+§9 | Ono no Komachi
+The color of the flowers has faded, all in vain,
+while I gazed out at the long rains
+and grew old in the world.
+note: Nagame means both "long rains" and "gazing in thought"; furu both "to fall" and "to grow old".
+
+§10 | Semimaru
+So this is the place where those who go and those who return,
+friends and strangers,
+part and meet: the barrier of Meeting Hill.
+
+§11 | Ono no Takamura
+Tell them, fishing boats:
+I have rowed out onto the wide sea,
+bound past its eighty islands.
+note: Written as he set out for exile on the Oki Islands.
+
+§12 | Sōjō Henjō
+Winds of heaven, blow shut
+the paths through the clouds,
+and keep these dancing maidens with us a little longer.
+
+§13 | Emperor Yōzei
+From the peak of Mount Tsukuba
+the Minano River falls:
+so my love has gathered into a deep pool.
+
+§14 | Minamoto no Tōru
+Like the tangled patterns of Shinobu cloth from Michinoku,
+my heart has fallen into disorder.
+For whose sake? Not my own.
+
+§15 | Emperor Kōkō
+For you I went out into the spring fields
+to gather young greens,
+and on my sleeves the snow kept falling.
+
+§16 | Ariwara no Yukihira
+I leave you for Inaba,
+where pines grow on the mountain peaks;
+but if I hear you pine for me, I will come straight back.
+note: Matsu means both "pine" and "to wait".
+
+§17 | Ariwara no Narihira
+Unheard of even in the age of the raging gods:
+the Tatsuta River
+tie-dyeing its waters in Chinese crimson.
+note: The dye is the maple leaves floating on the river.
+
+§18 | Fujiwara no Toshiyuki
+Waves draw near the shore at Suminoe;
+yet even at night, on the paths of dreams,
+why do you shun the eyes of others?
+
+§19 | Ise
+Would you have me go through this life
+without meeting you, even for a moment
+short as the joints of the reeds in Naniwa Bay?
+
+§20 | Prince Motoyoshi
+Wretched as I am, it is all the same now:
+like the channel markers of Naniwa,
+I will spend myself to meet you.
+note: Miotsukushi, "channel marker", also means "to give up one's life".
+
+§21 | Sosei Hōshi
+Only because you said you would come soon,
+I waited through the long autumn nights
+until the moon of dawn came out.
+
+§22 | Fun'ya no Yasuhide
+As soon as it blows, the autumn grass and trees wither;
+no wonder the wind off the mountain
+is written "storm".
+note: The character for storm, 嵐, is made of mountain, 山, over wind, 風.
+
+§23 | Ōe no Chisato
+When I look at the moon
+I am sad in a thousand ways,
+though autumn has not come to me alone.
+
+§24 | Sugawara no Michizane
+On this journey I could bring no offering.
+At Offering Mountain, let this brocade of maple leaves
+be for the gods, as they please.
+
+§25 | Fujiwara no Sadakata
+If you are true to your name,
+sleeping vine of Meeting Hill,
+show me a way to draw her to me unseen.
+
+§26 | Fujiwara no Tadahira
+Maple leaves on the peak of Mount Ogura,
+if you have hearts,
+wait for one more royal visit.
+
+§27 | Fujiwara no Kanesuke
+Welling up, the Izumi River divides the Mika plain.
+When did I ever see her,
+that I should long for her so?
+
+§28 | Minamoto no Muneyuki
+In a mountain village it is winter that is loneliest,
+when I think how both visitors and grasses
+have withered away.
+
+§29 | Ōshikōchi no Mitsune
+If I pick one, I must pick by guesswork:
+the first frost has settled
+and confused itself with the white chrysanthemums.
+
+§30 | Mibu no Tadamine
+Since we parted under the cold, indifferent moon of dawn,
+nothing has been so bitter to me
+as daybreak.
+
+§31 | Sakanoue no Korenori
+At first light, the white snow fallen on the village of Yoshino
+is so bright
+I took it for the moon at dawn.
+
+§32 | Harumichi no Tsuraki
+The weir the wind has thrown
+across the mountain stream
+is made of maple leaves that cannot flow away.
+
+§33 | Ki no Tomonori
+On a spring day of calm and steady light,
+why do the blossoms fall
+with such unquiet hearts?
+
+§34 | Fujiwara no Okikaze
+Whom shall I have for a friend?
+Even the old pines of Takasago
+were not my companions long ago.
+
+§35 | Ki no Tsurayuki
+As for you, I cannot know your heart;
+but in this old place the blossoms
+have the scent they always had.
+
+§36 | Kiyohara no Fukayabu
+A summer night: it was still evening, and already dawn.
+Where in the clouds
+has the moon found lodging?
+
+§37 | Fun'ya no Asayasu
+On the autumn moor, when the wind blows over the white dew,
+pearls that no thread holds
+scatter everywhere.
+
+§38 | Ukon
+I do not think of myself, forgotten;
+but I fear for the life of the man
+who swore before the gods to love me.
+
+§39 | Minamoto no Hitoshi
+Low reeds, bamboo grass on the little moor:
+I hide my love, but it overflows.
+Why do I long for you so?
+
+§40 | Taira no Kanemori
+I hid it, but my love has shown in my face,
+until people ask me
+whether something troubles me.
+
+§41 | Mibu no Tadami
+Already the rumor is out
+that I am in love,
+though I had only just begun to love in secret.
+
+§42 | Kiyohara no Motosuke
+We promised, didn't we, wringing out
+each other's tear-soaked sleeves:
+no wave would ever cross the pine hill of Sue.
+
+§43 | Fujiwara no Atsutada
+Compared with my heart
+since we met,
+before, I knew nothing of longing.
+
+§44 | Fujiwara no Asatada
+If we had never met at all,
+I would not now resent
+you, or myself.
+
+§45 | Fujiwara no Koretada
+I can think of no one
+who would say they pity me,
+and so I must waste away for nothing.
+
+§46 | Sone no Yoshitada
+Like a boatman crossing the strait of Yura
+who has lost his oar,
+I drift on love's way, not knowing where.
+
+§47 | Egyō Hōshi
+The lonely house is overgrown with creepers;
+no one comes to see it,
+but autumn has come.
+
+§48 | Minamoto no Shigeyuki
+Like the waves the wind drives against a rock,
+I alone break to pieces:
+these are days of longing.
+
+§49 | Ōnakatomi no Yoshinobu
+Like the fires the palace guards light at the gates,
+my love burns at night
+and dies down by day.
+
+§50 | Fujiwara no Yoshitaka
+For your sake I would not have minded losing my life;
+now that we have met,
+I wish it could be long.
+
+§51 | Fujiwara no Sanekata
+I cannot even tell you that I love you.
+You cannot know how it burns,
+like the moxa of Mount Ibuki.
+
+§52 | Fujiwara no Michinobu
+I know that dawn will turn to dusk again
+and bring you back,
+and still I hate the first light.
+
+§53 | The mother of Fujiwara no Michitsuna
+Do you know how long a night can be,
+lying alone and grieving
+until the dawn?
+
+§54 | The mother of Fujiwara no Korechika
+"I will never forget," you say.
+Since forever is hard to trust,
+let my life end today.
+
+§55 | Fujiwara no Kintō
+The sound of the waterfall
+stopped long ago,
+but its name flows on and is heard still.
+
+§56 | Izumi Shikibu
+Soon I will be gone from this world.
+To take with me beyond it,
+let me see you once more.
+
+§57 | Murasaki Shikibu
+We met again, and before I could be sure it was you,
+you were gone,
+like the midnight moon behind the clouds.
+
+§58 | Daini no Sanmi
+When the wind blows across the bamboo grass of Ina
+below Mount Arima, it rustles: yes, yes.
+Could I forget you?
+
+§59 | Akazome Emon
+I should have gone to sleep without waiting.
+Instead, as the night wore on,
+I watched the moon until it set.
+
+§60 | Koshikibu no Naishi
+The road over Mount Ōe through Ikuno is long:
+I have not set foot on the Bridge of Heaven,
+nor seen a letter from there.
+note: Fumi means both "to step" and "a letter". The poet's mother, Izumi Shikibu, was then in Tango, and the court teased the daughter that her mother wrote her poems for her.
+
+§61 | Ise no Taifu
+The eightfold cherries
+of the old capital of Nara
+bloom today in the ninefold palace.
+
+§62 | Sei Shōnagon
+In the dead of night you may fool the gatekeeper
+with a false cock-crow,
+but the barrier of Meeting Hill will never let you through.
+note: A Chinese story tells of a man who escaped through a border gate at night by imitating a rooster.
+
+§63 | Fujiwara no Michimasa
+Now I only want a way to tell you,
+myself and not through another,
+that I must give you up.
+
+§64 | Fujiwara no Sadayori
+At first light, as the river mist at Uji breaks,
+the stakes of the fish weirs appear
+one by one across the shallows.
+
+§65 | Sagami
+My sleeves, never dry from bitter tears, are bad enough;
+it is my name, rotting away in love,
+that I regret.
+
+§66 | Gyōson
+Let us feel for each other, mountain cherry:
+besides your flowers
+no one here knows me.
+
+§67 | Suō no Naishi
+For an arm as a pillow, as brief as a spring night's dream,
+how I would hate the rumor it would raise,
+and all for nothing.
+
+§68 | Emperor Sanjō
+If against my will I live on
+in this sorrowful world,
+how I shall miss this midnight moon.
+
+§69 | Nōin Hōshi
+Blown by the storm from Mount Mimuro,
+the maple leaves become
+brocade on the Tatsuta River.
+
+§70 | Ryōzen Hōshi
+Lonely, I step out of my hut
+and look around: everywhere
+the same autumn dusk.
+
+§71 | Minamoto no Tsunenobu
+At evening the rice leaves in the fields by the gate rustle,
+and the autumn wind blows
+through the reed-thatched hut.
+
+§72 | Kii
+I've heard of the fickle waves on Takashi beach:
+I won't let them near,
+or my sleeves will be wet with tears.
+
+§73 | Ōe no Masafusa
+The cherries on the high peaks have bloomed.
+Mists of the near hills,
+do not rise and hide them.
+
+§74 | Minamoto no Toshiyori
+I prayed at Hatsuse that her cold heart might soften,
+not that it should grow harsher
+like the wind that blows down the mountain.
+
+§75 | Fujiwara no Mototoshi
+I lived on your promise, dew on the moxa leaves,
+and now, alas,
+this autumn too is passing.
+
+§76 | Fujiwara no Tadamichi
+Rowing out on the wide sea, I look:
+far off, the white waves
+blur into the clouds.
+
+§77 | Emperor Sutoku
+The rapids split on a rock,
+but downstream the waters join again:
+so we too, parted now, will meet in the end.
+
+§78 | Minamoto no Kanemasa
+Keeper of the barrier at Suma,
+how many nights have you woken
+to the plovers crying on their way to Awaji?
+
+§79 | Fujiwara no Akisuke
+Through a gap in the clouds
+trailing on the autumn wind,
+how clear the moonlight streams.
+
+§80 | Taikenmon'in no Horikawa
+I cannot know whether your heart will last.
+This morning my black hair is tangled,
+and so are my thoughts.
+
+§81 | Fujiwara no Sanesada
+I look toward the place
+where the cuckoo sang:
+only the moon of dawn is left.
+
+§82 | Dōin Hōshi
+In my misery I still live on;
+it is my tears
+that cannot bear the sorrow.
+
+§83 | Fujiwara no Shunzei
+There is no way out of this world:
+even deep in the mountains where I came to hide,
+I hear a stag crying.
+
+§84 | Fujiwara no Kiyosuke
+If I live on, I may look back fondly on these days too:
+the times I thought were hard
+are the ones I miss now.
+
+§85 | Shun'e Hōshi
+All through these nights of longing, dawn will not come,
+and even the chinks of my bedroom door
+are cruel and let in no light.
+
+§86 | Saigyō Hōshi
+Is it the moon that tells me to grieve,
+that fills me with longing?
+My tears pretend it is.
+
+§87 | Jakuren Hōshi
+The drops of a passing shower not yet dry on the cypress leaves,
+the mist rises:
+an autumn evening.
+
+§88 | Kōkamon'in no Bettō
+For one night's short sleep, short as a reed's joint in Naniwa Bay,
+must I give myself
+wholly to love?
+
+§89 | Princess Shikishi
+Thread of my life, if you must break, then break:
+if I live on, my strength
+to hide this love will fail.
+
+§90 | Inpumon'in no Tayū
+If only I could show you:
+even the fishermen's sleeves at Ojima, soaked through and through,
+keep their color. Mine are dyed with tears.
+
+§91 | Fujiwara no Yoshitsune
+Crickets cry in the frosty night.
+On a cold straw mat, spreading one sleeve,
+must I sleep alone?
+
+§92 | Nijōin no Sanuki
+My sleeves are like a rock far out at sea,
+unseen even at low tide:
+no one knows, but they are never dry.
+
+§93 | Minamoto no Sanetomo
+If only the world could always stay like this:
+a fisherman's small boat towed along the shore,
+how moving it is.
+
+§94 | Fujiwara no Masatsune
+The autumn wind comes down from the mountains of Yoshino.
+Late at night, in the old village, cold,
+the sound of cloth being beaten.
+
+§95 | Jien
+Unworthy as I am,
+from the timbered mountain where I live
+I spread my black monk's sleeves over the people of this sorrowful world.
+
+§96 | Fujiwara no Kintsune
+It is not the snow of blossoms
+the storm sweeps into the garden that is falling:
+it is I who am growing old.
+note: Furu means both "to fall" and "to grow old".
+
+§97 | Fujiwara no Teika
+Waiting for one who does not come,
+in the evening calm at Matsuho Bay
+I burn like the seaweed they burn for salt.
+note: Teika compiled this anthology.
+
+§98 | Fujiwara no Ietaka
+The wind rustles the oaks by the brook of Nara at dusk,
+like autumn: only the purification rite
+says it is summer still.
+
+§99 | Emperor Go-Toba
+I cherish some people and resent others;
+it is because I brood on this bitter world
+that I am so troubled.
+
+§100 | Emperor Juntoku
+The palace of a hundred stones: remembrance fern
+grows on its old eaves,
+and still the past is more than I can long for.
