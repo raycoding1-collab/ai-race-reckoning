@@ -84,7 +84,7 @@ def hero(P):
     M.spray(P, front, 2800, 1330, 330, 150, n=90, seed=9)
     P.commit(front)
     cart = P.plane("cart")
-    cartouche(P, cart, 3700, 120, "日出", "日本")
+    cartouche(P, cart, 3440, 380, "日出", "日本")
     P.commit(cart)
 
 
@@ -165,7 +165,7 @@ def jomon(P):
     M.susuki(P, front, 180, 2220, 440, n=6, seed=5, lean=0.5)
     P.commit(front)
     cart = P.plane("cart")
-    cartouche(P, cart, 3700, 120, "縄文", "三内丸山")
+    cartouche(P, cart, 3440, 380, "縄文", "三内丸山")
     P.commit(cart)
 
 
@@ -292,7 +292,7 @@ def kofun(P):
     M.susuki(P, front, 3700, 2200, 560, n=8, seed=7, lean=-0.5)
     P.commit(front)
     cart = P.plane("cart")
-    cartouche(P, cart, 3700, 120, "古墳", "大和")
+    cartouche(P, cart, 3440, 380, "古墳", "大和")
     P.commit(cart)
 
 
@@ -357,7 +357,7 @@ def nara(P):
     A.blossoms(P, front, 3900, 2300, 1150, seed=4, spread=0.9)
     P.commit(front)
     cart = P.plane("cart")
-    cartouche(P, cart, 3700, 120, "奈良", "東大寺")
+    cartouche(P, cart, 3440, 380, "奈良", "東大寺")
     P.commit(cart)
 
 
@@ -465,7 +465,7 @@ def heian(P):
     P.key(front, leaves, 16, color="hill", alpha=1.0, taper=(0.3, 0.3))
     P.commit(front)
     cart = P.plane("cart")
-    cartouche(P, cart, 3700, 120, "平安", "平等院")
+    cartouche(P, cart, 3440, 380, "平安", "平等院")
     P.commit(cart)
 
 
@@ -529,7 +529,7 @@ def kamakura(P):
     M.spray(P, front, 2600, 1400, 400, 180, n=110, seed=5)
     P.commit(front)
     cart = P.plane("cart")
-    cartouche(P, cart, 3700, 120, "鎌倉", "弘安", color="shu")
+    cartouche(P, cart, 3440, 380, "鎌倉", "弘安", color="shu")
     P.commit(cart)
 
 
@@ -618,7 +618,7 @@ def muromachi(P):
     M.snowfall(P, snow, n=700, seed=5)
     P.commit(snow)
     cart = P.plane("cart")
-    cartouche(P, cart, 3700, 120, "室町", "金閣")
+    cartouche(P, cart, 3440, 380, "室町", "金閣")
     P.commit(cart)
 
 
@@ -668,7 +668,7 @@ def sengoku(P):
     A.blossoms(P, front, 1150, 2300, 700, seed=9, spread=0.8)
     P.commit(front)
     cart = P.plane("cart")
-    cartouche(P, cart, 3700, 120, "戦国", "天守")
+    cartouche(P, cart, 3440, 380, "戦国", "天守")
     P.commit(cart)
 
 
@@ -734,7 +734,7 @@ def edo(P):
             A.poly_block(P, front, A.rect(x - 16, y, x + 16, y + 40), "light", key=1.4)
     P.commit(front)
     cart = P.plane("cart")
-    cartouche(P, cart, 3700, 120, "江戸", "日本橋")
+    cartouche(P, cart, 3440, 380, "江戸", "日本橋")
     P.commit(cart)
 
 
@@ -802,7 +802,7 @@ def meiji(P):
     A.crowd(P, front, 2950, 3450, 2000, 110, 4, seed=12, robes=("sumi", "robe", "grey"), hats=0.3)
     P.commit(front)
     cart = P.plane("cart")
-    cartouche(P, cart, 3700, 120, "明治", "高輪")
+    cartouche(P, cart, 3440, 380, "明治", "高輪")
     P.commit(cart)
 
 
@@ -865,7 +865,7 @@ def showa(P):
                      key=2.2)
     P.commit(front)
     cart = P.plane("cart")
-    cartouche(P, cart, 3700, 120, "昭和", "広島")
+    cartouche(P, cart, 3440, 380, "昭和", "広島")
     P.commit(cart)
 
 
@@ -929,7 +929,7 @@ def sengo(P):
                       for k, x in enumerate(rng.uniform(-100, 3800, 24))], 2.0, color="sea_line", alpha=0.35, smooth=False)
     P.commit(front)
     cart = P.plane("cart")
-    cartouche(P, cart, 3700, 120, "戦後", "富士川")
+    cartouche(P, cart, 3440, 380, "戦後", "富士川")
     P.commit(cart)
 
 
