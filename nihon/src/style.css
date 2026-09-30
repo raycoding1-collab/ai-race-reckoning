@@ -216,7 +216,7 @@ main, .end { position: relative; z-index: 1; }
   content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
   background: radial-gradient(ellipse 60% 72% at 14% 58%, var(--veil) 0%, var(--veil-soft) 48%, transparent 76%);
 }
-.hero-han { position: absolute; top: calc(5.5rem + env(safe-area-inset-top, 0px)); right: calc(var(--gutter) + 9rem); }
+.hero-han { position: absolute; top: calc(5.5rem + env(safe-area-inset-top, 0px)); right: calc(var(--gutter) + max(9rem, 16vw)); }
 .han-write { display: inline-block; font-family: var(--font-ja); line-height: 1; }
 .hero-han .han-write { writing-mode: vertical-rl; font-size: clamp(5rem, 11vw, 10.5rem); color: var(--ink); opacity: .92; }
 .hero-text { max-width: min(38rem, 48vw); }
