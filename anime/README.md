@@ -29,14 +29,24 @@ publishing as a claude.ai artifact.
 ## Images
 
 Pictures live in `img/` as `<slug>.webp` (or `.jpg`/`.png`). Every picture in the
-page names its slug in an `<x-shot>`, `<x-still>` or `<x-frame>` macro. When a file
-is missing the build substitutes a designed placeholder and lists the missing
-slugs in `src/images-missing.txt`, so the page is always complete.
+page names its slug in an `<x-shot>`, `<x-still>` or `<x-frame>` macro, and
+`src/data/images-wanted.json` is the shot list: for each slug, the work, the frame
+the page would ideally show (also its alt text), where it is used, and where a
+legitimate copy can be found. When a file is missing the build substitutes a
+designed placeholder and lists the missing slugs in `src/images-missing.txt`, so
+the page is always complete. The note on the images in the sources section says
+whether the pictures are in.
 
-Pre-1917 works are public domain. Studio Ghibli publishes stills for free use
-“within the bounds of common sense”. All other stills are © their rights holders,
-credited where they appear, and reproduced at reduced size for criticism,
-commentary and education.
+Any shape works: the build reads each file's size and lays it out to suit. Stills
+(between about 6:5 and 2:1) fill their frame; wide banners and scrolls run as a
+band across the screen; posters hang whole over a blurred copy of themselves, and
+turn a featured-work card portrait. WebP at quality 70–80, at most 1600 px on the
+long side and under about 350 KB is plenty.
+
+The picture scrolls, Hokusai's prints and films made before 1953 are public
+domain. Studio Ghibli publishes stills for free use “within the bounds of common
+sense”. All other stills are © their rights holders, credited where they appear,
+and reproduced at reduced size for criticism, commentary and education.
 
 ## Map
 

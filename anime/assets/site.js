@@ -27,21 +27,23 @@
 
   /* ---------- broken or missing images fall back to placeholders ---------- */
   function toPlaceholder(img) {
+    if (img.classList.contains('bd')) { img.remove(); return; }
     var shot = img.closest('.shot');
-    var label = img.getAttribute('alt') || '';
     if (shot && shot.tagName === 'BUTTON') {
       var div = doc.createElement('div');
       div.className = shot.className + ' is-ph';
-      div.setAttribute('role', 'img');
-      div.setAttribute('aria-label', label);
+      div.setAttribute('aria-hidden', 'true');
       div.innerHTML = '<span class="ph"></span>';
       shot.replaceWith(div);
     } else {
+      var fr = img.closest('.fr') || img;
       var ph = doc.createElement('div');
       ph.className = 'ph';
-      ph.dataset.t = img.dataset.t || '';
-      ph.dataset.credit = img.dataset.credit || '';
-      img.replaceWith(ph);
+      ph.setAttribute('aria-hidden', 'true');
+      ph.dataset.t = fr.dataset.t || '';
+      if (fr.classList.contains('is-on')) ph.classList.add('is-on');
+      fr.replaceWith(ph);
+      refreshScenes();
     }
   }
   $$('img').forEach(function (img) {
@@ -96,11 +98,17 @@
     s.frames.forEach(function (f, k) { f.classList.toggle('is-on', k === i); });
     var f = s.frames[i];
     if (s.cap && f) {
-      var t = f.dataset.t || '', c = f.dataset.credit || '';
+      var t = f.dataset.t || '', c = f.classList.contains('ph') ? '' : f.dataset.credit || '';
       s.cap.innerHTML = (t ? '<b>' + escapeHtml(t) + '</b>' : '') + (c ? '<br>' + escapeHtml(c) : '');
     }
   }
   scenes.forEach(function (s) { setFrame(s, 0); });
+
+  // a frame that failed to load has been swapped for a placeholder: look the frames up again
+  function refreshScenes() {
+    if (!scenes) return;
+    scenes.forEach(function (s) { s.frames = $$('.frames > *', s.el); });
+  }
 
   function escapeHtml(str) {
     return String(str).replace(/[&<>"']/g, function (ch) {

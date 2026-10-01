@@ -11,7 +11,9 @@ any image that is missing is replaced by a designed placeholder, and the build l
 Macros used in the parts:
   <x-shot src= alt= t= cap= credit= ph= [tall] [eager] [pos=]></x-shot>   a picture with lightbox
   <x-still ...></x-still>                                                 a frame in a film strip
-  <x-frame ...></x-frame>                                                 a frame on a reel's stage
+  <x-frame ... [cover]></x-frame>                                         a frame on a reel's stage
+Each picture is laid out by its shape (see shape_of): stills fill their box, while banners
+and posters are shown whole where cropping would lose them.
   [[key]] or [[key|text]]     inline glossary term (keys in data/glossary.json)
   {{cut}}                     the next CUT number (001, 002, …)
   {{scrub}} {{reelnav}} {{toc}} {{map}} {{chart:market}} {{chart:boxoffice}}
@@ -59,22 +61,41 @@ def find_image(slug):
     return None
 
 
-def img_tag(slug, alt, eager=False, pos=None, cls=None, extra=""):
+def image_info(slug):
     p = find_image(slug)
     if not p:
         return None
     used_images.add(p.name)
-    size = ""
+    w = h = 0
     if Image is not None:
         try:
             with Image.open(p) as im:
-                size = f' width="{im.width}" height="{im.height}"'
+                w, h = im.size
         except Exception:
             pass
+    return p, w, h
+
+
+def shape_of(w, h):
+    """'still' for frames between 6:5 and about 2:1, 'wide' for banners and scrolls, 'tall' for posters and pages."""
+    if not w or not h:
+        return "still"
+    r = w / h
+    return "tall" if r < 1.2 else "wide" if r > 2.1 else "still"
+
+
+def img_el(p, w, h, alt, eager=False, pos=None, cls=None, extra=""):
+    size = f' width="{w}" height="{h}"' if w and h else ""
     loading = 'fetchpriority="high"' if eager else 'loading="lazy"'
     style = f' style="object-position:{esc(pos)}"' if pos else ""
     c = f' class="{cls}"' if cls else ""
     return f'<img{c} src="img/{p.name}" alt="{esc(alt)}"{size} {loading} decoding="async"{style}{extra}>'
+
+
+def backdrop(p, eager=False):
+    # the same file again, blurred behind a picture that does not fill its box
+    loading = "" if eager else ' loading="lazy"'
+    return f'<img class="bd" src="img/{p.name}" alt="" aria-hidden="true"{loading} decoding="async">'
 
 
 ATTR = re.compile(r'(\w+)="([^"]*)"|\b(\w+)\b')
@@ -91,18 +112,26 @@ def attrs(s):
 
 
 def shot(a):
+    """A picture in a card. Tall pictures sit whole on a blurred copy of themselves, except
+    in a cut, where the card turns portrait; wide ones are cropped to the card."""
     slug = a.get("src", "")
-    tall = " is-tall" if a.get("tall") else ""
-    img = img_tag(slug, a.get("alt", ""), eager=bool(a.get("eager")), pos=a.get("pos"))
-    if img:
+    info = image_info(slug)
+    if not info:
+        missing.append(slug)
+        tall = " is-tall" if a.get("tall") else ""
         return (
-            f'<button type="button" class="shot{tall}" data-lb data-t="{esc(a.get("t"))}" '
-            f'data-cap="{esc(a.get("cap"))}" data-credit="{esc(a.get("credit"))}">{img}</button>'
+            f'<div class="shot is-ph{tall}" aria-hidden="true">'
+            f'<span class="ph"><span lang="ja">{esc(a.get("ph", ""))}</span></span></div>'
         )
-    missing.append(slug)
+    p, w, h = info
+    shape = "tall" if a.get("tall") else shape_of(w, h)
+    eager = bool(a.get("eager"))
+    img = img_el(p, w, h, a.get("alt", ""), eager=eager, pos=a.get("pos") or ("50% 25%" if shape == "tall" else None))
+    bd = backdrop(p, eager) if shape == "tall" else ""
+    cls = {"tall": " is-tall", "wide": " is-wide"}.get(shape, "")
     return (
-        f'<div class="shot is-ph{tall}" role="img" aria-label="{esc(a.get("alt"))}">'
-        f'<span class="ph"><span lang="ja">{esc(a.get("ph", ""))}</span></span></div>'
+        f'<button type="button" class="shot{cls}" data-lb data-t="{esc(a.get("t"))}" '
+        f'data-cap="{esc(a.get("cap"))}" data-credit="{esc(a.get("credit"))}">{img}{bd}</button>'
     )
 
 
@@ -114,13 +143,24 @@ def still(a):
 
 
 def frame(a):
+    """A full-bleed picture. Stills fill the screen; banners and posters are shown whole,
+    as a band or a hanging poster, over a blurred copy of themselves. `cover` always fills."""
     slug = a.get("src", "")
     data = f' data-t="{esc(a.get("t"))}" data-credit="{esc(a.get("credit"))}"'
-    img = img_tag(slug, a.get("alt", ""), eager=bool(a.get("eager")), pos=a.get("pos"), extra=data)
-    if img:
-        return img
-    missing.append(slug)
-    return f'<div class="ph"{data} role="img" aria-label="{esc(a.get("alt"))}"><span lang="ja">{esc(a.get("ph", ""))}</span></div>'
+    info = image_info(slug)
+    if not info:
+        missing.append(slug)
+        return f'<div class="ph" data-t="{esc(a.get("t"))}" aria-hidden="true"><span lang="ja">{esc(a.get("ph", ""))}</span></div>'
+    p, w, h = info
+    shape = shape_of(w, h)
+    eager = bool(a.get("eager"))
+    if a.get("cover") or shape == "still":
+        pos = a.get("pos") or ("50% 25%" if shape == "tall" else None)
+        return img_el(p, w, h, a.get("alt", ""), eager=eager, pos=pos, extra=data)
+    return (
+        f'<div class="fr is-{shape}"{data} style="--r:{w / h:.3f};--h:{h}">'
+        f'{img_el(p, w, h, a.get("alt", ""), eager=eager, pos=a.get("pos"))}{backdrop(p, eager)}</div>'
+    )
 
 
 def expand_macros(text):
@@ -311,6 +351,31 @@ def render_watch():
     )
 
 
+def render_imagenote():
+    # written after the macros have run, so it can say whether the pictures are in yet
+    rights = (
+        "The picture scrolls, Hokusai's prints and the films made before 1953 are in the public domain. Studio Ghibli "
+        "stills come from the studio's own image library, which it opened in 2020 for free use “within the bounds of "
+        "common sense”.",
+        "All other stills and key art are © their respective rights holders, credited on each image, and are "
+        "reproduced at reduced size for criticism, commentary and education.",
+    )
+    if not used_images:
+        items = (
+            "The stills for this edition have not been added yet. Each picture is a placeholder in its era's colour, "
+            "marked with the Japanese title of the work it will show.",
+            "When they are added, the picture scrolls, Hokusai's prints and the films made before 1953 will be in the "
+            "public domain; Studio Ghibli stills will come from the studio's own image library, opened in 2020 for free "
+            "use “within the bounds of common sense”; and all other stills and key art will be credited to their rights "
+            "holders and reproduced at reduced size for criticism, commentary and education.",
+        )
+    elif missing:
+        items = rights + ("Pictures not yet added appear as placeholders in their era's colour, marked with the work's Japanese title.",)
+    else:
+        items = rights
+    return "<ul>" + "".join(f"<li>{t}</li>" for t in items) + "</ul>"
+
+
 def render_glossary(gl):
     rows = sorted(gl.items(), key=lambda kv: kv[1]["term"].lower())
     return '<dl class="glossary">' + "".join(
@@ -340,6 +405,7 @@ def build(artifact_dir=None):
     body = body.replace("{{gldata}}", f'<script type="application/json" id="gl-data">{json.dumps(gl, ensure_ascii=False)}</script>')
     body = body.replace("{{quizdata}}", f'<script type="application/json" id="quiz-data">{json.dumps(quiz, ensure_ascii=False)}</script>')
     body = expand_macros(body)
+    body = body.replace("{{imagenote}}", render_imagenote())
     body = expand_glossary(body, gl)
     body = number_cuts(body)
 
