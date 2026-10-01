@@ -1,0 +1,31 @@
+<a class="skip" href="#start">Skip to the history</a>
+
+<header class="mast" data-mast>
+  <div class="mast-in">
+    <a class="brand" href="#top" aria-label="Drawn to Move, back to the top">
+      <span class="seal" aria-hidden="true">動</span>
+      <span class="brand-t">Drawn to Move</span>
+    </a>
+    <p class="mast-now" aria-hidden="true"><b data-now-n>Opening titles</b> <span data-now-t>A history of anime, 1907–2026</span></p>
+    <div class="mast-tools">
+      <!-- pages-only --><button class="icon-btn" type="button" data-theme-toggle aria-label="Switch between light and dark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 0 0 0 17z" fill="currentColor"/></svg>
+      </button><!-- /pages-only -->
+      <button class="mast-contents" type="button" data-toc-open aria-expanded="false" aria-controls="toc">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="1"/><path d="M3.5 9h17M3.5 15h17M8 4.5v15M16 4.5v15"/></svg>
+        <span>Contents</span>
+      </button>
+    </div>
+  </div>
+  <nav class="scrub" aria-label="Jump to a reel">{{scrub}}</nav>
+</header>
+
+<div class="toc" id="toc" hidden data-toc role="dialog" aria-modal="true" aria-labelledby="toc-title">
+  <div class="toc-in">
+    <div class="toc-head">
+      <span class="label" id="toc-title">Contents · ten reels · {{readtime}}</span>
+      <button class="btn" type="button" data-toc-close>Close</button>
+    </div>
+    {{toc}}
+  </div>
+</div>

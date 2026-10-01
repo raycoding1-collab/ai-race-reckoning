@@ -1,0 +1,33 @@
+<section class="lab" id="lab-frames" style="--era:#7fb2ff" aria-labelledby="lab-frames-title">
+  <div class="wrap">
+    <div class="lab-head">
+      <div><span class="label">Interlude · The Frame Lab</span><h2 id="lab-frames-title">Drawing less, meaning more</h2></div>
+      <p>Film runs at 24 frames a second. Animate “on ones” and you draw a new picture for every frame. “On twos” holds each drawing for two frames, “on threes” for three. Switch between them and watch the ball. The background is a camera pan, which costs no extra drawings, so it stays smooth at every setting. That was the trick Mushi Production built a weekly show on.</p>
+    </div>
+
+    <div class="panel">
+      <div class="panel-bar">
+        <div class="seg" role="group" aria-label="How long each drawing is held">
+          <button type="button" data-hold="1" aria-pressed="false">On ones · 24/s</button>
+          <button type="button" data-hold="2" aria-pressed="false">On twos · 12/s</button>
+          <button type="button" data-hold="3" aria-pressed="true">On threes · 8/s</button>
+        </div>
+        <label class="range" for="fl-speed"><span>Playback speed</span><input type="range" id="fl-speed" min="0.1" max="1" step="0.05" value="1"><output for="fl-speed" data-speed-out>1×</output></label>
+      </div>
+      <div class="canvas-box">
+        <canvas data-frame-lab role="img" aria-label="A bouncing ball and a talking face animated at the chosen number of drawings per second, above a strip of 24 timing-sheet cells showing which drawing is on screen in each frame."></canvas>
+      </div>
+      <div class="readout">
+        <div><b data-ro="dps">8</b><span>new drawings every second</span></div>
+        <div><b data-ro="ep">10,560</b><span>drawings for a 22-minute episode if every one were new</span></div>
+        <div><b data-ro="hold">3</b><span>frames each drawing stays on screen</span></div>
+      </div>
+    </div>
+
+    <div class="lab-notes">
+      <div><h3>The hold <span lang="ja">止め</span></h3><p>One drawing stays on screen while something else moves: the camera, an effect, a mouth. Directors such as Osamu Dezaki turned the held frame from a shortcut into a moment of emphasis.</p></div>
+      <div><h3>The bank <span lang="ja">バンク</span></h3><p>Finished sequences were filed and reused: the robot's launch, the special attack, the magical-girl transformation. Repetition saved money, and turned those sequences into rituals audiences waited for every week.</p></div>
+      <div><h3>The lip flap <span lang="ja">口パク</span></h3><p>Only the mouth moves, swapped between a few shapes over a still face. Japanese studios usually record voices after animating, so lips are timed loosely. <i>Akira</i> was a rare exception: it recorded the dialogue first.</p></div>
+    </div>
+  </div>
+</section>

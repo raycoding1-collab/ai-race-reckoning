@@ -1,0 +1,189 @@
+{
+  "origin": {
+    "lon": 139.69,
+    "lat": 35.69,
+    "label": "Tokyo"
+  },
+  "pins": [
+    {
+      "id": "ch",
+      "lon": 9.53,
+      "lat": 47.01,
+      "c": "#f2a541",
+      "place": "Maienfeld, Switzerland",
+      "when": "Summer 1973",
+      "title": "Heidi's Alp",
+      "text": "Isao Takahata, Hayao Miyazaki and Yōichi Kotabe spent about ten days scouting Switzerland and Germany for <i>Heidi, Girl of the Alps</i>, two of them in the village of Maienfeld. It was a pioneering trip for TV animation. The mountain hut they sketched is now marketed to visitors as “Heidi's Alp”, and the series became a staple of European childhoods."
+    },
+    {
+      "id": "us63",
+      "lon": -74.0,
+      "lat": 40.71,
+      "c": "#7fb2ff",
+      "place": "United States",
+      "when": "1963 onward",
+      "title": "Astro Boy crosses the Pacific",
+      "text": "NBC Enterprises syndicated an English version of <i>Tetsuwan Atom</i> in 1963, the same year it premiered in Japan, with the characters given American names. <i>Kimba the White Lion</i> (1966) and <i>Speed Racer</i> (1967) followed, and most young viewers had no idea the shows came from Japan."
+    },
+    {
+      "id": "it",
+      "lon": 12.5,
+      "lat": 41.9,
+      "c": "#f2a541",
+      "place": "Italy",
+      "when": "1978",
+      "title": "Goldrake",
+      "text": "Public broadcaster RAI aired <i>UFO Robot Grendizer</i> as <i>Goldrake</i> in 1978. Italy's new private channels then filled their schedules with Japanese series, and <i>Candy Candy</i>, <i>Lady Oscar</i> (<i>The Rose of Versailles</i>) and <i>Holly e Benji</i> (<i>Captain Tsubasa</i>) became shared Italian memories."
+    },
+    {
+      "id": "fr",
+      "lon": 2.35,
+      "lat": 48.86,
+      "c": "#f2a541",
+      "place": "France",
+      "when": "July 1978",
+      "title": "Goldorak",
+      "text": "Antenne 2 began showing <i>Grendizer</i> as <i>Goldorak</i> in July 1978. By January 1979 it was on the cover of <i>Paris Match</i>, and critics were warning about its influence on children. By 1990 more than a third of the animation on French television was Japanese."
+    },
+    {
+      "id": "lb",
+      "lon": 35.5,
+      "lat": 33.89,
+      "c": "#f2a541",
+      "place": "Lebanon and the Arab world",
+      "when": "1979",
+      "title": "Grendizer",
+      "text": "Dubbed into Arabic in Lebanon during the civil war, with Jihad Al-Atrash as the exiled prince Duke Fleed, <i>Grendizer</i> spread across the Arab world. Its story of a displaced hero defending a home that is not his own struck a deep chord, and the show remains a shared reference for several generations."
+    },
+    {
+      "id": "ph",
+      "lon": 120.98,
+      "lat": 14.6,
+      "c": "#f2a541",
+      "place": "Philippines",
+      "when": "27 August 1979",
+      "title": "Voltes V is pulled off the air",
+      "text": "Ferdinand Marcos's government took <i>Voltes V</i> and other robot shows off television four episodes before the end, officially for violence. Many viewers believed the real reason was its story of an uprising against a tyrant. It returned after the 1986 People Power Revolution, and the final episodes were not broadcast until 1999."
+    },
+    {
+      "id": "cn",
+      "lon": 116.4,
+      "lat": 39.9,
+      "c": "#7fb2ff",
+      "place": "China",
+      "when": "December 1980",
+      "title": "Astro Boy on CCTV",
+      "text": "China Central Television broadcast <i>Astro Boy</i> in December 1980, early in the reform era. <i>Ikkyū-san</i> followed in 1983 and was rerun so often that schoolchildren memorised its Japanese theme song."
+    },
+    {
+      "id": "es",
+      "lon": -3.7,
+      "lat": 40.42,
+      "c": "#e8463a",
+      "place": "Spain and Latin America",
+      "when": "1980s–1990s",
+      "title": "Oliver y Benji",
+      "text": "<i>Captain Tsubasa</i> became <i>Oliver y Benji</i> in Spanish, <i>Olive et Tom</i> in French and <i>Holly e Benji</i> in Italian. A generation of professional footballers has credited it. Fernando Torres said he took up the game because of it: “I wanted to be Oliver.”"
+    },
+    {
+      "id": "uk",
+      "lon": -0.13,
+      "lat": 51.5,
+      "c": "#e8463a",
+      "place": "United Kingdom",
+      "when": "1 September 1991",
+      "title": "Akira on VHS",
+      "text": "Island World released <i>Akira</i> on video in Britain in 1991. The label renamed itself Manga Entertainment in 1993, and for a decade its violent, adult catalogue was what many British viewers thought anime was."
+    },
+    {
+      "id": "in",
+      "lon": 77.21,
+      "lat": 28.61,
+      "c": "#a07bf2",
+      "place": "India",
+      "when": "1992",
+      "title": "A Japanese Ramayana",
+      "text": "Documentary maker Yugo Sako spent nearly a decade making <i>Ramayana: The Legend of Prince Rama</i> with the Indian animator Ram Mohan. Objections to a Japanese company adapting India's epic kept it from wide release, but it later found a large audience through Cartoon Network in India."
+    },
+    {
+      "id": "br",
+      "lon": -46.63,
+      "lat": -23.55,
+      "c": "#a07bf2",
+      "place": "Brazil",
+      "when": "1 September 1994",
+      "title": "Os Cavaleiros do Zodíaco",
+      "text": "Rede Manchete got <i>Saint Seiya</i> free in exchange for airing commercials for Bandai's toys. It became a national phenomenon and opened the door for <i>Dragon Ball</i>, <i>Sailor Moon</i> and the anime that followed. Brazil also has the largest Japanese diaspora in the world."
+    },
+    {
+      "id": "kr",
+      "lon": 126.98,
+      "lat": 37.57,
+      "c": "#a07bf2",
+      "place": "South Korea",
+      "when": "1998–2004",
+      "title": "The ban comes down",
+      "text": "South Korea lifted its postwar ban on Japanese cultural imports in four stages between October 1998 and January 2004. In 2023 <i>The First Slam Dunk</i> sold more than three million tickets there and stayed in cinemas for almost a year."
+    },
+    {
+      "id": "mx",
+      "lon": -106.49,
+      "lat": 31.69,
+      "c": "#f06ea9",
+      "place": "Mexico, Ecuador, El Salvador",
+      "when": "17 March 2018",
+      "title": "Goku versus Jiren in the town square",
+      "text": "When <i>Dragon Ball Super</i> episode 130 aired, city governments put it on big screens. About 15,000 people gathered in Ciudad Juárez and more than 10,000 in Machala, Ecuador. Toei said it had not authorised the screenings."
+    },
+    {
+      "id": "th",
+      "lon": 100.5,
+      "lat": 13.75,
+      "c": "#4cc38a",
+      "place": "Bangkok, Thailand",
+      "when": "26 July 2020",
+      "title": "Hamtaro at Democracy Monument",
+      "text": "Pro-democracy protesters ran circles around Democracy Monument singing a parody of the <i>Hamtaro</i> theme. “The most delicious thing is sunflower seeds” became “the most delicious thing is the people's taxes”."
+    },
+    {
+      "id": "id",
+      "lon": 106.85,
+      "lat": -6.2,
+      "c": "#4cc38a",
+      "place": "Indonesia",
+      "when": "August 2025",
+      "title": "The Straw Hat flag",
+      "text": "Ahead of Independence Day, Indonesians flew the Jolly Roger of <i>One Piece</i>'s Straw Hat Pirates in place of the national flag, as a protest against the government. Within weeks the flag was being carried by young protesters in other countries."
+    },
+    {
+      "id": "np",
+      "lon": 85.32,
+      "lat": 27.7,
+      "c": "#4cc38a",
+      "place": "Kathmandu, Nepal",
+      "when": "September 2025",
+      "title": "Gen Z under a pirate flag",
+      "text": "The Straw Hat flag flew over the youth protests that brought down Nepal's government. For Rohan Rai, 19, it stood for “freedom, loyalty and defiance against injustice”. It appeared again in Madagascar, the Philippines, Peru and elsewhere."
+    },
+    {
+      "id": "sa",
+      "lon": 46.68,
+      "lat": 24.71,
+      "c": "#4cc38a",
+      "place": "Saudi Arabia",
+      "when": "2023–2024",
+      "title": "Grendizer comes home to its fans",
+      "text": "Half a century after the Arabic dub, Saudi Arabia's Manga Productions co-developed and marketed <i>Grendizer U</i>, a new series built for the audience that had grown up with the original."
+    },
+    {
+      "id": "us25",
+      "lon": -118.24,
+      "lat": 34.05,
+      "c": "#4cc38a",
+      "place": "United States",
+      "when": "1999 → 2026",
+      "title": "From Pokémon to KPop Demon Hunters",
+      "text": "<i>Pokémon: The First Movie</i> opened at No. 1 in November 1999 and earned $85.7 million, a record for anime in North America that stood until 2025, when <i>Infinity Castle</i> took $70.6 million in its first weekend alone. In 2026 the Oscar for animated feature went to <i>KPop Demon Hunters</i>, an American film whose directors named <i>Sailor Moon</i>, <i>Cowboy Bebop</i> and <i>FLCL</i> among their models."
+    }
+  ]
+}

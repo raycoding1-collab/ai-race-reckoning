@@ -1,0 +1,72 @@
+[
+  {
+    "q": "What does the three-second Katsudō Shashin fragment show?",
+    "o": ["A samurai testing a blunt sword", "A boy in a sailor suit writing “moving pictures” and bowing", "A frog and a rabbit wrestling", "A girl flying on a broom"],
+    "a": 1,
+    "why": "Fifty frames stencilled onto celluloid, probably between 1905 and 1912: a boy writes 活動写真 (katsudō shashin, “moving pictures”), turns, lifts his cap and bows. The samurai is Namakura Gatana (1917); the frog and rabbit are from the 12th-century Chōjū-giga scrolls.",
+    "go": "r0"
+  },
+  {
+    "q": "In 1945 a 16-year-old Osamu Tezuka cried at a film and resolved to make animation. Which film?",
+    "o": ["Snow White and the Seven Dwarfs", "Momotarō: Sacred Sailors", "The Tale of the White Serpent", "Spider and the Tulip"],
+    "a": 1,
+    "why": "Mitsuyo Seo's Momotarō: Sacred Sailors, Japan's first feature-length animation, was commissioned by the Navy Ministry and released in April 1945. Snow White did not reach Japan until 1950, and The White Serpent came in 1958.",
+    "go": "r1"
+  },
+  {
+    "q": "Why did Tezuka's price of ¥550,000 per episode of Astro Boy matter so much?",
+    "o": ["It made Astro Boy the most expensive show on TV", "It was far below the real cost and set low expectations for what TV anime should cost", "It was paid entirely by the US network NBC", "It meant Astro Boy had no merchandise"],
+    "a": 1,
+    "why": "Tezuka covered the gap with his manga income and licensing. Broadcasters came to expect anime at that kind of price, and many in the industry trace its low pay back to the deal.",
+    "go": "r3"
+  },
+  {
+    "q": "At 24 frames a second, what does animating “on threes” mean?",
+    "o": ["Three frames are drawn for every drawing on screen", "Each drawing is held for three frames, so 8 new drawings a second", "Three animators share each scene", "The film runs at 3 frames a second"],
+    "a": 1,
+    "why": "On ones means a new drawing every frame (24 a second), on twos 12 a second, on threes 8. Mushi Production's limited animation leaned on threes, holds and reused footage. Try it in the Frame Lab.",
+    "go": "lab-frames"
+  },
+  {
+    "q": "Which 1979 series turned giant robots into mass-produced weapons and started the “real robot” genre?",
+    "o": ["Mazinger Z", "Space Battleship Yamato", "Mobile Suit Gundam", "Macross"],
+    "a": 2,
+    "why": "Yoshiyuki Tomino's Gundam was cut from 52 episodes to 43 for poor ratings, then revived by Bandai's model kits and three compilation films. In February 1981 around 15,000 fans gathered in Shinjuku to declare “a new anime century”.",
+    "go": "r4"
+  },
+  {
+    "q": "What made Studio Ghibli insist that its films never be cut for foreign release?",
+    "o": ["A censorship ruling in Japan", "Warriors of the Wind, the 1985 US version of Nausicaä, with about 23 minutes removed", "A dispute with Disney over Totoro", "Its contract with Tokuma Shoten"],
+    "a": 1,
+    "why": "New World Pictures re-edited Nausicaä heavily. Ghibli wrote a no-edit rule into later deals, and when Miramax asked for cuts to Princess Mononoke, producer Toshio Suzuki sent Harvey Weinstein a replica sword with a note: “No cuts.”",
+    "go": "r5"
+  },
+  {
+    "q": "What did Hayao Miyazaki call the pauses he deliberately leaves in his films?",
+    "o": ["Ma (間), emptiness", "Wabi-sabi", "Mono no aware", "Kawaii"],
+    "a": 0,
+    "why": "Asked by Roger Ebert in 2002 about the quiet moments in his films, Miyazaki clapped his hands a few times and said the time between the claps was ma, and that without it tension just turns into busyness.",
+    "go": "lab-grammar"
+  },
+  {
+    "q": "Which film did the Wachowskis show producer Joel Silver when pitching The Matrix, saying “We wanna do that for real”?",
+    "o": ["Akira", "Ghost in the Shell", "Serial Experiments Lain", "Paprika"],
+    "a": 1,
+    "why": "Mamoru Oshii's 1995 film underperformed in cinemas, then became the first Japanese animated film to top Billboard's home video sales chart in August 1996.",
+    "go": "r6"
+  },
+  {
+    "q": "In 2024, about how much of the anime industry's ¥3.84 trillion came from outside Japan?",
+    "o": ["About 15%", "About 30%", "About 56%", "About 90%"],
+    "a": 2,
+    "why": "The Association of Japanese Animations put overseas revenue at ¥2.17 trillion against ¥1.67 trillion at home. Overseas has now been larger than domestic in 2020, 2023 and 2024.",
+    "go": "lab-numbers"
+  },
+  {
+    "q": "What did young protesters in Indonesia, Nepal, Madagascar and elsewhere fly in 2025?",
+    "o": ["The Akira capsule logo", "The Straw Hat Pirates' Jolly Roger from One Piece", "A Totoro banner", "The NERV logo from Evangelion"],
+    "a": 1,
+    "why": "Starting in Indonesia in August 2025, the flag of Luffy's crew, who fight a corrupt world government, became a sign of youth protest across Asia, Africa and Latin America.",
+    "go": "r9"
+  }
+]
