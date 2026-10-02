@@ -54,7 +54,8 @@ AniList, Kitsu and each work's Wikipedia article offer for every shot; a person
 picks from them; a `final` job then fetches the picks as WebP into `img/` and
 records each one in `src/data/images-sourced.json`: its size, source, credit and
 a description of what it shows. The build uses that description as the alt
-text; captions stay in the page text.
+text, and an optional `pos` (a CSS object-position) as the focal point when a
+wide picture is cropped; captions stay in the page text.
 
 The picture scrolls, Hokusai's prints and films made before 1953 are public
 domain. Studio Ghibli publishes stills for free use “within the bounds of common

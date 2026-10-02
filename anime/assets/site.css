@@ -305,18 +305,24 @@ b, strong { font-weight: 600; }
 /* ---------- hero ---------- */
 
 .hero { position: relative; overflow: hidden; isolation: isolate; border-bottom: 1px solid var(--rule); }
+/* a strip of film running under the titles: ten eras, one frame each, looping */
 .hero-reel {
-  position: absolute; inset: 0; z-index: -2; display: flex; gap: 10px; align-items: center;
-  padding-block: 2rem; opacity: 0.5;
+  position: relative; overflow: hidden; background: #050608;
+  padding-block: 24px; border-top: 1px solid var(--rule);
 }
-.hero-reel-track { display: flex; gap: 10px; animation: reel 160s linear infinite; will-change: transform; }
-.hero-reel figure { margin: 0; flex: none; width: clamp(15rem, 28vw, 26rem); aspect-ratio: 16 / 9; position: relative; overflow: hidden; background: var(--bg-3); }
-.hero-reel img { width: 100%; height: 100%; object-fit: cover; filter: saturate(0.9); }
+.hero-reel-track { display: flex; gap: 8px; width: max-content; padding-right: 8px; animation: reel 150s linear infinite; will-change: transform; }
+.hero-reel:hover .hero-reel-track { animation-play-state: paused; }
+.hero-reel figure { margin: 0; flex: none; height: clamp(6.5rem, 4rem + 8vw, 11rem); aspect-ratio: 16 / 9; position: relative; overflow: hidden; background: #111216; }
+.hero-reel img { width: 100%; height: 100%; object-fit: cover; filter: saturate(0.95) contrast(1.02); }
 @keyframes reel { to { transform: translateX(-50%); } }
 .hero-reel::before,
-.hero-reel::after { content: ""; position: absolute; left: 0; right: 0; height: 14px; z-index: 1; background: radial-gradient(circle at 50% 50%, var(--bg) 3px, transparent 3.5px) 0 0 / 22px 14px repeat-x; }
-.hero-reel::before { top: calc(2rem - 18px); }
-.hero-reel::after { bottom: calc(2rem - 18px); }
+.hero-reel::after {
+  content: ""; position: absolute; left: 0; right: 0; height: 10px; z-index: 1; pointer-events: none;
+  background: radial-gradient(circle at 50% 50%, color-mix(in oklab, var(--bg) 62%, #fff) 2.4px, transparent 2.9px) 0 0 / 18px 10px repeat-x;
+  opacity: 0.55;
+}
+.hero-reel::before { top: 7px; }
+.hero-reel::after { bottom: 7px; }
 .hero-shade {
   position: absolute; inset: 0; z-index: -1;
   background:

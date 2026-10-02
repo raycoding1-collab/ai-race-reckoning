@@ -167,7 +167,7 @@
   "kind": "artwork",
   "source_url": "https://commons.wikimedia.org/wiki/File:Chikara_to_Onna_no_Yo_no_Naka_screenshot.jpg",
   "credit": "Kenzō Masaoka, Shochiku. Public domain",
-  "shows": "Two cartoon figures, a woman in a polka-dot dress and a man, sit back to back.",
+  "shows": "The film's hero and the office typist, drawn in black and white.",
   "commons": {
    "artist": "Directed and animated by Kenzō Masaoka, released in Japan by Shochiku, uploaded by Nihonjoe",
    "license": "Public domain",
@@ -225,7 +225,8 @@
   "kind": "banner",
   "source_url": "https://anilist.co/anime/121664",
   "credit": "© DAICON Film",
-  "shows": "The DAICON IV heroine in a red bunny costume throws a punch, a red robot behind her."
+  "shows": "The DAICON IV heroine in a red bunny costume throws a punch, a red robot behind her.",
+  "pos": "30% 50%"
  },
  {
   "slug": "dandadan",
@@ -245,7 +246,8 @@
   "kind": "banner",
   "source_url": "https://kitsu.app/anime/41370",
   "credit": "© Koyoharu Gotōge / Shueisha, Aniplex, ufotable",
-  "shows": "Tanjiro carries his sister Nezuko through the snow."
+  "shows": "Tanjiro carries his sister Nezuko through the snow.",
+  "pos": "25% 50%"
  },
  {
   "slug": "devilman",
@@ -355,7 +357,8 @@
   "kind": "banner",
   "source_url": "https://kitsu.app/anime/46474",
   "credit": "© Kanehito Yamada, Tsukasa Abe / Shogakukan / “Frieren” Project",
-  "shows": "Frieren, an elf mage with long white hair, walks past an old stone wall below a hill town."
+  "shows": "Frieren, an elf mage with long white hair, walks past an old stone wall below a hill town.",
+  "pos": "15% 50%"
  },
  {
   "slug": "gatchaman",
@@ -465,7 +468,8 @@
   "kind": "banner",
   "source_url": "https://anilist.co/anime/2001",
   "credit": "© GAINAX, Nakashima Kazuki / Aniplex · KDE-J · TV Tokyo · Dentsu",
-  "shows": "A huge craft hangs over a range of volcanoes in a sunset sky."
+  "shows": "A huge craft hangs over a range of volcanoes in a sunset sky.",
+  "pos": "68% 50%"
  },
  {
   "slug": "hakujaden",
@@ -695,7 +699,7 @@
   "kind": "poster",
   "source_url": "https://anilist.co/anime/3990",
   "credit": "Kenzō Masaoka, Shochiku",
-  "shows": "A home-video cover for Kumo to Chūrippu, with a black-and-white frame of the ladybird."
+  "shows": "A Japanese home-video cover of Kenzō Masaoka's films, with a black-and-white frame of the ladybird."
  },
  {
   "slug": "lain",
@@ -775,7 +779,8 @@
   "kind": "banner",
   "source_url": "https://anilist.co/anime/9756",
   "credit": "© Magica Quartet / Aniplex · Madoka Partners · MBS",
-  "shows": "Madoka and Homura above a city skyline under a blue sky."
+  "shows": "Madoka and Homura above a city skyline under a blue sky.",
+  "pos": "68% 50%"
  },
  {
   "slug": "mazinger",
@@ -995,7 +1000,8 @@
   "kind": "banner",
   "source_url": "https://anilist.co/anime/21",
   "credit": "© Eiichiro Oda / Shueisha, Fuji TV, Toei Animation",
-  "shows": "Luffy, in his straw hat, grins among his crew and a crowd of creatures."
+  "shows": "Luffy, in his straw hat, grins among his crew and a crowd of creatures.",
+  "pos": "38% 50%"
  },
  {
   "slug": "one-piece-flag",
@@ -1004,8 +1010,8 @@
   "height": 1200,
   "kind": "artwork",
   "source_url": "https://commons.wikimedia.org/wiki/File:Trillion_Peso_March_(Straw_Hat_Pirates_Flag).jpg",
-  "credit": "Photo via Wikimedia Commons, CC BY 4.0",
-  "shows": "Protesters at the Trillion Peso March in Manila under a Straw Hat Jolly Roger flag.",
+  "credit": "Photo: RFNirmala, CC BY 4.0, via Wikimedia Commons",
+  "shows": "Protesters in Manila march beside a wall painted “Tayo ang lakas” (We are the strength), under a Straw Hat Jolly Roger flag.",
   "commons": {
    "artist": "RFNirmala",
    "license": "CC BY 4.0",
@@ -1073,7 +1079,8 @@
   "kind": "banner",
   "source_url": "https://anilist.co/anime/1096",
   "credit": "© HEADGEAR / Bandai Visual / Tohokushinsha",
-  "shows": "Shinobu Nagumo holds a white cat against her cheek, painted in muted blues."
+  "shows": "Shinobu Nagumo holds a white cat against her cheek, painted in muted blues.",
+  "pos": "20% 50%"
  },
  {
   "slug": "perfect-blue",
@@ -1093,7 +1100,8 @@
   "kind": "banner",
   "source_url": "https://kitsu.app/anime/8262",
   "credit": "",
-  "shows": "Peco and Smile leap joyfully against a bright yellow background."
+  "shows": "Peco and Smile leap joyfully against a bright yellow background.",
+  "pos": "30% 50%"
  },
  {
   "slug": "pokemon",
@@ -1223,7 +1231,8 @@
   "kind": "banner",
   "source_url": "https://kitsu.app/anime/46231",
   "credit": "© Solo Leveling Animation Partners",
-  "shows": "Jinwoo stands in a vast stone chamber of statues in the double dungeon."
+  "shows": "Jinwoo stands in a vast stone chamber of statues in the double dungeon.",
+  "pos": "38% 50%"
  },
  {
   "slug": "speed-racer",
@@ -1313,7 +1322,8 @@
   "kind": "banner",
   "source_url": "https://anilist.co/anime/1293",
   "credit": "© Rumiko Takahashi / Shogakukan, Kitty Film, Fuji TV",
-  "shows": "Ataru runs from a crowd of the series' characters across the rooftops at night."
+  "shows": "Ataru runs from a crowd of the series' characters across the rooftops at night.",
+  "pos": "35% 50%"
  },
  {
   "slug": "utena",
@@ -1433,7 +1443,8 @@
   "kind": "banner",
   "source_url": "https://anilist.co/anime/20665",
   "credit": "© Naoshi Arakawa, Kodansha / “Your Lie in April” Production Committee",
-  "shows": "Kōsei at the piano and Kaori with her violin, framed by cherry blossom."
+  "shows": "Kōsei at the piano and Kaori with her violin, framed by cherry blossom.",
+  "pos": "35% 50%"
  },
  {
   "slug": "your-name",

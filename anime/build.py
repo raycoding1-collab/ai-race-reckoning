@@ -26,6 +26,7 @@ import json
 import re
 import sys
 from pathlib import Path
+from urllib.parse import unquote
 
 ROOT = Path(__file__).resolve().parent
 SRC = ROOT / "src"
@@ -125,6 +126,8 @@ def described(a):
         a["alt"] = rec["shows"]
     if not a.get("credit") and rec.get("credit"):
         a["credit"] = rec["credit"]
+    if not a.get("pos") and rec.get("pos"):
+        a["pos"] = rec["pos"]  # where the subject sits, for crops
     return a
 
 
@@ -393,6 +396,14 @@ def render_imagenote():
         items = rights + ("Pictures not yet added appear as placeholders in their era's colour, marked with the work's Japanese title.",)
     else:
         items = rights
+    # Creative Commons photographs: author, licence and source, as their licences ask
+    for r in sorted(sourced.values(), key=lambda r: r["slug"]):
+        cm = r.get("commons") or {}
+        if r["file"] in used_images and cm.get("license", "").startswith("CC"):
+            title = re.sub(r"^File:|\.\w+$", "", unquote(r["source_url"].rsplit("/", 1)[-1])).replace("_", " ")
+            lic = f'<a href="{esc(cm["license_url"])}" rel="noopener">{esc(cm["license"])}</a>' if cm.get("license_url") else esc(cm["license"])
+            items += (f'“<a href="{esc(r["source_url"])}" rel="noopener">{esc(title)}</a>” by {esc(cm.get("artist") or "unknown")}, '
+                      f'{lic}, resized and cropped.',)
     return "<ul>" + "".join(f"<li>{t}</li>" for t in items) + "</ul>"
 
 
