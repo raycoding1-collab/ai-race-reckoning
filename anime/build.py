@@ -47,6 +47,9 @@ FONTS = (
 
 missing = []
 used_images = set()
+# what each fetched picture actually shows (src/data/images-sourced.json, written by
+# tools/images/fetch.py): its description replaces the alt text the shot list wished for
+sourced = {}
 
 
 def esc(s):
@@ -111,9 +114,26 @@ def attrs(s):
     return out
 
 
-def shot(a):
+def described(a, own_cap=True):
+    """The macro's attributes, with alt text (and, for scene captions, the caption) taken
+    from the record of what the fetched picture shows. Decorative pictures keep alt=""."""
+    rec = sourced.get(a.get("src", ""))
+    if not rec:
+        return a
+    a = dict(a)
+    if a.get("alt") and rec.get("shows"):
+        a["alt"] = rec["shows"]
+    if own_cap and rec.get("cap"):
+        a["cap"] = rec["cap"]
+    if not a.get("credit") and rec.get("credit"):
+        a["credit"] = rec["credit"]
+    return a
+
+
+def shot(a, own_cap=True):
     """A picture in a card. Tall pictures sit whole on a blurred copy of themselves, except
     in a cut, where the card turns portrait; wide ones are cropped to the card."""
+    a = described(a, own_cap)
     slug = a.get("src", "")
     info = image_info(slug)
     if not info:
@@ -139,12 +159,13 @@ def still(a):
     cap = a.get("cap", "")
     t = a.get("t", "")
     fig = f"<b>{esc(t)}</b> {esc(cap)}" if t else esc(cap)
-    return f"<figure>{shot(a)}<figcaption>{fig}</figcaption></figure>"
+    return f"<figure>{shot(a, own_cap=False)}<figcaption>{fig}</figcaption></figure>"
 
 
 def frame(a):
     """A full-bleed picture. Stills fill the screen; banners and posters are shown whole,
     as a band or a hanging poster, over a blurred copy of themselves. `cover` always fills."""
+    a = described(a, own_cap=False)
     slug = a.get("src", "")
     data = f' data-t="{esc(a.get("t"))}" data-credit="{esc(a.get("credit"))}"'
     info = image_info(slug)
@@ -337,7 +358,8 @@ def render_watch():
         tags = "".join(f"<span>{mood_names[m]}</span>" for m in w["m"])
         if w.get("s"):
             tags = '<span class="start">Start here</span>' + tags
-        pic = shot({"src": w["img"], "alt": f'{w["t"]} ({w["y"]})', "t": f'{w["t"]} ({w["y"]})', "cap": w["b"], "credit": "", "ph": w.get("ph", "")})
+        pic = shot({"src": w["img"], "alt": f'{w["t"]} ({w["y"]})', "t": f'{w["t"]} ({w["y"]})', "cap": w["b"], "credit": "", "ph": w.get("ph", "")},
+                   own_cap=False)
         cards.append(
             f'<article class="w" data-moods="{" ".join(w["m"])}" data-fmt="{w["f"]}" data-start="{"1" if w.get("s") else "0"}">'
             f'{pic}<div class="w-b"><h3 class="w-t">{esc(w["t"])}</h3><p class="w-m">{w["y"]} · {"Film" if w["f"] == "film" else "Series"} · {esc(w["len"])}</p>'
@@ -384,6 +406,9 @@ def render_glossary(gl):
 
 
 def build(artifact_dir=None):
+    p = SRC / "data" / "images-sourced.json"
+    if p.exists():
+        sourced.update({r["slug"]: r for r in json.loads(p.read_text())})
     gl = json.loads((SRC / "data" / "glossary.json").read_text())
     quiz = json.loads((SRC / "data" / "quiz.json").read_text())
     parts = sorted((SRC / "parts").glob("*.html"))

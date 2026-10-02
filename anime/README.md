@@ -43,6 +43,19 @@ band across the screen; posters hang whole over a blurred copy of themselves, an
 turn a featured-work card portrait. WebP at quality 70–80, at most 1600 px on the
 long side and under about 350 KB is plenty.
 
+### Fetching pictures
+
+`tools/images/fetch.py` downloads them. The sandbox that builds this site cannot
+reach image hosts, so it runs in GitHub Actions
+(`.github/workflows/anime-images.yml`) whenever `tools/images/job.json` changes,
+and commits what it fetched. A `candidates` job makes labelled contact sheets in
+`tools/images/cand/` of what Studio Ghibli's image library, Wikimedia Commons,
+AniList, Kitsu and each work's Wikipedia article offer for every shot; a person
+picks from them; a `final` job then fetches the picks as WebP into `img/` and
+records each one in `src/data/images-sourced.json`: its size, source, credit and
+a description of what it shows. The build uses that description as the alt
+text, and a `cap` there replaces a caption written for a different frame.
+
 The picture scrolls, Hokusai's prints and films made before 1953 are public
 domain. Studio Ghibli publishes stills for free use “within the bounds of common
 sense”. All other stills are © their rights holders, credited where they appear,
