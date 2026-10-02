@@ -314,11 +314,12 @@ def render_boxoffice_chart():
     # Japan domestic box office, billions of yen, nominal, including re-releases (Kōgyō Tsūshinsha).
     rows = [
         ("Demon Slayer: Mugen Train", 2020, 40.8, True),
-        ("Demon Slayer: Infinity Castle*", 2025, 40.4, True),
+        ("Demon Slayer: Infinity Castle*", 2025, 40.2, True),
         ("Spirited Away", 2001, 31.7, True),
         ("Titanic", 1997, 27.8, False),
         ("Frozen", 2014, 25.5, False),
         ("Your Name", 2016, 25.2, True),
+        ("Kokuho", 2025, 20.8, False),
         ("One Piece Film: Red", 2022, 20.3, True),
         ("Harry Potter and the Philosopher's Stone", 2001, 20.3, False),
         ("Princess Mononoke", 1997, 20.2, True),
@@ -330,13 +331,14 @@ def render_boxoffice_chart():
         for t, y, v, a in rows
     )
     return (
-        '<figure class="chart"><h3>Six of the nine biggest films in Japan are anime</h3>'
-        '<p class="sub">All-time domestic box office, billions of yen, not adjusted for inflation</p>'
+        '<figure class="chart"><h3>Six of the ten biggest films in Japan are anime</h3>'
+        '<p class="sub">All-time box office in Japan only, billions of yen, not adjusted for inflation</p>'
         '<div class="legend"><span><i style="background:var(--era)"></i>Anime</span>'
         '<span><i style="background:color-mix(in oklab, var(--ink) 26%, transparent)"></i>Other films</span></div>'
         f'<ol class="hbars" style="--max:45">{items}</ol>'
-        '<p class="src">Source: Kōgyō Tsūshinsha figures as reported by Anime News Network and Wikipedia, including re-releases. '
-        '*Infinity Castle as of March 2026, when it passed ¥40 billion. Worldwide it earned about $820 million, '
+        '<p class="src">Source: Kōgyō Tsūshinsha figures as reported by Anime News Network, Oricon and Wikipedia, including re-releases. '
+        "*Infinity Castle's total when its run in Japan ended in April 2026, ¥0.55 billion short of Mugen Train. "
+        'Worldwide it is far ahead of Mugen Train, with ¥117.9 billion from 98.5 million tickets, '
         'the most for any Japanese film.</p></figure>'
     )
 

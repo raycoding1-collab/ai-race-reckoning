@@ -1317,6 +1317,18 @@
   "source_hint": "AniList (bannerImage for wide, coverImage.extraLarge for poster)"
  },
  {
+  "slug": "monster",
+  "work": "Monster",
+  "want": [
+   "A doctor crouched against a wall, aiming a pistol"
+  ],
+  "uses": [
+   "still"
+  ],
+  "credit": "© Naoki Urasawa, Studio Nuts / Shogakukan, VAP, NTV",
+  "source_hint": "TMDB backdrops (tv/30981)"
+ },
+ {
   "slug": "girl-leapt",
   "work": "The Girl Who Leapt Through Time",
   "want": [
@@ -1734,6 +1746,18 @@
   ],
   "credit": "© Aka Akasaka × Mengo Yokoyari / Shueisha, “Oshi no Ko” Partners",
   "source_hint": "AniList (bannerImage for wide, coverImage.extraLarge for poster)"
+ },
+ {
+  "slug": "pluto",
+  "work": "Pluto",
+  "want": [
+   "A detective in a brown jacket aiming a gun in a forest"
+  ],
+  "uses": [
+   "still"
+  ],
+  "credit": "© Naoki Urasawa / Takashi Nagasaki / Tezuka Productions / “PLUTO” Production Committee",
+  "source_hint": "TMDB backdrops (tv/91997)"
  },
  {
   "slug": "dandadan",

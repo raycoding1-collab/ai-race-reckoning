@@ -633,7 +633,13 @@ b, strong { font-weight: 600; }
 .also-t .jp { display: block; font-size: 0.68em; font-weight: 600; color: var(--ink-2); margin-top: 0.3rem; letter-spacing: 0.06em; }
 .also-m { font-family: var(--f-ui); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); line-height: 1.5; margin: 0.5rem 0 0.65rem; }
 .also-item > div > p:last-child { font-size: var(--t-sm); line-height: 1.62; }
+@media (min-width: 1181px) { .also--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 1180px) { .also { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 561px) and (max-width: 1180px) {
+  /* a last card alone on its row lies across both columns, picture beside text */
+  .also-item:last-child:nth-child(odd) { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: clamp(1rem, 2vw, 1.5rem); align-items: start; }
+  .also-item:last-child:nth-child(odd) .also-t { margin-top: 0; }
+}
 @media (max-width: 560px) { .also { grid-template-columns: minmax(0, 1fr); } }
 
 /* ---------- ripples (impact) ---------- */
@@ -865,6 +871,7 @@ b, strong { font-weight: 600; }
 .maker .life { font-family: var(--f-ui); font-size: 0.72rem; color: var(--ink-3); letter-spacing: 0.06em; }
 .maker p { font-size: var(--t-sm); color: var(--ink-2); line-height: 1.58; margin-top: 0.6rem; }
 .maker .sig { font-family: var(--f-ui); font-size: 0.72rem; color: var(--era-text); margin-top: 0.6rem; letter-spacing: 0.03em; }
+.makers-note { font-size: var(--t-sm); color: var(--ink-2); line-height: 1.6; margin-top: 1.4rem; max-width: 46rem; }
 @media (max-width: 1000px) {
   .makers { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .maker:not(:nth-child(4n + 1)) { padding-left: 0; border-left: 0; }
