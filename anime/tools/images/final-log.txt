@@ -1,0 +1,176 @@
+ok spirited-away: 1600x865 48 KB
+ok motif-train: 1600x865 52 KB
+ok totoro: 1600x865 75 KB
+ok nausicaa: 1600x865 45 KB
+ok laputa: 1600x865 45 KB
+ok motif-ruins: 1600x865 60 KB
+ok kiki: 1600x865 70 KB
+ok motif-food: 1600x865 98 KB
+ok ponyo: 1600x865 56 KB
+ok motif-flight: 1600x865 64 KB
+ok porco: 1600x865 65 KB
+ok mononoke: 1600x865 90 KB
+ok mononoke-2: 1600x865 66 KB
+ok only-yesterday: 1600x865 89 KB
+ok whisper: 1600x865 81 KB
+ok howl: 1600x865 94 KB
+ok wind-rises: 1600x865 78 KB
+ok kaguya: 1600x865 101 KB
+ok heron: 1600x865 57 KB
+ok chojugiga: 1154x732 47 KB
+ok chojugiga-2: 599x281 18 KB
+ok shigisan: 1600x855 212 KB
+ok ban-dainagon: 794x559 36 KB
+ok genji-emaki: 1600x883 239 KB
+ok hokusai-manga: 725x1100 69 KB
+ok great-wave: 1600x1103 327 KB
+ok katsudo-shashin: 400x600 41 KB
+ok katsudo-shashin-2: 470x300 26 KB
+ok namakura: 960x750 33 KB
+ok namakura-2: 192x500 10 KB
+ok momotaro: 903x592 13 KB
+ok momotaro-2: 595x419 19 KB
+ok iron-fan: 956x320 16 KB
+ok iron-fan-2: 376x284 7 KB
+ok kujira: 460x678 17 KB
+ok hakujaden: 715x240 15 KB
+ok astro-boy: 1900x600 82 KB
+ok yamato: 1600x1026 202 KB
+ok akira: 1900x400 23 KB
+ok akira-2: 421x237 8 KB
+ok evangelion: 1900x400 34 KB
+ok your-name: 1500x844 74 KB
+ok motif-sky: 1900x400 31 KB
+ok frieren: 2400x769 170 KB
+ok motif-back: 1170x480 44 KB
+ok wanpaku: 1920x808 58 KB
+ok wanpaku-2: 941x1100 180 KB
+ok sarutobi: 460x647 31 KB
+ok saiyuki: 1270x368 20 KB
+ok ashita-no-joe: 1900x400 41 KB
+ok belladonna: 1900x742 309 KB
+ok kimba: 1342x450 13 KB
+ok hols: 1280x586 15 KB
+ok mazinger: 1454x485 24 KB
+ok sally: 500x166 4 KB
+ok speed-racer: 971x576 38 KB
+ok lupin: 1600x1000 64 KB
+ok gatchaman: 1024x768 64 KB
+ok devilman: 1438x480 24 KB
+ok gundam: 1680x467 49 KB
+ok ge999: 985x546 49 KB
+ok heidi: 1600x1200 105 KB
+ok cagliostro: 1280x712 56 KB
+ok versailles: 1920x576 180 KB
+ok macross: 1500x500 150 KB
+ok conan: 1900x600 71 KB
+ok grendizer: 1900x400 85 KB
+ok doraemon: 1900x600 71 KB
+ok urusei: 1900x450 118 KB
+ok daicon: 1900x396 102 KB
+ok angels-egg: 1700x473 68 KB
+ok honneamise: 1900x550 140 KB
+ok beautiful-dreamer: 640x480 25 KB
+ok dragon-ball: 1400x875 163 KB
+ok saint-seiya: 1900x472 188 KB
+ok chars-counterattack: 1900x600 130 KB
+ok logh: 1900x400 76 KB
+ok patlabor: 490x710 35 KB
+ok motif-rain: 1600x900 111 KB
+ok motif-sakura: 1721x391 46 KB
+ok 5cm: 1600x900 42 KB
+ok gits: 1600x907 26 KB
+ok bebop: 1900x400 120 KB
+ok sailor-moon: 1600x1194 215 KB
+ok perfect-blue: 750x1051 142 KB
+ok utena: 1400x865 85 KB
+ok lain: 1600x900 171 KB
+ok patlabor2: 1388x292 71 KB
+ok pokemon: 866x1100 81 KB
+ok eoe: 1900x401 43 KB
+ok one-piece: 1900x400 135 KB
+ok paprika: 1400x755 71 KB
+ok millennium-actress: 1900x400 191 KB
+ok voices: 1920x600 38 KB
+ok mushishi: 1440x520 91 KB
+ok haruhi: 460x640 37 KB
+ok fmab: 460x647 29 KB
+ok flcl: 2400x882 114 KB
+ok innocence: 1900x400 14 KB
+ok mind-game: 1900x600 69 KB
+ok girl-leapt: 460x680 15 KB
+ok gurren: 1900x400 32 KB
+ok summer-wars: 1900x400 107 KB
+ok aot: 1600x900 246 KB
+ok violet: 1600x887 103 KB
+ok madoka: 1900x400 60 KB
+ok silent-voice: 1900x400 97 KB
+ok corner: 1500x500 124 KB
+ok demon-slayer: 2048x499 49 KB
+ok steins-gate: 1900x400 75 KB
+ok wolf-children: 1721x391 33 KB
+ok your-lie-april: 1900x400 69 KB
+ok one-punch: 1900x400 46 KB
+ok mob-psycho: 1600x900 89 KB
+ok made-in-abyss: 1497x588 132 KB
+ok devilman-crybaby: 460x650 30 KB
+ok weathering: 1900x400 45 KB
+ok infinity-castle: 1448x635 62 KB
+ok mugen-train: 773x1100 132 KB
+ok eva-final: 1720x400 38 KB
+ok bocchi: 1900x400 68 KB
+ok slam-dunk: 2400x718 176 KB
+ok suzume: 1900x399 119 KB
+ok look-back: 2400x710 124 KB
+ok jjk: 1981x544 215 KB
+ok spy-family: 1900x400 37 KB
+ok chainsaw-man: 1900x400 57 KB
+ok edgerunners: 1900x400 67 KB
+ok oshi-no-ko: 2152x743 120 KB
+ok dandadan: 1900x400 68 KB
+ok solo-leveling: 2048x502 89 KB
+ok reze: 2400x733 45 KB
+ok tokyo-godfathers: 1400x757 65 KB
+ok ping-pong: 1600x334 35 KB
+ok grave: 460x690 47 KB
+ok grave-2: 1721x391 30 KB
+extra op-flag
+  sheet extra-op-flag.jpg 1720x2242
+extra hakujaden
+  sheet extra-hakujaden.jpg 1720x1420
+extra kumo-tulip
+  sheet extra-kumo-tulip.jpg 1720x324
+extra ofuji
+  sheet extra-ofuji.jpg 1720x872
+extra ge999
+  sheet extra-ge999.jpg 1720x1420
+extra yamato
+  sheet extra-yamato.jpg 1720x1146
+extra akira
+  sheet extra-akira.jpg 1720x1146
+extra aot
+  sheet extra-aot.jpg 1720x1146
+extra grave
+  sheet extra-grave.jpg 1720x1146
+extra honneamise
+  sheet extra-honneamise.jpg 1720x1146
+extra macross
+  sheet extra-macross.jpg 1720x598
+extra infinity-castle
+  sheet extra-infinity-castle.jpg 1720x1146
+extra mugen-train
+  sheet extra-mugen-train.jpg 1720x1146
+extra momotaro
+  sheet extra-momotaro.jpg 1720x324
+extra gits
+  sheet extra-gits.jpg 1720x1146
+extra wanpaku
+  sheet extra-wanpaku.jpg 1720x872
+extra saiyuki
+  sheet extra-saiyuki.jpg 1720x598
+extra sarutobi
+  sheet extra-sarutobi.jpg 1720x324
+extra perfect-blue
+  sheet extra-perfect-blue.jpg 1720x1146
+extra 5cm
+  sheet extra-5cm.jpg 1720x1146
