@@ -7,10 +7,13 @@ office of 2025–26. Published at `/anime/` on this site.
 Ten reels (eras), each with the same four parts — context, the artists' intent,
 interiority (how the work felt), and ripples (impact in Japan, abroad and on one
 life) — plus featured works laid out as storyboard “cuts”, film strips, and
-interludes: the Frame Lab (ones, twos and threes), the grammar of anime (sliding
-cel layers, the Itano Circus, techniques and motifs), a world map of anime's
-impact, the numbers, the makers, myths and facts, a viewing guide, a quiz and a
-glossary.
+interludes. In the last three reels (2000–2026) each featured work has a full
+entry (the story, how it was made, the makers' words, why it lasts, and an “at a
+glance” panel that stays beside the text), and the film strip becomes an “Also
+essential” grid with a paragraph on each work. The interludes are: the Frame Lab
+(ones, twos and threes), the grammar of anime (sliding cel layers, the Itano
+Circus, techniques and motifs), a world map of anime's impact, the numbers, the
+makers, myths and facts, a viewing guide, a quiz and a glossary.
 
 ## Build
 

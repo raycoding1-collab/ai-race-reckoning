@@ -594,6 +594,48 @@ b, strong { font-weight: 600; }
 }
 @media (max-width: 520px) { .cut-rows > div { grid-template-columns: minmax(0, 1fr); gap: 0.15rem; } }
 
+/* full entries (reels 07–09): the story, the making, the maker's words and why it lasts, with the
+   picture and an "at a glance" panel riding beside the text */
+.cut-side { min-width: 0; }
+@media (min-width: 1001px) {
+  .cut-sheet--full,
+  .cuts--full .cut { grid-template-columns: 5.5rem minmax(0, 0.92fr) minmax(0, 1.18fr) 4rem; }
+}
+@media (min-width: 1001px) and (min-height: 700px) {
+  .cut-side { position: sticky; top: calc(var(--mast-h) + 0.5rem); }
+}
+.cut-facts { margin-top: 1.1rem; }
+.cut-facts-h { font-family: var(--f-ui); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--era-text); margin: 0 0 0.35rem; }
+.cut-facts dl { margin: 0; border-bottom: 1px solid var(--rule); }
+.cut-facts dl > div { display: grid; grid-template-columns: 6.4rem minmax(0, 1fr); gap: 0.8rem; padding: 0.42rem 0; border-top: 1px solid var(--rule); }
+.cut-facts dt { font-family: var(--f-ui); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); padding-top: 0.17rem; }
+.cut-facts dd { margin: 0; font-family: var(--f-ui); font-size: 0.8rem; line-height: 1.5; color: var(--ink); font-variant-numeric: tabular-nums; }
+.cut-lede { font-size: var(--t-base); line-height: 1.66; margin: 0 0 1.35rem; }
+.cut-deep h5 { font-family: var(--f-ui); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--era-text); margin: 1.5rem 0 0.45rem; }
+.cut-deep p { font-size: 0.95rem; line-height: 1.7; hyphens: auto; }
+.cut-quote { margin: 1.4rem 0 0; padding: 0 0 0 1.25rem; }
+.cut-quote p { font-family: var(--f-display); font-weight: 600; font-size: 1.12rem; line-height: 1.5; text-wrap: pretty; }
+.cut-quote p::before { content: "「"; color: var(--era-text); margin-left: -1.05em; margin-right: 0.05em; }
+.cut-quote p::after { content: "」"; color: var(--era-text); margin-left: 0.05em; }
+.cut-quote footer { margin-top: 0.5rem; font-family: var(--f-ui); font-size: var(--t-xs); line-height: 1.5; color: var(--ink-3); }
+.cuts--full .cut-watch { margin-top: 1.5rem; }
+@media (max-width: 1000px) {
+  /* in one column the facts follow the text, as a summary, rather than stand before the title */
+  .cut-side { display: contents; }
+  .cut-facts { order: 1; margin-top: 1.75rem; }
+  .cut-facts dl { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); column-gap: 1.5rem; }
+}
+
+/* also essential: the rest of a reel's canon, a picture and a paragraph each */
+.also { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(1.75rem, 3vw, 2.5rem) clamp(1rem, 2vw, 1.5rem); }
+.also-item { min-width: 0; border-top: 2px solid var(--ink); padding-top: 0.8rem; }
+.also-t { font-size: var(--t-lg); line-height: 1.15; margin-top: 0.85rem; }
+.also-t .jp { display: block; font-size: 0.68em; font-weight: 600; color: var(--ink-2); margin-top: 0.3rem; letter-spacing: 0.06em; }
+.also-m { font-family: var(--f-ui); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); line-height: 1.5; margin: 0.5rem 0 0.65rem; }
+.also-item > div > p:last-child { font-size: var(--t-sm); line-height: 1.62; }
+@media (max-width: 1180px) { .also { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .also { grid-template-columns: minmax(0, 1fr); } }
+
 /* ---------- ripples (impact) ---------- */
 
 .ripples { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border-top: 1px solid var(--rule-strong); }
