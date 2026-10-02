@@ -515,12 +515,27 @@ TMDB_HEADERS = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.3
                 "Accept-Language": "en-US,en;q=0.8"}
 
 
-def tmdb_stills(enwiki_title, limit=16):
-    """Backdrops (film stills) listed on a work's TMDB images page, found through Wikidata."""
-    kind, tid = tmdb_id(enwiki_title)
+def tmdb_search(kind, query):
+    """TMDB id of the first result on TMDB's own search page, for works Wikidata cannot place."""
+    r = http("GET", f"https://www.themoviedb.org/search/{kind}?query={quote(query)}", headers=TMDB_HEADERS)
+    if r is None or r.status_code != 200:
+        log(f"  TMDB search {kind} {query!r}: {getattr(r, 'status_code', 'error')}")
+        return None
+    m = re.search(rf'href="/{kind}/(\d+)', r.text)
+    return m.group(1) if m else None
+
+
+def tmdb_stills(ref, limit=24):
+    """Backdrops (mostly stills) listed on a work's TMDB images page. `ref` is an English Wikipedia
+    title, found through Wikidata, or {"kind": "movie" or "tv", "q": search words} or {"kind", "id"}."""
+    if isinstance(ref, dict):
+        kind, tid = ref["kind"], ref.get("id") or tmdb_search(ref["kind"], ref["q"])
+    else:
+        kind, tid = tmdb_id(ref)
     if not tid:
-        log(f"  no TMDB id for {enwiki_title}")
+        log(f"  no TMDB id for {ref}")
         return []
+    log(f"  TMDB {kind}/{tid} for {ref}")
     seen, res = set(), []
     for q in ("", "?image_language=xx", "?image_language=ja", "?image_language=en"):
         r = http("GET", f"https://www.themoviedb.org/{kind}/{tid}/images/backdrops{q}", headers=TMDB_HEADERS)
