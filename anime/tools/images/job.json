@@ -1,9 +1,8 @@
 {
  "mode": "candidates",
- "run": 1,
+ "run": 2,
  "ghibli": [
   "chihiro",
-  "hotaru",
   "howl",
   "kaguyahime",
   "kazetachinu",
@@ -84,7 +83,9 @@
    "key": "katsudo-shashin",
    "q": [
     "Katsudō Shashin",
-    "Katsudo Shashin animation"
+    "Katsudo Shashin animation",
+    "活動写真 1907",
+    "Katsudō Shashin film strip"
    ],
    "slugs": [
     "katsudo-shashin",
@@ -95,7 +96,9 @@
    "key": "namakura",
    "q": [
     "Namakura Gatana",
-    "Namakura gatana 1917"
+    "Namakura gatana 1917",
+    "なまくら刀",
+    "Namakura Gatana 1917 animation"
    ],
    "slugs": [
     "namakura",
@@ -107,7 +110,10 @@
    "q": [
     "Kumo to Chūrippu",
     "Spider and the Tulip 1943",
-    "Kumo to Tulip"
+    "Kumo to Tulip",
+    "くもとちゅうりっぷ",
+    "Kumo to Chūrippu 1943",
+    "Masaoka Kenzo"
    ],
    "slugs": [
     "kumo-tulip",
@@ -119,7 +125,9 @@
    "q": [
     "Momotaro Umi no Shinpei",
     "Momotaro's Divine Sea Warriors",
-    "Momotarō Sacred Sailors"
+    "Momotarō Sacred Sailors",
+    "桃太郎 海の神兵",
+    "Momotarō Umi no Shinpei 1945"
    ],
    "slugs": [
     "momotaro",
@@ -131,7 +139,9 @@
    "q": [
     "Princess Iron Fan 1941",
     "Tieshan gongzhu",
-    "铁扇公主 1941"
+    "铁扇公主 1941",
+    "铁扇公主",
+    "Wan brothers animation 1941"
    ],
    "slugs": [
     "iron-fan",
@@ -143,7 +153,12 @@
    "q": [
     "Noburō Ōfuji",
     "Ofuji Noburo",
-    "Ōfuji chiyogami animation"
+    "Ōfuji chiyogami animation",
+    "大藤信郎",
+    "Noburo Ofuji",
+    "Ōfuji Noburō animation",
+    "Kujira 1927 animation",
+    "Yūreisen 1956"
    ],
    "slugs": [
     "ofuji"
@@ -153,7 +168,9 @@
    "key": "kujira",
    "q": [
     "Kujira 1952 Ofuji",
-    "Ōfuji Kujira"
+    "Ōfuji Kujira",
+    "Kujira 1952 animation Ofuji",
+    "大藤信郎 くじら"
    ],
    "slugs": [
     "kujira"

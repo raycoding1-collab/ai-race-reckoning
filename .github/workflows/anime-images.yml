@@ -33,7 +33,8 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A anime/img anime/tools/images anime/src/data
+          git add -A anime/tools/images anime/src/data
+          if [ -d anime/img ]; then git add -A anime/img; fi
           if git diff --cached --quiet; then echo "nothing to commit"; exit 0; fi
           mode=$(python3 -c 'import json;print(json.load(open("anime/tools/images/job.json"))["mode"])')
           git commit -q -m "Fetch pictures for Drawn to Move (${mode})" \
