@@ -1,154 +1,72 @@
 {
  "mode": "links",
- "run": 9,
- "file": "src/parts/900-sources.html",
+ "run": 10,
+ "urls": [
+  "https://web.archive.org/web/2024/https://www.rogerebert.com/interviews/drawing-on-spirited-world",
+  "https://web.archive.org/web/2024/https://www.rogerebert.com/reviews/great-movie-spirited-away-2002",
+  "https://web.archive.org/web/2024/https://www.arabnews.com/Grendizer50",
+  "https://web.archive.org/web/2024/https://screendaily.com/news/japan-sleeper-hit-look-back-readies-prime-video-uk-ireland-releases/5197968.article",
+  "http://www.nausicaa.net/miyazaki/interviews/aboutanime.html",
+  "https://web.archive.org/web/2024/https://www.nausicaa.net/miyazaki/interviews/aboutanime.html",
+  "https://web.archive.org/web/2024/http://www.nausicaa.net/miyazaki/interviews/aboutanime.html",
+  "https://lowendmac.com/?p=49143",
+  "https://web.archive.org/web/2024/https://lowendmac.com/thompson/06/0126.html",
+  "https://www.thepopverse.com/pluto-netflix-m2-astro-boy-anime-manga-adaptation-release-date-creator-plot-poster-trailer",
+  "https://www.thepopverse.com/pluto-netflix-anime-manga-astro-boy-naoki-urasawa-osamu-tezuka",
+  "https://animation.filmarchives.jp/en/index.html",
+  "https://www.animenewsnetwork.com/news/2017-02-22/anime-industry-celebrates-100th-anniversary-by-streaming-oldest-works-with-subtitles/.112554"
+ ],
  "expect": {
-  "filmarchives.jp": [
-   "1917"
+  "https://web.archive.org/web/2024/https://www.rogerebert.com/interviews/drawing-on-spirited-world": [
+   "clapping",
+   "Miyazaki"
   ],
-  "3.84-trillion": [
-   "3.84"
+  "https://web.archive.org/web/2024/https://www.rogerebert.com/reviews/great-movie-spirited-away-2002": [
+   "clapping",
+   "Miyazaki"
   ],
-  "266-days": [
-   "266"
+  "https://web.archive.org/web/2024/https://www.arabnews.com/Grendizer50": [
+   "Grendizer",
+   "Lebanon"
   ],
-  "famitsu.com/article/202604/71571": [
-   "1179"
+  "https://web.archive.org/web/2024/https://screendaily.com/news/japan-sleeper-hit-look-back-readies-prime-video-uk-ireland-releases/5197968.article": [
+   "Look Back",
+   "Prime Video"
   ],
-  "nippon.com/en/news/l00372": [
-   "Demon Slayer"
-  ],
-  "oricon.co.jp/news/2436596": [
-   "国宝",
-   "200億"
-  ],
-  "parrotanalytics": [
-   "Attack on Titan"
-  ],
-  "half-of-global-subs": [
-   "anime"
-  ],
-  "new-survey-shows": [
-   "NAFCA"
-  ],
-  "mappa-production-meltdown": [
-   "MAPPA"
-  ],
-  "drawing-on-spirited-world": [
-   "clapping"
-  ],
-  "aboutanime.html": [
+  "http://www.nausicaa.net/miyazaki/interviews/aboutanime.html": [
    "Hakujaden"
   ],
-  "miyazakis-quiet-protest": [
-   "Iraq"
+  "https://web.archive.org/web/2024/https://www.nausicaa.net/miyazaki/interviews/aboutanime.html": [
+   "Hakujaden"
   ],
-  "princess-iron-fan": [
-   "Tezuka"
+  "https://web.archive.org/web/2024/http://www.nausicaa.net/miyazaki/interviews/aboutanime.html": [
+   "Hakujaden"
   ],
-  "grave-of-the-fireflies": [
-   "Takahata"
+  "https://lowendmac.com/?p=49143": [
+   "Shinkai",
+   "G4"
   ],
-  "shinkai-says-film-inspired": [
-   "earthquake"
+  "https://web.archive.org/web/2024/https://lowendmac.com/thompson/06/0126.html": [
+   "Shinkai",
+   "G4"
   ],
-  "the-day-anime-changed": [
-   "Gundam"
+  "https://www.thepopverse.com/pluto-netflix-m2-astro-boy-anime-manga-adaptation-release-date-creator-plot-poster-trailer": [
+   "M2",
+   "2017",
+   "Kawaguchi"
   ],
-  "heidi": [
-   "Heidi"
+  "https://www.thepopverse.com/pluto-netflix-anime-manga-astro-boy-naoki-urasawa-osamu-tezuka": [
+   "M2",
+   "Kawaguchi"
   ],
-  "toei-doga": [
-   "Toei"
+  "https://animation.filmarchives.jp/en/index.html": [
+   "1917",
+   "1941",
+   "64"
   ],
-  "voltes-v": [
-   "Voltes"
-  ],
-  "Grendizer50": [
-   "Grendizer"
-  ],
-  "captain-tsubasa": [
-   "Torres"
-  ],
-  "dragon-ball-super-screenings": [
-   "Dragon Ball"
-  ],
-  "subversive-anime": [
-   "Hamtaro"
-  ],
-  "one-piece-pirate-flag": [
-   "One Piece"
-  ],
-  "spirited-aways-box-office": [
-   "Spirited Away"
-  ],
-  "beating-spirited-away": [
-   "Spirited Away"
-  ],
-  "feature/2001-08-21": [
-   "Millennium Actress"
-  ],
-  "paprika-mushishi": [
-   "Paprika",
-   "Venice"
-  ],
-  "kons-last-words": [
-   "Kon"
-  ],
-  "lowendmac.com/thompson/06/0126": [
-   "Shinkai"
-  ],
-  "5-centimeters-wins": [
-   "5 Centimeters"
-  ],
-  "attack-on-titan-creator": [
-   "Isayama"
-  ],
-  "kinema-jumpo": [
-   "Kinema"
-  ],
-  "1000-days": [
-   "Corner of the World"
-  ],
-  "hideaki-anno-opens-up": [
-   "Anno"
-  ],
-  "bocchi-the-rock-album": [
-   "Bocchi"
-  ],
-  "chainsaw-man-anime-was": [
-   "Chainsaw Man"
-  ],
-  "look-back-readies": [
-   "Look Back"
-  ],
-  "look-back-wins": [
-   "Look Back"
-  ],
-  "sony-top-film-2025": [
-   "Infinity Castle"
-  ],
-  "reze-arc-tops": [
-   "Reze"
-  ],
-  "List_of_Monster_episodes": [
-   "Madhouse",
-   "74"
-  ],
-  "pluto-anime-gets": [
-   "Pluto"
-  ],
-  "naoki-urasawa-osamu-tezuka": [
-   "Studio M2"
-  ],
-  "edgerunners-named": [
-   "Edgerunners"
-  ],
-  "solo-leveling-is-anime": [
-   "Solo Leveling"
-  ],
-  "frieren-beyond-journeys-end-season-2": [
-   "Frieren"
+  "https://www.animenewsnetwork.com/news/2017-02-22/anime-industry-celebrates-100th-anniversary-by-streaming-oldest-works-with-subtitles/.112554": [
+   "64",
+   "1917"
   ]
  }
 }

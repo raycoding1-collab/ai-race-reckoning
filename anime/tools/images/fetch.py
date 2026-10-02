@@ -707,8 +707,7 @@ def run_links(job):
     """Checks each link on the sources page: does it load, what is the page called, and does
     its text contain the words the citation relies on ("expect", matched by URL fragment)."""
     import html as htmllib
-    src = (ANIME / job["file"]).read_text()
-    urls = list(dict.fromkeys(re.findall(r'href="(https?://[^"]+)"', src)))
+    urls = job.get("urls") or list(dict.fromkeys(re.findall(r'href="(https?://[^"]+)"', (ANIME / job["file"]).read_text())))
     rows = []
     for u in urls:
         rec = {"url": u}
