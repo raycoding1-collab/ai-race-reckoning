@@ -114,26 +114,24 @@ def attrs(s):
     return out
 
 
-def described(a, own_cap=True):
-    """The macro's attributes, with alt text (and, for scene captions, the caption) taken
-    from the record of what the fetched picture shows. Decorative pictures keep alt=""."""
+def described(a):
+    """The macro's attributes, with the alt text taken from the record of what the fetched
+    picture actually shows. Decorative pictures keep alt=""."""
     rec = sourced.get(a.get("src", ""))
     if not rec:
         return a
     a = dict(a)
     if a.get("alt") and rec.get("shows"):
         a["alt"] = rec["shows"]
-    if own_cap and rec.get("cap"):
-        a["cap"] = rec["cap"]
     if not a.get("credit") and rec.get("credit"):
         a["credit"] = rec["credit"]
     return a
 
 
-def shot(a, own_cap=True):
+def shot(a):
     """A picture in a card. Tall pictures sit whole on a blurred copy of themselves, except
     in a cut, where the card turns portrait; wide ones are cropped to the card."""
-    a = described(a, own_cap)
+    a = described(a)
     slug = a.get("src", "")
     info = image_info(slug)
     if not info:
@@ -159,13 +157,13 @@ def still(a):
     cap = a.get("cap", "")
     t = a.get("t", "")
     fig = f"<b>{esc(t)}</b> {esc(cap)}" if t else esc(cap)
-    return f"<figure>{shot(a, own_cap=False)}<figcaption>{fig}</figcaption></figure>"
+    return f"<figure>{shot(a)}<figcaption>{fig}</figcaption></figure>"
 
 
 def frame(a):
     """A full-bleed picture. Stills fill the screen; banners and posters are shown whole,
     as a band or a hanging poster, over a blurred copy of themselves. `cover` always fills."""
-    a = described(a, own_cap=False)
+    a = described(a)
     slug = a.get("src", "")
     data = f' data-t="{esc(a.get("t"))}" data-credit="{esc(a.get("credit"))}"'
     info = image_info(slug)
@@ -358,8 +356,7 @@ def render_watch():
         tags = "".join(f"<span>{mood_names[m]}</span>" for m in w["m"])
         if w.get("s"):
             tags = '<span class="start">Start here</span>' + tags
-        pic = shot({"src": w["img"], "alt": f'{w["t"]} ({w["y"]})', "t": f'{w["t"]} ({w["y"]})', "cap": w["b"], "credit": "", "ph": w.get("ph", "")},
-                   own_cap=False)
+        pic = shot({"src": w["img"], "alt": f'{w["t"]} ({w["y"]})', "t": f'{w["t"]} ({w["y"]})', "cap": w["b"], "credit": "", "ph": w.get("ph", "")})
         cards.append(
             f'<article class="w" data-moods="{" ".join(w["m"])}" data-fmt="{w["f"]}" data-start="{"1" if w.get("s") else "0"}">'
             f'{pic}<div class="w-b"><h3 class="w-t">{esc(w["t"])}</h3><p class="w-m">{w["y"]} · {"Film" if w["f"] == "film" else "Series"} · {esc(w["len"])}</p>'
