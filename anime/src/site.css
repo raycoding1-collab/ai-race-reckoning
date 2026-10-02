@@ -845,8 +845,9 @@ b, strong { font-weight: 600; }
 .hb-row i { display: block; height: 0.62rem; width: calc(var(--v) / var(--max) * 88%); background: color-mix(in oklab, var(--ink) 26%, transparent); }
 .hbars li.is-anime .hb-row i { background: var(--era); }
 .hb-row b { font: 700 0.72rem/1 var(--f-ui); color: var(--ink); white-space: nowrap; }
-.scene .stage-title { transition: opacity 0.6s ease; }
-.scene.is-reading .stage-title { opacity: 0.16; }
+.scene .stage-title { transition: opacity 0.5s ease, transform 0.6s ease; }
+/* once the dated cards start passing, the title steps aside: the masthead still names the reel */
+.scene.is-reading .stage-title { opacity: 0; transform: translateY(1.25rem); }
 
 .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid var(--rule-strong); border-bottom: 1px solid var(--rule); margin-bottom: 1.5rem; }
 .stat { padding: 1rem 1rem 1.1rem 0; border-right: 1px solid var(--rule); min-width: 0; }
