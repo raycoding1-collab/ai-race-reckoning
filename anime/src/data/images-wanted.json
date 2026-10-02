@@ -1549,18 +1549,6 @@
   "source_hint": "AniList (bannerImage for wide, coverImage.extraLarge for poster)"
  },
  {
-  "slug": "made-in-abyss",
-  "work": "Made in Abyss",
-  "want": [
-   "Two children at the edge of a vast vertical chasm"
-  ],
-  "uses": [
-   "still"
-  ],
-  "credit": "© Akihito Tsukushi, Takeshobo / Made in Abyss Production Committee",
-  "source_hint": "AniList (bannerImage for wide, coverImage.extraLarge for poster)"
- },
- {
   "slug": "devilman-crybaby",
   "work": "Devilman Crybaby",
   "want": [
