@@ -1,0 +1,211 @@
+ghibli codes: {"aya": 50, "baron": 50, "chihiro": 50, "ged": 50, "ghiblies": 50, "howl": 50, "kaguyahime": 50, "karigurashi": 50, "kazetachinu": 50, "kimitachi": 52, "kokurikozaka": 50, "laputa": 50, "majo": 50, "marnie": 50, "mimi": 50, "mononoke": 50, "nausicaa": 50, "omoide": 50, "onyourmark": 28, "ponyo": 50, "porco": 50, "redturtle": 50, "tanuki": 50, "totoro": 50, "umi": 50, "yamada": 50}
+ghibli chihiro: 50 pictures
+  sheet ghibli-chihiro-1.jpg 1848x1220
+  sheet ghibli-chihiro-2.jpg 1848x1220
+ghibli howl: 50 pictures
+  sheet ghibli-howl-1.jpg 1848x1220
+  sheet ghibli-howl-2.jpg 1848x1220
+ghibli kaguyahime: 50 pictures
+  sheet ghibli-kaguyahime-1.jpg 1848x1220
+  sheet ghibli-kaguyahime-2.jpg 1848x1220
+ghibli kazetachinu: 50 pictures
+  sheet ghibli-kazetachinu-1.jpg 1848x1220
+  sheet ghibli-kazetachinu-2.jpg 1848x1220
+ghibli kimitachi: 52 pictures
+  sheet ghibli-kimitachi-1.jpg 1848x1220
+  sheet ghibli-kimitachi-2.jpg 1848x1220
+  sheet ghibli-kimitachi-3.jpg 1848x284
+ghibli laputa: 50 pictures
+  sheet ghibli-laputa-1.jpg 1848x1220
+  sheet ghibli-laputa-2.jpg 1848x1220
+ghibli majo: 50 pictures
+  sheet ghibli-majo-1.jpg 1848x1220
+  sheet ghibli-majo-2.jpg 1848x1220
+ghibli mimi: 50 pictures
+  sheet ghibli-mimi-1.jpg 1848x1220
+  sheet ghibli-mimi-2.jpg 1848x1220
+ghibli mononoke: 50 pictures
+  sheet ghibli-mononoke-1.jpg 1848x1220
+  sheet ghibli-mononoke-2.jpg 1848x1220
+ghibli nausicaa: 50 pictures
+  sheet ghibli-nausicaa-1.jpg 1848x1220
+  sheet ghibli-nausicaa-2.jpg 1848x1220
+ghibli omoide: 50 pictures
+  sheet ghibli-omoide-1.jpg 1848x1220
+  sheet ghibli-omoide-2.jpg 1848x1220
+ghibli ponyo: 50 pictures
+  sheet ghibli-ponyo-1.jpg 1848x1220
+  sheet ghibli-ponyo-2.jpg 1848x1220
+ghibli porco: 50 pictures
+  sheet ghibli-porco-1.jpg 1848x1220
+  sheet ghibli-porco-2.jpg 1848x1220
+ghibli totoro: 50 pictures
+  sheet ghibli-totoro-1.jpg 1848x1220
+  sheet ghibli-totoro-2.jpg 1848x1220
+commons chojugiga: 16 files
+  sheet commons-chojugiga.jpg 1720x1226
+commons shigisan: 12 files
+  sheet commons-shigisan.jpg 1720x932
+commons ban-dainagon: 17 files
+  sheet commons-ban-dainagon.jpg 1720x1520
+commons genji-emaki: 20 files
+  sheet commons-genji-emaki.jpg 1720x1520
+commons hokusai-manga: 10 files
+  sheet commons-hokusai-manga.jpg 1720x932
+commons great-wave: 12 files
+  sheet commons-great-wave.jpg 1720x932
+commons katsudo-shashin: 10 files
+  sheet commons-katsudo-shashin.jpg 1720x932
+commons namakura: 4 files
+  sheet commons-namakura.jpg 1720x344
+commons kumo-tulip: 3 files
+  sheet commons-kumo-tulip.jpg 1720x344
+commons momotaro: 4 files
+  sheet commons-momotaro.jpg 1720x344
+commons iron-fan: 12 files
+  sheet commons-iron-fan.jpg 1720x932
+commons ofuji: 12 files
+  sheet commons-ofuji.jpg 1720x932
+commons kujira: 12 files
+  sheet commons-kujira.jpg 1720x932
+anime 1/102: Hakujaden (1958, MOVIE) -> hakujaden, hakujaden-2, hakujaden-3
+anime 2/102: Tetsuwan Atom (1963, TV) -> astro-boy
+anime 3/102: Uchuu Senkan Yamato (1974, TV) -> yamato
+anime 4/102: Akira (1988, MOVIE) -> akira, akira-2
+anime 5/102: Shin Seiki Evangelion (1995, TV) -> evangelion
+anime 6/102: Kimi no Na wa. (2016, MOVIE) -> your-name, motif-sky
+anime 7/102: Sousou no Frieren (2023, TV) -> frieren, motif-back
+anime 8/102: Namakura Gatana (1917, None) -> namakura
+anime 9/102: Katsudou Shashin (1907, None) -> katsudo-shashin
+anime 10/102: Kumo to Tulip (1943, MOVIE) -> kumo-tulip
+anime 11/102: Momotarou: Umi no Shinpei (1945, MOVIE) -> momotaro
+anime 12/102: Tie Shan Gongzhu (1941, MOVIE) -> iron-fan
+anime 13/102: Kujira (1952, MOVIE) -> kujira
+anime 14/102: Wanpaku Ouji no Orochi Taiji (1963, MOVIE) -> wanpaku, wanpaku-2
+anime 15/102: Shounen Sarutobi Sasuke (1959, MOVIE) -> sarutobi
+anime 16/102: Saiyuuki (1960, MOVIE) -> saiyuki
+anime 17/102: Ashita no Joe (1970, TV) -> ashita-no-joe
+anime 18/102: Kanashimi no Belladonna (1973, MOVIE) -> belladonna
+anime 19/102: Jungle Taitei (1965, TV) -> kimba
+anime 20/102: Taiyou no Ouji: Horus no Daibouken (1968, MOVIE) -> hols
+anime 21/102: Mazinger Z (1972, TV) -> mazinger
+anime 22/102: Mahoutsukai Sally (1966, TV) -> sally
+anime 23/102: Mach GoGoGo (1967, TV) -> speed-racer
+anime 24/102: Lupin III (1971, TV) -> lupin
+anime 25/102: Kagaku Ninja-tai Gatchaman (1972, TV) -> gatchaman
+anime 26/102: Devilman (1972, TV) -> devilman
+anime 27/102: Kidou Senshi Gundam (1979, TV) -> gundam
+anime 28/102: Ginga Tetsudou 999 (1979, MOVIE) -> ge999
+anime 29/102: Alps no Shoujo Heidi (1974, TV) -> heidi
+anime 30/102: Lupin III: Cagliostro no Shiro (1979, MOVIE) -> cagliostro
+anime 31/102: Versailles no Bara (1979, TV) -> versailles
+anime 32/102: Choujikuu Yousai Macross (1982, TV) -> macross
+anime 33/102: Mirai Shounen Conan (1978, TV) -> conan
+anime 34/102: UFO Robo Grendizer (1975, TV) -> grendizer
+anime 35/102: Doraemon (1979, TV) -> doraemon
+anime 36/102: Urusei Yatsura (1981, TV) -> urusei
+anime 37/102: DAICON IV Opening Animation (1983, None) -> daicon
+anime 38/102: Tenshi no Tamago (1985, OVA) -> angels-egg
+anime 39/102: Ouritsu Uchuugun: Honneamise no Tsubasa (1987, MOVIE) -> honneamise
+anime 40/102: Urusei Yatsura 2: Beautiful Dreamer (1984, MOVIE) -> beautiful-dreamer
+anime 41/102: Dragon Ball (1986, TV) -> dragon-ball
+anime 42/102: Saint Seiya (1986, TV) -> saint-seiya
+anime 43/102: Kidou Senshi Gundam: Gyakushuu no Char (1988, MOVIE) -> chars-counterattack
+anime 44/102: Ginga Eiyuu Densetsu (1988, OVA) -> logh
+anime 45/102: Kidou Keisatsu Patlabor: The Movie (1989, MOVIE) -> patlabor
+anime 46/102: Kotonoha no Niwa (2013, MOVIE) -> motif-rain
+anime 47/102: Byousoku 5 Centimeter (2007, MOVIE) -> motif-sakura, 5cm
+anime 48/102: Koukaku Kidoutai (1995, MOVIE) -> gits
+anime 49/102: Cowboy Bebop (1998, TV) -> bebop
+anime 50/102: Bishoujo Senshi Sailor Moon (1992, TV) -> sailor-moon
+anime 51/102: Perfect Blue (1997, MOVIE) -> perfect-blue
+anime 52/102: Shoujo Kakumei Utena (1997, TV) -> utena
+anime 53/102: Serial Experiments Lain (1998, TV) -> lain
+anime 54/102: Kidou Keisatsu Patlabor 2 the Movie (1993, MOVIE) -> patlabor2
+anime 55/102: Pokemon (1997, TV) -> pokemon
+anime 56/102: Shin Seiki Evangelion Movie: Air / Magokoro wo, Kimi ni (1997, MOVIE) -> eoe
+anime 57/102: One Piece (1999, TV) -> one-piece, one-piece-flag
+anime 58/102: Paprika (2006, MOVIE) -> paprika
+anime 59/102: Sennen Joyuu (2001, MOVIE) -> millennium-actress
+anime 60/102: Hoshi no Koe (2002, OVA) -> voices
+anime 61/102: Mushishi (2005, TV) -> mushishi
+anime 62/102: Suzumiya Haruhi no Yuuutsu (2006, TV) -> haruhi
+anime 63/102: Hagane no Renkinjutsushi: FULLMETAL ALCHEMIST (2009, TV) -> fmab
+anime 64/102: FLCL (2000, OVA) -> flcl
+anime 65/102: Innocence (2004, MOVIE) -> innocence
+anime 66/102: Mind Game (2004, MOVIE) -> mind-game
+anime 67/102: Toki wo Kakeru Shoujo (2006, MOVIE) -> girl-leapt
+anime 68/102: Tengen Toppa Gurren Lagann (2007, TV) -> gurren
+anime 69/102: Summer Wars (2009, MOVIE) -> summer-wars
+anime 70/102: Shingeki no Kyojin (2013, TV) -> aot
+anime 71/102: Violet Evergarden (2018, TV) -> violet
+anime 72/102: Mahou Shoujo Madoka Magica (2011, TV) -> madoka
+anime 73/102: Koe no Katachi (2016, MOVIE) -> silent-voice
+anime 74/102: Kono Sekai no Katasumi ni (2016, MOVIE) -> corner
+anime 75/102: Kimetsu no Yaiba (2019, TV) -> demon-slayer
+anime 76/102: Steins;Gate (2011, TV) -> steins-gate
+anime 77/102: Ookami Kodomo no Ame to Yuki (2012, MOVIE) -> wolf-children
+anime 78/102: Shigatsu wa Kimi no Uso (2014, TV) -> your-lie-april
+anime 79/102: One Punch Man (2015, TV) -> one-punch
+anime 80/102: Mob Psycho 100 (2016, TV) -> mob-psycho
+anime 81/102: Made in Abyss (2017, TV) -> made-in-abyss
+anime 82/102: Devilman: Crybaby (2018, ONA) -> devilman-crybaby
+anime 83/102: Tenki no Ko (2019, MOVIE) -> weathering
+anime 84/102: Kimetsu no Yaiba: Mugen Jou-hen (2025, MOVIE) -> infinity-castle
+anime 85/102: Kimetsu no Yaiba Movie: Mugen Ressha-hen (2020, MOVIE) -> mugen-train
+anime 86/102: Shin Evangelion Movie:|| (2021, MOVIE) -> eva-final
+anime 87/102: Bocchi the Rock! (2022, TV) -> bocchi
+anime 88/102: THE FIRST SLAM DUNK (2022, MOVIE) -> slam-dunk
+anime 89/102: Suzume no Tojimari (2022, MOVIE) -> suzume
+anime 90/102: Look Back (2024, MOVIE) -> look-back
+anime 91/102: Jujutsu Kaisen (2020, TV) -> jjk
+anime 92/102: SPY×FAMILY (2022, TV) -> spy-family
+anime 93/102: Chainsaw Man (2022, TV) -> chainsaw-man
+anime 94/102: Cyberpunk: Edgerunners (2022, ONA) -> edgerunners
+anime 95/102: Oshi no Ko (2023, TV) -> oshi-no-ko
+anime 96/102: Dandadan (2024, TV) -> dandadan
+anime 97/102: Ore dake Level Up na Ken (2024, TV) -> solo-leveling
+anime 98/102: Chainsaw Man Movie: Reze-hen (2025, MOVIE) -> reze
+anime 99/102: Tokyo Godfathers (2003, MOVIE) -> tokyo-godfathers
+anime 100/102: Ping Pong THE ANIMATION (2014, TV) -> ping-pong
+anime 101/102: Hotaru no Haka (1988, MOVIE) -> grave
+anime 102/102: Kimitachi wa Dou Ikiru ka (2023, MOVIE) -> heron
+  sheet anime-01.jpg
+  sheet anime-02.jpg
+  sheet anime-03.jpg
+  sheet anime-04.jpg
+  sheet anime-05.jpg
+  sheet anime-06.jpg
+  sheet anime-07.jpg
+  sheet anime-08.jpg
+  GET failed https://media.kitsu.app/anime/cover_images/66/original.jpg: ('Connection broken: IncompleteRead(0 bytes read, 324832 more expected)', IncompleteRead(0 bytes read, 324832 more expected))
+  sheet anime-09.jpg
+  sheet anime-10.jpg
+  sheet anime-11.jpg
+  sheet anime-12.jpg
+  sheet anime-13.jpg
+  sheet anime-14.jpg
+  sheet anime-15.jpg
+  sheet anime-16.jpg
+  sheet anime-17.jpg
+  sheet anime-18.jpg
+  sheet anime-19.jpg
+  sheet anime-20.jpg
+  sheet anime-21.jpg
+  sheet wiki-01.jpg
+  sheet wiki-02.jpg
+  sheet wiki-03.jpg
+  sheet wiki-04.jpg
+  sheet wiki-05.jpg
+  sheet wiki-06.jpg
+  sheet wiki-07.jpg
+  sheet wiki-08.jpg
+  sheet wiki-09.jpg
+  sheet wiki-10.jpg
+  429 from https://upload.wikimedia.org/wikipedia/en/4/43/The_Girl_Who_, waiting 12s
+  sheet wiki-11.jpg
+  sheet wiki-12.jpg
+  sheet wiki-13.jpg
+  sheet wiki-14.jpg
+  sheet wiki-15.jpg
+  sheet wiki-16.jpg
