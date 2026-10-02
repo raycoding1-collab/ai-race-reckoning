@@ -1,0 +1,773 @@
+{
+ "ghibli": {
+  "spirited-away": "chihiro",
+  "motif-train": "chihiro",
+  "totoro": "totoro",
+  "nausicaa": "nausicaa",
+  "laputa": "laputa",
+  "motif-ruins": "laputa",
+  "kiki": "majo",
+  "motif-food": "ponyo",
+  "ponyo": "ponyo",
+  "motif-flight": "porco",
+  "porco": "porco",
+  "mononoke": "mononoke",
+  "mononoke-2": "mononoke",
+  "only-yesterday": "omoide",
+  "whisper": "mimi",
+  "howl": "howl",
+  "wind-rises": "kazetachinu",
+  "kaguya": "kaguyahime",
+  "grave": "hotaru",
+  "grave-2": "hotaru",
+  "heron": "kimitachi"
+ },
+ "commons": {
+  "chojugiga": [
+   "Chōjū-jinbutsu-giga",
+   "Choju giga frogs rabbits",
+   "Chōjū-giga"
+  ],
+  "chojugiga-2": [
+   "Chōjū-jinbutsu-giga",
+   "Choju giga frogs rabbits",
+   "Chōjū-giga"
+  ],
+  "shigisan": [
+   "Shigisan Engi Emaki",
+   "Shigisan-engi"
+  ],
+  "ban-dainagon": [
+   "Ban Dainagon Ekotoba",
+   "Ban Dainagon emaki"
+  ],
+  "genji-emaki": [
+   "Genji Monogatari Emaki",
+   "Genji emaki Tokugawa"
+  ],
+  "hokusai-manga": [
+   "Hokusai Manga",
+   "Hokusai sketches manga volume"
+  ],
+  "great-wave": [
+   "Great Wave off Kanagawa"
+  ],
+  "katsudo-shashin": [
+   "Katsudō Shashin",
+   "Katsudo Shashin animation"
+  ],
+  "katsudo-shashin-2": [
+   "Katsudō Shashin",
+   "Katsudo Shashin animation"
+  ],
+  "namakura": [
+   "Namakura Gatana",
+   "Namakura gatana 1917"
+  ],
+  "namakura-2": [
+   "Namakura Gatana",
+   "Namakura gatana 1917"
+  ],
+  "kumo-tulip": [
+   "Kumo to Chūrippu",
+   "Spider and the Tulip 1943",
+   "Kumo to Tulip"
+  ],
+  "kumo-tulip-2": [
+   "Kumo to Chūrippu",
+   "Spider and the Tulip 1943",
+   "Kumo to Tulip"
+  ],
+  "momotaro": [
+   "Momotaro Umi no Shinpei",
+   "Momotaro's Divine Sea Warriors",
+   "Momotarō Sacred Sailors"
+  ],
+  "momotaro-2": [
+   "Momotaro Umi no Shinpei",
+   "Momotaro's Divine Sea Warriors",
+   "Momotarō Sacred Sailors"
+  ],
+  "iron-fan": [
+   "Princess Iron Fan 1941",
+   "Tieshan gongzhu",
+   "铁扇公主 1941"
+  ],
+  "iron-fan-2": [
+   "Princess Iron Fan 1941",
+   "Tieshan gongzhu",
+   "铁扇公主 1941"
+  ],
+  "ofuji": [
+   "Noburō Ōfuji",
+   "Ofuji Noburo",
+   "Ōfuji chiyogami animation"
+  ],
+  "kujira": [
+   "Kujira 1952 Ofuji",
+   "Ōfuji Kujira"
+  ]
+ },
+ "anime": {
+  "hakujaden": [
+   "Hakujaden",
+   1958,
+   "MOVIE",
+   "The Tale of the White Serpent 1958 film"
+  ],
+  "hakujaden-2": [
+   "Hakujaden",
+   1958,
+   "MOVIE",
+   "The Tale of the White Serpent 1958 film"
+  ],
+  "hakujaden-3": [
+   "Hakujaden",
+   1958,
+   "MOVIE",
+   "The Tale of the White Serpent 1958 film"
+  ],
+  "astro-boy": [
+   "Tetsuwan Atom",
+   1963,
+   "TV",
+   "Astro Boy 1963 TV series"
+  ],
+  "yamato": [
+   "Uchuu Senkan Yamato",
+   1974,
+   "TV",
+   "Space Battleship Yamato 1974 TV series"
+  ],
+  "akira": [
+   "Akira",
+   1988,
+   "MOVIE",
+   "Akira 1988 film"
+  ],
+  "akira-2": [
+   "Akira",
+   1988,
+   "MOVIE",
+   "Akira 1988 film"
+  ],
+  "evangelion": [
+   "Shin Seiki Evangelion",
+   1995,
+   "TV",
+   "Neon Genesis Evangelion"
+  ],
+  "your-name": [
+   "Kimi no Na wa.",
+   2016,
+   "MOVIE",
+   "Your Name 2016 film"
+  ],
+  "motif-sky": [
+   "Kimi no Na wa.",
+   2016,
+   "MOVIE",
+   "Your Name 2016 film"
+  ],
+  "frieren": [
+   "Sousou no Frieren",
+   2023,
+   "TV",
+   "Frieren Beyond Journey's End anime"
+  ],
+  "motif-back": [
+   "Sousou no Frieren",
+   2023,
+   "TV",
+   "Frieren Beyond Journey's End anime"
+  ],
+  "namakura": [
+   "Namakura Gatana",
+   1917,
+   null,
+   "Namakura Gatana"
+  ],
+  "katsudo-shashin": [
+   "Katsudou Shashin",
+   1907,
+   null,
+   "Katsudō Shashin"
+  ],
+  "kumo-tulip": [
+   "Kumo to Tulip",
+   1943,
+   "MOVIE",
+   "The Spider and the Tulip"
+  ],
+  "momotaro": [
+   "Momotarou: Umi no Shinpei",
+   1945,
+   "MOVIE",
+   "Momotaro Sacred Sailors"
+  ],
+  "iron-fan": [
+   "Tie Shan Gongzhu",
+   1941,
+   "MOVIE",
+   "Princess Iron Fan 1941 film"
+  ],
+  "kujira": [
+   "Kujira",
+   1952,
+   "MOVIE",
+   "Noburō Ōfuji"
+  ],
+  "wanpaku": [
+   "Wanpaku Ouji no Orochi Taiji",
+   1963,
+   "MOVIE",
+   "The Little Prince and the Eight-Headed Dragon"
+  ],
+  "wanpaku-2": [
+   "Wanpaku Ouji no Orochi Taiji",
+   1963,
+   "MOVIE",
+   "The Little Prince and the Eight-Headed Dragon"
+  ],
+  "sarutobi": [
+   "Shounen Sarutobi Sasuke",
+   1959,
+   "MOVIE",
+   "Magic Boy 1959 film"
+  ],
+  "saiyuki": [
+   "Saiyuuki",
+   1960,
+   "MOVIE",
+   "Alakazam the Great"
+  ],
+  "ashita-no-joe": [
+   "Ashita no Joe",
+   1970,
+   "TV",
+   "Ashita no Joe anime 1970"
+  ],
+  "belladonna": [
+   "Kanashimi no Belladonna",
+   1973,
+   "MOVIE",
+   "Belladonna of Sadness"
+  ],
+  "kimba": [
+   "Jungle Taitei",
+   1965,
+   "TV",
+   "Kimba the White Lion 1965 TV series"
+  ],
+  "hols": [
+   "Taiyou no Ouji: Horus no Daibouken",
+   1968,
+   "MOVIE",
+   "Hols Prince of the Sun"
+  ],
+  "mazinger": [
+   "Mazinger Z",
+   1972,
+   "TV",
+   "Mazinger Z anime"
+  ],
+  "sally": [
+   "Mahoutsukai Sally",
+   1966,
+   "TV",
+   "Sally the Witch"
+  ],
+  "speed-racer": [
+   "Mach GoGoGo",
+   1967,
+   "TV",
+   "Speed Racer Mach GoGoGo 1967"
+  ],
+  "lupin": [
+   "Lupin III",
+   1971,
+   "TV",
+   "Lupin the Third Part I 1971"
+  ],
+  "gatchaman": [
+   "Kagaku Ninja-tai Gatchaman",
+   1972,
+   "TV",
+   "Science Ninja Team Gatchaman"
+  ],
+  "devilman": [
+   "Devilman",
+   1972,
+   "TV",
+   "Devilman 1972 TV series"
+  ],
+  "gundam": [
+   "Kidou Senshi Gundam",
+   1979,
+   "TV",
+   "Mobile Suit Gundam"
+  ],
+  "ge999": [
+   "Ginga Tetsudou 999",
+   1979,
+   "MOVIE",
+   "Galaxy Express 999 1979 film"
+  ],
+  "heidi": [
+   "Alps no Shoujo Heidi",
+   1974,
+   "TV",
+   "Heidi, Girl of the Alps"
+  ],
+  "cagliostro": [
+   "Lupin III: Cagliostro no Shiro",
+   1979,
+   "MOVIE",
+   "The Castle of Cagliostro"
+  ],
+  "versailles": [
+   "Versailles no Bara",
+   1979,
+   "TV",
+   "The Rose of Versailles anime"
+  ],
+  "macross": [
+   "Choujikuu Yousai Macross",
+   1982,
+   "TV",
+   "The Super Dimension Fortress Macross"
+  ],
+  "conan": [
+   "Mirai Shounen Conan",
+   1978,
+   "TV",
+   "Future Boy Conan"
+  ],
+  "grendizer": [
+   "UFO Robo Grendizer",
+   1975,
+   "TV",
+   "UFO Robot Grendizer"
+  ],
+  "doraemon": [
+   "Doraemon",
+   1979,
+   "TV",
+   "Doraemon 1979 anime"
+  ],
+  "urusei": [
+   "Urusei Yatsura",
+   1981,
+   "TV",
+   "Urusei Yatsura 1981 TV series"
+  ],
+  "daicon": [
+   "DAICON IV Opening Animation",
+   1983,
+   null,
+   "Daicon III and IV Opening Animations"
+  ],
+  "angels-egg": [
+   "Tenshi no Tamago",
+   1985,
+   "OVA",
+   "Angel's Egg"
+  ],
+  "honneamise": [
+   "Ouritsu Uchuugun: Honneamise no Tsubasa",
+   1987,
+   "MOVIE",
+   "Royal Space Force: The Wings of Honnêamise"
+  ],
+  "beautiful-dreamer": [
+   "Urusei Yatsura 2: Beautiful Dreamer",
+   1984,
+   "MOVIE",
+   "Urusei Yatsura 2 Beautiful Dreamer"
+  ],
+  "dragon-ball": [
+   "Dragon Ball",
+   1986,
+   "TV",
+   "Dragon Ball TV series 1986"
+  ],
+  "saint-seiya": [
+   "Saint Seiya",
+   1986,
+   "TV",
+   "Saint Seiya anime"
+  ],
+  "chars-counterattack": [
+   "Kidou Senshi Gundam: Gyakushuu no Char",
+   1988,
+   "MOVIE",
+   "Mobile Suit Gundam: Char's Counterattack"
+  ],
+  "logh": [
+   "Ginga Eiyuu Densetsu",
+   1988,
+   "OVA",
+   "Legend of the Galactic Heroes"
+  ],
+  "patlabor": [
+   "Kidou Keisatsu Patlabor: The Movie",
+   1989,
+   "MOVIE",
+   "Patlabor: The Movie"
+  ],
+  "motif-rain": [
+   "Kotonoha no Niwa",
+   2013,
+   "MOVIE",
+   "The Garden of Words"
+  ],
+  "motif-sakura": [
+   "Byousoku 5 Centimeter",
+   2007,
+   "MOVIE",
+   "5 Centimeters per Second"
+  ],
+  "5cm": [
+   "Byousoku 5 Centimeter",
+   2007,
+   "MOVIE",
+   "5 Centimeters per Second"
+  ],
+  "gits": [
+   "Koukaku Kidoutai",
+   1995,
+   "MOVIE",
+   "Ghost in the Shell 1995 film"
+  ],
+  "bebop": [
+   "Cowboy Bebop",
+   1998,
+   "TV",
+   "Cowboy Bebop"
+  ],
+  "sailor-moon": [
+   "Bishoujo Senshi Sailor Moon",
+   1992,
+   "TV",
+   "Sailor Moon 1992 TV series"
+  ],
+  "perfect-blue": [
+   "Perfect Blue",
+   1997,
+   "MOVIE",
+   "Perfect Blue"
+  ],
+  "utena": [
+   "Shoujo Kakumei Utena",
+   1997,
+   "TV",
+   "Revolutionary Girl Utena"
+  ],
+  "lain": [
+   "Serial Experiments Lain",
+   1998,
+   "TV",
+   "Serial Experiments Lain"
+  ],
+  "patlabor2": [
+   "Kidou Keisatsu Patlabor 2 the Movie",
+   1993,
+   "MOVIE",
+   "Patlabor 2: The Movie"
+  ],
+  "pokemon": [
+   "Pokemon",
+   1997,
+   "TV",
+   "Pokémon 1997 TV series"
+  ],
+  "eoe": [
+   "Shin Seiki Evangelion Movie: Air / Magokoro wo, Kimi ni",
+   1997,
+   "MOVIE",
+   "The End of Evangelion"
+  ],
+  "one-piece": [
+   "One Piece",
+   1999,
+   "TV",
+   "One Piece anime"
+  ],
+  "one-piece-flag": [
+   "One Piece",
+   1999,
+   "TV",
+   "One Piece anime"
+  ],
+  "paprika": [
+   "Paprika",
+   2006,
+   "MOVIE",
+   "Paprika 2006 film"
+  ],
+  "millennium-actress": [
+   "Sennen Joyuu",
+   2001,
+   "MOVIE",
+   "Millennium Actress"
+  ],
+  "voices": [
+   "Hoshi no Koe",
+   2002,
+   "OVA",
+   "Voices of a Distant Star"
+  ],
+  "mushishi": [
+   "Mushishi",
+   2005,
+   "TV",
+   "Mushishi anime"
+  ],
+  "haruhi": [
+   "Suzumiya Haruhi no Yuuutsu",
+   2006,
+   "TV",
+   "The Melancholy of Haruhi Suzumiya anime"
+  ],
+  "fmab": [
+   "Hagane no Renkinjutsushi: FULLMETAL ALCHEMIST",
+   2009,
+   "TV",
+   "Fullmetal Alchemist: Brotherhood"
+  ],
+  "flcl": [
+   "FLCL",
+   2000,
+   "OVA",
+   "FLCL"
+  ],
+  "innocence": [
+   "Innocence",
+   2004,
+   "MOVIE",
+   "Ghost in the Shell 2: Innocence"
+  ],
+  "mind-game": [
+   "Mind Game",
+   2004,
+   "MOVIE",
+   "Mind Game 2004 film"
+  ],
+  "girl-leapt": [
+   "Toki wo Kakeru Shoujo",
+   2006,
+   "MOVIE",
+   "The Girl Who Leapt Through Time 2006 film"
+  ],
+  "gurren": [
+   "Tengen Toppa Gurren Lagann",
+   2007,
+   "TV",
+   "Gurren Lagann"
+  ],
+  "summer-wars": [
+   "Summer Wars",
+   2009,
+   "MOVIE",
+   "Summer Wars"
+  ],
+  "aot": [
+   "Shingeki no Kyojin",
+   2013,
+   "TV",
+   "Attack on Titan anime"
+  ],
+  "violet": [
+   "Violet Evergarden",
+   2018,
+   "TV",
+   "Violet Evergarden"
+  ],
+  "madoka": [
+   "Mahou Shoujo Madoka Magica",
+   2011,
+   "TV",
+   "Puella Magi Madoka Magica"
+  ],
+  "silent-voice": [
+   "Koe no Katachi",
+   2016,
+   "MOVIE",
+   "A Silent Voice film"
+  ],
+  "corner": [
+   "Kono Sekai no Katasumi ni",
+   2016,
+   "MOVIE",
+   "In This Corner of the World film"
+  ],
+  "demon-slayer": [
+   "Kimetsu no Yaiba",
+   2019,
+   "TV",
+   "Demon Slayer: Kimetsu no Yaiba anime"
+  ],
+  "steins-gate": [
+   "Steins;Gate",
+   2011,
+   "TV",
+   "Steins;Gate anime"
+  ],
+  "wolf-children": [
+   "Ookami Kodomo no Ame to Yuki",
+   2012,
+   "MOVIE",
+   "Wolf Children"
+  ],
+  "your-lie-april": [
+   "Shigatsu wa Kimi no Uso",
+   2014,
+   "TV",
+   "Your Lie in April"
+  ],
+  "one-punch": [
+   "One Punch Man",
+   2015,
+   "TV",
+   "One-Punch Man anime"
+  ],
+  "mob-psycho": [
+   "Mob Psycho 100",
+   2016,
+   "TV",
+   "Mob Psycho 100"
+  ],
+  "made-in-abyss": [
+   "Made in Abyss",
+   2017,
+   "TV",
+   "Made in Abyss"
+  ],
+  "devilman-crybaby": [
+   "Devilman: Crybaby",
+   2018,
+   "ONA",
+   "Devilman Crybaby"
+  ],
+  "weathering": [
+   "Tenki no Ko",
+   2019,
+   "MOVIE",
+   "Weathering with You"
+  ],
+  "infinity-castle": [
+   "Kimetsu no Yaiba: Mugen Jou-hen",
+   2025,
+   "MOVIE",
+   "Demon Slayer: Kimetsu no Yaiba – The Movie: Infinity Castle"
+  ],
+  "mugen-train": [
+   "Kimetsu no Yaiba Movie: Mugen Ressha-hen",
+   2020,
+   "MOVIE",
+   "Demon Slayer: Kimetsu no Yaiba – The Movie: Mugen Train"
+  ],
+  "eva-final": [
+   "Shin Evangelion Movie:||",
+   2021,
+   "MOVIE",
+   "Evangelion: 3.0+1.0 Thrice Upon a Time"
+  ],
+  "bocchi": [
+   "Bocchi the Rock!",
+   2022,
+   "TV",
+   "Bocchi the Rock!"
+  ],
+  "slam-dunk": [
+   "THE FIRST SLAM DUNK",
+   2022,
+   "MOVIE",
+   "The First Slam Dunk"
+  ],
+  "suzume": [
+   "Suzume no Tojimari",
+   2022,
+   "MOVIE",
+   "Suzume film"
+  ],
+  "look-back": [
+   "Look Back",
+   2024,
+   "MOVIE",
+   "Look Back 2024 film"
+  ],
+  "jjk": [
+   "Jujutsu Kaisen",
+   2020,
+   "TV",
+   "Jujutsu Kaisen anime"
+  ],
+  "spy-family": [
+   "SPY×FAMILY",
+   2022,
+   "TV",
+   "Spy × Family anime"
+  ],
+  "chainsaw-man": [
+   "Chainsaw Man",
+   2022,
+   "TV",
+   "Chainsaw Man anime"
+  ],
+  "edgerunners": [
+   "Cyberpunk: Edgerunners",
+   2022,
+   "ONA",
+   "Cyberpunk: Edgerunners"
+  ],
+  "oshi-no-ko": [
+   "Oshi no Ko",
+   2023,
+   "TV",
+   "Oshi no Ko anime"
+  ],
+  "dandadan": [
+   "Dandadan",
+   2024,
+   "TV",
+   "Dandadan anime"
+  ],
+  "solo-leveling": [
+   "Ore dake Level Up na Ken",
+   2024,
+   "TV",
+   "Solo Leveling anime"
+  ],
+  "reze": [
+   "Chainsaw Man Movie: Reze-hen",
+   2025,
+   "MOVIE",
+   "Chainsaw Man – The Movie: Reze Arc"
+  ],
+  "tokyo-godfathers": [
+   "Tokyo Godfathers",
+   2003,
+   "MOVIE",
+   "Tokyo Godfathers"
+  ],
+  "ping-pong": [
+   "Ping Pong THE ANIMATION",
+   2014,
+   "TV",
+   "Ping Pong the Animation"
+  ],
+  "grave": [
+   "Hotaru no Haka",
+   1988,
+   "MOVIE",
+   "Grave of the Fireflies"
+  ],
+  "heron": [
+   "Kimitachi wa Dou Ikiru ka",
+   2023,
+   "MOVIE",
+   "The Boy and the Heron"
+  ]
+ }
+}

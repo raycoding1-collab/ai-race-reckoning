@@ -1,0 +1,46 @@
+# Fetches pictures for Drawn to Move (anime/), whose build sandbox cannot reach
+# image hosts. Runs when anime/tools/images/job.json changes on this branch, and
+# commits what it fetched back to the branch. See anime/tools/images/fetch.py.
+name: Drawn to Move images
+
+on:
+  push:
+    branches: [ccr-47da3b15-xdetkd]
+    paths: ['anime/tools/images/job.json']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: anime-images
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install --quiet pillow requests
+      - name: Fetch
+        run: python3 anime/tools/images/fetch.py anime/tools/images/job.json
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A anime/img anime/tools/images anime/src/data
+          if git diff --cached --quiet; then echo "nothing to commit"; exit 0; fi
+          mode=$(python3 -c 'import json;print(json.load(open("anime/tools/images/job.json"))["mode"])')
+          git commit -q -m "Fetch pictures for Drawn to Move (${mode})" \
+            -m "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>" \
+            -m "Claude-Session: https://claude.ai/code/session_01Rurdh8wvZf9XFy7RDk84zU"
+          for i in 1 2 3 4 5; do
+            git pull --rebase -q origin "${GITHUB_REF_NAME}" && git push -q origin "HEAD:${GITHUB_REF_NAME}" && exit 0
+            sleep $((i * 5))
+          done
+          exit 1
