@@ -1,22 +1,154 @@
 {
- "mode": "final",
- "run": 8,
- "picks": [
-  {
-   "slug": "monster",
-   "shows": "Dr Kenzō Tenma, crouched against a wall, aims a pistol with both hands.",
-   "credit": "© Naoki Urasawa, Studio Nuts / Shogakukan, VAP, NTV",
-   "kind": "still",
-   "url": "https://image.tmdb.org/t/p/w1280/15ikWbR3dO9Uj9ufFiynCcEBWB4.jpg",
-   "page": "https://www.themoviedb.org/tv/30981/images/backdrops"
-  },
-  {
-   "slug": "pluto",
-   "shows": "Gesicht, in a brown jacket and striped tie, levels a gun-barrel arm at the viewer in a forest.",
-   "credit": "© Naoki Urasawa / Takashi Nagasaki / Tezuka Productions / “PLUTO” Production Committee",
-   "kind": "still",
-   "url": "https://image.tmdb.org/t/p/w1280/danuIpIt7ydQygtXJtZc1mXLpb7.jpg",
-   "page": "https://www.themoviedb.org/tv/91997/images/backdrops"
-  }
- ]
+ "mode": "links",
+ "run": 9,
+ "file": "src/parts/900-sources.html",
+ "expect": {
+  "filmarchives.jp": [
+   "1917"
+  ],
+  "3.84-trillion": [
+   "3.84"
+  ],
+  "266-days": [
+   "266"
+  ],
+  "famitsu.com/article/202604/71571": [
+   "1179"
+  ],
+  "nippon.com/en/news/l00372": [
+   "Demon Slayer"
+  ],
+  "oricon.co.jp/news/2436596": [
+   "国宝",
+   "200億"
+  ],
+  "parrotanalytics": [
+   "Attack on Titan"
+  ],
+  "half-of-global-subs": [
+   "anime"
+  ],
+  "new-survey-shows": [
+   "NAFCA"
+  ],
+  "mappa-production-meltdown": [
+   "MAPPA"
+  ],
+  "drawing-on-spirited-world": [
+   "clapping"
+  ],
+  "aboutanime.html": [
+   "Hakujaden"
+  ],
+  "miyazakis-quiet-protest": [
+   "Iraq"
+  ],
+  "princess-iron-fan": [
+   "Tezuka"
+  ],
+  "grave-of-the-fireflies": [
+   "Takahata"
+  ],
+  "shinkai-says-film-inspired": [
+   "earthquake"
+  ],
+  "the-day-anime-changed": [
+   "Gundam"
+  ],
+  "heidi": [
+   "Heidi"
+  ],
+  "toei-doga": [
+   "Toei"
+  ],
+  "voltes-v": [
+   "Voltes"
+  ],
+  "Grendizer50": [
+   "Grendizer"
+  ],
+  "captain-tsubasa": [
+   "Torres"
+  ],
+  "dragon-ball-super-screenings": [
+   "Dragon Ball"
+  ],
+  "subversive-anime": [
+   "Hamtaro"
+  ],
+  "one-piece-pirate-flag": [
+   "One Piece"
+  ],
+  "spirited-aways-box-office": [
+   "Spirited Away"
+  ],
+  "beating-spirited-away": [
+   "Spirited Away"
+  ],
+  "feature/2001-08-21": [
+   "Millennium Actress"
+  ],
+  "paprika-mushishi": [
+   "Paprika",
+   "Venice"
+  ],
+  "kons-last-words": [
+   "Kon"
+  ],
+  "lowendmac.com/thompson/06/0126": [
+   "Shinkai"
+  ],
+  "5-centimeters-wins": [
+   "5 Centimeters"
+  ],
+  "attack-on-titan-creator": [
+   "Isayama"
+  ],
+  "kinema-jumpo": [
+   "Kinema"
+  ],
+  "1000-days": [
+   "Corner of the World"
+  ],
+  "hideaki-anno-opens-up": [
+   "Anno"
+  ],
+  "bocchi-the-rock-album": [
+   "Bocchi"
+  ],
+  "chainsaw-man-anime-was": [
+   "Chainsaw Man"
+  ],
+  "look-back-readies": [
+   "Look Back"
+  ],
+  "look-back-wins": [
+   "Look Back"
+  ],
+  "sony-top-film-2025": [
+   "Infinity Castle"
+  ],
+  "reze-arc-tops": [
+   "Reze"
+  ],
+  "List_of_Monster_episodes": [
+   "Madhouse",
+   "74"
+  ],
+  "pluto-anime-gets": [
+   "Pluto"
+  ],
+  "naoki-urasawa-osamu-tezuka": [
+   "Studio M2"
+  ],
+  "edgerunners-named": [
+   "Edgerunners"
+  ],
+  "solo-leveling-is-anime": [
+   "Solo Leveling"
+  ],
+  "frieren-beyond-journeys-end-season-2": [
+   "Frieren"
+  ]
+ }
 }

@@ -9,6 +9,8 @@ what it finds back to the branch. It works in two passes:
                         choose from: tools/images/cand/*.jpg and cand/candidates.json
   "mode": "final"       the chosen pictures, as img/<slug>.webp, recorded in
                         src/data/images-sourced.json
+  "mode": "links"       checks the links on the sources page, since the sandbox cannot
+                        reach most of them either: tools/images/links-report.json
 
 Sources: Studio Ghibli's free image library (ghibli.jp/gallery), Wikimedia Commons
 (public-domain works), AniList and Kitsu (banners and key art), and the pictures
@@ -696,11 +698,53 @@ def run_final(picks):
     SOURCED.write_text(json.dumps(sorted(sourced.values(), key=lambda r: r["slug"]), ensure_ascii=False, indent=1) + "\n")
 
 
+# ---------------------------------------------------------------- source links
+
+BROWSER_UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36"
+
+
+def run_links(job):
+    """Checks each link on the sources page: does it load, what is the page called, and does
+    its text contain the words the citation relies on ("expect", matched by URL fragment)."""
+    import html as htmllib
+    src = (ANIME / job["file"]).read_text()
+    urls = list(dict.fromkeys(re.findall(r'href="(https?://[^"]+)"', src)))
+    rows = []
+    for u in urls:
+        rec = {"url": u}
+        r = http("GET", u, timeout=30)
+        if r is not None and r.status_code in (401, 403, 406, 429, 503):
+            rec["first_status"] = r.status_code  # many news sites turn away scripts; ask again as a browser would
+            r = http("GET", u, timeout=30, headers={"User-Agent": BROWSER_UA, "Accept": "text/html,*/*",
+                                                     "Accept-Language": "en,ja;q=0.8"})
+        if r is None:
+            rec["status"] = "error"
+        else:
+            rec["status"] = r.status_code
+            if r.url.rstrip("/") != u.rstrip("/"):
+                rec["final"] = r.url
+            r.encoding = r.encoding if r.encoding and r.encoding.lower() != "iso-8859-1" else r.apparent_encoding
+            text = r.text
+            m = re.search(r"<title[^>]*>(.*?)</title>", text, re.S | re.I)
+            rec["title"] = htmllib.unescape(re.sub(r"\s+", " ", m.group(1))).strip()[:150] if m else ""
+            body = htmllib.unescape(re.sub(r"<[^>]+>", " ", text)).lower()
+            for frag, words in job.get("expect", {}).items():
+                if frag in u:
+                    rec["missing"] = [w for w in words if w.lower() not in body]
+        log(json.dumps(rec, ensure_ascii=False))
+        rows.append(rec)
+        time.sleep(1)
+    (HERE / "links-report.json").write_text(json.dumps(rows, ensure_ascii=False, indent=1) + "\n")
+
+
 # ---------------------------------------------------------------- main
 
 def main():
     job = json.loads(Path(sys.argv[1]).read_text())
-    if job["mode"] == "candidates":
+    if job["mode"] == "links":
+        run_links(job)
+        (HERE / "final-log.txt").write_text("\n".join(LOG) + "\n")
+    elif job["mode"] == "candidates":
         CAND.mkdir(parents=True, exist_ok=True)
         out = {"ghibli": {}, "commons": {}, "anime": {}}
         for part, fn in (("ghibli", run_ghibli), ("commons", run_commons), ("anime", run_anime)):
