@@ -448,6 +448,164 @@ def wiki_sheet(rows, path):
     log(f"  sheet {path.name}")
 
 
+# ---------------------------------------------------------------- more candidates for particular shots
+
+def commons_category(cat, limit=30):
+    data = get_json("https://commons.wikimedia.org/w/api.php?action=query&format=json&generator=categorymembers"
+                    f"&gcmtitle={quote('Category:' + cat)}&gcmtype=file&gcmlimit={limit}&prop=imageinfo"
+                    "&iiprop=url|size|mime|extmetadata&iiurlwidth=480&iiextmetadatafilter=LicenseShortName")
+    res = []
+    for p in (data or {}).get("query", {}).get("pages", {}).values():
+        ii = (p.get("imageinfo") or [{}])[0]
+        if not ii.get("mime", "").startswith("image/") or ii.get("mime") == "image/svg+xml":
+            continue
+        lic = re.sub("<[^>]+>", "", ii.get("extmetadata", {}).get("LicenseShortName", {}).get("value", ""))
+        res.append({"commons": p["title"], "thumb": ii.get("thumburl"), "w": ii.get("width"), "h": ii.get("height"),
+                    "page": ii.get("descriptionurl"), "license": lic})
+    return res
+
+
+def wiki_page_images(lang, title):
+    """Pictures on one Wikipedia page, in any language."""
+    api = f"https://{lang}.wikipedia.org/w/api.php?action=query&format=json"
+    im = get_json(api + f"&prop=images&imlimit=60&redirects=1&titles={quote(title)}")
+    files = []
+    for p in (im or {}).get("query", {}).get("pages", {}).values():
+        files += [x["title"] for x in p.get("images", []) if not SKIP_FILE.search(x["title"])]
+    res = []
+    for i in range(0, len(files[:40]), 20):
+        info = get_json(api + "&prop=imageinfo&iiprop=url|size|mime&iiurlwidth=480&titles=" + quote("|".join(files[i:i + 20])))
+        for p in (info or {}).get("query", {}).get("pages", {}).values():
+            ii = (p.get("imageinfo") or [{}])[0]
+            if ii.get("url") and ii.get("mime", "").startswith("image/") and (ii.get("width") or 0) >= 250:
+                res.append({"wikifile": p["title"], "wikilang": lang, "thumb": ii.get("thumburl") or ii["url"],
+                            "w": ii.get("width"), "h": ii.get("height"), "page": ii.get("descriptionurl")})
+    return res
+
+
+def tmdb_id(enwiki_title):
+    """TMDB id of an English Wikipedia article's subject (title or search words), via its Wikidata item."""
+    api = "https://en.wikipedia.org/w/api.php?action=query&format=json"
+    qid = None
+    for _ in range(2):
+        d = get_json(api + f"&redirects=1&prop=pageprops&ppprop=wikibase_item&titles={quote(enwiki_title)}")
+        for p in (d or {}).get("query", {}).get("pages", {}).values():
+            qid = qid or p.get("pageprops", {}).get("wikibase_item")
+        if qid:
+            break
+        s = get_json(api + f"&list=search&srlimit=1&srsearch={quote(enwiki_title)}")
+        hits = (s or {}).get("query", {}).get("search", [])
+        if not hits:
+            break
+        enwiki_title = hits[0]["title"]
+    if not qid:
+        return None, None
+    data = get_json(f"https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&props=claims&ids={qid}")
+    for ent in (data or {}).get("entities", {}).values():
+        claims = ent.get("claims", {})
+        for prop, kind in (("P4947", "movie"), ("P4983", "tv")):
+            for c in claims.get(prop, []):
+                v = c.get("mainsnak", {}).get("datavalue", {}).get("value")
+                if v:
+                    return kind, str(v)
+    return None, None
+
+
+TMDB_HEADERS = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126 Safari/537.36",
+                "Accept-Language": "en-US,en;q=0.8"}
+
+
+def tmdb_stills(enwiki_title, limit=16):
+    """Backdrops (film stills) listed on a work's TMDB images page, found through Wikidata."""
+    kind, tid = tmdb_id(enwiki_title)
+    if not tid:
+        log(f"  no TMDB id for {enwiki_title}")
+        return []
+    seen, res = set(), []
+    for q in ("", "?image_language=xx", "?image_language=ja", "?image_language=en"):
+        r = http("GET", f"https://www.themoviedb.org/{kind}/{tid}/images/backdrops{q}", headers=TMDB_HEADERS)
+        if r is None or r.status_code != 200:
+            log(f"  TMDB {kind}/{tid}{q}: {getattr(r, 'status_code', 'error')}")
+            continue
+        for f in re.findall(r'/t/p/[a-z0-9_]+/([A-Za-z0-9]{20,40}\.(?:jpg|png))', r.text):
+            if f not in seen:
+                seen.add(f)
+                res.append({"url": f"https://image.tmdb.org/t/p/w1280/{f}", "thumb": f"https://image.tmdb.org/t/p/w300/{f}",
+                            "page": f"https://www.themoviedb.org/{kind}/{tid}/images/backdrops"})
+        time.sleep(0.5)
+    return res[:limit]
+
+
+def anilist_by_id(mid):
+    r = http("POST", "https://graphql.anilist.co", headers={"Content-Type": "application/json", "Accept": "application/json"},
+             json={"query": "query($id:Int){Media(id:$id){id title{romaji} bannerImage coverImage{extraLarge} siteUrl}}",
+                   "variables": {"id": mid}})
+    time.sleep(2.2)
+    m = ((r.json() if r is not None and r.status_code == 200 else {}).get("data") or {}).get("Media") or {}
+    out = []
+    if m.get("bannerImage"):
+        out.append({"url": m["bannerImage"], "thumb": m["bannerImage"], "page": m.get("siteUrl"), "note": "AniList banner"})
+    if (m.get("coverImage") or {}).get("extraLarge"):
+        out.append({"url": m["coverImage"]["extraLarge"], "thumb": m["coverImage"]["extraLarge"], "page": m.get("siteUrl"),
+                    "note": "AniList cover"})
+    return out
+
+
+def kitsu_by_id(kid):
+    d = get_json(f"https://kitsu.app/api/edge/anime/{kid}", headers={"Accept": "application/vnd.api+json"}) or {}
+    a = (d.get("data") or {}).get("attributes", {})
+    out = []
+    for key, note in (("coverImage", "Kitsu cover"), ("posterImage", "Kitsu poster")):
+        u = (a.get(key) or {}).get("original")
+        if u:
+            out.append({"url": u, "thumb": u, "page": f"https://kitsu.app/anime/{kid}", "note": note})
+    return out
+
+
+def run_extra(items, out):
+    for it in items:
+        key = it["key"]
+        log(f"extra {key}")
+        found = []
+        try:
+            for q in it.get("commons", []):
+                for r in commons_search(q, 10):
+                    found.append({"commons": r["title"], "thumb": r["thumb"], "w": r["w"], "h": r["h"], "page": r.get("page"),
+                                  "license": r["license"]})
+                time.sleep(0.4)
+            for cat in it.get("commons_cat", []):
+                found += commons_category(cat)
+            for lang, title in it.get("wiki", []):
+                found += wiki_page_images(lang, title)
+            for t in it.get("tmdb", []):
+                found += tmdb_stills(t)
+            for mid in it.get("anilist", []):
+                found += anilist_by_id(mid)
+            for kid in it.get("kitsu", []):
+                found += kitsu_by_id(kid)
+        except Exception:
+            log(traceback.format_exc())
+        seen, cands = set(), []
+        for f in found:
+            ident = f.get("commons") or f.get("wikifile") or f.get("url")
+            if ident and ident not in seen:
+                seen.add(ident)
+                cands.append(f)
+        cands = cands[:32]
+        cells = []
+        for i, f in enumerate(cands):
+            f["code"] = f"X{i + 1}"
+            im = fetch_image(f["thumb"])
+            if im is not None and not f.get("w"):
+                f["w"], f["h"] = im.size  # thumbnail size only; the full picture is larger
+            src = "Commons " + f.get("license", "")[:14] if f.get("commons") else \
+                f"{f.get('wikilang', '')}.wikipedia" if f.get("wikifile") else f.get("note") or "TMDB still"
+            cells.append((f["code"], im, f"{f.get('w') or '?'}x{f.get('h') or '?'} {src}"))
+        out["extra"][key] = {"slugs": it["slugs"], "candidates": cands}
+        if cells:
+            grid_sheet(cells, 4, 420, 240, f"Extra: {key} ({', '.join(it['slugs'])})", CAND / f"extra-{key}.jpg")
+
+
 # ---------------------------------------------------------------- final pictures
 
 def commons_thumb(title, width):
@@ -459,8 +617,8 @@ def commons_thumb(title, width):
     return None, None
 
 
-def wiki_thumb(title, width):
-    data = get_json("https://en.wikipedia.org/w/api.php?action=query&format=json&prop=imageinfo"
+def wiki_thumb(title, width, lang="en"):
+    data = get_json(f"https://{lang}.wikipedia.org/w/api.php?action=query&format=json&prop=imageinfo"
                     f"&iiprop=url|size&iiurlwidth={width}&titles={quote(title)}")
     for p in (data or {}).get("query", {}).get("pages", {}).values():
         ii = (p.get("imageinfo") or [{}])[0]
@@ -478,7 +636,7 @@ def run_final(picks):
             if p.get("commons"):
                 url, page = commons_thumb(p["commons"], p.get("width", 1920))
             elif p.get("wikifile"):
-                url, page = wiki_thumb(p["wikifile"], p.get("width", 1280))
+                url, page = wiki_thumb(p["wikifile"], p.get("width", 1280), p.get("wikilang", "en"))
             im = fetch_image(url)
             if im is None:
                 log(f"FAILED {slug}: {url}")
@@ -490,15 +648,14 @@ def run_final(picks):
             r = im.width / im.height
             kind = p.get("kind", "still")
             longest = 2400 if r > 2.1 else 1100 if r < 0.9 else 1600
-            if kind == "banner":
-                longest = 1900
             if max(im.size) > longest:
                 im.thumbnail((longest, longest), Image.LANCZOS)
-            q = {"banner": 78, "poster": 82}.get(kind, 74)
+            q = {"banner": 76, "poster": 80}.get(kind, 72)
             out = IMG / f"{slug}.webp"
             im.save(out, "WEBP", quality=q, method=6)
-            if out.stat().st_size > 420_000:
-                im.save(out, "WEBP", quality=q - 12, method=6)
+            while out.stat().st_size > 360_000 and q > 50:
+                q -= 8
+                im.save(out, "WEBP", quality=q, method=6)
             rec = {"slug": slug, "file": out.name, "width": im.width, "height": im.height, "kind": kind,
                    "source_url": page or url, "credit": p.get("credit", ""), "shows": p.get("shows", "")}
             if p.get("cap"):
@@ -525,8 +682,16 @@ def main():
                     log(f"{part} failed:\n{traceback.format_exc()}")
                 (CAND / "candidates.json").write_text(json.dumps(out, ensure_ascii=False, indent=1) + "\n")
         (CAND / "log.txt").write_text("\n".join(LOG) + "\n")
-    elif job["mode"] == "final":
-        run_final(job["picks"])
+    else:  # "final": fetch the chosen pictures, and optionally gather extra candidates for shots still open
+        if job.get("picks"):
+            run_final(job["picks"])
+        if job.get("extra"):
+            CAND.mkdir(parents=True, exist_ok=True)
+            p = CAND / "candidates.json"
+            out = json.loads(p.read_text()) if p.exists() else {}
+            out["extra"] = {}
+            run_extra(job["extra"], out)
+            p.write_text(json.dumps(out, ensure_ascii=False, indent=1) + "\n")
         (HERE / "final-log.txt").write_text("\n".join(LOG) + "\n")
 
 
