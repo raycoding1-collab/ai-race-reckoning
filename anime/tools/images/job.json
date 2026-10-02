@@ -1,42 +1,164 @@
 {
  "mode": "links",
- "run": 11,
- "urls": [
-  "https://web.archive.org/web/2012/http://www.nausicaa.net/miyazaki/interviews/aboutanime.html",
-  "https://web.archive.org/web/2016/http://www.nausicaa.net/miyazaki/interviews/aboutanime.html",
-  "https://web.archive.org/web/2019/http://www.nausicaa.net/miyazaki/interviews/aboutanime.html",
-  "https://web.archive.org/web/2021/http://www.nausicaa.net/miyazaki/interviews/aboutanime.html",
-  "https://en.wikipedia.org/wiki/Pluto_(manga)",
-  "https://en.wikipedia.org/wiki/Pluto_(TV_series)",
-  "https://lowendmac.com/2006/voices-of-a-distant-star-a-brisk-breathtaking-anime-film-made-on-a-power-mac-g4/"
- ],
+ "run": 12,
+ "file": "src/parts/900-sources.html",
  "expect": {
-  "https://web.archive.org/web/2012/http://www.nausicaa.net/miyazaki/interviews/aboutanime.html": [
+  "filmarchives.jp": [
+   "アニメーション"
+  ],
+  "3.84-trillion": [
+   "3.84"
+  ],
+  "266-days": [
+   "266"
+  ],
+  "famitsu.com/article/202604/71571": [
+   "1179"
+  ],
+  "nippon.com/en/news/l00372": [
+   "Demon Slayer"
+  ],
+  "oricon.co.jp/news/2436596": [
+   "国宝",
+   "200億"
+  ],
+  "parrotanalytics": [
+   "Attack on Titan"
+  ],
+  "half-of-global-subs": [
+   "anime"
+  ],
+  "new-survey-shows": [
+   "NAFCA"
+  ],
+  "mappa-production-meltdown": [
+   "MAPPA"
+  ],
+  "drawing-on-spirited-world": [
+   "clapping"
+  ],
+  "aboutanime.html": [
    "Hakujaden"
   ],
-  "https://web.archive.org/web/2016/http://www.nausicaa.net/miyazaki/interviews/aboutanime.html": [
-   "Hakujaden"
+  "miyazakis-quiet-protest": [
+   "Iraq"
   ],
-  "https://web.archive.org/web/2019/http://www.nausicaa.net/miyazaki/interviews/aboutanime.html": [
-   "Hakujaden"
+  "princess-iron-fan": [
+   "Tezuka"
   ],
-  "https://web.archive.org/web/2021/http://www.nausicaa.net/miyazaki/interviews/aboutanime.html": [
-   "Hakujaden"
+  "grave-of-the-fireflies": [
+   "Takahata"
   ],
-  "https://en.wikipedia.org/wiki/Pluto_(manga)": [
-   "2017",
-   "Kawaguchi",
-   "M2",
-   "Genco"
+  "shinkai-says-film-inspired": [
+   "earthquake"
   ],
-  "https://en.wikipedia.org/wiki/Pluto_(TV_series)": [
-   "2017",
-   "Kawaguchi",
-   "M2"
+  "the-day-anime-changed": [
+   "Gundam"
   ],
-  "https://lowendmac.com/2006/voices-of-a-distant-star-a-brisk-breathtaking-anime-film-made-on-a-power-mac-g4/": [
+  "heidi": [
+   "Heidi"
+  ],
+  "toei-doga": [
+   "Toei"
+  ],
+  "voltes-v": [
+   "Voltes"
+  ],
+  "Grendizer50": [
+   "Grendizer"
+  ],
+  "captain-tsubasa": [
+   "Torres"
+  ],
+  "dragon-ball-super-screenings": [
+   "Dragon Ball"
+  ],
+  "subversive-anime": [
+   "Hamtaro"
+  ],
+  "one-piece-pirate-flag": [
+   "One Piece"
+  ],
+  "spirited-aways-box-office": [
+   "Spirited Away"
+  ],
+  "beating-spirited-away": [
+   "Spirited Away"
+  ],
+  "feature/2001-08-21": [
+   "Millennium Actress"
+  ],
+  "paprika-mushishi": [
+   "Paprika",
+   "Venice"
+  ],
+  "kons-last-words": [
+   "Kon"
+  ],
+  "5-centimeters-wins": [
+   "5 Centimeters"
+  ],
+  "attack-on-titan-creator": [
+   "Isayama"
+  ],
+  "kinema-jumpo": [
+   "Kinema"
+  ],
+  "1000-days": [
+   "Corner of the World"
+  ],
+  "hideaki-anno-opens-up": [
+   "Anno"
+  ],
+  "bocchi-the-rock-album": [
+   "Bocchi"
+  ],
+  "chainsaw-man-anime-was": [
+   "Chainsaw Man"
+  ],
+  "look-back-readies": [
+   "Look Back"
+  ],
+  "look-back-wins": [
+   "Look Back"
+  ],
+  "sony-top-film-2025": [
+   "Infinity Castle"
+  ],
+  "reze-arc-tops": [
+   "Reze"
+  ],
+  "List_of_Monster_episodes": [
+   "Madhouse",
+   "74"
+  ],
+  "pluto-anime-gets": [
+   "Pluto"
+  ],
+  "edgerunners-named": [
+   "Edgerunners"
+  ],
+  "solo-leveling-is-anime": [
+   "Solo Leveling"
+  ],
+  "frieren-beyond-journeys-end-season-2": [
+   "Frieren"
+  ],
+  "voices-of-a-distant-star-a-brisk": [
    "Shinkai",
    "G4"
+  ],
+  "anime-industry-celebrates-100th": [
+   "64",
+   "1917"
+  ],
+  "Pluto_(manga)": [
+   "2017",
+   "M2"
+  ],
+  "pluto-anime-new-trailer": [
+   "Kawaguchi",
+   "M2"
   ]
  }
 }
