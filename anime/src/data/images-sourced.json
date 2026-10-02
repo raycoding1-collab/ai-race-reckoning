@@ -858,6 +858,16 @@
   "shows": "Kodama, small white forest spirits, among the mossy roots of the forest."
  },
  {
+  "slug": "monster",
+  "file": "monster.webp",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/tv/30981/images/backdrops",
+  "credit": "© Naoki Urasawa, Studio Nuts / Shogakukan, VAP, NTV",
+  "shows": "Dr Kenzō Tenma, crouched against a wall, aims a pistol with both hands."
+ },
+ {
   "slug": "motif-back",
   "file": "motif-back.webp",
   "width": 1170,
@@ -1097,6 +1107,16 @@
   "credit": "",
   "shows": "Peco and Smile leap joyfully against a bright yellow background.",
   "pos": "30% 50%"
+ },
+ {
+  "slug": "pluto",
+  "file": "pluto.webp",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/tv/91997/images/backdrops",
+  "credit": "© Naoki Urasawa / Takashi Nagasaki / Tezuka Productions / “PLUTO” Production Committee",
+  "shows": "Gesicht, in a brown jacket and striped tie, levels a gun-barrel arm at the viewer in a forest."
  },
  {
   "slug": "pokemon",

@@ -1,8 +1,2 @@
-extra monster
-  TMDB tv/30981 for {'kind': 'tv', 'id': '30981'}
-  no TMDB id for Monster (manga)
-  sheet extra-monster.jpg 1720x1694
-extra pluto
-  TMDB tv/91997 for {'kind': 'tv', 'q': 'Pluto'}
-  no TMDB id for Pluto (manga)
-  sheet extra-pluto.jpg 1720x1694
+ok monster: 1280x720 50 KB
+ok pluto: 1280x720 44 KB
