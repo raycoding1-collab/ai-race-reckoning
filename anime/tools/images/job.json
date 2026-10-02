@@ -1,398 +1,236 @@
 {
  "mode": "final",
- "run": 5,
- "extra": [
+ "run": 6,
+ "picks": [
   {
-   "key": "fmab",
-   "slugs": [
-    "fmab"
-   ],
-   "tmdb": [
-    {
-     "kind": "tv",
-     "q": "Fullmetal Alchemist: Brotherhood"
-    }
-   ]
+   "slug": "fmab",
+   "shows": "Edward and Alphonse, in silhouette, sit together against a blazing orange sky.",
+   "credit": "© Hiromu Arakawa / FA Project, MBS",
+   "kind": "still",
+   "url": "https://image.tmdb.org/t/p/w1280/2UG177tWHy7xRmMKWJHB7nAUmKd.jpg",
+   "page": "https://www.themoviedb.org/tv/31911/images/backdrops"
   },
   {
-   "key": "jjk",
-   "slugs": [
-    "jjk"
-   ],
-   "tmdb": [
-    {
-     "kind": "tv",
-     "q": "Jujutsu Kaisen"
-    }
-   ]
+   "slug": "jjk",
+   "shows": "Yūji Itadori walks alone across an empty Shibuya crossing at night, neon signs glowing.",
+   "credit": "© Gege Akutami / Shueisha, Jujutsu Kaisen Project, MBS",
+   "kind": "still",
+   "url": "https://image.tmdb.org/t/p/w1280/3US5UXJSStOVozc6EwhGSMDguol.jpg",
+   "page": "https://www.themoviedb.org/tv/95479/images/backdrops"
   },
   {
-   "key": "oshi-no-ko",
-   "slugs": [
-    "oshi-no-ko"
-   ],
-   "tmdb": [
-    {
-     "kind": "tv",
-     "q": "Oshi no Ko"
-    }
-   ]
+   "slug": "oshi-no-ko",
+   "shows": "Ai Hoshino on a concert stage, seen from behind, facing a sea of glowing penlights.",
+   "credit": "© Aka Akasaka × Mengo Yokoyari / Shueisha, “Oshi no Ko” Partners",
+   "kind": "still",
+   "url": "https://image.tmdb.org/t/p/w1280/gArCVC4ML529WMCEqOXbALdQbUq.jpg",
+   "page": "https://www.themoviedb.org/tv/203737/images/backdrops"
   },
   {
-   "key": "madoka",
-   "slugs": [
-    "madoka"
-   ],
-   "tmdb": [
-    {
-     "kind": "tv",
-     "q": "Puella Magi Madoka Magica"
-    }
-   ]
+   "slug": "madoka",
+   "shows": "A witch's labyrinth built as collage: framed pictures float over a pale void around a circular stage.",
+   "credit": "© Magica Quartet / Aniplex · Madoka Partners · MBS",
+   "kind": "still",
+   "url": "https://image.tmdb.org/t/p/w1280/tEG740RxpLaIPgYlkV1G0wg6FgF.jpg",
+   "page": "https://www.themoviedb.org/tv/39218/images/backdrops"
   },
   {
-   "key": "steins-gate",
-   "slugs": [
-    "steins-gate"
-   ],
-   "tmdb": [
-    {
-     "kind": "tv",
-     "q": "Steins;Gate"
-    }
-   ]
+   "slug": "steins-gate",
+   "shows": "Kurisu, Okabe, Daru and Mayuri crowd round a mobile phone in the dim lab.",
+   "credit": "© MAGES. / Chiyo St. Inc. / Steins;Gate Partners",
+   "kind": "still",
+   "url": "https://image.tmdb.org/t/p/w1280/mwBF3oSjD1k7ciNRORZaMBeJlCg.jpg",
+   "page": "https://www.themoviedb.org/tv/42509/images/backdrops"
   },
   {
-   "key": "spy-family",
-   "slugs": [
-    "spy-family"
-   ],
-   "tmdb": [
-    {
-     "kind": "tv",
-     "q": "Spy x Family"
-    }
-   ]
+   "slug": "spy-family",
+   "shows": "Yor holds Anya close in a shadowy alley, glancing back over her shoulder.",
+   "credit": "© Tatsuya Endo / Shueisha, Spy × Family Production Committee",
+   "kind": "still",
+   "url": "https://image.tmdb.org/t/p/w1280/aD2UcIw8pCmbNyG5piwSByPQhZw.jpg",
+   "page": "https://www.themoviedb.org/tv/120089/images/backdrops"
   },
   {
-   "key": "dandadan",
-   "slugs": [
-    "dandadan"
-   ],
-   "tmdb": [
-    {
-     "kind": "tv",
-     "q": "Dan Da Dan"
-    }
-   ]
+   "slug": "dandadan",
+   "shows": "Momo and Okarun together in a school corridor by the lockers, Okarun reading a magazine.",
+   "credit": "© Yukinobu Tatsu / Shueisha, Dandadan Production Committee",
+   "kind": "still",
+   "url": "https://image.tmdb.org/t/p/w1280/BeRaLeCiwUhkCbWwrnmDsjeJp3.jpg",
+   "page": "https://www.themoviedb.org/tv/240411/images/backdrops"
   },
   {
-   "key": "edgerunners",
-   "slugs": [
-    "edgerunners"
-   ],
-   "tmdb": [
-    {
-     "kind": "tv",
-     "q": "Cyberpunk: Edgerunners"
-    }
-   ]
+   "slug": "edgerunners",
+   "shows": "David and Lucy sit side by side on the Moon's surface, looking at the Earth.",
+   "credit": "© CD PROJEKT S.A.",
+   "kind": "still",
+   "url": "https://image.tmdb.org/t/p/w1280/gLlemMoIN4vbKvZvOWInWGxeQNL.jpg",
+   "page": "https://www.themoviedb.org/tv/105248/images/backdrops"
   },
   {
-   "key": "bocchi",
-   "slugs": [
-    "bocchi"
-   ],
-   "tmdb": [
-    {
-     "kind": "tv",
-     "q": "Bocchi the Rock!"
-    }
-   ]
+   "slug": "bocchi",
+   "shows": "Kessoku Band, four girls carrying instrument cases, stand at a sunlit street crossing.",
+   "credit": "© Aki Hamaji, Houbunsha / Bocchi the Rock! Production Committee",
+   "kind": "still",
+   "url": "https://image.tmdb.org/t/p/w1280/nNPR2SHrUxqkJENsoul3rXWCzSq.jpg",
+   "page": "https://www.themoviedb.org/tv/119100/images/backdrops"
   },
   {
-   "key": "one-punch",
-   "slugs": [
-    "one-punch"
-   ],
-   "tmdb": [
-    {
-     "kind": "tv",
-     "q": "One-Punch Man"
-    }
-   ]
+   "slug": "one-punch",
+   "shows": "Saitama's blank, bored face in close-up.",
+   "credit": "© ONE · Yusuke Murata / Shueisha, Hero Association HQ",
+   "kind": "still",
+   "url": "https://image.tmdb.org/t/p/w1280/4VMZTbclxQOjDoiTEm04F5K7NP4.jpg",
+   "page": "https://www.themoviedb.org/tv/63926/images/backdrops"
   },
   {
-   "key": "your-lie-april",
-   "slugs": [
-    "your-lie-april"
-   ],
-   "tmdb": [
-    {
-     "kind": "tv",
-     "q": "Your Lie in April"
-    }
-   ]
+   "slug": "your-lie-april",
+   "shows": "Kaori, carrying her violin case, looks back under cherry blossom.",
+   "credit": "© Naoshi Arakawa, Kodansha / “Your Lie in April” Production Committee",
+   "kind": "still",
+   "url": "https://image.tmdb.org/t/p/w1280/2OMHoAkDHb1Vwe91spzuzAguj6p.jpg",
+   "page": "https://www.themoviedb.org/tv/61663/images/backdrops"
   },
   {
-   "key": "haruhi",
-   "slugs": [
-    "haruhi"
-   ],
-   "tmdb": [
-    {
-     "kind": "tv",
-     "q": "The Melancholy of Haruhi Suzumiya"
-    }
-   ]
+   "slug": "haruhi",
+   "shows": "Haruhi, pointer in hand, lectures the SOS Brigade from a whiteboard.",
+   "credit": "© Nagaru Tanigawa · Noizi Ito / SOS Dan",
+   "kind": "still",
+   "url": "https://image.tmdb.org/t/p/w1280/s5LX55ZpiCOFBYYsOEsb1YgStNI.jpg",
+   "page": "https://www.themoviedb.org/tv/42511/images/backdrops"
   },
   {
-   "key": "devilman-crybaby",
-   "slugs": [
-    "devilman-crybaby"
-   ],
-   "tmdb": [
-    {
-     "kind": "tv",
-     "q": "Devilman Crybaby"
-    }
-   ]
+   "slug": "devilman-crybaby",
+   "shows": "Devilman, bat-winged, silhouetted against a huge red moon.",
+   "credit": "© Go Nagai · Devilman Crybaby Project",
+   "kind": "still",
+   "url": "https://image.tmdb.org/t/p/w1280/kQtO0UypJdE1CHZn5WFhjrsABD5.jpg",
+   "page": "https://www.themoviedb.org/tv/75208/images/backdrops"
   },
   {
-   "key": "violet",
-   "slugs": [
-    "violet"
-   ],
-   "tmdb": [
-    {
-     "kind": "tv",
-     "q": "Violet Evergarden"
-    }
-   ]
+   "slug": "pokemon",
+   "shows": "Ash and Pikachu, ready for battle, on the street of an old stone town.",
+   "credit": "© Nintendo · Creatures · GAME FREAK · TV Tokyo · ShoPro · JR Kikaku",
+   "kind": "still",
+   "url": "https://image.tmdb.org/t/p/w1280/ugTmcBckC9zEjIKI81hGe78nKwH.jpg",
+   "page": "https://www.themoviedb.org/tv/60572/images/backdrops"
   },
   {
-   "key": "frieren",
-   "slugs": [
-    "frieren"
-   ],
-   "tmdb": [
-    {
-     "kind": "tv",
-     "q": "Frieren: Beyond Journey's End"
-    }
-   ]
+   "slug": "silent-voice",
+   "shows": "Shōko and Shōya stand at the rail of the footbridge under cherry blossom.",
+   "credit": "© Yoshitoki Ōima, Kodansha / A Silent Voice Production Committee",
+   "kind": "still",
+   "url": "https://image.tmdb.org/t/p/w1280/AbMvioHldxKgLKXspk8luAzMFsG.jpg",
+   "page": "https://www.themoviedb.org/movie/378064/images/backdrops"
   },
   {
-   "key": "pokemon",
-   "slugs": [
-    "pokemon"
-   ],
-   "tmdb": [
-    "Pokémon (TV series)",
-    {
-     "kind": "tv",
-     "q": "Pokémon"
-    }
-   ]
+   "slug": "summer-wars",
+   "shows": "The Jinnouchi family crowd together, staring at a screen in their old country house.",
+   "credit": "© 2009 Summer Wars Film Partners",
+   "kind": "still",
+   "url": "https://image.tmdb.org/t/p/w1280/v0AVNgZ0qy3cdzxpOfL1eukqARn.jpg",
+   "page": "https://www.themoviedb.org/movie/28874/images/backdrops"
   },
   {
-   "key": "silent-voice",
-   "slugs": [
-    "silent-voice"
-   ],
-   "tmdb": [
-    "A Silent Voice (film)"
-   ]
+   "slug": "wolf-children",
+   "shows": "Hana, laughing, rides a bicycle with her two small children in the countryside.",
+   "credit": "© 2012 “Wolf Children” Film Partners",
+   "kind": "still",
+   "url": "https://image.tmdb.org/t/p/w1280/oMqgJMCaNIqeJtilc71D4nRqdmt.jpg",
+   "page": "https://www.themoviedb.org/movie/110420/images/backdrops"
   },
   {
-   "key": "summer-wars",
-   "slugs": [
-    "summer-wars"
-   ],
-   "tmdb": [
-    "Summer Wars"
-   ]
+   "slug": "girl-leapt",
+   "shows": "Makoto leaps through the air against a blue sky streaked with cloud.",
+   "credit": "© “Toki o Kakeru Shōjo” Film Partners 2006",
+   "kind": "still",
+   "url": "https://image.tmdb.org/t/p/w1280/1sO3PeplPWn7uOokHLJL3BFvHFA.jpg",
+   "page": "https://www.themoviedb.org/movie/14069/images/backdrops"
   },
   {
-   "key": "wolf-children",
-   "slugs": [
-    "wolf-children"
-   ],
-   "tmdb": [
-    "Wolf Children"
-   ]
+   "slug": "mugen-train",
+   "shows": "Rengoku, the Flame Hashira, stands in a blaze of fire with his sword levelled.",
+   "credit": "© Koyoharu Gotōge / Shueisha, Aniplex, ufotable",
+   "kind": "still",
+   "url": "https://image.tmdb.org/t/p/w1280/6JIOReDStHm3pDK0j0f4qT93pdd.jpg",
+   "page": "https://www.themoviedb.org/movie/635302/images/backdrops"
   },
   {
-   "key": "girl-leapt",
-   "slugs": [
-    "girl-leapt"
-   ],
-   "tmdb": [
-    "The Girl Who Leapt Through Time (2006 film)"
-   ]
+   "slug": "grave",
+   "shows": "Setsuko stands in tall grass at night, surrounded by drifting fireflies.",
+   "credit": "© Akiyuki Nosaka / Shinchosha, 1988",
+   "kind": "still",
+   "url": "https://image.tmdb.org/t/p/w1280/dlC0ed9Ugh3FzydnkBtV5lRXUu4.jpg",
+   "page": "https://www.themoviedb.org/movie/12477/images/backdrops"
   },
   {
-   "key": "mugen-train",
-   "slugs": [
-    "mugen-train"
-   ],
-   "tmdb": [
-    "Demon Slayer: Kimetsu no Yaiba – The Movie: Mugen Train",
-    {
-     "kind": "movie",
-     "q": "Demon Slayer Mugen Train"
-    }
-   ]
+   "slug": "patlabor",
+   "shows": "A construction Labor tears down old wooden houses as a detective walks by, towers rising behind.",
+   "credit": "© HEADGEAR / Bandai Visual / Tohokushinsha",
+   "kind": "still",
+   "url": "https://image.tmdb.org/t/p/w1280/ovMJ71DCdAFduYRMFQj1viOa8Nt.jpg",
+   "page": "https://www.themoviedb.org/movie/14571/images/backdrops"
   },
   {
-   "key": "grave",
-   "slugs": [
-    "grave"
-   ],
-   "tmdb": [
-    "Grave of the Fireflies"
-   ]
+   "slug": "beautiful-dreamer",
+   "shows": "A tank, a striped beach parasol and abandoned appliances on a deserted shore.",
+   "credit": "© Rumiko Takahashi / Shogakukan, Kitty Film",
+   "kind": "still",
+   "url": "https://image.tmdb.org/t/p/w1280/1wA9PC8MvxDABXruonVNLoJ26vR.jpg",
+   "page": "https://www.themoviedb.org/movie/43967/images/backdrops"
   },
   {
-   "key": "patlabor",
-   "slugs": [
-    "patlabor"
-   ],
-   "tmdb": [
-    "Patlabor: The Movie"
-   ]
+   "slug": "reze",
+   "shows": "Denji and Reze kiss at a railing as fireworks burst over the town.",
+   "credit": "© Tatsuki Fujimoto / Shueisha, MAPPA",
+   "kind": "still",
+   "url": "https://image.tmdb.org/t/p/w1280/wWQ3l19pcRrAJzqZ5Etq0RimDFf.jpg",
+   "page": "https://www.themoviedb.org/movie/1218925/images/backdrops"
   },
   {
-   "key": "beautiful-dreamer",
-   "slugs": [
-    "beautiful-dreamer"
-   ],
-   "tmdb": [
-    "Urusei Yatsura 2: Beautiful Dreamer"
-   ]
+   "slug": "slam-dunk",
+   "shows": "The Shohoku starting five, in red, stand together in the arena.",
+   "credit": "© I.T.Planning, Inc. © 2022 The First Slam Dunk Film Partners",
+   "kind": "still",
+   "url": "https://image.tmdb.org/t/p/w1280/rBgzI1a126JWA7YJd7p1NBmC61z.jpg",
+   "page": "https://www.themoviedb.org/movie/783675/images/backdrops"
   },
   {
-   "key": "reze",
-   "slugs": [
-    "reze"
-   ],
-   "tmdb": [
-    "Chainsaw Man – The Movie: Reze Arc",
-    {
-     "kind": "movie",
-     "q": "Chainsaw Man The Movie Reze Arc"
-    }
-   ]
+   "slug": "innocence",
+   "shows": "A crowd of gilded deity masks fills the frame at the film's festival parade.",
+   "credit": "© 2004 Shirow Masamune / KODANSHA · IG, ITNDDTD",
+   "kind": "still",
+   "url": "https://image.tmdb.org/t/p/w1280/7awhko7JqxQgjPB5FxGbY1r2T86.jpg",
+   "page": "https://www.themoviedb.org/movie/12140/images/backdrops"
   },
   {
-   "key": "slam-dunk",
-   "slugs": [
-    "slam-dunk"
-   ],
-   "tmdb": [
-    "The First Slam Dunk"
-   ]
+   "slug": "hols",
+   "shows": "Hilda, holding a lyre, stands in the foreground beside an owl, as Hols watches from behind.",
+   "credit": "© Toei Animation",
+   "kind": "still",
+   "url": "https://image.tmdb.org/t/p/w1280/AnamZTkw7ikf0XUwcuvqJZ6mDVs.jpg",
+   "page": "https://www.themoviedb.org/movie/52686/images/backdrops"
   },
   {
-   "key": "innocence",
-   "slugs": [
-    "innocence"
-   ],
-   "tmdb": [
-    "Ghost in the Shell 2: Innocence"
-   ]
+   "slug": "iron-fan",
+   "shows": "Three of the pilgrims, Pigsy, Sun Wukong and Sandy, in a black-and-white frame.",
+   "credit": "Wan Laiming, Wan Guchan",
+   "kind": "still",
+   "url": "https://image.tmdb.org/t/p/w1280/dDOjWUl0YWneFOfgJxjgq2TyAZP.jpg",
+   "page": "https://www.themoviedb.org/movie/76737/images/backdrops"
   },
   {
-   "key": "sally",
-   "slugs": [
-    "sally"
-   ],
-   "tmdb": [
-    {
-     "kind": "tv",
-     "q": "Sally the Witch"
-    },
-    {
-     "kind": "tv",
-     "q": "魔法使いサリー"
-    }
-   ]
+   "slug": "iron-fan-2",
+   "shows": "Princess Iron Fan, seated, drinks from a teacup in a black-and-white frame.",
+   "credit": "Wan brothers",
+   "kind": "still",
+   "commons": "File:PrincessIronFan-PDChina50PD.JPG"
   },
   {
-   "key": "kimba",
-   "slugs": [
-    "kimba"
-   ],
-   "tmdb": [
-    {
-     "kind": "tv",
-     "q": "Kimba the White Lion"
-    },
-    {
-     "kind": "tv",
-     "q": "ジャングル大帝"
-    }
-   ]
-  },
-  {
-   "key": "hols",
-   "slugs": [
-    "hols"
-   ],
-   "tmdb": [
-    "The Little Norse Prince"
-   ]
-  },
-  {
-   "key": "iron-fan",
-   "slugs": [
-    "iron-fan",
-    "iron-fan-2"
-   ],
-   "tmdb": [
-    "Princess Iron Fan (1941 film)"
-   ],
-   "commons": [
-    "Princess Iron Fan 1941 film",
-    "鐵扇公主 1941"
-   ]
-  },
-  {
-   "key": "kumo-tulip",
-   "slugs": [
-    "kumo-tulip",
-    "kumo-tulip-2"
-   ],
-   "tmdb": [
-    {
-     "kind": "movie",
-     "id": "324443"
-    }
-   ],
-   "commons": [
-    "Kumo to Chūrippu Masaoka",
-    "くもとちゅうりっぷ"
-   ]
-  },
-  {
-   "key": "katsudo-shashin",
-   "slugs": [
-    "katsudo-shashin"
-   ],
-   "commons": [
-    "Katsudō Shashin film",
-    "活動写真 フィルム 松本"
-   ]
-  },
-  {
-   "key": "momotaro-2",
-   "slugs": [
-    "momotaro-2"
-   ],
-   "commons": [
-    "Momotaro Sacred Sailors 1945",
-    "桃太郎 海の神兵"
-   ]
+   "slug": "momotaro-2",
+   "shows": "Two of Momotarō's animal sailors, in naval caps, look up in surprise.",
+   "credit": "Mitsuyo Seo, Shochiku",
+   "kind": "still",
+   "commons": "File:Momotaro's Divine Sea Warriors-screeny.JPG"
   }
  ]
 }
