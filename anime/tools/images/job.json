@@ -1,1335 +1,198 @@
 {
  "mode": "final",
- "run": 3,
+ "run": 4,
  "picks": [
   {
-   "slug": "spirited-away",
-   "shows": "Chihiro and No-Face sit side by side on the train, shadowy passengers around them.",
-   "credit": "© 2001 Studio Ghibli · NDDTM",
-   "url": "https://www.ghibli.jp/gallery/chihiro042.jpg",
-   "kind": "still"
-  },
-  {
-   "slug": "motif-train",
-   "shows": "A two-car train crosses a flooded plain at dusk, mirrored in the water under pink clouds.",
-   "credit": "© 2001 Studio Ghibli · NDDTM",
-   "url": "https://www.ghibli.jp/gallery/chihiro043.jpg",
-   "kind": "still"
-  },
-  {
-   "slug": "totoro",
-   "shows": "Totoro and Satsuki wait at the rural bus stop in the rain.",
-   "credit": "© 1988 Studio Ghibli",
-   "url": "https://www.ghibli.jp/gallery/totoro029.jpg",
-   "kind": "still"
-  },
-  {
-   "slug": "nausicaa",
-   "shows": "Nausicaä, in blue, skims low over a golden desert on her white Mehve glider.",
-   "credit": "© 1984 Studio Ghibli · H",
-   "url": "https://www.ghibli.jp/gallery/nausicaa007.jpg",
-   "kind": "still"
-  },
-  {
-   "slug": "laputa",
-   "shows": "Laputa, a ruined castle crowned by a giant tree, floats among clouds.",
-   "credit": "© 1986 Studio Ghibli",
-   "url": "https://www.ghibli.jp/gallery/laputa036.jpg",
-   "kind": "still"
-  },
-  {
-   "slug": "motif-ruins",
-   "shows": "Pazu and Sheeta stand with the moss-covered robot gardener in Laputa's overgrown garden.",
-   "credit": "© 1986 Studio Ghibli",
-   "url": "https://www.ghibli.jp/gallery/laputa041.jpg",
-   "kind": "still"
-  },
-  {
-   "slug": "kiki",
-   "shows": "Kiki flies on her broom high above the rooftops of a harbour town.",
-   "credit": "© 1989 Eiko Kadono – Studio Ghibli – N",
-   "url": "https://www.ghibli.jp/gallery/majo024.jpg",
-   "kind": "still"
-  },
-  {
-   "slug": "motif-food",
-   "shows": "A bowl of instant ramen topped with ham and a boiled egg.",
-   "credit": "© 2008 Studio Ghibli · NDHDMT",
-   "url": "https://www.ghibli.jp/gallery/ponyo035.jpg",
-   "kind": "still"
-  },
-  {
-   "slug": "ponyo",
-   "shows": "Ponyo, a small red-haired girl, runs across the backs of giant fish-shaped waves.",
-   "credit": "© 2008 Studio Ghibli · NDHDMT",
-   "url": "https://www.ghibli.jp/gallery/ponyo028.jpg",
-   "kind": "still"
-  },
-  {
-   "slug": "motif-flight",
-   "shows": "Porco's red seaplane banks across a deep blue sky.",
-   "credit": "© 1992 Studio Ghibli · NN",
-   "url": "https://www.ghibli.jp/gallery/porco002.jpg",
-   "kind": "still"
-  },
-  {
-   "slug": "porco",
-   "shows": "Porco Rosso, a pig in aviator goggles, grins from the cockpit of his red seaplane.",
-   "credit": "© 1992 Studio Ghibli · NN",
-   "url": "https://www.ghibli.jp/gallery/porco025.jpg",
-   "kind": "still"
-  },
-  {
-   "slug": "mononoke",
-   "shows": "San rides a giant white wolf through the forest.",
-   "credit": "© 1997 Studio Ghibli · ND",
-   "url": "https://www.ghibli.jp/gallery/mononoke033.jpg",
-   "kind": "still"
-  },
-  {
-   "slug": "mononoke-2",
-   "shows": "Kodama, small white forest spirits, among the mossy roots of the forest.",
-   "credit": "© 1997 Studio Ghibli · ND",
-   "url": "https://www.ghibli.jp/gallery/mononoke023.jpg",
-   "kind": "still"
-  },
-  {
-   "slug": "only-yesterday",
-   "shows": "Taeko picks safflowers in a misty field at dawn.",
-   "credit": "© 1991 Hotaru Okamoto · Yuko Tone · Isao Takahata · Studio Ghibli · NH",
-   "url": "https://www.ghibli.jp/gallery/omoide027.jpg",
-   "kind": "still"
-  },
-  {
-   "slug": "whisper",
-   "shows": "Shizuku and Seiji on a hilltop above Tokyo at sunrise.",
-   "credit": "© 1995 Aoi Hiiragi · Shueisha · Studio Ghibli · NH",
-   "url": "https://www.ghibli.jp/gallery/mimi048.jpg",
-   "kind": "still"
-  },
-  {
-   "slug": "howl",
-   "shows": "Howl's moving castle, a heap of turrets and chimneys on chicken legs, strides across the moor.",
-   "credit": "© 2004 Studio Ghibli · NDDMT",
-   "url": "https://www.ghibli.jp/gallery/howl011.jpg",
-   "kind": "still"
-  },
-  {
-   "slug": "wind-rises",
-   "shows": "In Jiro's dream, figures stand on the wings of Caproni's giant aircraft in flight.",
-   "credit": "© 2013 Studio Ghibli · NDHDMTK",
-   "url": "https://www.ghibli.jp/gallery/kazetachinu002.jpg",
-   "kind": "still"
-  },
-  {
-   "slug": "kaguya",
-   "shows": "Kaguya runs from the capital in a storm of rough charcoal strokes.",
-   "credit": "© 2013 Hatake Jimusho · Studio Ghibli · NDHDMTK",
-   "url": "https://www.ghibli.jp/gallery/kaguyahime030.jpg",
-   "kind": "still"
-  },
-  {
-   "slug": "heron",
-   "shows": "Mahito, a boy in a grey jacket, faces the grey heron at close range.",
-   "credit": "© 2023 Studio Ghibli",
-   "url": "https://www.ghibli.jp/gallery/kimitachi031.jpg",
-   "kind": "still"
-  },
-  {
-   "slug": "chojugiga",
-   "shows": "Ink drawing from the Chōjū-jinbutsu-giga: a frog throws a rabbit in a sumo bout while another frog watches.",
-   "credit": "Kōzan-ji, Kyoto. Public domain",
-   "commons": "File:Chouju sumou.jpg",
-   "width": 1154,
-   "kind": "artwork"
-  },
-  {
-   "slug": "chojugiga-2",
-   "shows": "Ink drawing from the Chōjū-jinbutsu-giga: a monkey in monk's robes chants before a frog seated like a Buddha.",
-   "credit": "Kōzan-ji, Kyoto. Public domain",
-   "commons": "File:Chouju monks.jpg",
-   "width": 599,
-   "kind": "artwork"
-  },
-  {
-   "slug": "shigisan",
-   "shows": "Painted scroll from the Shigisan Engi Emaki: villagers run and gesture as a granary flies off over the hills.",
-   "credit": "Chōgosonshi-ji, Nara. Public domain",
-   "commons": "File:Sigisanengi tobikura.jpg",
-   "width": 1920,
-   "kind": "artwork"
-  },
-  {
-   "slug": "ban-dainagon",
-   "shows": "Painted scroll from the Ban Dainagon Ekotoba: a crowd of courtiers and commoners presses forward to watch a fire.",
-   "credit": "Idemitsu Museum of Arts. Public domain",
-   "commons": "File:Ban Dainagon Ekotoba - People watching fire 3.jpg",
-   "width": 794,
-   "kind": "artwork"
-  },
-  {
-   "slug": "genji-emaki",
-   "shows": "Painted scroll from the Genji Monogatari Emaki: court ladies in layered robes seen from above through a roofless room.",
-   "credit": "Tokugawa Art Museum. Public domain",
-   "commons": "File:Genji emaki SAWARABI.jpg",
-   "width": 1920,
-   "kind": "artwork"
-  },
-  {
-   "slug": "hokusai-manga",
-   "shows": "A page of Hokusai Manga: figures climbing a rope and tumbling, drawn in quick brush lines.",
-   "credit": "Katsushika Hokusai. Public domain",
-   "commons": "File:Hokusai sketches - hokusai manga vol6.jpg",
-   "width": 1920,
-   "kind": "artwork"
-  },
-  {
-   "slug": "great-wave",
-   "shows": "Hokusai's Great Wave off Kanagawa: a huge wave curls over three boats, with Mount Fuji small in the distance.",
-   "credit": "Katsushika Hokusai. Public domain",
-   "commons": "File:The Great Wave off Kanagawa.jpg",
-   "width": 1920,
-   "kind": "artwork"
-  },
-  {
-   "slug": "katsudo-shashin",
-   "shows": "Two stencilled frames from Katsudō Shashin: a boy in a sailor suit and red cap beside the characters 活動写真.",
-   "credit": "Maker unknown. Public domain",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/nx101429-fAZXxvSAcOPY.jpg",
-   "kind": "poster",
-   "page": "https://anilist.co/anime/101429"
-  },
-  {
-   "slug": "katsudo-shashin-2",
-   "shows": "A single frame of Katsudō Shashin: a boy in a red cap and sailor suit raises his hand to his cap.",
-   "credit": "Maker unknown. Public domain",
-   "commons": "File:Katsudō Shashin.jpg",
-   "width": 470,
-   "kind": "artwork"
-  },
-  {
-   "slug": "namakura",
-   "shows": "A frame from Namakura Gatana: a swaggering samurai and a man with a walking stick on a road beneath a willow.",
-   "credit": "Jun'ichi Kōuchi. Public domain",
-   "commons": "File:Anime cell 1917.jpg",
-   "width": 960,
-   "kind": "artwork"
-  },
-  {
-   "slug": "namakura-2",
-   "shows": "A short strip of frames from Namakura Gatana: the samurai, sword raised, inside a round vignette.",
-   "credit": "Jun'ichi Kōuchi. Public domain",
-   "commons": "File:Namakura-gatana (1917) toy movie filmstrip.png",
-   "width": 192,
-   "kind": "artwork"
-  },
-  {
-   "slug": "momotaro",
-   "shows": "A monkey and a dog in sailor uniforms and naval caps, from Momotarō: Sacred Sailors.",
-   "credit": "Mitsuyo Seo, Shochiku",
-   "commons": "File:Momotaro's Divine Sea Warriors-screeny.JPG",
-   "width": 903,
-   "kind": "artwork"
-  },
-  {
-   "slug": "momotaro-2",
-   "shows": "Momotarō sits among his animal troops, a bear, a monkey and rabbits in uniform.",
-   "credit": "Mitsuyo Seo, Shochiku",
-   "commons": "File:Momotaro- Sacred Sailors poster.jpg",
-   "width": 595,
-   "kind": "artwork"
-  },
-  {
-   "slug": "iron-fan",
-   "shows": "Sun Wukong, the Monkey King, swings his staff above the clouds.",
-   "credit": "Wan Laiming, Wan Guchan",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/n9521-ihWF6NXmg2Rb.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/9521"
-  },
-  {
-   "slug": "iron-fan-2",
-   "shows": "Princess Iron Fan, her hair pinned up, in a black-and-white frame.",
-   "credit": "Wan brothers",
-   "commons": "File:Princessironfan.jpg",
-   "width": 376,
-   "kind": "artwork"
-  },
-  {
-   "slug": "kujira",
-   "shows": "The poster for Kujira: a sailing ship on stylised waves under the title.",
-   "credit": "Noburō Ōfuji",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx7528-PvotBkdYqQJE.jpg",
-   "kind": "poster",
-   "page": "https://anilist.co/anime/7528"
-  },
-  {
    "slug": "hakujaden",
-   "shows": "Bai-Niang, the White Snake heroine, and Xu-Xian look towards a butterfly.",
+   "shows": "Bai-Niang and Xu-Xian stand side by side beneath blossom, watching a butterfly.",
    "credit": "© Toei Animation",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/4513-gnFAqZMVBfoj.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/4513"
-  },
-  {
-   "slug": "astro-boy",
-   "shows": "Astro Boy flies with his fists forward, in black and white.",
-   "credit": "© Tezuka Productions",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/2747-9vSxJNN5dr3Y.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/2747"
-  },
-  {
-   "slug": "yamato",
-   "shows": "Susumu Kodai and Yuki Mori in uniform against a field of stars.",
-   "credit": "© Voyager Entertainment / Space Battleship Yamato Production Committee",
-   "url": "https://media.kitsu.app/anime/cover_images/1483/original.jpg",
-   "kind": "banner",
-   "page": "https://kitsu.app/anime/1483"
-  },
-  {
-   "slug": "akira",
-   "shows": "Kaneda, in his red jacket, walks towards his red motorcycle on a white ground.",
-   "credit": "© 1988 MASH·ROOM / AKIRA Committee",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/47-fof8HqtNDtvx.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/47"
-  },
-  {
-   "slug": "akira-2",
-   "shows": "Kaneda's red motorcycle skids sideways to a stop on a night road, trailing light.",
-   "credit": "© 1988 MASH·ROOM / AKIRA Committee",
-   "wikifile": "File:Akira Slide.jpg",
-   "wikilang": "en",
-   "width": 421,
+   "url": "https://image.tmdb.org/t/p/w1280/pW5zXbWFazDhT5ZXTGZxaIlOToy.jpg",
+   "page": "https://www.themoviedb.org/movie/64777/images/backdrops",
    "kind": "still"
   },
   {
-   "slug": "evangelion",
-   "shows": "Evangelion Unit-01 stands silhouetted against an orange sunset sky.",
-   "credit": "© khara / Project Eva",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/30-gEMoHHIqxDgN.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/30"
-  },
-  {
-   "slug": "your-name",
-   "shows": "Taki and Mitsuha face each other on a mountaintop above the clouds at twilight.",
-   "credit": "© 2016 “Your Name.” Production Committee",
-   "url": "https://media.kitsu.app/anime/cover_images/11614/original.jpg",
-   "kind": "banner",
-   "page": "https://kitsu.app/anime/11614"
-  },
-  {
-   "slug": "motif-sky",
-   "shows": "Taki and Mitsuha look up as a comet's trail cuts across a bright blue sky.",
-   "credit": "© 2016 “Your Name.” Production Committee",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/21519-1ayMXgNlmByb.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/21519"
-  },
-  {
-   "slug": "frieren",
-   "shows": "Frieren, an elf mage with long white hair, walks past an old stone wall below a hill town.",
-   "credit": "© Kanehito Yamada, Tsukasa Abe / Shogakukan / “Frieren” Project",
-   "url": "https://media.kitsu.app/anime/46474/cover_image/883c308356a4db76a9c0af900ada96ed.jpg",
-   "kind": "banner",
-   "page": "https://kitsu.app/anime/46474"
-  },
-  {
-   "slug": "motif-back",
-   "shows": "Hodaka and Hina, seen from behind at a railing, face a vast sky breaking open with sunbeams.",
-   "credit": "© 2019 “Weathering With You” Film Partners",
-   "url": "https://media.kitsu.app/anime/cover_images/42028/original.jpeg",
-   "kind": "banner",
-   "page": "https://kitsu.app/anime/42028"
-  },
-  {
-   "slug": "wanpaku",
-   "shows": "Susanoo and Kushinada face each other among stylised trees, drawn in flat, graphic shapes.",
+   "slug": "hakujaden-2",
+   "shows": "Xu-Xian holds Bai-Niang close against a pale sky.",
    "credit": "© Toei Animation",
-   "url": "https://media.kitsu.app/anime/cover_images/3336/original.jpg",
-   "kind": "banner",
-   "page": "https://kitsu.app/anime/3336"
+   "url": "https://image.tmdb.org/t/p/w1280/jnsZDc3XJoyDwVhgd9c0EnOfPcA.jpg",
+   "page": "https://www.themoviedb.org/movie/64777/images/backdrops",
+   "kind": "still"
   },
   {
-   "slug": "wanpaku-2",
-   "shows": "The poster for The Little Prince and the Eight-Headed Dragon: Susanoo rides into battle against the red dragon.",
+   "slug": "hakujaden-3",
+   "shows": "Xu-Xian and Bai-Niang in a room of red lattice screens.",
    "credit": "© Toei Animation",
-   "url": "https://media.kitsu.app/anime/poster_images/3336/original.jpg",
+   "url": "https://image.tmdb.org/t/p/w1280/vAYXaOOjlelRqNy9Hxd2mIkdGXQ.jpg",
+   "page": "https://www.themoviedb.org/movie/64777/images/backdrops",
+   "kind": "still"
+  },
+  {
+   "slug": "kumo-tulip",
+   "shows": "The poster for Kumo to Chūrippu: a ladybird girl, a spider and a red tulip on an orange ground.",
+   "credit": "Kenzō Masaoka, Shochiku",
+   "url": "https://image.tmdb.org/t/p/original/lsodRXxiLqjQwxegBeSEaHLAXGi.jpg",
+   "page": "https://www.themoviedb.org/movie/324443/images/backdrops",
+   "kind": "poster"
+  },
+  {
+   "slug": "kumo-tulip-2",
+   "shows": "A home-video cover for Kumo to Chūrippu, with a black-and-white frame of the ladybird.",
+   "credit": "Kenzō Masaoka, Shochiku",
+   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/3990.jpg",
    "kind": "poster",
-   "page": "https://kitsu.app/anime/3336"
+   "page": "https://anilist.co/anime/3990"
   },
   {
-   "slug": "sarutobi",
-   "shows": "The poster for Magic Boy: the boy ninja Sasuke leaps among forest animals.",
-   "credit": "© Toei Animation",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx4948-jCgpSVUX3srk.png",
-   "kind": "poster",
-   "page": "https://anilist.co/anime/4948"
+   "slug": "chikara",
+   "shows": "Two cartoon figures, a woman in a polka-dot dress and a man, sit back to back.",
+   "credit": "Kenzō Masaoka, Shochiku. Public domain",
+   "commons": "File:Chikara to Onna no Yo no Naka screenshot.jpg",
+   "width": 1920,
+   "kind": "artwork"
   },
   {
-   "slug": "saiyuki",
-   "shows": "Two small monkeys sit on a branch above jagged red mountains.",
-   "credit": "© Toei Animation",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/n4481-VruxM6ssgKty.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/4481"
-  },
-  {
-   "slug": "ashita-no-joe",
-   "shows": "Joe Yabuki and his rival trade punches against a red-and-black background.",
-   "credit": "© Asao Takamori, Tetsuya Chiba / Kodansha, TMS",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/2402-Uu2lAPxkPUeg.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/2402"
-  },
-  {
-   "slug": "belladonna",
-   "shows": "Jeanne's face in pale purple watercolour washes, her hair flowing.",
-   "credit": "© Mushi Production",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/3220-ZdjakVJ2qKyb.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/3220"
-  },
-  {
-   "slug": "kimba",
-   "shows": "Kimba, a white lion cub, runs across an olive-green ground.",
-   "credit": "© Tezuka Productions",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/n1572-81YLQHgwGSn8.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/1572"
-  },
-  {
-   "slug": "hols",
-   "shows": "Hols, smiling, leads Hilda by the hand against a blue sky.",
-   "credit": "© Toei Animation",
-   "url": "https://media.kitsu.app/anime/cover_images/934/original.png",
-   "kind": "banner",
-   "page": "https://kitsu.app/anime/934"
-  },
-  {
-   "slug": "mazinger",
-   "shows": "The head of the super robot Mazinger Z, horned and stern, against a pale sky.",
-   "credit": "© Go Nagai / Dynamic Planning, Toei Animation",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/n2253-5uGlpuUBKee3.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/2253"
-  },
-  {
-   "slug": "sally",
-   "shows": "Sally the witch flies on her broom trailing sparkles, in black and white.",
-   "credit": "© Mitsuteru Yokoyama / Hikari Production, Toei Animation",
-   "url": "https://media.kitsu.app/anime/cover_images/2953/original.jpg",
-   "kind": "banner",
-   "page": "https://kitsu.app/anime/2953"
-  },
-  {
-   "slug": "speed-racer",
-   "shows": "Go Mifune in his white helmet grips the wheel of the Mach 5.",
-   "credit": "© Tatsunoko Production",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/n1445-rfPhOQSGRe0i.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/1445"
-  },
-  {
-   "slug": "lupin",
-   "shows": "Lupin III, in a green jacket, drives a small yellow car out of a spiral of blue.",
-   "credit": "© Monkey Punch / TMS",
-   "url": "https://media.kitsu.app/anime/cover_images/1265/original.jpg",
-   "kind": "banner",
-   "page": "https://kitsu.app/anime/1265"
-  },
-  {
-   "slug": "gatchaman",
-   "shows": "The five members of the Science Ninja Team pose in their bird costumes and capes.",
-   "credit": "© Tatsunoko Production",
-   "url": "https://media.kitsu.app/anime/cover_images/2166/original.jpg",
-   "kind": "banner",
-   "page": "https://kitsu.app/anime/2166"
-  },
-  {
-   "slug": "devilman",
-   "shows": "Devilman, green-skinned with bat wings, reaches out against a red sky.",
-   "credit": "© Go Nagai / Dynamic Planning, Toei Animation",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/2252-mBvJg1f88Y0Y.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/2252"
-  },
-  {
-   "slug": "gundam",
-   "shows": "The white RX-78-2 Gundam stands with rifle and shield in space beside a colony.",
-   "credit": "© Sotsu · Sunrise",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/80-LcQhJ600WeDn.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/80"
+   "slug": "one-piece-flag",
+   "shows": "Protesters at the Trillion Peso March in Manila under a Straw Hat Jolly Roger flag.",
+   "credit": "Photo via Wikimedia Commons, CC BY 4.0",
+   "commons": "File:Trillion Peso March (Straw Hat Pirates Flag).jpg",
+   "width": 1920,
+   "kind": "artwork"
   },
   {
    "slug": "ge999",
-   "shows": "Tetsurō, Maetel, Captain Harlock, Emeraldas and other characters of the Galaxy Express 999 film, lined up.",
+   "shows": "Maetel, in her black fur hat and coat, stands beside the 999's steam locomotive among the stars.",
    "credit": "© Leiji Matsumoto / Toei Animation",
-   "url": "https://media.kitsu.app/anime/cover_images/1173/original.jpg",
-   "kind": "banner",
-   "page": "https://kitsu.app/anime/1173"
+   "url": "https://image.tmdb.org/t/p/w1280/jU7aA911z7SrXtjgQOvjDVXcR0q.jpg",
+   "page": "https://www.themoviedb.org/movie/15227/images/backdrops",
+   "kind": "still"
   },
   {
-   "slug": "heidi",
-   "shows": "Heidi, in pink with a yellow hat, smiles in an Alpine meadow above a lake.",
-   "credit": "© Zuiyo",
-   "url": "https://media.kitsu.app/anime/cover_images/2016/original.jpg",
-   "kind": "banner",
-   "page": "https://kitsu.app/anime/2016"
+   "slug": "yamato",
+   "shows": "The space battleship Yamato, red-hulled and grey, crosses a deep blue sky.",
+   "credit": "© Voyager Entertainment / Space Battleship Yamato Production Committee",
+   "url": "https://image.tmdb.org/t/p/w1280/nkHM1bVx6oXFFEEwHJG8i5M9JZz.jpg",
+   "page": "https://www.themoviedb.org/movie/48101/images/backdrops",
+   "kind": "still"
   },
   {
-   "slug": "cagliostro",
-   "shows": "Lupin and Jigen rest by their battered yellow Fiat 500 in a field of flowers.",
-   "credit": "© Monkey Punch / TMS",
-   "url": "https://media.kitsu.app/anime/cover_images/1283/original.png",
-   "kind": "banner",
-   "page": "https://kitsu.app/anime/1283"
+   "slug": "akira",
+   "shows": "Kaneda rides his red motorcycle along a Neo-Tokyo highway at night, headlights flaring.",
+   "credit": "© 1988 MASH·ROOM / AKIRA Committee",
+   "url": "https://image.tmdb.org/t/p/w1280/isHLegL2LP2wxJCNbQxJAyY7GQh.jpg",
+   "page": "https://www.themoviedb.org/movie/149/images/backdrops",
+   "kind": "still"
   },
   {
-   "slug": "versailles",
-   "shows": "Oscar, Marie Antoinette and other characters of The Rose of Versailles among white roses.",
-   "credit": "© Ikeda Riyoko Production / TMS",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/338-XTxJzUNXqTVo.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/338"
+   "slug": "akira-2",
+   "shows": "Kaneda leans low over his red motorcycle as it skids across the road.",
+   "credit": "© 1988 MASH·ROOM / AKIRA Committee",
+   "url": "https://image.tmdb.org/t/p/w1280/9uyoEpuSOnajLECZQ1yBI10dej5.jpg",
+   "page": "https://www.themoviedb.org/movie/149/images/backdrops",
+   "kind": "still"
   },
   {
-   "slug": "macross",
-   "shows": "Hikaru, Minmay, Misa and the cast of Macross, painted in warm colours with a Valkyrie fighter.",
-   "credit": "© Big West",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/1088-qEDmlgWXrKH3.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/1088"
+   "slug": "akira-3",
+   "shows": "Tetsuo, in a red cape, walks through a pale ruin.",
+   "credit": "© 1988 MASH·ROOM / AKIRA Committee",
+   "url": "https://image.tmdb.org/t/p/w1280/b3AToYoQ0GxXi2iXKpdJbs4Phrh.jpg",
+   "page": "https://www.themoviedb.org/movie/149/images/backdrops",
+   "kind": "still"
   },
   {
-   "slug": "conan",
-   "shows": "A green island with a ruined tower and a lone huge tree under a blue sky.",
-   "credit": "© Nippon Animation",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/302-6lfV0hg7KVj1.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/302"
+   "slug": "momotaro",
+   "shows": "Momotarō's animal officers, a monkey and bears among them, gather around a map.",
+   "credit": "Mitsuyo Seo, Shochiku",
+   "url": "https://image.tmdb.org/t/p/w1280/wiUSAqNR0gCXrZ4J8vJ46Xfw9Ms.jpg",
+   "page": "https://www.themoviedb.org/movie/77604/images/backdrops",
+   "kind": "still"
   },
   {
-   "slug": "grendizer",
-   "shows": "Grendizer's horned head, a fighter craft and the heroine Hikaru against a blue sky.",
-   "credit": "© Go Nagai / Dynamic Planning, Toei Animation",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/1985-kyrtocnMQsvE.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/1985"
-  },
-  {
-   "slug": "doraemon",
-   "shows": "Doraemon, Nobita, Shizuka, Gian and Suneo fly with bamboo-copters on their heads.",
-   "credit": "© Fujiko Pro, Shogakukan, TV Asahi, Shin-Ei, ADK",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/2471-A7h23JrH0ENK.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/2471"
-  },
-  {
-   "slug": "urusei",
-   "shows": "Ataru runs from a crowd of the series' characters across the rooftops at night.",
-   "credit": "© Rumiko Takahashi / Shogakukan, Kitty Film, Fuji TV",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/1293-XmAkK3xVNmQh.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/1293"
-  },
-  {
-   "slug": "daicon",
-   "shows": "The DAICON IV heroine in a red bunny costume throws a punch, a red robot behind her.",
-   "credit": "© DAICON Film",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/121664-pC5VqgwWHrhq.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/121664"
-  },
-  {
-   "slug": "angels-egg",
-   "shows": "In a dark, drowned city, the girl holds her egg while the boy stands nearby.",
-   "credit": "© Tokuma Shoten",
-   "url": "https://media.kitsu.app/anime/785/cover_image/9adae663b911cb3636eead72fd62c1e3.png",
-   "kind": "banner",
-   "page": "https://kitsu.app/anime/785"
-  },
-  {
-   "slug": "honneamise",
-   "shows": "Shirotsugh in a flight suit before the bulk of a silver aircraft.",
-   "credit": "© Bandai Visual / Gainax",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/1034-YlFs9a9ENOPR.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/1034"
-  },
-  {
-   "slug": "beautiful-dreamer",
-   "shows": "A ruined clock face in a crumbling tower, from Beautiful Dreamer.",
-   "credit": "© Rumiko Takahashi / Shogakukan, Kitty Film",
-   "url": "https://media.kitsu.app/anime/cover_images/1731/original.jpg",
-   "kind": "banner",
-   "page": "https://kitsu.app/anime/1731"
-  },
-  {
-   "slug": "dragon-ball",
-   "shows": "Young Goku rides the dragon Shenron with Bulma, Krillin and friends.",
-   "credit": "© Bird Studio / Shueisha, Toei Animation",
-   "url": "https://media.kitsu.app/anime/cover_images/199/original.jpg",
-   "kind": "banner",
-   "page": "https://kitsu.app/anime/199"
-  },
-  {
-   "slug": "saint-seiya",
-   "shows": "The Gold Saints in gleaming zodiac armour.",
-   "credit": "© Masami Kurumada / Toei Animation",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/1254-8sEdD7gwYipm.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/1254"
-  },
-  {
-   "slug": "chars-counterattack",
-   "shows": "The Nu Gundam and the red Sazabi clash above the Earth.",
-   "credit": "© Sotsu · Sunrise",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/87-YhOEoJL9FMOr.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/87"
-  },
-  {
-   "slug": "logh",
-   "shows": "The officers of the Empire and the Alliance face each other in two ranks.",
-   "credit": "© Yoshiki Tanaka, Tokuma Shoten",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/820-FcKc3kvg60z8.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/820"
-  },
-  {
-   "slug": "patlabor",
-   "shows": "The police Labor Ingram stands over its uniformed crew in a city at night.",
-   "credit": "© HEADGEAR / Bandai Visual / Tohokushinsha",
-   "url": "https://media.kitsu.app/anime/poster_images/980/original.png",
-   "kind": "poster",
-   "page": "https://kitsu.app/anime/980"
-  },
-  {
-   "slug": "motif-rain",
-   "shows": "A wooden rain shelter beside a still pond under hanging green leaves.",
-   "credit": "© Makoto Shinkai / CoMix Wave Films",
-   "url": "https://media.kitsu.app/anime/cover_images/7515/original.jpg",
-   "kind": "banner",
-   "page": "https://kitsu.app/anime/7515"
-  },
-  {
-   "slug": "motif-sakura",
-   "shows": "Two children stand among drifting cherry petals beside a road.",
-   "credit": "© Makoto Shinkai / CoMix Wave Films",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/1689.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/1689"
-  },
-  {
-   "slug": "5cm",
-   "shows": "Two small figures stand on a hillside under an enormous evening sky full of light.",
-   "credit": "© Makoto Shinkai / CoMix Wave Films",
-   "url": "https://media.kitsu.app/anime/cover_images/1517/original.png",
-   "kind": "banner",
-   "page": "https://kitsu.app/anime/1517"
-  },
-  {
-   "slug": "gits",
-   "shows": "Motoko Kusanagi sits in shadow, the towers of the city behind her.",
-   "credit": "© 1995 Shirow Masamune / KODANSHA · BANDAI VISUAL · MANGA ENTERTAINMENT",
-   "url": "https://media.kitsu.app/anime/cover_images/25/original.jpg",
-   "kind": "banner",
-   "page": "https://kitsu.app/anime/25"
-  },
-  {
-   "slug": "bebop",
-   "shows": "The crew of the Bebop: Spike, Jet, Faye, Ed and the dog Ein, gathered aboard the ship.",
-   "credit": "© Sunrise",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/1-OquNCNB6srGe.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/1"
-  },
-  {
-   "slug": "sailor-moon",
-   "shows": "The five Sailor Guardians pose together on a city rooftop.",
-   "credit": "© Naoko Takeuchi / PNP, Toei Animation",
-   "url": "https://media.kitsu.app/anime/cover_images/489/original.jpg",
-   "kind": "banner",
-   "page": "https://kitsu.app/anime/489"
-  },
-  {
-   "slug": "perfect-blue",
-   "shows": "The Japanese poster for Perfect Blue: Mima, in a pink dress, looks out over the title.",
-   "credit": "© Rex Entertainment",
-   "url": "https://media.kitsu.app/anime/poster_images/400/original.jpg",
-   "kind": "poster",
-   "page": "https://kitsu.app/anime/400"
-  },
-  {
-   "slug": "utena",
-   "shows": "Utena, sword in hand, and Anthy in a red gown amid swirling rose petals.",
-   "credit": "© BE-PAPAS / Chiho Saito / Shogakukan · Shokaku",
-   "url": "https://media.kitsu.app/anime/cover_images/403/original.jpg",
-   "kind": "banner",
-   "page": "https://kitsu.app/anime/403"
-  },
-  {
-   "slug": "lain",
-   "shows": "Lain in a tangle of cables and wires, her classmates behind her.",
-   "credit": "© NBCUniversal Entertainment Japan",
-   "url": "https://media.kitsu.app/anime/cover_images/306/original.jpg",
-   "kind": "banner",
-   "page": "https://kitsu.app/anime/306"
-  },
-  {
-   "slug": "patlabor2",
-   "shows": "Shinobu Nagumo holds a white cat against her cheek, painted in muted blues.",
-   "credit": "© HEADGEAR / Bandai Visual / Tohokushinsha",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/1096-itEd3O4eF4de.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/1096"
-  },
-  {
-   "slug": "pokemon",
-   "shows": "Ash, Misty, Brock and Pikachu run towards the viewer.",
-   "credit": "© Nintendo · Creatures · GAME FREAK · TV Tokyo · ShoPro · JR Kikaku",
-   "url": "https://media.kitsu.app/anime/cover_images/486/original.jpg",
-   "kind": "banner",
-   "page": "https://kitsu.app/anime/486"
-  },
-  {
-   "slug": "eoe",
-   "shows": "A red sea on the horizon under a dark sky.",
-   "credit": "© khara / Project Eva",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/n32-BH9yHJBQqeOa.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/32"
-  },
-  {
-   "slug": "one-piece",
-   "shows": "Luffy, in his straw hat, grins among his crew and a crowd of creatures.",
-   "credit": "© Eiichiro Oda / Shueisha, Fuji TV, Toei Animation",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/21-wf37VakJmZqs.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/21"
-  },
-  {
-   "slug": "paprika",
-   "shows": "The dream parade: dolls, animals and household objects crowd a theatre.",
-   "credit": "© 2006 Madhouse / Sony Pictures Entertainment (Japan)",
-   "url": "https://media.kitsu.app/anime/cover_images/1752/original.jpg",
-   "kind": "banner",
-   "page": "https://kitsu.app/anime/1752"
-  },
-  {
-   "slug": "millennium-actress",
-   "shows": "Chiyoko in many costumes from many eras, painted as one collage.",
-   "credit": "© 2001 Chiyoko Committee",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/1033-npnaGITec3EV.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/1033"
-  },
-  {
-   "slug": "voices",
-   "shows": "Two hands reach towards a flip phone floating in space.",
-   "credit": "© Makoto Shinkai / CoMix Wave Films",
-   "url": "https://media.kitsu.app/anime/cover_images/231/original.jpg",
-   "kind": "banner",
-   "page": "https://kitsu.app/anime/231"
-  },
-  {
-   "slug": "mushishi",
-   "shows": "Ginko, a white-haired wanderer, in a misty blue forest.",
-   "credit": "© Yuki Urushibara / Kodansha · Mushishi Partners",
-   "url": "https://media.kitsu.app/anime/cover_images/419/original.jpeg",
-   "kind": "banner",
-   "page": "https://kitsu.app/anime/419"
-  },
-  {
-   "slug": "haruhi",
-   "shows": "Haruhi Suzumiya and the SOS Brigade leap into the air in their school uniforms.",
-   "credit": "© Nagaru Tanigawa · Noizi Ito / SOS Dan",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx849-wQM3GqLvl62P.png",
-   "kind": "poster",
-   "page": "https://anilist.co/anime/849"
-  },
-  {
-   "slug": "fmab",
-   "shows": "Edward Elric in his red coat, with his brother Alphonse, a suit of armour, behind him.",
-   "credit": "© Hiromu Arakawa / FA Project, MBS",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx5114-nSWCgQlmOMtj.jpg",
-   "kind": "poster",
-   "page": "https://anilist.co/anime/5114"
-  },
-  {
-   "slug": "flcl",
-   "shows": "Haruko, goggles on her head, grins beside her blue bass guitar, splashed with paint.",
-   "credit": "© Production I.G / King Records / FLCL",
-   "url": "https://media.kitsu.app/anime/202/cover_image/ec80b41410b7dd7e627a382fe11871a3.jpg",
-   "kind": "banner",
-   "page": "https://kitsu.app/anime/202"
-  },
-  {
-   "slug": "innocence",
-   "shows": "The cracked porcelain face of a gynoid doll with blue eyes.",
-   "credit": "© 2004 Shirow Masamune / KODANSHA · IG, ITNDDTD",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/468-V8L7r2QZaNeS.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/468"
-  },
-  {
-   "slug": "mind-game",
-   "shows": "A red sea bream with long eyelashes smokes a cigarette.",
-   "credit": "© 2004 Mind Game Project",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/875-yXbiRS7ayxlG.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/875"
-  },
-  {
-   "slug": "girl-leapt",
-   "shows": "Makoto leaps through a blue sky full of clouds.",
-   "credit": "© “Toki o Kakeru Shōjo” Film Partners 2006",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx2236-tH5fWFkHyVGg.png",
-   "kind": "poster",
-   "page": "https://anilist.co/anime/2236"
-  },
-  {
-   "slug": "gurren",
-   "shows": "A huge craft hangs over a range of volcanoes in a sunset sky.",
-   "credit": "© GAINAX, Nakashima Kazuki / Aniplex · KDE-J · TV Tokyo · Dentsu",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/2001-3eWhvkau8NV3.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/2001"
-  },
-  {
-   "slug": "summer-wars",
-   "shows": "The Jinnouchi family line up in a summer field, a banner flying behind them.",
-   "credit": "© 2009 Summer Wars Film Partners",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/5681-M15hrscD9QHN.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/5681"
+   "slug": "wanpaku-2",
+   "shows": "Susanoo, on his white horse, charges the heads of the eight-headed dragon against a purple sky.",
+   "credit": "© Toei Animation",
+   "url": "https://image.tmdb.org/t/p/w1280/mAwFPAWm9K2gdpmkCoY9k2xTfca.jpg",
+   "page": "https://www.themoviedb.org/movie/84480/images/backdrops",
+   "kind": "still"
   },
   {
    "slug": "aot",
-   "shows": "Two soldiers sit on top of the great wall, a wide sky and plain beyond.",
+   "shows": "The Colossal Titan's silhouette looms over the burning wall; a soldier in a Survey Corps cloak stands below.",
    "credit": "© Hajime Isayama, Kodansha / “ATTACK ON TITAN” Production Committee",
-   "url": "https://media.kitsu.app/anime/cover_images/7442/original.png",
-   "kind": "banner",
-   "page": "https://kitsu.app/anime/7442"
-  },
-  {
-   "slug": "violet",
-   "shows": "Violet sits on a stone ledge above a harbour town at sunset.",
-   "credit": "© Kana Akatsuki, Kyoto Animation / Violet Evergarden Production Partners",
-   "url": "https://media.kitsu.app/anime/cover_images/12230/original.jpg",
-   "kind": "banner",
-   "page": "https://kitsu.app/anime/12230"
-  },
-  {
-   "slug": "madoka",
-   "shows": "Madoka and Homura above a city skyline under a blue sky.",
-   "credit": "© Magica Quartet / Aniplex · Madoka Partners · MBS",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/9756-d5M8NffgJJHB.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/9756"
-  },
-  {
-   "slug": "silent-voice",
-   "shows": "Shōya and Shōko by the water, with carp below and cherry blossom around them.",
-   "credit": "© Yoshitoki Ōima, Kodansha / A Silent Voice Production Committee",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/20954-f30bHMXa5Qoe.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/20954"
-  },
-  {
-   "slug": "corner",
-   "shows": "Suzu sits in a grassy field on a hillside path, sketching among flowers.",
-   "credit": "© Fumiyo Kōno, Futabasha / “In This Corner of the World” Production Committee",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/15227-yQXL90tfOpRO.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/15227"
-  },
-  {
-   "slug": "demon-slayer",
-   "shows": "Tanjiro carries his sister Nezuko through the snow.",
-   "credit": "© Koyoharu Gotōge / Shueisha, Aniplex, ufotable",
-   "url": "https://media.kitsu.app/anime/41370/cover_image/7958f9c01b57c980636386d124553791.jpg",
-   "kind": "banner",
-   "page": "https://kitsu.app/anime/41370"
-  },
-  {
-   "slug": "steins-gate",
-   "shows": "Okabe and his lab members, painted in soft colours.",
-   "credit": "© MAGES. / Chiyo St. Inc. / Steins;Gate Partners",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/n9253-JIhmKgBKsWUN.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/9253"
-  },
-  {
-   "slug": "wolf-children",
-   "shows": "Hana hugs her children Yuki and Ame, both with wolf ears, against a pale sky.",
-   "credit": "© 2012 “Wolf Children” Film Partners",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/12355.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/12355"
-  },
-  {
-   "slug": "your-lie-april",
-   "shows": "Kōsei at the piano and Kaori with her violin, framed by cherry blossom.",
-   "credit": "© Naoshi Arakawa, Kodansha / “Your Lie in April” Production Committee",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/20665-j4kSsfhfkM24.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/20665"
-  },
-  {
-   "slug": "one-punch",
-   "shows": "Saitama, a bald hero in a red suit, bursts through a torn wall.",
-   "credit": "© ONE · Yusuke Murata / Shueisha, Hero Association HQ",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/21087-sHb9zUZFsHe1.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/21087"
-  },
-  {
-   "slug": "mob-psycho",
-   "shows": "Mob walks beside a wire fence in an orange sunset street.",
-   "credit": "© ONE · Shogakukan / Mob Psycho 100 Production Committee",
-   "url": "https://media.kitsu.app/anime/cover_images/11578/original.jpg",
-   "kind": "banner",
-   "page": "https://kitsu.app/anime/11578"
-  },
-  {
-   "slug": "made-in-abyss",
-   "shows": "Riko and Reg hold hands at the edge of the Abyss, waterfalls behind them.",
-   "credit": "© Akihito Tsukushi, Takeshobo / Made in Abyss Production Committee",
-   "url": "https://media.kitsu.app/anime/cover_images/13273/original.jpg",
-   "kind": "banner",
-   "page": "https://kitsu.app/anime/13273"
-  },
-  {
-   "slug": "devilman-crybaby",
-   "shows": "Akira, Ryō and demonic figures in the key art for Devilman Crybaby.",
-   "credit": "© Go Nagai · Devilman Crybaby Project",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx98460-bLtH2c3jd6sV.png",
-   "kind": "poster",
-   "page": "https://anilist.co/anime/98460"
-  },
-  {
-   "slug": "weathering",
-   "shows": "Hodaka and Hina fall through the golden sky, holding hands.",
-   "credit": "© 2019 “Weathering With You” Film Partners",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/106286-3oKwiwjd7Wkm.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/106286"
-  },
-  {
-   "slug": "infinity-castle",
-   "shows": "A demon's huge eye, the demon slayers reflected in it.",
-   "credit": "© Koyoharu Gotōge / Shueisha, Aniplex, ufotable",
-   "url": "https://media.kitsu.app/anime/49001/cover_image/60097f6669b09f38479808dbf415d2a8.jpg",
-   "kind": "banner",
-   "page": "https://kitsu.app/anime/49001"
-  },
-  {
-   "slug": "mugen-train",
-   "shows": "The poster for Mugen Train: Tanjiro, Rengoku and their companions with the steam train at night.",
-   "credit": "© Koyoharu Gotōge / Shueisha, Aniplex, ufotable",
-   "url": "https://media.kitsu.app/anime/poster_images/42586/original.jpg",
-   "kind": "poster",
-   "page": "https://kitsu.app/anime/42586"
-  },
-  {
-   "slug": "eva-final",
-   "shows": "Telephone poles under an enormous sky above a red horizon, tiny figures far below.",
-   "credit": "© khara",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/3786-IfWKqRp9grgo.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/3786"
-  },
-  {
-   "slug": "bocchi",
-   "shows": "Kessoku Band, Kita, Ryō, Hitori and Nijika, smile in front of a graffiti wall.",
-   "credit": "© Aki Hamaji, Houbunsha / Bocchi the Rock! Production Committee",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/130003-5F90a7BtsPQN.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/130003"
-  },
-  {
-   "slug": "slam-dunk",
-   "shows": "The Shohoku starting five in red jerseys, drawn in Takehiko Inoue's line.",
-   "credit": "© I.T.Planning, Inc. © 2022 The First Slam Dunk Film Partners",
-   "url": "https://media.kitsu.app/anime/46225/cover_image/63bb33b1574182b7605a5cf04a50d3a7.jpg",
-   "kind": "banner",
-   "page": "https://kitsu.app/anime/46225"
-  },
-  {
-   "slug": "suzume",
-   "shows": "A white door stands alone in a flooded ruin under a blue sky.",
-   "credit": "© 2022 “Suzume” Film Partners",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/142770-YgESt2HJXlNg.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/142770"
-  },
-  {
-   "slug": "look-back",
-   "shows": "Fujino, seen from behind, draws at her cluttered desk by a window.",
-   "credit": "© Tatsuki Fujimoto / Shueisha © 2024 “Look Back” Production Committee",
-   "url": "https://media.kitsu.app/anime/48541/cover_image/356a8d34307ce5691346349e716d5556.jpg",
-   "kind": "banner",
-   "page": "https://kitsu.app/anime/48541"
-  },
-  {
-   "slug": "jjk",
-   "shows": "Nobara, Yūji, Megumi and the blindfolded Gojo sit together in casual clothes.",
-   "credit": "© Gege Akutami / Shueisha, Jujutsu Kaisen Project, MBS",
-   "url": "https://media.kitsu.app/anime/cover_images/42765/original.jpeg",
-   "kind": "banner",
-   "page": "https://kitsu.app/anime/42765"
-  },
-  {
-   "slug": "spy-family",
-   "shows": "Loid with a pistol, Anya smiling, Yor with a golden hairpin: the Forger family in three panels.",
-   "credit": "© Tatsuya Endo / Shueisha, Spy × Family Production Committee",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/140960-Z7xSvkRxHKfj.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/140960"
-  },
-  {
-   "slug": "chainsaw-man",
-   "shows": "Denji, Makima, Aki, Power and other devil hunters watch a film in a cinema.",
-   "credit": "© Tatsuki Fujimoto / Shueisha, MAPPA",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/127230-o8IRwCGVr9KW.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/127230"
-  },
-  {
-   "slug": "edgerunners",
-   "shows": "David and Lucy leap through a neon-green night city.",
-   "credit": "© CD PROJEKT S.A.",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/120377-c15oLS8CA31s.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/120377"
-  },
-  {
-   "slug": "oshi-no-ko",
-   "shows": "Ai Hoshino winks, stars shining in her eyes.",
-   "credit": "© Aka Akasaka × Mengo Yokoyari / Shueisha, “Oshi no Ko” Partners",
-   "url": "https://media.kitsu.app/anime/46170/cover_image/b6f21b20a7413da4930af6dff99877ad.jpg",
-   "kind": "banner",
-   "page": "https://kitsu.app/anime/46170"
-  },
-  {
-   "slug": "dandadan",
-   "shows": "Momo and Okarun scream as a huge red monster looms behind them.",
-   "credit": "© Yukinobu Tatsu / Shueisha, Dandadan Production Committee",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/171018-SpwPNAduszXl.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/171018"
-  },
-  {
-   "slug": "solo-leveling",
-   "shows": "Jinwoo stands in a vast stone chamber of statues in the double dungeon.",
-   "credit": "© Solo Leveling Animation Partners",
-   "url": "https://media.kitsu.app/anime/46231/cover_image/3889183203c74864e499990fce30cadf.jpg",
-   "kind": "banner",
-   "page": "https://kitsu.app/anime/46231"
-  },
-  {
-   "slug": "reze",
-   "shows": "Denji and Reze, silhouetted in blue, hold hands among red shapes.",
-   "credit": "© Tatsuki Fujimoto / Shueisha, MAPPA",
-   "url": "https://media.kitsu.app/anime/48323/cover_image/01485b42b8f9b293c0e37d10bb7893e0.jpg",
-   "kind": "banner",
-   "page": "https://kitsu.app/anime/48323"
-  },
-  {
-   "slug": "tokyo-godfathers",
-   "shows": "Gin, Hana and Miyuki huddle around the abandoned baby they found.",
-   "credit": "",
-   "url": "https://media.kitsu.app/anime/cover_images/681/original.jpg",
-   "kind": "banner",
-   "page": "https://kitsu.app/anime/681"
-  },
-  {
-   "slug": "ping-pong",
-   "shows": "Peco and Smile leap joyfully against a bright yellow background.",
-   "credit": "",
-   "url": "https://media.kitsu.app/anime/cover_images/8262/original.jpg",
-   "kind": "banner",
-   "page": "https://kitsu.app/anime/8262"
-  },
-  {
-   "slug": "grave",
-   "shows": "Seita and Setsuko kneel in the grass, surrounded by fireflies.",
-   "credit": "© Akiyuki Nosaka / Shinchosha, 1988",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx578-vU6XcOlb1XFU.jpg",
-   "kind": "poster",
-   "page": "https://anilist.co/anime/578"
+   "url": "https://image.tmdb.org/t/p/w1280/aok7IhrbA83josNz9Dqh8tNA0Ao.jpg",
+   "page": "https://www.themoviedb.org/tv/1429/images/backdrops",
+   "kind": "still"
   },
   {
    "slug": "grave-2",
-   "shows": "Setsuko stands alone in the dark grass among glowing fireflies.",
+   "shows": "The cave in the hillside by the pond where Seita and Setsuko make their home, a parasol at its mouth.",
    "credit": "© Akiyuki Nosaka / Shinchosha, 1988",
-   "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/578.jpg",
-   "kind": "banner",
-   "page": "https://anilist.co/anime/578"
-  }
- ],
- "extra": [
-  {
-   "key": "op-flag",
-   "slugs": [
-    "one-piece-flag"
-   ],
-   "commons": [
-    "One Piece flag protest",
-    "One Piece Jolly Roger flag",
-    "bendera One Piece",
-    "One Piece flag Nepal protest 2025",
-    "One Piece flag Indonesia 2025",
-    "Straw Hat Jolly Roger"
-   ],
-   "tmdb": [
-    "One Piece (1999 TV series)"
-   ],
-   "anilist": [
-    459
-   ]
+   "url": "https://image.tmdb.org/t/p/w1280/tLFITpJFr8oDqfZu0HtSj7YNVs2.jpg",
+   "page": "https://www.themoviedb.org/movie/12477/images/backdrops",
+   "kind": "still"
   },
   {
-   "key": "hakujaden",
-   "slugs": [
-    "hakujaden",
-    "hakujaden-2",
-    "hakujaden-3"
-   ],
-   "tmdb": [
-    "The White Snake Enchantress (film)"
-   ],
-   "commons": [
-    "Hakujaden 1958",
-    "白蛇伝 東映動画",
-    "Oizumi-gakuen anime monument"
-   ],
-   "wiki": [
-    [
-     "ja",
-     "白蛇伝 (1958年の映画)"
-    ]
-   ],
-   "kitsu": [
-    3658
-   ]
+   "slug": "honneamise",
+   "shows": "The rocket lifts off through billowing smoke, seen from above.",
+   "credit": "© Bandai Visual / Gainax",
+   "url": "https://image.tmdb.org/t/p/w1280/q7MXd7D4mbLyyRdP5qBp2AjpC4q.jpg",
+   "page": "https://www.themoviedb.org/movie/20043/images/backdrops",
+   "kind": "still"
   },
   {
-   "key": "kumo-tulip",
-   "slugs": [
-    "kumo-tulip",
-    "kumo-tulip-2"
-   ],
-   "wiki": [
-    [
-     "ja",
-     "くもとちゅうりっぷ"
-    ],
-    [
-     "en",
-     "The Spider and the Tulip"
-    ]
-   ],
-   "commons_cat": [
-    "Kenzō Masaoka"
-   ],
-   "commons": [
-    "くもとちゅうりっぷ",
-    "Kumo to Chūrippu 1943",
-    "Spider and the Tulip 1943 Masaoka"
-   ],
-   "tmdb": [
-    "The Spider and the Tulip 1943 film"
-   ]
+   "slug": "macross",
+   "shows": "Hikaru, in a red-and-white helmet, in the cockpit of his Valkyrie.",
+   "credit": "© Big West",
+   "url": "https://image.tmdb.org/t/p/w1280/lr036KRY2rHvWZnGfJPE3ZebILN.jpg",
+   "page": "https://www.themoviedb.org/tv/21734/images/backdrops",
+   "kind": "still"
   },
   {
-   "key": "ofuji",
-   "slugs": [
-    "ofuji",
-    "kujira"
-   ],
-   "commons_cat": [
-    "Noburō Ōfuji"
-   ],
-   "wiki": [
-    [
-     "ja",
-     "大藤信郎"
-    ],
-    [
-     "en",
-     "Noburō Ōfuji"
-    ]
-   ],
-   "commons": [
-    "大藤信郎",
-    "Ōfuji Noburō chiyogami",
-    "Kujira 1927 Ofuji",
-    "Yūreisen Ōfuji 1956"
-   ],
-   "kitsu": [
-    10702
-   ]
+   "slug": "infinity-castle",
+   "shows": "Tanjiro and the demon slayers fall through the Infinity Castle's maze of rooms amid water and flame.",
+   "credit": "© Koyoharu Gotōge / Shueisha, Aniplex, ufotable",
+   "url": "https://image.tmdb.org/t/p/w1280/1RgPyOhN4DRs225BGTlHJqCudII.jpg",
+   "page": "https://www.themoviedb.org/movie/1311031/images/backdrops",
+   "kind": "still"
   },
   {
-   "key": "ge999",
-   "slugs": [
-    "ge999"
-   ],
-   "anilist": [
-    1491
-   ],
-   "kitsu": [
-    1337
-   ],
-   "tmdb": [
-    "Galaxy Express 999 (film)"
-   ]
+   "slug": "gits",
+   "shows": "Motoko Kusanagi on a rooftop edge high above the city, about to dive.",
+   "credit": "© 1995 Shirow Masamune / KODANSHA · BANDAI VISUAL · MANGA ENTERTAINMENT",
+   "url": "https://image.tmdb.org/t/p/w1280/m1LUdsYnFThcrbvRzlpbsFioEQT.jpg",
+   "page": "https://www.themoviedb.org/movie/9323/images/backdrops",
+   "kind": "still"
   },
   {
-   "key": "yamato",
-   "slugs": [
-    "yamato"
-   ],
-   "anilist": [
-    1651,
-    1652
-   ],
-   "tmdb": [
-    "Space Battleship Yamato 1974 TV series",
-    "Space Battleship Yamato (1977 film)"
-   ]
+   "slug": "perfect-blue",
+   "shows": "Mima on a train, her reflection in the window wearing her pop-idol outfit.",
+   "credit": "© Rex Entertainment",
+   "url": "https://image.tmdb.org/t/p/w1280/A1Larywbw79kZQqkvCEiPHJqdLN.jpg",
+   "page": "https://www.themoviedb.org/movie/10494/images/backdrops",
+   "kind": "still"
   },
   {
-   "key": "akira",
-   "slugs": [
-    "akira"
-   ],
-   "tmdb": [
-    "Akira (1988 film)"
-   ]
+   "slug": "5cm",
+   "shows": "A railway crossing on a quiet street under falling cherry blossom.",
+   "credit": "© Makoto Shinkai / CoMix Wave Films",
+   "url": "https://image.tmdb.org/t/p/w1280/toxFS9LZSSWulE4LqFQun6IXTOR.jpg",
+   "page": "https://www.themoviedb.org/movie/38142/images/backdrops",
+   "kind": "still"
   },
   {
-   "key": "aot",
-   "slugs": [
-    "aot"
-   ],
-   "tmdb": [
-    "Attack on Titan (TV series)"
-   ]
+   "slug": "saiyuki",
+   "shows": "Son Gokū, the monkey hero, swings his staff against a deep blue sky.",
+   "credit": "© Toei Animation",
+   "url": "https://image.tmdb.org/t/p/w1280/lzwIlahR7Hsf05p6Zdsqd9EUerX.jpg",
+   "page": "https://www.themoviedb.org/movie/76721/images/backdrops",
+   "kind": "still"
   },
   {
-   "key": "grave",
-   "slugs": [
-    "grave-2"
-   ],
-   "tmdb": [
-    "Grave of the Fireflies"
-   ]
-  },
-  {
-   "key": "honneamise",
-   "slugs": [
-    "honneamise"
-   ],
-   "tmdb": [
-    "Royal Space Force: The Wings of Honnêamise"
-   ]
-  },
-  {
-   "key": "macross",
-   "slugs": [
-    "macross"
-   ],
-   "tmdb": [
-    "The Super Dimension Fortress Macross"
-   ]
-  },
-  {
-   "key": "infinity-castle",
-   "slugs": [
-    "infinity-castle"
-   ],
-   "tmdb": [
-    "Demon Slayer: Kimetsu no Yaiba – The Movie: Infinity Castle"
-   ]
-  },
-  {
-   "key": "mugen-train",
-   "slugs": [
-    "mugen-train"
-   ],
-   "tmdb": [
-    "Demon Slayer: Kimetsu no Yaiba – The Movie: Mugen Train"
-   ]
-  },
-  {
-   "key": "momotaro",
-   "slugs": [
-    "momotaro"
-   ],
-   "tmdb": [
-    "Momotaro: Sacred Sailors"
-   ]
-  },
-  {
-   "key": "gits",
-   "slugs": [
-    "gits"
-   ],
-   "tmdb": [
-    "Ghost in the Shell (1995 film)"
-   ]
-  },
-  {
-   "key": "wanpaku",
-   "slugs": [
-    "wanpaku-2"
-   ],
-   "tmdb": [
-    "The Little Prince and the Eight-Headed Dragon"
-   ]
-  },
-  {
-   "key": "saiyuki",
-   "slugs": [
-    "saiyuki"
-   ],
-   "tmdb": [
-    "Alakazam the Great"
-   ]
-  },
-  {
-   "key": "sarutobi",
-   "slugs": [
-    "sarutobi"
-   ],
-   "tmdb": [
-    "Magic Boy 1959 animated film"
-   ]
-  },
-  {
-   "key": "perfect-blue",
-   "slugs": [
-    "perfect-blue"
-   ],
-   "tmdb": [
-    "Perfect Blue"
-   ]
-  },
-  {
-   "key": "5cm",
-   "slugs": [
-    "5cm"
-   ],
-   "tmdb": [
-    "5 Centimeters per Second"
-   ]
+   "slug": "sarutobi",
+   "shows": "Sasuke, the boy ninja, grips a staff in falling snow.",
+   "credit": "© Toei Animation",
+   "url": "https://image.tmdb.org/t/p/w1280/rKMZssoj5H5hUDSKCIkXIPzOM7g.jpg",
+   "page": "https://www.themoviedb.org/movie/63486/images/backdrops",
+   "kind": "still"
   }
  ]
 }

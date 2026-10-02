@@ -377,7 +377,8 @@ def render_imagenote():
         "stills come from the studio's own image library, which it opened in 2020 for free use “within the bounds of "
         "common sense”.",
         "All other stills and key art are © their respective rights holders, credited on each image, and are "
-        "reproduced at reduced size for criticism, commentary and education.",
+        "reproduced at reduced size for criticism, commentary and education. Photographs from Wikimedia Commons are "
+        "credited to their photographers under their Creative Commons licences.",
     )
     if not used_images:
         items = (

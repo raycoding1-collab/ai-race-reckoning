@@ -299,16 +299,16 @@
   "source_hint": "Wikimedia Commons (public domain)"
  },
  {
-  "slug": "ofuji",
-  "work": "Noburō Ōfuji",
+  "slug": "chikara",
+  "work": "Chikara to Onna no Yo no Naka (1933)",
   "want": [
-   "Silhouette cut-out figures in a paper animation"
+   "A still of the cartoon couple from Japan's first talkie anime"
   ],
   "uses": [
    "still"
   ],
-  "credit": "Noburō Ōfuji",
-  "source_hint": "AniList (bannerImage for wide, coverImage.extraLarge for poster)"
+  "credit": "Kenzō Masaoka, Shochiku. Public domain",
+  "source_hint": "Wikimedia Commons (public domain)"
  },
  {
   "slug": "kumo-tulip-2",
@@ -885,6 +885,18 @@
   ],
   "credit": "© 1988 MASH·ROOM / AKIRA Committee",
   "source_hint": "AniList (bannerImage for wide, coverImage.extraLarge for poster)"
+ },
+ {
+  "slug": "akira-3",
+  "work": "Akira",
+  "want": [
+   "Tetsuo in his red cape"
+  ],
+  "uses": [
+   "still"
+  ],
+  "credit": "© 1988 MASH·ROOM / AKIRA Committee",
+  "source_hint": "TMDB"
  },
  {
   "slug": "motif-train",

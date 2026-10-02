@@ -617,6 +617,18 @@ def commons_thumb(title, width):
     return None, None
 
 
+def commons_meta(title):
+    """Author, licence and description of a Commons file, for its credit line."""
+    data = get_json("https://commons.wikimedia.org/w/api.php?action=query&format=json&prop=imageinfo&iiprop=extmetadata"
+                    f"&titles={quote(title)}")
+    for p in (data or {}).get("query", {}).get("pages", {}).values():
+        meta = (p.get("imageinfo") or [{}])[0].get("extmetadata", {})
+        pick = lambda k: re.sub(r"\s+", " ", re.sub("<[^>]+>", "", meta.get(k, {}).get("value", ""))).strip()[:300]
+        return {"artist": pick("Artist"), "license": pick("LicenseShortName"), "license_url": pick("LicenseUrl"),
+                "description": pick("ImageDescription"), "date": pick("DateTimeOriginal"), "credit": pick("Credit")}
+    return {}
+
+
 def wiki_thumb(title, width, lang="en"):
     data = get_json(f"https://{lang}.wikipedia.org/w/api.php?action=query&format=json&prop=imageinfo"
                     f"&iiprop=url|size&iiurlwidth={width}&titles={quote(title)}")
@@ -658,6 +670,8 @@ def run_final(picks):
                 im.save(out, "WEBP", quality=q, method=6)
             rec = {"slug": slug, "file": out.name, "width": im.width, "height": im.height, "kind": kind,
                    "source_url": page or url, "credit": p.get("credit", ""), "shows": p.get("shows", "")}
+            if p.get("commons"):
+                rec["commons"] = commons_meta(p["commons"])
             if p.get("cap"):
                 rec["cap"] = p["cap"]
             sourced[slug] = rec
