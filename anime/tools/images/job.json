@@ -1,32 +1,22 @@
 {
  "mode": "final",
- "run": 7,
- "extra": [
+ "run": 8,
+ "picks": [
   {
-   "key": "monster",
-   "slugs": [
-    "monster"
-   ],
-   "tmdb": [
-    {
-     "kind": "tv",
-     "id": "30981"
-    },
-    "Monster (manga)"
-   ]
+   "slug": "monster",
+   "shows": "Dr Kenzō Tenma, crouched against a wall, aims a pistol with both hands.",
+   "credit": "© Naoki Urasawa, Studio Nuts / Shogakukan, VAP, NTV",
+   "kind": "still",
+   "url": "https://image.tmdb.org/t/p/w1280/15ikWbR3dO9Uj9ufFiynCcEBWB4.jpg",
+   "page": "https://www.themoviedb.org/tv/30981/images/backdrops"
   },
   {
-   "key": "pluto",
-   "slugs": [
-    "pluto"
-   ],
-   "tmdb": [
-    {
-     "kind": "tv",
-     "q": "Pluto"
-    },
-    "Pluto (manga)"
-   ]
+   "slug": "pluto",
+   "shows": "Gesicht, in a brown jacket and striped tie, levels a gun-barrel arm at the viewer in a forest.",
+   "credit": "© Naoki Urasawa / Takashi Nagasaki / Tezuka Productions / “PLUTO” Production Committee",
+   "kind": "still",
+   "url": "https://image.tmdb.org/t/p/w1280/danuIpIt7ydQygtXJtZc1mXLpb7.jpg",
+   "page": "https://www.themoviedb.org/tv/91997/images/backdrops"
   }
  ]
 }
