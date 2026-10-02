@@ -1,105 +1,29 @@
-extra fmab
-  TMDB tv/31911 for {'kind': 'tv', 'q': 'Fullmetal Alchemist: Brotherhood'}
-  sheet extra-fmab.jpg 1720x1694
-extra jjk
-  TMDB tv/95479 for {'kind': 'tv', 'q': 'Jujutsu Kaisen'}
-  sheet extra-jjk.jpg 1720x1694
-extra oshi-no-ko
-  TMDB tv/203737 for {'kind': 'tv', 'q': 'Oshi no Ko'}
-  sheet extra-oshi-no-ko.jpg 1720x1694
-extra madoka
-  TMDB tv/39218 for {'kind': 'tv', 'q': 'Puella Magi Madoka Magica'}
-  sheet extra-madoka.jpg 1720x1694
-extra steins-gate
-  TMDB tv/42509 for {'kind': 'tv', 'q': 'Steins;Gate'}
-  sheet extra-steins-gate.jpg 1720x1694
-extra spy-family
-  TMDB tv/120089 for {'kind': 'tv', 'q': 'Spy x Family'}
-  sheet extra-spy-family.jpg 1720x1694
-extra dandadan
-  TMDB tv/240411 for {'kind': 'tv', 'q': 'Dan Da Dan'}
-  sheet extra-dandadan.jpg 1720x1694
-extra edgerunners
-  TMDB tv/105248 for {'kind': 'tv', 'q': 'Cyberpunk: Edgerunners'}
-  sheet extra-edgerunners.jpg 1720x1694
-extra bocchi
-  TMDB tv/119100 for {'kind': 'tv', 'q': 'Bocchi the Rock!'}
-  sheet extra-bocchi.jpg 1720x1146
-extra one-punch
-  TMDB tv/63926 for {'kind': 'tv', 'q': 'One-Punch Man'}
-  sheet extra-one-punch.jpg 1720x1694
-extra your-lie-april
-  TMDB tv/61663 for {'kind': 'tv', 'q': 'Your Lie in April'}
-  sheet extra-your-lie-april.jpg 1720x1694
-extra haruhi
-  TMDB tv/42511 for {'kind': 'tv', 'q': 'The Melancholy of Haruhi Suzumiya'}
-  sheet extra-haruhi.jpg 1720x1694
-extra devilman-crybaby
-  TMDB tv/75208 for {'kind': 'tv', 'q': 'Devilman Crybaby'}
-  sheet extra-devilman-crybaby.jpg 1720x1420
-extra violet
-  TMDB tv/75214 for {'kind': 'tv', 'q': 'Violet Evergarden'}
-  sheet extra-violet.jpg 1720x1694
-extra frieren
-  TMDB tv/209867 for {'kind': 'tv', 'q': "Frieren: Beyond Journey's End"}
-  sheet extra-frieren.jpg 1720x1694
-extra pokemon
-  TMDB tv/60572 for Pokémon (TV series)
-  TMDB tv/60572 for {'kind': 'tv', 'q': 'Pokémon'}
-  sheet extra-pokemon.jpg 1720x1694
-extra silent-voice
-  TMDB movie/378064 for A Silent Voice (film)
-  sheet extra-silent-voice.jpg 1720x1694
-extra summer-wars
-  TMDB movie/28874 for Summer Wars
-  sheet extra-summer-wars.jpg 1720x1694
-extra wolf-children
-  TMDB movie/110420 for Wolf Children
-  sheet extra-wolf-children.jpg 1720x1694
-extra girl-leapt
-  TMDB movie/14069 for The Girl Who Leapt Through Time (2006 film)
-  sheet extra-girl-leapt.jpg 1720x1694
-extra mugen-train
-  TMDB movie/635302 for Demon Slayer: Kimetsu no Yaiba – The Movie: Mugen Train
-  TMDB movie/635302 for {'kind': 'movie', 'q': 'Demon Slayer Mugen Train'}
-  sheet extra-mugen-train.jpg 1720x1694
-extra grave
-  TMDB movie/12477 for Grave of the Fireflies
-  sheet extra-grave.jpg 1720x1694
-extra patlabor
-  TMDB movie/14571 for Patlabor: The Movie
-  sheet extra-patlabor.jpg 1720x1694
-extra beautiful-dreamer
-  TMDB movie/43967 for Urusei Yatsura 2: Beautiful Dreamer
-  sheet extra-beautiful-dreamer.jpg 1720x598
-extra reze
-  TMDB movie/1218925 for Chainsaw Man – The Movie: Reze Arc
-  TMDB movie/1218925 for {'kind': 'movie', 'q': 'Chainsaw Man The Movie Reze Arc'}
-  sheet extra-reze.jpg 1720x1694
-extra slam-dunk
-  TMDB movie/783675 for The First Slam Dunk
-  sheet extra-slam-dunk.jpg 1720x1694
-extra innocence
-  TMDB movie/12140 for Ghost in the Shell 2: Innocence
-  sheet extra-innocence.jpg 1720x1694
-extra sally
-  TMDB tv/96579 for {'kind': 'tv', 'q': 'Sally the Witch'}
-  TMDB tv/96579 for {'kind': 'tv', 'q': '魔法使いサリー'}
-  sheet extra-sally.jpg 1720x324
-extra kimba
-  TMDB tv/8853 for {'kind': 'tv', 'q': 'Kimba the White Lion'}
-  TMDB tv/8853 for {'kind': 'tv', 'q': 'ジャングル大帝'}
-  sheet extra-kimba.jpg 1720x324
-extra hols
-  TMDB movie/52686 for The Little Norse Prince
-  sheet extra-hols.jpg 1720x1420
-extra iron-fan
-  TMDB movie/76737 for Princess Iron Fan (1941 film)
-  sheet extra-iron-fan.jpg 1720x872
-extra kumo-tulip
-  TMDB movie/324443 for {'kind': 'movie', 'id': '324443'}
-  sheet extra-kumo-tulip.jpg 1720x324
-extra katsudo-shashin
-  sheet extra-katsudo-shashin.jpg 1720x598
-extra momotaro-2
-  sheet extra-momotaro-2.jpg 1720x324
+ok fmab: 1280x720 35 KB
+ok jjk: 1280x720 60 KB
+ok oshi-no-ko: 1280x720 38 KB
+ok madoka: 1280x720 36 KB
+ok steins-gate: 1279x719 26 KB
+ok spy-family: 1280x720 26 KB
+ok dandadan: 1280x720 42 KB
+ok edgerunners: 1280x720 69 KB
+ok bocchi: 1280x720 77 KB
+ok one-punch: 1280x720 11 KB
+ok your-lie-april: 1280x720 81 KB
+ok haruhi: 1280x720 37 KB
+ok devilman-crybaby: 1280x720 17 KB
+ok pokemon: 1280x720 75 KB
+ok silent-voice: 1280x720 67 KB
+ok summer-wars: 1280x720 54 KB
+ok wolf-children: 1280x720 56 KB
+ok girl-leapt: 1280x720 20 KB
+ok mugen-train: 1280x720 42 KB
+ok grave: 1280x720 38 KB
+ok patlabor: 1280x720 81 KB
+ok beautiful-dreamer: 1280x720 43 KB
+ok reze: 1280x720 37 KB
+ok slam-dunk: 1280x720 88 KB
+ok innocence: 1280x719 80 KB
+ok hols: 1280x720 17 KB
+ok iron-fan: 1280x720 30 KB
+ok iron-fan-2: 714x580 8 KB
+ok momotaro-2: 903x592 13 KB

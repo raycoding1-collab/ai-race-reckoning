@@ -92,12 +92,12 @@
  {
   "slug": "beautiful-dreamer",
   "file": "beautiful-dreamer.webp",
-  "width": 640,
-  "height": 480,
-  "kind": "banner",
-  "source_url": "https://kitsu.app/anime/1731",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/movie/43967/images/backdrops",
   "credit": "© Rumiko Takahashi / Shogakukan, Kitty Film",
-  "shows": "A ruined clock face in a crumbling tower, from Beautiful Dreamer."
+  "shows": "A tank, a striped beach parasol and abandoned appliances on a deserted shore."
  },
  {
   "slug": "bebop",
@@ -122,12 +122,12 @@
  {
   "slug": "bocchi",
   "file": "bocchi.webp",
-  "width": 1900,
-  "height": 400,
-  "kind": "banner",
-  "source_url": "https://anilist.co/anime/130003",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/tv/119100/images/backdrops",
   "credit": "© Aki Hamaji, Houbunsha / Bocchi the Rock! Production Committee",
-  "shows": "Kessoku Band, Kita, Ryō, Hitori and Nijika, smile in front of a graffiti wall."
+  "shows": "Kessoku Band, four girls carrying instrument cases, stand at a sunlit street crossing."
  },
  {
   "slug": "cagliostro",
@@ -231,12 +231,12 @@
  {
   "slug": "dandadan",
   "file": "dandadan.webp",
-  "width": 1900,
-  "height": 400,
-  "kind": "banner",
-  "source_url": "https://anilist.co/anime/171018",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/tv/240411/images/backdrops",
   "credit": "© Yukinobu Tatsu / Shueisha, Dandadan Production Committee",
-  "shows": "Momo and Okarun scream as a huge red monster looms behind them."
+  "shows": "Momo and Okarun together in a school corridor by the lockers, Okarun reading a magazine."
  },
  {
   "slug": "demon-slayer",
@@ -262,12 +262,12 @@
  {
   "slug": "devilman-crybaby",
   "file": "devilman-crybaby.webp",
-  "width": 460,
-  "height": 650,
-  "kind": "poster",
-  "source_url": "https://anilist.co/anime/98460",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/tv/75208/images/backdrops",
   "credit": "© Go Nagai · Devilman Crybaby Project",
-  "shows": "Akira, Ryō and demonic figures in the key art for Devilman Crybaby."
+  "shows": "Devilman, bat-winged, silhouetted against a huge red moon."
  },
  {
   "slug": "doraemon",
@@ -292,12 +292,12 @@
  {
   "slug": "edgerunners",
   "file": "edgerunners.webp",
-  "width": 1900,
-  "height": 400,
-  "kind": "banner",
-  "source_url": "https://anilist.co/anime/120377",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/tv/105248/images/backdrops",
   "credit": "© CD PROJEKT S.A.",
-  "shows": "David and Lucy leap through a neon-green night city."
+  "shows": "David and Lucy sit side by side on the Moon's surface, looking at the Earth."
  },
  {
   "slug": "eoe",
@@ -342,12 +342,12 @@
  {
   "slug": "fmab",
   "file": "fmab.webp",
-  "width": 460,
-  "height": 647,
-  "kind": "poster",
-  "source_url": "https://anilist.co/anime/5114",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/tv/31911/images/backdrops",
   "credit": "© Hiromu Arakawa / FA Project, MBS",
-  "shows": "Edward Elric in his red coat, with his brother Alphonse, a suit of armour, behind him."
+  "shows": "Edward and Alphonse, in silhouette, sit together against a blazing orange sky."
  },
  {
   "slug": "frieren",
@@ -393,12 +393,12 @@
  {
   "slug": "girl-leapt",
   "file": "girl-leapt.webp",
-  "width": 460,
-  "height": 680,
-  "kind": "poster",
-  "source_url": "https://anilist.co/anime/2236",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/movie/14069/images/backdrops",
   "credit": "© “Toki o Kakeru Shōjo” Film Partners 2006",
-  "shows": "Makoto leaps through a blue sky full of clouds."
+  "shows": "Makoto leaps through the air against a blue sky streaked with cloud."
  },
  {
   "slug": "gits",
@@ -413,12 +413,12 @@
  {
   "slug": "grave",
   "file": "grave.webp",
-  "width": 460,
-  "height": 690,
-  "kind": "poster",
-  "source_url": "https://anilist.co/anime/578",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/movie/12477/images/backdrops",
   "credit": "© Akiyuki Nosaka / Shinchosha, 1988",
-  "shows": "Seita and Setsuko kneel in the grass, surrounded by fireflies."
+  "shows": "Setsuko stands in tall grass at night, surrounded by drifting fireflies."
  },
  {
   "slug": "grave-2",
@@ -504,12 +504,12 @@
  {
   "slug": "haruhi",
   "file": "haruhi.webp",
-  "width": 460,
-  "height": 640,
-  "kind": "poster",
-  "source_url": "https://anilist.co/anime/849",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/tv/42511/images/backdrops",
   "credit": "© Nagaru Tanigawa · Noizi Ito / SOS Dan",
-  "shows": "Haruhi Suzumiya and the SOS Brigade leap into the air in their school uniforms."
+  "shows": "Haruhi, pointer in hand, lectures the SOS Brigade from a whiteboard."
  },
  {
   "slug": "heidi",
@@ -545,11 +545,11 @@
   "slug": "hols",
   "file": "hols.webp",
   "width": 1280,
-  "height": 586,
-  "kind": "banner",
-  "source_url": "https://kitsu.app/anime/934",
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/movie/52686/images/backdrops",
   "credit": "© Toei Animation",
-  "shows": "Hols, smiling, leads Hilda by the hand against a blue sky."
+  "shows": "Hilda, holding a lyre, stands in the foreground beside an owl, as Hols watches from behind."
  },
  {
   "slug": "honneamise",
@@ -584,42 +584,50 @@
  {
   "slug": "innocence",
   "file": "innocence.webp",
-  "width": 1900,
-  "height": 400,
-  "kind": "banner",
-  "source_url": "https://anilist.co/anime/468",
+  "width": 1280,
+  "height": 719,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/movie/12140/images/backdrops",
   "credit": "© 2004 Shirow Masamune / KODANSHA · IG, ITNDDTD",
-  "shows": "The cracked porcelain face of a gynoid doll with blue eyes."
+  "shows": "A crowd of gilded deity masks fills the frame at the film's festival parade."
  },
  {
   "slug": "iron-fan",
   "file": "iron-fan.webp",
-  "width": 956,
-  "height": 320,
-  "kind": "banner",
-  "source_url": "https://anilist.co/anime/9521",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/movie/76737/images/backdrops",
   "credit": "Wan Laiming, Wan Guchan",
-  "shows": "Sun Wukong, the Monkey King, swings his staff above the clouds."
+  "shows": "Three of the pilgrims, Pigsy, Sun Wukong and Sandy, in a black-and-white frame."
  },
  {
   "slug": "iron-fan-2",
   "file": "iron-fan-2.webp",
-  "width": 376,
-  "height": 284,
-  "kind": "artwork",
-  "source_url": "https://commons.wikimedia.org/wiki/File:Princessironfan.jpg",
+  "width": 714,
+  "height": 580,
+  "kind": "still",
+  "source_url": "https://commons.wikimedia.org/wiki/File:PrincessIronFan-PDChina50PD.JPG",
   "credit": "Wan brothers",
-  "shows": "Princess Iron Fan, her hair pinned up, in a black-and-white frame."
+  "shows": "Princess Iron Fan, seated, drinks from a teacup in a black-and-white frame.",
+  "commons": {
+   "artist": "film director: Wan Guchan",
+   "license": "Public domain",
+   "license_url": "",
+   "description": "Screenshot of the movie Princess Iron Fan, 1941",
+   "date": "2007-12-17",
+   "credit": "http://video.google.nl/videoplay?docid=-2534277319554720375&amp;q=Princess+Iron+Fan&amp;total=20&amp;start=0&amp;num=10&amp;so=0&amp;type=search&amp;plindex=0"
+  }
  },
  {
   "slug": "jjk",
   "file": "jjk.webp",
-  "width": 1981,
-  "height": 544,
-  "kind": "banner",
-  "source_url": "https://kitsu.app/anime/42765",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/tv/95479/images/backdrops",
   "credit": "© Gege Akutami / Shueisha, Jujutsu Kaisen Project, MBS",
-  "shows": "Nobara, Yūji, Megumi and the blindfolded Gojo sit together in casual clothes."
+  "shows": "Yūji Itadori walks alone across an empty Shibuya crossing at night, neon signs glowing."
  },
  {
   "slug": "kaguya",
@@ -764,13 +772,12 @@
  {
   "slug": "madoka",
   "file": "madoka.webp",
-  "width": 1900,
-  "height": 400,
-  "kind": "banner",
-  "source_url": "https://anilist.co/anime/9756",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/tv/39218/images/backdrops",
   "credit": "© Magica Quartet / Aniplex · Madoka Partners · MBS",
-  "shows": "Madoka and Homura above a city skyline under a blue sky.",
-  "pos": "68% 50%"
+  "shows": "A witch's labyrinth built as collage: framed pictures float over a pale void around a circular stage."
  },
  {
   "slug": "mazinger",
@@ -825,12 +832,20 @@
  {
   "slug": "momotaro-2",
   "file": "momotaro-2.webp",
-  "width": 595,
-  "height": 419,
-  "kind": "artwork",
-  "source_url": "https://commons.wikimedia.org/wiki/File:Momotaro-_Sacred_Sailors_poster.jpg",
+  "width": 903,
+  "height": 592,
+  "kind": "still",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Momotaro%27s_Divine_Sea_Warriors-screeny.JPG",
   "credit": "Mitsuyo Seo, Shochiku",
-  "shows": "Momotarō sits among his animal troops, a bear, a monkey and rabbits in uniform."
+  "shows": "Two of Momotarō's animal sailors, in naval caps, look up in surprise.",
+  "commons": {
+   "artist": "Shochiku / directed by Mitsuyo Seo",
+   "license": "Public domain",
+   "license_url": "",
+   "description": "(Español:) Este archivo es de dominio público porque en julio del 2006, una corte japonés mando que todas las películas producidas antes de 1953, son aptas para el dominio público. (English:) This file is in the public domain because in July 2006, a Japanese court ordered all films produced before 1",
+   "date": "Release date: 12 April 1945 (Japan)",
+   "credit": "Screenshot from the film."
+  }
  },
  {
   "slug": "mononoke",
@@ -935,12 +950,12 @@
  {
   "slug": "mugen-train",
   "file": "mugen-train.webp",
-  "width": 773,
-  "height": 1100,
-  "kind": "poster",
-  "source_url": "https://kitsu.app/anime/42586",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/movie/635302/images/backdrops",
   "credit": "© Koyoharu Gotōge / Shueisha, Aniplex, ufotable",
-  "shows": "The poster for Mugen Train: Tanjiro, Rengoku and their companions with the steam train at night."
+  "shows": "Rengoku, the Flame Hashira, stands in a blaze of fire with his sword levelled."
  },
  {
   "slug": "mushishi",
@@ -1014,12 +1029,12 @@
  {
   "slug": "one-punch",
   "file": "one-punch.webp",
-  "width": 1900,
-  "height": 400,
-  "kind": "banner",
-  "source_url": "https://anilist.co/anime/21087",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/tv/63926/images/backdrops",
   "credit": "© ONE · Yusuke Murata / Shueisha, Hero Association HQ",
-  "shows": "Saitama, a bald hero in a red suit, bursts through a torn wall."
+  "shows": "Saitama's blank, bored face in close-up."
  },
  {
   "slug": "only-yesterday",
@@ -1034,12 +1049,12 @@
  {
   "slug": "oshi-no-ko",
   "file": "oshi-no-ko.webp",
-  "width": 2152,
-  "height": 743,
-  "kind": "banner",
-  "source_url": "https://kitsu.app/anime/46170",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/tv/203737/images/backdrops",
   "credit": "© Aka Akasaka × Mengo Yokoyari / Shueisha, “Oshi no Ko” Partners",
-  "shows": "Ai Hoshino winks, stars shining in her eyes."
+  "shows": "Ai Hoshino on a concert stage, seen from behind, facing a sea of glowing penlights."
  },
  {
   "slug": "paprika",
@@ -1054,12 +1069,12 @@
  {
   "slug": "patlabor",
   "file": "patlabor.webp",
-  "width": 490,
-  "height": 710,
-  "kind": "poster",
-  "source_url": "https://kitsu.app/anime/980",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/movie/14571/images/backdrops",
   "credit": "© HEADGEAR / Bandai Visual / Tohokushinsha",
-  "shows": "The police Labor Ingram stands over its uniformed crew in a city at night."
+  "shows": "A construction Labor tears down old wooden houses as a detective walks by, towers rising behind."
  },
  {
   "slug": "patlabor2",
@@ -1096,12 +1111,12 @@
  {
   "slug": "pokemon",
   "file": "pokemon.webp",
-  "width": 866,
-  "height": 1100,
-  "kind": "banner",
-  "source_url": "https://kitsu.app/anime/486",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/tv/60572/images/backdrops",
   "credit": "© Nintendo · Creatures · GAME FREAK · TV Tokyo · ShoPro · JR Kikaku",
-  "shows": "Ash, Misty, Brock and Pikachu run towards the viewer."
+  "shows": "Ash and Pikachu, ready for battle, on the street of an old stone town."
  },
  {
   "slug": "ponyo",
@@ -1126,12 +1141,12 @@
  {
   "slug": "reze",
   "file": "reze.webp",
-  "width": 2400,
-  "height": 733,
-  "kind": "banner",
-  "source_url": "https://kitsu.app/anime/48323",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/movie/1218925/images/backdrops",
   "credit": "© Tatsuki Fujimoto / Shueisha, MAPPA",
-  "shows": "Denji and Reze, silhouetted in blue, hold hands among red shapes."
+  "shows": "Denji and Reze kiss at a railing as fireworks burst over the town."
  },
  {
   "slug": "sailor-moon",
@@ -1196,22 +1211,22 @@
  {
   "slug": "silent-voice",
   "file": "silent-voice.webp",
-  "width": 1900,
-  "height": 400,
-  "kind": "banner",
-  "source_url": "https://anilist.co/anime/20954",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/movie/378064/images/backdrops",
   "credit": "© Yoshitoki Ōima, Kodansha / A Silent Voice Production Committee",
-  "shows": "Shōya and Shōko by the water, with carp below and cherry blossom around them."
+  "shows": "Shōko and Shōya stand at the rail of the footbridge under cherry blossom."
  },
  {
   "slug": "slam-dunk",
   "file": "slam-dunk.webp",
-  "width": 2400,
-  "height": 718,
-  "kind": "banner",
-  "source_url": "https://kitsu.app/anime/46225",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/movie/783675/images/backdrops",
   "credit": "© I.T.Planning, Inc. © 2022 The First Slam Dunk Film Partners",
-  "shows": "The Shohoku starting five in red jerseys, drawn in Takehiko Inoue's line."
+  "shows": "The Shohoku starting five, in red, stand together in the arena."
  },
  {
   "slug": "solo-leveling",
@@ -1247,32 +1262,32 @@
  {
   "slug": "spy-family",
   "file": "spy-family.webp",
-  "width": 1900,
-  "height": 400,
-  "kind": "banner",
-  "source_url": "https://anilist.co/anime/140960",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/tv/120089/images/backdrops",
   "credit": "© Tatsuya Endo / Shueisha, Spy × Family Production Committee",
-  "shows": "Loid with a pistol, Anya smiling, Yor with a golden hairpin: the Forger family in three panels."
+  "shows": "Yor holds Anya close in a shadowy alley, glancing back over her shoulder."
  },
  {
   "slug": "steins-gate",
   "file": "steins-gate.webp",
-  "width": 1900,
-  "height": 400,
-  "kind": "banner",
-  "source_url": "https://anilist.co/anime/9253",
+  "width": 1279,
+  "height": 719,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/tv/42509/images/backdrops",
   "credit": "© MAGES. / Chiyo St. Inc. / Steins;Gate Partners",
-  "shows": "Okabe and his lab members, painted in soft colours."
+  "shows": "Kurisu, Okabe, Daru and Mayuri crowd round a mobile phone in the dim lab."
  },
  {
   "slug": "summer-wars",
   "file": "summer-wars.webp",
-  "width": 1900,
-  "height": 400,
-  "kind": "banner",
-  "source_url": "https://anilist.co/anime/5681",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/movie/28874/images/backdrops",
   "credit": "© 2009 Summer Wars Film Partners",
-  "shows": "The Jinnouchi family line up in a summer field, a banner flying behind them."
+  "shows": "The Jinnouchi family crowd together, staring at a screen in their old country house."
  },
  {
   "slug": "suzume",
@@ -1408,12 +1423,12 @@
  {
   "slug": "wolf-children",
   "file": "wolf-children.webp",
-  "width": 1721,
-  "height": 391,
-  "kind": "banner",
-  "source_url": "https://anilist.co/anime/12355",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/movie/110420/images/backdrops",
   "credit": "© 2012 “Wolf Children” Film Partners",
-  "shows": "Hana hugs her children Yuki and Ame, both with wolf ears, against a pale sky."
+  "shows": "Hana, laughing, rides a bicycle with her two small children in the countryside."
  },
  {
   "slug": "yamato",
@@ -1428,13 +1443,12 @@
  {
   "slug": "your-lie-april",
   "file": "your-lie-april.webp",
-  "width": 1900,
-  "height": 400,
-  "kind": "banner",
-  "source_url": "https://anilist.co/anime/20665",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/tv/61663/images/backdrops",
   "credit": "© Naoshi Arakawa, Kodansha / “Your Lie in April” Production Committee",
-  "shows": "Kōsei at the piano and Kaori with her violin, framed by cherry blossom.",
-  "pos": "35% 50%"
+  "shows": "Kaori, carrying her violin case, looks back under cherry blossom."
  },
  {
   "slug": "your-name",
