@@ -97,7 +97,7 @@
   "kind": "still",
   "source_url": "https://www.themoviedb.org/movie/43967/images/backdrops",
   "credit": "© Rumiko Takahashi / Shogakukan, Kitty Film",
-  "shows": "A tank, a striped beach parasol and abandoned appliances on a deserted shore."
+  "shows": "On a deserted shore, a tank under a striped beach parasol, ringed with televisions and other abandoned appliances."
  },
  {
   "slug": "bebop",
@@ -236,7 +236,7 @@
   "kind": "still",
   "source_url": "https://www.themoviedb.org/tv/240411/images/backdrops",
   "credit": "© Yukinobu Tatsu / Shueisha, Dandadan Production Committee",
-  "shows": "Momo and Okarun together in a school corridor by the lockers, Okarun reading a magazine."
+  "shows": "Momo leans on a desk beside Okarun, who is reading a magazine, in their classroom."
  },
  {
   "slug": "demon-slayer",
@@ -297,7 +297,7 @@
   "kind": "still",
   "source_url": "https://www.themoviedb.org/tv/105248/images/backdrops",
   "credit": "© CD PROJEKT S.A.",
-  "shows": "David and Lucy sit side by side on the Moon's surface, looking at the Earth."
+  "shows": "David and Lucy sit side by side on the Moon's grey surface, the Earth huge behind them."
  },
  {
   "slug": "eoe",
@@ -599,7 +599,7 @@
   "kind": "still",
   "source_url": "https://www.themoviedb.org/movie/76737/images/backdrops",
   "credit": "Wan Laiming, Wan Guchan",
-  "shows": "Three of the pilgrims, Pigsy, Sun Wukong and Sandy, in a black-and-white frame."
+  "shows": "Pigsy, Sun Wukong and Sandy, three of the pilgrims, in a black-and-white frame."
  },
  {
   "slug": "iron-fan-2",
@@ -609,7 +609,7 @@
   "kind": "still",
   "source_url": "https://commons.wikimedia.org/wiki/File:PrincessIronFan-PDChina50PD.JPG",
   "credit": "Wan brothers",
-  "shows": "Princess Iron Fan, seated, drinks from a teacup in a black-and-white frame.",
+  "shows": "Princess Iron Fan, seated in a high-backed chair, drinks from a teacup, in a black-and-white frame.",
   "commons": {
    "artist": "film director: Wan Guchan",
    "license": "Public domain",
@@ -700,16 +700,6 @@
   "shows": "The poster for Kumo to Chūrippu: a ladybird girl, a spider and a red tulip on an orange ground."
  },
  {
-  "slug": "kumo-tulip-2",
-  "file": "kumo-tulip-2.webp",
-  "width": 225,
-  "height": 283,
-  "kind": "poster",
-  "source_url": "https://anilist.co/anime/3990",
-  "credit": "Kenzō Masaoka, Shochiku",
-  "shows": "A Japanese home-video cover of Kenzō Masaoka's films, with a black-and-white frame of the ladybird."
- },
- {
   "slug": "lain",
   "file": "lain.webp",
   "width": 1600,
@@ -777,7 +767,7 @@
   "kind": "still",
   "source_url": "https://www.themoviedb.org/tv/39218/images/backdrops",
   "credit": "© Magica Quartet / Aniplex · Madoka Partners · MBS",
-  "shows": "A witch's labyrinth built as collage: framed pictures float over a pale void around a circular stage."
+  "shows": "Homura's apartment: a white void hung with framed pictures above a circular floor, two small figures at its centre."
  },
  {
   "slug": "mazinger",
@@ -1074,7 +1064,7 @@
   "kind": "still",
   "source_url": "https://www.themoviedb.org/movie/14571/images/backdrops",
   "credit": "© HEADGEAR / Bandai Visual / Tohokushinsha",
-  "shows": "A construction Labor tears down old wooden houses as a detective walks by, towers rising behind."
+  "shows": "A construction Labor tears down old wooden houses while a detective looks on, office towers rising behind."
  },
  {
   "slug": "patlabor2",
@@ -1267,7 +1257,7 @@
   "kind": "still",
   "source_url": "https://www.themoviedb.org/tv/120089/images/backdrops",
   "credit": "© Tatsuya Endo / Shueisha, Spy × Family Production Committee",
-  "shows": "Yor holds Anya close in a shadowy alley, glancing back over her shoulder."
+  "shows": "Yor holds Anya close in a shadowy alley."
  },
  {
   "slug": "steins-gate",
