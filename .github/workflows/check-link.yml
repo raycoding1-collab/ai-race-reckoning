@@ -1,0 +1,20 @@
+# Temporary: checks that the site loads from public CDNs that serve this repo. Removed after one run.
+name: Check public link
+on:
+  push:
+    paths: ['.github/workflows/check-link.yml']
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          for base in "https://rawcdn.githack.com/raycoding1-collab/ai-race-reckoning/b9fd75166939e67fc04988bf7afa14d200f392b7/anime" \
+                      "https://raw.githack.com/raycoding1-collab/ai-race-reckoning/ccr-47da3b15-xdetkd/anime"; do
+            echo "== $base"
+            for p in "" index.html "assets/site.css?v=6fc4b8fd12" "assets/site.js?v=6fc4b8fd12" img/fmab.webp img/aot.webp img/violet.webp img/reze.webp favicon.svg; do
+              curl -sL -o /tmp/out -w "%{http_code} %{content_type} %{size_download} /$p\n" -m 30 "$base/$p" || echo "fail /$p"
+            done
+            curl -sL -m 30 "$base/index.html" | grep -o '<title>[^<]*</title>' | head -1
+            curl -sL -m 30 "$base/index.html" | grep -c 'class="also-item"' || true
+            curl -sL -m 30 "$base/assets/site.css?v=6fc4b8fd12" | grep -c 'cut-facts' || true
+          done
