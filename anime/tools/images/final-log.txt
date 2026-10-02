@@ -1,29 +1,8 @@
-ok fmab: 1280x720 35 KB
-ok jjk: 1280x720 60 KB
-ok oshi-no-ko: 1280x720 38 KB
-ok madoka: 1280x720 36 KB
-ok steins-gate: 1279x719 26 KB
-ok spy-family: 1280x720 26 KB
-ok dandadan: 1280x720 42 KB
-ok edgerunners: 1280x720 69 KB
-ok bocchi: 1280x720 77 KB
-ok one-punch: 1280x720 11 KB
-ok your-lie-april: 1280x720 81 KB
-ok haruhi: 1280x720 37 KB
-ok devilman-crybaby: 1280x720 17 KB
-ok pokemon: 1280x720 75 KB
-ok silent-voice: 1280x720 67 KB
-ok summer-wars: 1280x720 54 KB
-ok wolf-children: 1280x720 56 KB
-ok girl-leapt: 1280x720 20 KB
-ok mugen-train: 1280x720 42 KB
-ok grave: 1280x720 38 KB
-ok patlabor: 1280x720 81 KB
-ok beautiful-dreamer: 1280x720 43 KB
-ok reze: 1280x720 37 KB
-ok slam-dunk: 1280x720 88 KB
-ok innocence: 1280x719 80 KB
-ok hols: 1280x720 17 KB
-ok iron-fan: 1280x720 30 KB
-ok iron-fan-2: 714x580 8 KB
-ok momotaro-2: 903x592 13 KB
+extra monster
+  TMDB tv/30981 for {'kind': 'tv', 'id': '30981'}
+  no TMDB id for Monster (manga)
+  sheet extra-monster.jpg 1720x1694
+extra pluto
+  TMDB tv/91997 for {'kind': 'tv', 'q': 'Pluto'}
+  no TMDB id for Pluto (manga)
+  sheet extra-pluto.jpg 1720x1694
