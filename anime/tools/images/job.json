@@ -1,72 +1,42 @@
 {
  "mode": "links",
- "run": 10,
+ "run": 11,
  "urls": [
-  "https://web.archive.org/web/2024/https://www.rogerebert.com/interviews/drawing-on-spirited-world",
-  "https://web.archive.org/web/2024/https://www.rogerebert.com/reviews/great-movie-spirited-away-2002",
-  "https://web.archive.org/web/2024/https://www.arabnews.com/Grendizer50",
-  "https://web.archive.org/web/2024/https://screendaily.com/news/japan-sleeper-hit-look-back-readies-prime-video-uk-ireland-releases/5197968.article",
-  "http://www.nausicaa.net/miyazaki/interviews/aboutanime.html",
-  "https://web.archive.org/web/2024/https://www.nausicaa.net/miyazaki/interviews/aboutanime.html",
-  "https://web.archive.org/web/2024/http://www.nausicaa.net/miyazaki/interviews/aboutanime.html",
-  "https://lowendmac.com/?p=49143",
-  "https://web.archive.org/web/2024/https://lowendmac.com/thompson/06/0126.html",
-  "https://www.thepopverse.com/pluto-netflix-m2-astro-boy-anime-manga-adaptation-release-date-creator-plot-poster-trailer",
-  "https://www.thepopverse.com/pluto-netflix-anime-manga-astro-boy-naoki-urasawa-osamu-tezuka",
-  "https://animation.filmarchives.jp/en/index.html",
-  "https://www.animenewsnetwork.com/news/2017-02-22/anime-industry-celebrates-100th-anniversary-by-streaming-oldest-works-with-subtitles/.112554"
+  "https://web.archive.org/web/2012/http://www.nausicaa.net/miyazaki/interviews/aboutanime.html",
+  "https://web.archive.org/web/2016/http://www.nausicaa.net/miyazaki/interviews/aboutanime.html",
+  "https://web.archive.org/web/2019/http://www.nausicaa.net/miyazaki/interviews/aboutanime.html",
+  "https://web.archive.org/web/2021/http://www.nausicaa.net/miyazaki/interviews/aboutanime.html",
+  "https://en.wikipedia.org/wiki/Pluto_(manga)",
+  "https://en.wikipedia.org/wiki/Pluto_(TV_series)",
+  "https://lowendmac.com/2006/voices-of-a-distant-star-a-brisk-breathtaking-anime-film-made-on-a-power-mac-g4/"
  ],
  "expect": {
-  "https://web.archive.org/web/2024/https://www.rogerebert.com/interviews/drawing-on-spirited-world": [
-   "clapping",
-   "Miyazaki"
-  ],
-  "https://web.archive.org/web/2024/https://www.rogerebert.com/reviews/great-movie-spirited-away-2002": [
-   "clapping",
-   "Miyazaki"
-  ],
-  "https://web.archive.org/web/2024/https://www.arabnews.com/Grendizer50": [
-   "Grendizer",
-   "Lebanon"
-  ],
-  "https://web.archive.org/web/2024/https://screendaily.com/news/japan-sleeper-hit-look-back-readies-prime-video-uk-ireland-releases/5197968.article": [
-   "Look Back",
-   "Prime Video"
-  ],
-  "http://www.nausicaa.net/miyazaki/interviews/aboutanime.html": [
+  "https://web.archive.org/web/2012/http://www.nausicaa.net/miyazaki/interviews/aboutanime.html": [
    "Hakujaden"
   ],
-  "https://web.archive.org/web/2024/https://www.nausicaa.net/miyazaki/interviews/aboutanime.html": [
+  "https://web.archive.org/web/2016/http://www.nausicaa.net/miyazaki/interviews/aboutanime.html": [
    "Hakujaden"
   ],
-  "https://web.archive.org/web/2024/http://www.nausicaa.net/miyazaki/interviews/aboutanime.html": [
+  "https://web.archive.org/web/2019/http://www.nausicaa.net/miyazaki/interviews/aboutanime.html": [
    "Hakujaden"
   ],
-  "https://lowendmac.com/?p=49143": [
-   "Shinkai",
-   "G4"
+  "https://web.archive.org/web/2021/http://www.nausicaa.net/miyazaki/interviews/aboutanime.html": [
+   "Hakujaden"
   ],
-  "https://web.archive.org/web/2024/https://lowendmac.com/thompson/06/0126.html": [
-   "Shinkai",
-   "G4"
-  ],
-  "https://www.thepopverse.com/pluto-netflix-m2-astro-boy-anime-manga-adaptation-release-date-creator-plot-poster-trailer": [
-   "M2",
+  "https://en.wikipedia.org/wiki/Pluto_(manga)": [
    "2017",
-   "Kawaguchi"
-  ],
-  "https://www.thepopverse.com/pluto-netflix-anime-manga-astro-boy-naoki-urasawa-osamu-tezuka": [
+   "Kawaguchi",
    "M2",
-   "Kawaguchi"
+   "Genco"
   ],
-  "https://animation.filmarchives.jp/en/index.html": [
-   "1917",
-   "1941",
-   "64"
+  "https://en.wikipedia.org/wiki/Pluto_(TV_series)": [
+   "2017",
+   "Kawaguchi",
+   "M2"
   ],
-  "https://www.animenewsnetwork.com/news/2017-02-22/anime-industry-celebrates-100th-anniversary-by-streaming-oldest-works-with-subtitles/.112554": [
-   "64",
-   "1917"
+  "https://lowendmac.com/2006/voices-of-a-distant-star-a-brisk-breathtaking-anime-film-made-on-a-power-mac-g4/": [
+   "Shinkai",
+   "G4"
   ]
  }
 }
