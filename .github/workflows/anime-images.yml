@@ -1,12 +1,12 @@
 # Fetches pictures for Drawn to Move (anime/), whose build sandbox cannot reach
-# image hosts. Runs when anime/tools/images/job.json changes on this branch, and
-# commits what it fetched back to the branch. See anime/tools/images/fetch.py.
+# image hosts. Runs when anime/tools/images/job.json changes, and commits what
+# it fetched back to the same branch. See anime/tools/images/fetch.py.
 name: Drawn to Move images
 
 on:
   push:
-    branches: [ccr-47da3b15-xdetkd]
     paths: ['anime/tools/images/job.json']
+  workflow_dispatch:
 
 permissions:
   contents: write

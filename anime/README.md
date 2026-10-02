@@ -51,7 +51,8 @@ reach image hosts, so it runs in GitHub Actions
 and commits what it fetched. A `candidates` job makes labelled contact sheets in
 `tools/images/cand/` of what Studio Ghibli's image library, Wikimedia Commons,
 AniList, Kitsu and each work's Wikipedia article offer for every shot; a person
-picks from them; a `final` job then fetches the picks as WebP into `img/` and
+picks from them (the sheets can be deleted afterwards; `cand/candidates.json`
+keeps the record); a `final` job then fetches the picks as WebP into `img/` and
 records each one in `src/data/images-sourced.json`: its size, source, credit and
 a description of what it shows. The build uses that description as the alt
 text, and an optional `pos` (a CSS object-position) as the focal point when a
