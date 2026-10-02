@@ -2,32 +2,42 @@
  {
   "slug": "5cm",
   "file": "5cm.webp",
-  "width": 1600,
-  "height": 900,
-  "kind": "banner",
-  "source_url": "https://kitsu.app/anime/1517",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/movie/38142/images/backdrops",
   "credit": "© Makoto Shinkai / CoMix Wave Films",
-  "shows": "Two small figures stand on a hillside under an enormous evening sky full of light."
+  "shows": "A railway crossing on a quiet street under falling cherry blossom."
  },
  {
   "slug": "akira",
   "file": "akira.webp",
-  "width": 1900,
-  "height": 400,
-  "kind": "banner",
-  "source_url": "https://anilist.co/anime/47",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/movie/149/images/backdrops",
   "credit": "© 1988 MASH·ROOM / AKIRA Committee",
-  "shows": "Kaneda, in his red jacket, walks towards his red motorcycle on a white ground."
+  "shows": "Kaneda rides his red motorcycle along a Neo-Tokyo highway at night, headlights flaring."
  },
  {
   "slug": "akira-2",
   "file": "akira-2.webp",
-  "width": 421,
-  "height": 237,
+  "width": 1280,
+  "height": 720,
   "kind": "still",
-  "source_url": "https://en.wikipedia.org/wiki/File:Akira_Slide.jpg",
+  "source_url": "https://www.themoviedb.org/movie/149/images/backdrops",
   "credit": "© 1988 MASH·ROOM / AKIRA Committee",
-  "shows": "Kaneda's red motorcycle skids sideways to a stop on a night road, trailing light."
+  "shows": "Kaneda leans low over his red motorcycle as it skids across the road."
+ },
+ {
+  "slug": "akira-3",
+  "file": "akira-3.webp",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/movie/149/images/backdrops",
+  "credit": "© 1988 MASH·ROOM / AKIRA Committee",
+  "shows": "Tetsuo, in a red cape, walks through a pale ruin."
  },
  {
   "slug": "angels-egg",
@@ -42,12 +52,12 @@
  {
   "slug": "aot",
   "file": "aot.webp",
-  "width": 1600,
-  "height": 900,
-  "kind": "banner",
-  "source_url": "https://kitsu.app/anime/7442",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/tv/1429/images/backdrops",
   "credit": "© Hajime Isayama, Kodansha / “ATTACK ON TITAN” Production Committee",
-  "shows": "Two soldiers sit on top of the great wall, a wide sky and plain beyond."
+  "shows": "The Colossal Titan's silhouette looms over the burning wall; a soldier in a Survey Corps cloak stands below."
  },
  {
   "slug": "ashita-no-joe",
@@ -148,6 +158,24 @@
   "source_url": "https://anilist.co/anime/87",
   "credit": "© Sotsu · Sunrise",
   "shows": "The Nu Gundam and the red Sazabi clash above the Earth."
+ },
+ {
+  "slug": "chikara",
+  "file": "chikara.webp",
+  "width": 763,
+  "height": 698,
+  "kind": "artwork",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Chikara_to_Onna_no_Yo_no_Naka_screenshot.jpg",
+  "credit": "Kenzō Masaoka, Shochiku. Public domain",
+  "shows": "Two cartoon figures, a woman in a polka-dot dress and a man, sit back to back.",
+  "commons": {
+   "artist": "Directed and animated by Kenzō Masaoka, released in Japan by Shochiku, uploaded by Nihonjoe",
+   "license": "Public domain",
+   "license_url": "",
+   "description": "Screenshot from Chikara to Onna no Yo no Naka a 1933 anime short film by Kenzō Masaoka, released in Japan by Shochiku.",
+   "date": "1933",
+   "credit": "Screenshot of the main character and the typist from the film."
+  }
  },
  {
   "slug": "chojugiga",
@@ -342,12 +370,12 @@
  {
   "slug": "ge999",
   "file": "ge999.webp",
-  "width": 985,
-  "height": 546,
-  "kind": "banner",
-  "source_url": "https://kitsu.app/anime/1173",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/movie/15227/images/backdrops",
   "credit": "© Leiji Matsumoto / Toei Animation",
-  "shows": "Tetsurō, Maetel, Captain Harlock, Emeraldas and other characters of the Galaxy Express 999 film, lined up."
+  "shows": "Maetel, in her black fur hat and coat, stands beside the 999's steam locomotive among the stars."
  },
  {
   "slug": "genji-emaki",
@@ -372,12 +400,12 @@
  {
   "slug": "gits",
   "file": "gits.webp",
-  "width": 1600,
-  "height": 907,
-  "kind": "banner",
-  "source_url": "https://kitsu.app/anime/25",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/movie/9323/images/backdrops",
   "credit": "© 1995 Shirow Masamune / KODANSHA · BANDAI VISUAL · MANGA ENTERTAINMENT",
-  "shows": "Motoko Kusanagi sits in shadow, the towers of the city behind her."
+  "shows": "Motoko Kusanagi on a rooftop edge high above the city, about to dive."
  },
  {
   "slug": "grave",
@@ -392,12 +420,12 @@
  {
   "slug": "grave-2",
   "file": "grave-2.webp",
-  "width": 1721,
-  "height": 391,
-  "kind": "banner",
-  "source_url": "https://anilist.co/anime/578",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/movie/12477/images/backdrops",
   "credit": "© Akiyuki Nosaka / Shinchosha, 1988",
-  "shows": "Setsuko stands alone in the dark grass among glowing fireflies."
+  "shows": "The cave in the hillside by the pond where Seita and Setsuko make their home, a parasol at its mouth."
  },
  {
   "slug": "great-wave",
@@ -442,12 +470,32 @@
  {
   "slug": "hakujaden",
   "file": "hakujaden.webp",
-  "width": 715,
-  "height": 240,
-  "kind": "banner",
-  "source_url": "https://anilist.co/anime/4513",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/movie/64777/images/backdrops",
   "credit": "© Toei Animation",
-  "shows": "Bai-Niang, the White Snake heroine, and Xu-Xian look towards a butterfly."
+  "shows": "Bai-Niang and Xu-Xian stand side by side beneath blossom, watching a butterfly."
+ },
+ {
+  "slug": "hakujaden-2",
+  "file": "hakujaden-2.webp",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/movie/64777/images/backdrops",
+  "credit": "© Toei Animation",
+  "shows": "Xu-Xian holds Bai-Niang close against a pale sky."
+ },
+ {
+  "slug": "hakujaden-3",
+  "file": "hakujaden-3.webp",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/movie/64777/images/backdrops",
+  "credit": "© Toei Animation",
+  "shows": "Xu-Xian and Bai-Niang in a room of red lattice screens."
  },
  {
   "slug": "haruhi",
@@ -502,12 +550,12 @@
  {
   "slug": "honneamise",
   "file": "honneamise.webp",
-  "width": 1900,
-  "height": 550,
-  "kind": "banner",
-  "source_url": "https://anilist.co/anime/1034",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/movie/20043/images/backdrops",
   "credit": "© Bandai Visual / Gainax",
-  "shows": "Shirotsugh in a flight suit before the bulk of a silver aircraft."
+  "shows": "The rocket lifts off through billowing smoke, seen from above."
  },
  {
   "slug": "howl",
@@ -522,12 +570,12 @@
  {
   "slug": "infinity-castle",
   "file": "infinity-castle.webp",
-  "width": 1448,
-  "height": 635,
-  "kind": "banner",
-  "source_url": "https://kitsu.app/anime/49001",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/movie/1311031/images/backdrops",
   "credit": "© Koyoharu Gotōge / Shueisha, Aniplex, ufotable",
-  "shows": "A demon's huge eye, the demon slayers reflected in it."
+  "shows": "Tanjiro and the demon slayers fall through the Infinity Castle's maze of rooms amid water and flame."
  },
  {
   "slug": "innocence",
@@ -630,6 +678,26 @@
   "shows": "The poster for Kujira: a sailing ship on stylised waves under the title."
  },
  {
+  "slug": "kumo-tulip",
+  "file": "kumo-tulip.webp",
+  "width": 500,
+  "height": 750,
+  "kind": "poster",
+  "source_url": "https://www.themoviedb.org/movie/324443/images/backdrops",
+  "credit": "Kenzō Masaoka, Shochiku",
+  "shows": "The poster for Kumo to Chūrippu: a ladybird girl, a spider and a red tulip on an orange ground."
+ },
+ {
+  "slug": "kumo-tulip-2",
+  "file": "kumo-tulip-2.webp",
+  "width": 225,
+  "height": 283,
+  "kind": "poster",
+  "source_url": "https://anilist.co/anime/3990",
+  "credit": "Kenzō Masaoka, Shochiku",
+  "shows": "A home-video cover for Kumo to Chūrippu, with a black-and-white frame of the ladybird."
+ },
+ {
   "slug": "lain",
   "file": "lain.webp",
   "width": 1600,
@@ -682,12 +750,12 @@
  {
   "slug": "macross",
   "file": "macross.webp",
-  "width": 1500,
-  "height": 500,
-  "kind": "banner",
-  "source_url": "https://anilist.co/anime/1088",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/tv/21734/images/backdrops",
   "credit": "© Big West",
-  "shows": "Hikaru, Minmay, Misa and the cast of Macross, painted in warm colours with a Valkyrie fighter."
+  "shows": "Hikaru, in a red-and-white helmet, in the cockpit of his Valkyrie."
  },
  {
   "slug": "made-in-abyss",
@@ -752,12 +820,12 @@
  {
   "slug": "momotaro",
   "file": "momotaro.webp",
-  "width": 903,
-  "height": 592,
-  "kind": "artwork",
-  "source_url": "https://commons.wikimedia.org/wiki/File:Momotaro%27s_Divine_Sea_Warriors-screeny.JPG",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/movie/77604/images/backdrops",
   "credit": "Mitsuyo Seo, Shochiku",
-  "shows": "A monkey and a dog in sailor uniforms and naval caps, from Momotarō: Sacred Sailors."
+  "shows": "Momotarō's animal officers, a monkey and bears among them, gather around a map."
  },
  {
   "slug": "momotaro-2",
@@ -930,6 +998,24 @@
   "shows": "Luffy, in his straw hat, grins among his crew and a crowd of creatures."
  },
  {
+  "slug": "one-piece-flag",
+  "file": "one-piece-flag.webp",
+  "width": 1600,
+  "height": 1200,
+  "kind": "artwork",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Trillion_Peso_March_(Straw_Hat_Pirates_Flag).jpg",
+  "credit": "Photo via Wikimedia Commons, CC BY 4.0",
+  "shows": "Protesters at the Trillion Peso March in Manila under a Straw Hat Jolly Roger flag.",
+  "commons": {
+   "artist": "RFNirmala",
+   "license": "CC BY 4.0",
+   "license_url": "https://creativecommons.org/licenses/by/4.0",
+   "description": "Taken at White Plains Avenue, September 21, 2025. Text reads \"Tayo ang lakas\" (We are the strength)",
+   "date": "2025-09-21 13:35:17",
+   "credit": "Own work"
+  }
+ },
+ {
   "slug": "one-punch",
   "file": "one-punch.webp",
   "width": 1900,
@@ -992,12 +1078,12 @@
  {
   "slug": "perfect-blue",
   "file": "perfect-blue.webp",
-  "width": 750,
-  "height": 1051,
-  "kind": "poster",
-  "source_url": "https://kitsu.app/anime/400",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/movie/10494/images/backdrops",
   "credit": "© Rex Entertainment",
-  "shows": "The Japanese poster for Perfect Blue: Mima, in a pink dress, looks out over the title."
+  "shows": "Mima on a train, her reflection in the window wearing her pop-idol outfit."
  },
  {
   "slug": "ping-pong",
@@ -1072,12 +1158,12 @@
  {
   "slug": "saiyuki",
   "file": "saiyuki.webp",
-  "width": 1270,
-  "height": 368,
-  "kind": "banner",
-  "source_url": "https://anilist.co/anime/4481",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/movie/76721/images/backdrops",
   "credit": "© Toei Animation",
-  "shows": "Two small monkeys sit on a branch above jagged red mountains."
+  "shows": "Son Gokū, the monkey hero, swings his staff against a deep blue sky."
  },
  {
   "slug": "sally",
@@ -1092,12 +1178,12 @@
  {
   "slug": "sarutobi",
   "file": "sarutobi.webp",
-  "width": 460,
-  "height": 647,
-  "kind": "poster",
-  "source_url": "https://anilist.co/anime/4948",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/movie/63486/images/backdrops",
   "credit": "© Toei Animation",
-  "shows": "The poster for Magic Boy: the boy ninja Sasuke leaps among forest animals."
+  "shows": "Sasuke, the boy ninja, grips a staff in falling snow."
  },
  {
   "slug": "shigisan",
@@ -1282,12 +1368,12 @@
  {
   "slug": "wanpaku-2",
   "file": "wanpaku-2.webp",
-  "width": 941,
-  "height": 1100,
-  "kind": "poster",
-  "source_url": "https://kitsu.app/anime/3336",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/movie/84480/images/backdrops",
   "credit": "© Toei Animation",
-  "shows": "The poster for The Little Prince and the Eight-Headed Dragon: Susanoo rides into battle against the red dragon."
+  "shows": "Susanoo, on his white horse, charges the heads of the eight-headed dragon against a purple sky."
  },
  {
   "slug": "weathering",
@@ -1332,12 +1418,12 @@
  {
   "slug": "yamato",
   "file": "yamato.webp",
-  "width": 1600,
-  "height": 1026,
-  "kind": "banner",
-  "source_url": "https://kitsu.app/anime/1483",
+  "width": 1280,
+  "height": 720,
+  "kind": "still",
+  "source_url": "https://www.themoviedb.org/movie/48101/images/backdrops",
   "credit": "© Voyager Entertainment / Space Battleship Yamato Production Committee",
-  "shows": "Susumu Kodai and Yuki Mori in uniform against a field of stars."
+  "shows": "The space battleship Yamato, red-hulled and grey, crosses a deep blue sky."
  },
  {
   "slug": "your-lie-april",
