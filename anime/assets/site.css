@@ -125,6 +125,8 @@
 *,
 *::before,
 *::after { box-sizing: border-box; }
+/* the hidden attribute must win over any display set below (filtered watch cards, popovers) */
+[hidden] { display: none !important; }
 
 html {
   -webkit-text-size-adjust: 100%;

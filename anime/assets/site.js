@@ -242,7 +242,7 @@
   var glData = {};
   try { glData = JSON.parse(($('#gl-data') || {}).textContent || '{}'); } catch (e) { glData = {}; }
   var pop = $('[data-gl-pop]');
-  var popFor = null;
+  var popFor = null, popPinned = false;
   function showGl(btn) {
     var d = glData[btn.dataset.gl];
     if (!d || !pop) return;
@@ -263,15 +263,22 @@
     pop.hidden = true;
     if (popFor) popFor.removeAttribute('aria-describedby');
     popFor = null;
+    popPinned = false;
   }
+  // hovering previews a definition; a click pins it open (hovering has usually opened it already),
+  // and a second click on the same word closes it
   doc.addEventListener('click', function (e) {
     var b = e.target.closest('.gl');
-    if (b) { e.preventDefault(); if (popFor === b) hideGl(); else showGl(b); return; }
+    if (b) {
+      e.preventDefault();
+      if (popFor === b && popPinned) hideGl(); else { showGl(b); popPinned = true; }
+      return;
+    }
     if (pop && !pop.contains(e.target)) hideGl();
   });
   if (window.matchMedia('(hover: hover)').matches) {
-    doc.addEventListener('mouseover', function (e) { var b = e.target.closest && e.target.closest('.gl'); if (b) showGl(b); });
-    doc.addEventListener('mouseout', function (e) { var b = e.target.closest && e.target.closest('.gl'); if (b && !b.contains(e.relatedTarget)) hideGl(); });
+    doc.addEventListener('mouseover', function (e) { var b = e.target.closest && e.target.closest('.gl'); if (b && !popPinned) showGl(b); });
+    doc.addEventListener('mouseout', function (e) { var b = e.target.closest && e.target.closest('.gl'); if (b && !popPinned && !b.contains(e.relatedTarget)) hideGl(); });
   }
   window.addEventListener('scroll', function () { if (popFor) hideGl(); }, { passive: true });
 
