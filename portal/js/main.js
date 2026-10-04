@@ -85,9 +85,17 @@ document.addEventListener('mousemove', (e) => {
 function lockPointer() {
   audio.init();
   audio.setVolume(settings.volume);
-  const p = canvas.requestPointerLock?.({ unadjustedMovement: true });
-  if (p && p.catch) p.catch(() => canvas.requestPointerLock?.());
+  if (!canvas.requestPointerLock) { $('lock-note').hidden = false; return; }
+  let p;
+  try { p = canvas.requestPointerLock({ unadjustedMovement: true }); } catch { p = null; }
+  if (p && p.catch) p.catch(() => {
+    // unadjustedMovement is not supported everywhere; retry plainly
+    try { const q = canvas.requestPointerLock(); if (q && q.catch) q.catch(() => { $('lock-note').hidden = false; }); } catch { $('lock-note').hidden = false; }
+  });
 }
+document.addEventListener('pointerlockerror', () => { $('lock-note').hidden = false; });
+// clicking the game view while paused resumes, like most PC shooters
+canvas.addEventListener('click', () => { if (started && !playing) lockPointer(); });
 
 document.addEventListener('pointerlockchange', () => {
   if (document.pointerLockElement === canvas) {
@@ -170,6 +178,7 @@ game.onFinished = () => {
   setTimeout(() => { document.exitPointerLock?.(); started = false; showMenu('start'); }, 4000);
 };
 
+if (window.matchMedia && matchMedia('(pointer: coarse)').matches && !matchMedia('(any-pointer: fine)').matches) $('touch-note').hidden = false;
 $('btn-play').textContent = unlocked > 0 ? `Continue · Chamber ${String(unlocked).padStart(2, '0')}` : 'Start testing';
 $('btn-new').hidden = unlocked === 0;
 
@@ -180,7 +189,6 @@ showMenu('start');
 
 // --- main loop -------------------------------------------------------------
 let last = performance.now(), acc = 0, fpsT = 0, fpsN = 0, fpsV = 60;
-let attract = 0;
 function frame(now) {
   requestAnimationFrame(frame);
   const dt = Math.min(0.1, (now - last) / 1000);
@@ -205,7 +213,6 @@ function frame(now) {
     if (n === 12) acc = 0;
   } else if (!started && !window.__test) {
     // slow attract-mode camera pan on the start screen
-    attract += dt;
     game.player.yaw += dt * 0.05;
     game.time += dt;
     acc = 0;

@@ -180,9 +180,9 @@ export function buildWorldMeshes(grid, textures, extraLights = []) {
             const d = Math.sqrt(d2) + 1e-3;
             const ndl = (lx * n[0] + ly * n[1] + lz * n[2]) / d;
             if (ndl <= 0) continue;
-            lum += L.i * 0.33 * ndl / (1 + d2 / (L.r * L.r));
+            lum += L.i * 0.28 * ndl / (1 + d2 / (L.r * L.r));
           }
-          lum = Math.min(lum, 1.05) * AO[ao];
+          lum = Math.min(lum, 0.98) * AO[ao];
         }
         g.pos.push(p[0], p[1], p[2]);
         g.uv.push(p[ua] / 128, p[va] / 128);

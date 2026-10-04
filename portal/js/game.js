@@ -343,7 +343,7 @@ export class Game {
     let cube = r.type === 'cube' ? r.ent : null;
     if (!cube) {
       // a little forgiveness, like the original's use cone
-      let best = 30;
+      let best = 36;
       for (const c of this.cubes) {
         if (c.dissolving >= 0) continue;
         const to = _v.subVectors(c.body.pos, eye);
@@ -565,8 +565,11 @@ export class Game {
   // are looking out of, and any copy of the player's body that sits on the
   // camera itself.
   onBeforeView(cam, level, skip) {
-    for (const [P, vis] of this.visuals) vis.group.visible = P.placed && P !== skip;
     _v.setFromMatrixPosition(cam.matrixWorld);
+    for (const [P, vis] of this.visuals) {
+      vis.group.visible = P.placed && P !== skip;
+      vis.points.visible = _v.distanceTo(P.pos) > 70;   // sparks right on the lens look like blobs
+    }
     const pm = this.playerModel;
     _v2.copy(pm.group.position); _v2.y += 60 * pm.group.scale.y;
     pm.group.visible = level > 0 && _v.distanceTo(_v2) > 40;

@@ -335,5 +335,3 @@ export function moveBody(world, body, dt) {
   }
 }
 
-// Line-of-sight test against grid only (used for "can I hold this cube").
-export function boxesBuffer() { return boxes; }

@@ -1,11 +1,10 @@
 import * as THREE from 'three';
-import { CELL, GRAVITY, CUBE, PELLET, PORTAL, PLAYER } from './constants.js';
-import { Body, moveBody, groundBelow, computeHoles } from './physics.js';
+import { CELL, GRAVITY, CUBE, PELLET, PORTAL } from './constants.js';
+import { Body, moveBody, groundBelow } from './physics.js';
 import { traceGrid } from './level.js';
 import { makeSignTexture } from './textures.js';
 
 const C = (v) => v * CELL;
-const lambert = (o) => new THREE.MeshLambertMaterial(o);
 const phong = (o) => new THREE.MeshPhongMaterial(o);
 
 function noCull(o) { o.traverse((c) => { c.frustumCulled = false; }); return o; }
@@ -793,5 +792,3 @@ export class Wire {
   }
 }
 
-export const PLAYER_DIMS = PLAYER;
-export { computeHoles };
