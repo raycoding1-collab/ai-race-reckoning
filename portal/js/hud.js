@@ -55,7 +55,7 @@ export class Hud {
     if (!item) { this.busy = false; sub.classList.remove('show'); return; }
     this.busy = true;
     sub.textContent = '';
-    sub.classList.add('show');
+    sub.classList.toggle('show', !item.silent);
     const text = item.text;
     let typed = 0, spoken = !item.speak, done = false;
     const finish = () => {

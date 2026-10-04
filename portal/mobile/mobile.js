@@ -35,7 +35,7 @@ const game = new Game(renderer, audio, hud);
 window.__game = game;
 
 const defaults = {
-  voice: true, fov: 80, sensitivity: 1, invertY: false, volume: 0.7, depth: 3, showFps: false,
+  voice: true, subtitles: false, fov: 80, sensitivity: 1, invertY: false, volume: 0.7, depth: 3, showFps: false,
   resolution: dpr >= 3 ? 0.55 : dpr >= 2 ? 0.7 : 1, buttons: 1, duckToggle: false, haptics: true,
 };
 const settings = Object.assign({}, defaults, store.get('settings-touch', {}));
@@ -285,6 +285,7 @@ bindSetting('set-ducktoggle', 'duckToggle');
 bindSetting('set-haptics', 'haptics');
 bindSetting('set-fps', 'showFps');
 bindSetting('set-voice', 'voice');
+bindSetting('set-subs', 'subtitles');
 
 game.onComplete = (i) => {
   unlocked = Math.max(unlocked, Math.min(LEVELS.length - 1, i + 1));

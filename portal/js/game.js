@@ -533,7 +533,8 @@ export class Game {
     const v = this.voice;
     if (v && this.settings.voice !== false) {
       v.volume = Math.min(1, this.settings.volume * 1.3);
-      this.hud.say(text, { speak: (t, done) => v.say(t, done) });
+      // voice only, unless subtitles are switched on in Settings
+      this.hud.say(text, { speak: (t, done) => v.say(t, done), silent: !this.settings.subtitles });
     } else {
       this.hud.say(text, { blip: () => this.audio.voiceBlip() });
     }
