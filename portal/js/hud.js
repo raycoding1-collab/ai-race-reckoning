@@ -41,28 +41,36 @@ export class Hud {
     this.el.fade.classList.remove('on');
   }
 
-  say(text, blip) {
-    this.queue.push({ text, blip });
-    if (!this.typing) this.next();
+  // Subtitles type out quickly and disappear soon after the line ends. When a
+  // speaker is supplied the subtitle stays up exactly as long as it talks.
+  say(text, opts = {}) {
+    this.queue.push({ text, ...opts });
+    if (!this.busy) this.next();
   }
 
   next() {
+    clearTimeout(this.typing);
     const item = this.queue.shift();
     const sub = this.el.sub;
-    if (!item) { this.typing = null; return; }
+    if (!item) { this.busy = false; sub.classList.remove('show'); return; }
+    this.busy = true;
     sub.textContent = '';
     sub.classList.add('show');
-    let i = 0;
-    const words = item.text;
+    const text = item.text;
+    let typed = 0, spoken = !item.speak, done = false;
+    const finish = () => {
+      if (done || !spoken || typed < text.length) return;
+      done = true;
+      // short hold after the line, longer only for long lines
+      this.typing = setTimeout(() => this.next(), item.speak ? 700 : 900 + text.length * 22);
+    };
+    if (item.speak) item.speak(text, () => { spoken = true; finish(); });
     const tick = () => {
-      i += 2;
-      sub.textContent = words.slice(0, i);
-      if (i % 6 === 0) item.blip?.();
-      if (i < words.length) this.typing = setTimeout(tick, 28);
-      else this.typing = setTimeout(() => {
-        if (this.queue.length) this.next();
-        else { sub.classList.remove('show'); this.typing = null; }
-      }, 2600 + words.length * 30);
+      typed = Math.min(text.length, typed + 3);
+      sub.textContent = text.slice(0, typed);
+      if (typed % 9 === 0) item.blip?.();
+      if (typed < text.length) this.typing = setTimeout(tick, 18);
+      else finish();
     };
     tick();
   }
@@ -70,8 +78,10 @@ export class Hud {
   clearSay() {
     clearTimeout(this.typing);
     this.typing = null;
+    this.busy = false;
     this.queue = [];
     this.el.sub.classList.remove('show');
+    this.onClear?.();
   }
 
   hurt(k) {

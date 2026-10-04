@@ -144,7 +144,7 @@ function extent(world, c, n, dir, across, acrossHalf, max) {
   return [lo, hi];
 }
 
-export function fitPortal(world, hitPoint, normal, up, self) {
+function fitAt(world, hitPoint, normal, up, self) {
   const n = normal.clone().round();
   const right = new THREE.Vector3().crossVectors(up, n).round();
   const c = hitPoint.clone();
@@ -210,4 +210,40 @@ export function portalUpFor(normal, shotDir) {
   const d = shotDir.clone(); d.y = 0;
   if (Math.abs(d.x) > Math.abs(d.z)) return new THREE.Vector3(Math.sign(d.x) || 1, 0, 0);
   return new THREE.Vector3(0, 0, Math.sign(d.z) || 1);
+}
+
+// Robust placement: try the shot point, then (for floors and ceilings) the
+// other orientation, then a widening ring of nearby points on the same
+// surface, and take the candidate closest to where the player aimed.
+const RING = [];
+for (const r of [12, 24, 40, 56, 72, 96]) {
+  const n = Math.max(8, Math.round(r / 4));
+  for (let i = 0; i < n; i++) { const a = (i / n) * Math.PI * 2; RING.push([Math.cos(a) * r, Math.sin(a) * r]); }
+}
+export function fitPortal(world, hitPoint, normal, up, self) {
+  const n = normal.clone().round();
+  const ups = [up.clone()];
+  if (Math.abs(n.y) > 0.5) ups.push(new THREE.Vector3(up.z, 0, -up.x));   // floors/ceilings: also try turned 90 degrees
+  let best = null, bestD = Infinity;
+  const consider = (fit) => {
+    if (!fit) return;
+    const d = fit.pos.distanceToSquared(hitPoint);
+    if (d < bestD) { best = fit; bestD = d; }
+  };
+  // keep the orientation the player aimed with whenever it fits
+  for (const u of ups) { const f = fitAt(world, hitPoint, n, u, self); if (f) return f; }
+  const right = new THREE.Vector3();
+  const p = new THREE.Vector3();
+  for (const u of ups) {
+    if (best) break;
+    right.crossVectors(u, n).round();
+    for (const [du, dv] of RING) {
+      p.copy(hitPoint).addScaledVector(right, du).addScaledVector(u, dv);
+      // the nudged point must still be on the same flat, portalable face
+      if (!surfaceOk(world, p, n)) continue;
+      consider(fitAt(world, p, n, u, self));
+      if (best && bestD < (Math.hypot(du, dv) + 1) ** 2) return best;
+    }
+  }
+  return best;
 }

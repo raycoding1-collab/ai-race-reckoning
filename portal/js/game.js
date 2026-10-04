@@ -7,6 +7,7 @@ import { Player } from './player.js';
 import { createTextures } from './textures.js';
 import { ViewModel, PlayerModel } from './models.js';
 import { LEVELS } from './levels.js';
+import { Voice } from './voice.js';
 import {
   Cube, FloorButton, Door, Fizzler, Goo, Exit, Dispenser, FaithPlate,
   PelletLauncher, Receptacle, Glass, Sign, Wire, BlobShadow, Turret, Platform,
@@ -19,7 +20,8 @@ class Emitter {
 }
 
 const C = (v) => v * CELL;
-const _v = new THREE.Vector3(), _v2 = new THREE.Vector3();
+const _v = new THREE.Vector3(), _v2 = new THREE.Vector3(), _feet = new THREE.Vector3();
+export const NO_CLIP = new THREE.Plane(new THREE.Vector3(0, 1, 0), 1e7);   // keeps everything
 
 function rayBox(o, d, b) {
   let tmin = 0, tmax = Infinity;
@@ -56,6 +58,8 @@ export class Game {
     this.fireCooldown = 0;
     this.scene = null;
     this.bursts = [];
+    this.voice = new Voice(audio);
+    hud.onClear = () => this.voice.stop();
     this.wireAudio();
   }
 
@@ -145,11 +149,14 @@ export class Game {
     this.playerModel.group.traverse((o) => { if (o.material) this.pmMats.push(o.material); });
     this.playerModel.clone.traverse((o) => { if (o.material) this.pmCloneMats.push(o.material); });
     this.playerShadow = new BlobShadow(scene, 56);
-    this.pmPlaneA = new THREE.Plane(); this.pmPlaneB = new THREE.Plane();
+    this.pmPlaneA = NO_CLIP.clone(); this.pmPlaneB = NO_CLIP.clone();
+    for (const m of this.pmMats) m.clippingPlanes = [this.pmPlaneA];
+    for (const m of this.pmCloneMats) m.clippingPlanes = [this.pmPlaneB];
 
     // entities
     for (const e of L.entities) this.spawnEntity(e);
     this.lines = (L.lines || []).slice();
+    this.voice.preload([...this.lines.map((l) => this.wordsFor(l[1])), ...(L.triggers || []).map((t) => this.wordsFor(t.say))]);
     this.triggers = (L.triggers || []).map((t) => ({ ...t, done: false }));
     this.viewModel.visible = this.gun !== 'none';
     this.viewModel.setColor('blue');
@@ -157,7 +164,27 @@ export class Game {
     this.hud.chamber(index, def.title);
     this.hud.clearSay();
     this.updateCrosshair();
+    this.precompile();
     this.onLevelLoaded?.(index);
+  }
+
+  precompile() {
+    const hidden = [];
+    this.scene.traverse((o) => { if (!o.visible) { hidden.push(o); o.visible = true; } });
+    const dummy = new THREE.Points(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3()]),
+      new THREE.PointsMaterial({ size: 4, map: dotTexture(), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
+    const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3(1, 0, 0)]),
+      new THREE.LineBasicMaterial({ transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
+    this.scene.add(dummy, line);
+    this.camera.updateMatrixWorld();
+    try {
+      // with and without the stencil test, as the portal passes use both
+      this.portalRenderer.setSceneStencil(this.scene, 0);
+      this.renderer.compile(this.scene, this.camera);
+      this.renderer.compile(this.viewModel.scene, this.viewModel.camera);
+    } catch { /* compile is only an optimisation */ }
+    this.scene.remove(dummy, line);
+    for (const o of hidden) o.visible = false;
   }
 
   spawnEntity(e) {
@@ -298,10 +325,13 @@ export class Game {
   aim() { return new THREE.Vector3(0, 0, -1).applyQuaternion(this.viewPose(1).quat); }
 
   firePortal(color) {
-    if (this.fireCooldown > 0 || !this.player.alive) return;
+    if (!this.player.alive) return;
+    // a click during the refire delay is remembered and fires as soon as it can
+    if (this.fireCooldown > 0) { if (this.fireCooldown < 0.3) this.queuedShot = color; return; }
     if (this.gun === 'none' || (this.gun === 'blue' && color !== 'blue')) return;
     if (this.held) { this.dropCube(); this.fireCooldown = 0.25; return; }
-    this.fireCooldown = 0.42;
+    this.fireCooldown = 0.33;
+    this.queuedShot = null;
     const P = this.portals[color];
     const { pos: eye, quat: q } = this.viewPose(1);
     const fwd = new THREE.Vector3(0, 0, -1).applyQuaternion(q);
@@ -455,6 +485,7 @@ export class Game {
     const p = this.player;
 
     if (p.alive && !this.completing) {
+      if (this.queuedShot && this.fireCooldown <= 0) this.firePortal(this.queuedShot);
       if (input.fire1) this.firePortal('blue');
       if (input.fire2) this.firePortal('orange');
       if (input.use) this.use();
@@ -488,14 +519,24 @@ export class Game {
     while (this.lines.length && this.time >= this.lines[0][0]) this.say(this.lines.shift()[1]);
     for (const t of this.triggers) {
       if (t.done) continue;
-      const b = t.box.map(C), q = p.body.pos;
+      const b = t.cells || (t.cells = t.box.map(C)), q = p.body.pos;
       if (q.x > b[0] && q.x < b[3] && q.y > b[1] && q.y < b[4] && q.z > b[2] && q.z < b[5]) { t.done = true; this.say(t.say); }
     }
   }
 
+  // front ends may reword lines (the touch edition does)
+  wordsFor(text) { return this.reword ? this.reword(text) : text; }
+
   say(text) {
+    text = this.wordsFor(text);
     this.audio.chime();
-    this.hud.say(text, () => this.audio.voiceBlip());
+    const v = this.voice;
+    if (v && this.settings.voice !== false) {
+      v.volume = Math.min(1, this.settings.volume * 1.3);
+      this.hud.say(text, { speak: (t, done) => v.say(t, done) });
+    } else {
+      this.hud.say(text, { blip: () => this.audio.voiceBlip() });
+    }
   }
 
   // ------------------------------------------------------------------
@@ -520,7 +561,7 @@ export class Game {
 
     // third-person body, seen through portals
     const speed = Math.hypot(b.vel.x, b.vel.z);
-    const feet = _v.lerpVectors(p.prevPos, b.pos, alpha).clone();
+    const feet = _feet.lerpVectors(p.prevPos, b.pos, alpha);
     const feetY = feet.y - b.half.y;
     this.playerModel.update(frameDt, feet, feetY, p.yaw, p.pitch, speed, b.onGround, this.viewModel.color);
     const scaleY = p.ducked ? 0.62 : 1;
@@ -529,8 +570,6 @@ export class Game {
     if (P) {
       this.pmPlaneA.setFromNormalAndCoplanarPoint(P.normal, P.pos);
       this.pmPlaneB.setFromNormalAndCoplanarPoint(P.other.normal, P.other.pos);
-      for (const m of this.pmMats) m.clippingPlanes = [this.pmPlaneA];
-      for (const m of this.pmCloneMats) m.clippingPlanes = [this.pmPlaneB];
       this.playerModel.group.updateMatrix();
       const M = this.playerModel.group.matrix.clone().premultiply(P.toOther);
       M.decompose(this.playerModel.clone.position, this.playerModel.clone.quaternion, this.playerModel.clone.scale);
@@ -540,7 +579,7 @@ export class Game {
       this.clipActive = true;
     } else {
       if (this.clipActive) {
-        for (const m of this.pmMats) m.clippingPlanes = [];
+        this.pmPlaneA.copy(NO_CLIP); this.pmPlaneB.copy(NO_CLIP);
         this.clipActive = false;
       }
       this.playerModel.clone.visible = false;

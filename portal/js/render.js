@@ -220,7 +220,7 @@ export class PortalVisual {
     const open = Math.min(1, (time - P.openedAt) / 0.28);
     const e = 1 - Math.pow(1 - open, 3);
     this.scale = Math.max(0.02, e);
-    this.group.matrix.copy(P.matrix).multiply(new THREE.Matrix4().makeScale(this.scale, this.scale, 1));
+    this.group.matrix.copy(P.matrix).multiply(_close.makeScale(this.scale, this.scale, 1));
     this.group.matrixWorldNeedsUpdate = true;
     this.rimMat.uniforms.uTime.value = time;
     this.rimMat.uniforms.uOpen.value = 0.6 + 0.4 * e;
@@ -315,7 +315,7 @@ export class PortalRenderer {
 
   portalMatrix(P, vis) {
     const s = vis ? vis.scale : 1;
-    return _scale.copy(P.matrix).multiply(new THREE.Matrix4().makeScale(s, s, 1));
+    return _scale.copy(P.matrix).multiply(_sub.makeScale(s, s, 1));
   }
 
   drawMask(P, vis, cam, ref, op) {

@@ -46,6 +46,7 @@ export class BlobShadow {
 // ---------------------------------------------------------------------------
 // Weighted storage cube
 let cubeGeo = null;
+const NO_CLIP = new THREE.Plane(new THREE.Vector3(0, 1, 0), 1e7);
 const _up = new THREE.Vector3(0, 1, 0), _one = new THREE.Vector3(1, 1, 1);
 const _tq = new THREE.Quaternion(), _tv = new THREE.Vector3();
 const _axes = [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]].map((a) => new THREE.Vector3(...a));
@@ -72,7 +73,9 @@ export class Cube {
     world.scene.add(this.mesh, this.clone);
     this.shadow = new BlobShadow(world.scene, 70);
     world.bodies.push(this.body);
-    this.planeA = new THREE.Plane(); this.planeB = new THREE.Plane();
+    this.planeA = NO_CLIP.clone(); this.planeB = NO_CLIP.clone();
+    for (const m of this.mats) m.clippingPlanes = [this.planeA];
+    for (const m of this.cloneMats) m.clippingPlanes = [this.planeB];
     this.impactCooldown = 0;
   }
 
@@ -204,14 +207,12 @@ export class Cube {
     if (P && this.dissolving < 0) {
       this.planeA.setFromNormalAndCoplanarPoint(P.normal, P.pos);
       this.planeB.setFromNormalAndCoplanarPoint(P.other.normal, P.other.pos);
-      for (const m of this.mats) m.clippingPlanes = [this.planeA];
-      for (const m of this.cloneMats) m.clippingPlanes = [this.planeB];
       this.clone.visible = true;
       const m = new THREE.Matrix4().compose(b.pos, this.mesh.quaternion, _one);
       m.premultiply(P.toOther);
       m.decompose(this.clone.position, this.clone.quaternion, this.clone.scale);
     } else {
-      if (this.mat.clippingPlanes && this.mat.clippingPlanes.length) for (const m of this.mats) m.clippingPlanes = [];
+      this.planeA.copy(NO_CLIP); this.planeB.copy(NO_CLIP);
       this.clone.visible = false;
     }
     this.shadow.update(this.world, b.pos, b.pos.y - b.half.y);

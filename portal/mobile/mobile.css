@@ -40,7 +40,7 @@ html, body { touch-action: none; overscroll-behavior: none; -webkit-user-select:
 #stick-knob { position: absolute; left: 50%; top: 50%; width: 56px; height: 56px; margin: -28px 0 0 -28px; border-radius: 50%; background: rgba(255, 255, 255, 0.35); border: 1.5px solid rgba(255, 255, 255, 0.6); }
 
 /* HUD tweaks for small screens */
-#subtitle { bottom: auto; top: calc(62px + var(--safe-t)); font-size: 14px; line-height: 1.4; padding: 8px 12px; max-width: min(520px, calc(100vw - 220px)); }
+#subtitle { bottom: auto; top: calc(58px + var(--safe-t)); font-size: 12.5px; line-height: 1.35; padding: 6px 10px; max-width: min(420px, 50%); background: rgba(0,0,0,0.45); }
 #card { left: calc(16px + var(--safe-l)); top: calc(10px + var(--safe-t)); }
 #card-num { font-size: 40px; }
 #card-title { font-size: 13px; }

@@ -184,12 +184,12 @@ export class Player {
       }
     }
 
-    const preVel = b.vel.clone();
+    const preVy = b.vel.y;
     moveBody(w, b, dt);
 
     // landing / footsteps
     if (b.blockedDown && !wasOnGround && !jumped && this.airTime > 0.15) {
-      w.events.emit('land', { speed: -preVel.y });
+      w.events.emit('land', { speed: -preVy });
     }
     this.airTime = b.onGround || b.blockedDown ? 0 : this.airTime + dt;
     if (b.onGround) {

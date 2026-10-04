@@ -35,7 +35,7 @@ const game = new Game(renderer, audio, hud);
 window.__game = game;
 
 const defaults = {
-  fov: 80, sensitivity: 1, invertY: false, volume: 0.7, depth: 4, showFps: false,
+  voice: true, fov: 80, sensitivity: 1, invertY: false, volume: 0.7, depth: 3, showFps: false,
   resolution: dpr >= 3 ? 0.55 : dpr >= 2 ? 0.7 : 1, buttons: 1, duckToggle: false, haptics: true,
 };
 const settings = Object.assign({}, defaults, store.get('settings-touch', {}));
@@ -284,6 +284,7 @@ bindSetting('set-invert', 'invertY');
 bindSetting('set-ducktoggle', 'duckToggle');
 bindSetting('set-haptics', 'haptics');
 bindSetting('set-fps', 'showFps');
+bindSetting('set-voice', 'voice');
 
 game.onComplete = (i) => {
   unlocked = Math.max(unlocked, Math.min(LEVELS.length - 1, i + 1));
@@ -298,8 +299,7 @@ const TOUCH_WORDS = [
   ['Left mouse places the blue portal', 'The blue button places the blue portal'],
   ['Right mouse now places the orange portal.', 'The orange button now places the orange portal.'],
 ];
-const say = game.say.bind(game);
-game.say = (text) => say(TOUCH_WORDS.reduce((t, [a, b]) => t.replace(a, b), text));
+game.reword = (text) => TOUCH_WORDS.reduce((t, [a, b]) => t.replace(a, b), text);
 
 // feedback: buzz when hurt, longer on death
 let lastHp = 100;
@@ -328,9 +328,10 @@ function frame(now) {
     fpsV = fpsN / fpsT; fpsT = 0; fpsN = 0;
     if (playing) {
       // adapt render scale every couple of seconds
-      if (fpsV < 45) { slow++; fast = 0; } else if (fpsV > 58) { fast++; slow = 0; } else { slow = fast = 0; }
-      if (slow >= 3 && dyn > 0.6) { dyn = Math.max(0.6, dyn - 0.1); slow = 0; resize(); }
-      if (fast >= 8 && dyn < 1) { dyn = Math.min(1, dyn + 0.1); fast = 0; resize(); }
+      // react within a second to drops, recover slowly to avoid see-sawing
+      if (fpsV < 50) { slow++; fast = 0; } else if (fpsV > 58) { fast++; slow = 0; } else { slow = fast = 0; }
+      if (slow >= 2 && dyn > 0.5) { dyn = Math.max(0.5, dyn - (fpsV < 35 ? 0.2 : 0.1)); slow = 0; resize(); }
+      if (fast >= 10 && dyn < 1) { dyn = Math.min(1, dyn + 0.05); fast = 0; resize(); }
     }
   }
   hud.fps(fpsV, settings.showFps && playing);

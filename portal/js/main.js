@@ -30,7 +30,7 @@ const hud = new Hud();
 const game = new Game(renderer, audio, hud);
 window.__game = game;
 
-const defaults = { fov: 75, sensitivity: 3, invertY: false, volume: 0.7, depth: 5, showFps: false, resolution: 1 };
+const defaults = { voice: true, fov: 75, sensitivity: 3, invertY: false, volume: 0.7, depth: 5, showFps: false, resolution: 1 };
 const settings = Object.assign({}, defaults, store.get('settings', {}));
 game.settings = settings;
 let unlocked = Math.max(0, Math.min(LEVELS.length - 1, store.get('unlocked', 0)));
@@ -179,6 +179,7 @@ bindSetting('set-vol', 'volume', parseFloat, (v) => Math.round(v * 100) + '%');
 bindSetting('set-res', 'resolution', parseFloat, (v) => Math.round(v * 100) + '%');
 bindSetting('set-invert', 'invertY');
 bindSetting('set-fps', 'showFps');
+bindSetting('set-voice', 'voice');
 
 game.onComplete = (i) => {
   unlocked = Math.max(unlocked, Math.min(LEVELS.length - 1, i + 1));

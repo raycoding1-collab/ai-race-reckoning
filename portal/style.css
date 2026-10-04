@@ -28,9 +28,9 @@ body.in-menu #hud { opacity: 0; }
 
 #subtitle {
   position: absolute; left: 50%; bottom: 9vh; transform: translateX(-50%);
-  max-width: min(760px, calc(100vw - 32px)); padding: 10px 16px;
+  max-width: min(560px, calc(100vw - 32px)); padding: 8px 14px;
   background: rgba(0,0,0,0.55); border-left: 3px solid var(--ink);
-  font: 500 17px/1.45 var(--sans); letter-spacing: 0.01em;
+  font: 500 15px/1.4 var(--sans); letter-spacing: 0.01em;
   opacity: 0; transition: opacity 0.3s;
 }
 #subtitle.show { opacity: 1; }

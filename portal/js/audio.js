@@ -9,6 +9,7 @@ export class Audio {
   }
 
   init() {
+    window.__game?.voice?.unlock();
     if (this.ctx) { if (this.ctx.state === 'suspended') this.ctx.resume(); return; }
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return;
