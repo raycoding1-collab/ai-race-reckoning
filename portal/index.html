@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Momentum Test Chambers</title>
+<meta name="description" content="A browser recreation of portal-gun physics: recursive see-through portals, momentum-conserving flings, cubes, buttons, emancipation grids, energy pellets and faith plates across nine test chambers.">
+<meta name="theme-color" content="#0b0c0e">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="style.css">
+<script type="importmap">{ "imports": { "three": "./vendor/three.module.min.js" } }</script>
+</head>
+<body class="in-menu">
+<canvas id="game" aria-label="Game view"></canvas>
+
+<div id="hud" aria-hidden="true">
+  <svg id="crosshair" viewBox="-20 -20 40 40" width="40" height="40">
+    <circle r="1.4" class="dot"/>
+    <path class="half blue" d="M -4 -11 A 11 11 0 0 0 -4 11"/>
+    <path class="half orange" d="M 4 -11 A 11 11 0 0 1 4 11"/>
+    <path class="fill blue" d="M -4 -11 A 11 11 0 0 0 -4 11 L -6 8 A 8.5 8.5 0 0 1 -6 -8 Z"/>
+    <path class="fill orange" d="M 4 -11 A 11 11 0 0 1 4 11 L 6 8 A 8.5 8.5 0 0 0 6 -8 Z"/>
+  </svg>
+  <div id="subtitle" role="status"></div>
+  <div id="card"><span id="card-num">00</span><span id="card-title">Orientation</span></div>
+  <div id="restart-ring" hidden><span>Restarting</span></div>
+  <div id="fps" hidden></div>
+</div>
+<div id="death"></div>
+<div id="fade"><div id="fade-text"></div></div>
+
+<div id="overlay">
+  <section id="menu-start" class="panel" hidden>
+    <p class="eyebrow">Momentum Research Annex</p>
+    <h1>Test<br>Chambers</h1>
+    <p class="lede">Two portals. One gun. Momentum is conserved. A browser recreation of portal physics with recursive see-through portals, flings, cubes, grids, pellets and faith plates.</p>
+    <div class="actions">
+      <button id="btn-play" class="primary">Start testing</button>
+      <button id="btn-new">New game</button>
+      <button data-open="chambers" data-from="start">Chamber select</button>
+      <button data-open="settings" data-from="start">Settings</button>
+      <button data-open="help" data-from="start">Controls</button>
+    </div>
+    <p class="fine">Needs a keyboard and mouse. Click to capture the pointer; press Esc to pause. An unofficial fan tribute to Valve's <em>Portal</em>, built from scratch.</p>
+  </section>
+
+  <section id="menu-pause" class="panel" hidden>
+    <p class="eyebrow">Paused</p>
+    <h2>Testing suspended</h2>
+    <div class="actions">
+      <button id="btn-resume" class="primary">Resume</button>
+      <button id="btn-restart">Restart chamber</button>
+      <button data-open="chambers" data-from="pause">Chamber select</button>
+      <button data-open="settings" data-from="pause">Settings</button>
+      <button data-open="help" data-from="pause">Controls</button>
+    </div>
+  </section>
+
+  <section id="menu-chambers" class="panel wide" hidden>
+    <p class="eyebrow">Chamber select</p>
+    <div id="chamber-list"></div>
+    <div class="actions row"><button data-back>Back</button></div>
+  </section>
+
+  <section id="menu-settings" class="panel" hidden>
+    <p class="eyebrow">Settings</p>
+    <label class="set"><span>Mouse sensitivity</span><input id="set-sens" type="range" min="0.5" max="10" step="0.1"><output id="set-sens-v"></output></label>
+    <label class="set"><span>Field of view</span><input id="set-fov" type="range" min="60" max="110" step="1"><output id="set-fov-v"></output></label>
+    <label class="set"><span>Portal recursion</span><input id="set-depth" type="range" min="1" max="8" step="1"><output id="set-depth-v"></output></label>
+    <label class="set"><span>Resolution scale</span><input id="set-res" type="range" min="0.5" max="1" step="0.05"><output id="set-res-v"></output></label>
+    <label class="set"><span>Volume</span><input id="set-vol" type="range" min="0" max="1" step="0.05"><output id="set-vol-v"></output></label>
+    <label class="set check"><span>Invert mouse Y</span><input id="set-invert" type="checkbox"></label>
+    <label class="set check"><span>Show frame rate</span><input id="set-fps" type="checkbox"></label>
+    <div class="actions row"><button data-back>Back</button></div>
+  </section>
+
+  <section id="menu-help" class="panel" hidden>
+    <p class="eyebrow">Controls</p>
+    <dl class="keys">
+      <dt>W A S D</dt><dd>Move</dd>
+      <dt>Mouse</dt><dd>Look</dd>
+      <dt>Left click / 1</dt><dd>Blue portal</dd>
+      <dt>Right click / 2</dt><dd>Orange portal</dd>
+      <dt>E</dt><dd>Pick up / drop</dd>
+      <dt>Space</dt><dd>Jump</dd>
+      <dt>Ctrl / C</dt><dd>Crouch (crouch while jumping to reach higher)</dd>
+      <dt>Hold R</dt><dd>Restart chamber</dd>
+      <dt>Esc</dt><dd>Pause</dd>
+    </dl>
+    <p class="fine">Portals only stick to light-coloured panels. Whatever enters one portal leaves the other at the same speed, turned to face out of it. Fall into a floor portal to be launched out of a wall portal.</p>
+    <div class="actions row"><button data-back>Back</button></div>
+  </section>
+</div>
+
+<div id="nowebgl" hidden><p>This game needs WebGL, which is not available in this browser.</p></div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
