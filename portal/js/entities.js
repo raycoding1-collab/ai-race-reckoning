@@ -50,28 +50,33 @@ export class Cube {
   constructor(world, pos, opts = {}) {
     this.world = world;
     this.kind = 'cube';
-    this.body = new Body('cube', CUBE.half, CUBE.half, CUBE.half);
+    const h = opts.half || [CUBE.half, CUBE.half, CUBE.half];
+    this.body = new Body('cube', h[0], h[1], h[2]);
     this.body.owner = this;
     this.body.pos.copy(pos);
     this.yaw = opts.yaw || 0;
     this.dispenser = opts.dispenser || null;
     this.held = false;
     this.dissolving = -1;
-    if (!cubeGeo) {
-      cubeGeo = new THREE.BoxGeometry(CUBE.half * 2, CUBE.half * 2, CUBE.half * 2);
-    }
-    this.mat = phong({ map: world.textures.cube, shininess: 30, specular: 0x333333 });
-    this.cloneMat = this.mat.clone();
-    this.mesh = new THREE.Mesh(cubeGeo, this.mat);
-    this.clone = new THREE.Mesh(cubeGeo, this.cloneMat);
+    this.build(world);
     this.clone.visible = false;
-    // little glowing edge so it reads at a distance
+    this.mesh.rotation.order = this.clone.rotation.order = 'YXZ';
     noCull(this.mesh); noCull(this.clone);
     world.scene.add(this.mesh, this.clone);
     this.shadow = new BlobShadow(world.scene, 70);
     world.bodies.push(this.body);
     this.planeA = new THREE.Plane(); this.planeB = new THREE.Plane();
     this.impactCooldown = 0;
+  }
+
+  build() {
+    if (!cubeGeo) cubeGeo = new THREE.BoxGeometry(CUBE.half * 2, CUBE.half * 2, CUBE.half * 2);
+    this.mat = phong({ map: this.world.textures.cube, shininess: 30, specular: 0x333333 });
+    this.cloneMat = this.mat.clone();
+    this.mesh = new THREE.Mesh(cubeGeo, this.mat);
+    this.clone = new THREE.Mesh(cubeGeo, this.cloneMat);
+    this.mats = [this.mat];
+    this.cloneMats = [this.cloneMat];
   }
 
   push(dir, speed) {
@@ -121,6 +126,9 @@ export class Cube {
     }
     const pre = b.vel.length();
     moveBody(this.world, b, dt);
+    for (const h of b.hits) {
+      if (h.ent && h.ent.isBody && h.ent.owner && h.ent.owner.knock && h.speed > 110) h.ent.owner.knock();
+    }
     this.impactCooldown -= dt;
     if (b.hits.length && this.impactCooldown <= 0) {
       const sp = Math.max(...b.hits.map((h) => h.speed));
@@ -140,18 +148,18 @@ export class Cube {
     this.mesh.position.copy(b.pos);
     this.mesh.rotation.set(0, this.yaw, 0);
     // render a clipped copy on the far side while passing through a portal
-    const P = b.holes.find((p) => p.linked && Math.abs(p.dist(b.pos)) < CUBE.half * 1.8);
+    const P = b.holes.find((p) => p.linked && Math.abs(p.dist(b.pos)) < b.half.y * 1.8);
     if (P && this.dissolving < 0) {
       this.planeA.setFromNormalAndCoplanarPoint(P.normal, P.pos);
       this.planeB.setFromNormalAndCoplanarPoint(P.other.normal, P.other.pos);
-      this.mat.clippingPlanes = [this.planeA];
-      this.cloneMat.clippingPlanes = [this.planeB];
+      for (const m of this.mats) m.clippingPlanes = [this.planeA];
+      for (const m of this.cloneMats) m.clippingPlanes = [this.planeB];
       this.clone.visible = true;
       const m = new THREE.Matrix4().compose(b.pos, new THREE.Quaternion().setFromEuler(this.mesh.rotation), new THREE.Vector3(1, 1, 1));
       m.premultiply(P.toOther);
       m.decompose(this.clone.position, this.clone.quaternion, this.clone.scale);
     } else {
-      if (this.mat.clippingPlanes && this.mat.clippingPlanes.length) this.mat.clippingPlanes = [];
+      if (this.mat.clippingPlanes && this.mat.clippingPlanes.length) for (const m of this.mats) m.clippingPlanes = [];
       this.clone.visible = false;
     }
     this.shadow.update(this.world, b.pos, b.pos.y - b.half.y);
@@ -792,3 +800,137 @@ export class Wire {
   }
 }
 
+
+// ---------------------------------------------------------------------------
+// Sentry turret: a carryable body with a sight cone and a laser. Knocking it
+// over (push, drop, fall, hit with a cube) shuts it down for good.
+export class Turret extends Cube {
+  constructor(world, pos, opts = {}) {
+    super(world, pos, { ...opts, half: [12, 30, 12] });
+    this.kind = 'turret';
+    this.tipped = false;
+    this.tip = 0;
+    this.alert = 0;
+    this.shotTimer = 0;
+    this.pushTime = 0;
+    this.air = 0;
+    this.aim = new THREE.Vector3(Math.sin(this.yaw), 0, Math.cos(this.yaw));
+    this.laser = new THREE.Line(new THREE.BufferGeometry().setFromPoints([pos, pos]),
+      new THREE.LineBasicMaterial({ color: 0xff2020, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending, depthWrite: false }));
+    this.laser.frustumCulled = false;
+    world.scene.add(this.laser);
+  }
+
+  build() {
+    const white = phong({ color: 0xeeeeee, shininess: 70, specular: 0x777777 });
+    const dark = phong({ color: 0x2a2c2f, shininess: 30 });
+    this.eyeMat = new THREE.MeshBasicMaterial({ color: 0xff2a20 });
+    const g = new THREE.Group();
+    const body = new THREE.Mesh(new THREE.SphereGeometry(10, 24, 18), white);
+    body.scale.set(1, 2.1, 0.95); body.position.y = 6;
+    const slit = new THREE.Mesh(new THREE.BoxGeometry(2.2, 34, 19.5), dark);
+    slit.position.y = 6;
+    const eye = new THREE.Mesh(new THREE.SphereGeometry(2.6, 14, 10), this.eyeMat);
+    eye.position.set(0, 12, 8.9);
+    const sideL = new THREE.Mesh(new THREE.BoxGeometry(3, 18, 8), white); sideL.position.set(-10.5, 6, 0);
+    const sideR = sideL.clone(); sideR.position.x = 10.5;
+    g.add(body, slit, eye, sideL, sideR);
+    for (let i = 0; i < 3; i++) {
+      const a = (i / 3) * Math.PI * 2 + Math.PI / 3;
+      const leg = new THREE.Mesh(new THREE.BoxGeometry(2, 26, 2), dark);
+      leg.position.set(Math.sin(a) * 9, -19, Math.cos(a) * 9);
+      leg.rotation.set(Math.cos(a) * 0.35, 0, -Math.sin(a) * 0.35);
+      g.add(leg);
+    }
+    this.mesh = g;
+    this.clone = g.clone(true);
+    this.mats = [white, dark, this.eyeMat];
+    const map = new Map(this.mats.map((m) => [m, m.clone()]));
+    this.clone.traverse((o) => { if (o.material) o.material = map.get(o.material); });
+    this.cloneMats = [...map.values()];
+    this.mat = white;
+  }
+
+
+  knock() {
+    if (this.tipped || this.dissolving >= 0) return;
+    this.tipped = true;
+    this.eyeMat.color.setHex(0x330000);
+    this.laser.visible = false;
+    this.world.events.emit('turretTip', { pos: this.body.pos });
+  }
+
+  push() {}   // turrets don't slide when walked into; they topple (see update)
+
+  onDropped(speed) { if (speed > 250) this.knock(); }
+
+  update(dt) {
+    super.update(dt);
+    if (this.removed || this.dissolving >= 0) { this.laser.visible = false; return; }
+    const b = this.body, w = this.world;
+    // walking into a turret shoves it over
+    const pb = w.player.body;
+    const gapX = Math.abs(pb.pos.x - b.pos.x) - pb.half.x - b.half.x;
+    const gapZ = Math.abs(pb.pos.z - b.pos.z) - pb.half.z - b.half.z;
+    const toT = new THREE.Vector3(b.pos.x - pb.pos.x, 0, b.pos.z - pb.pos.z).normalize();
+    const shoving = !this.held && Math.max(gapX, gapZ) < 3 && Math.abs(pb.pos.y - b.pos.y) < 60 &&
+      (w.player.wish ? w.player.wish.dot(toT) > 0.5 : false);
+    this.pushTime = shoving ? this.pushTime + dt : Math.max(0, this.pushTime - dt);
+    if (this.pushTime > 0.25) this.knock();
+    if (!this.held && !b.onGround) this.air += dt;
+    else { if (this.air > 0.35 && !this.held) this.knock(); this.air = 0; }
+    if (this.tipped) {
+      this.tip = Math.min(1.45, this.tip + dt * 4);
+      this.mesh.rotation.x = this.tip;
+      this.mesh.position.y = b.pos.y - 18 * this.tip / 1.45;   // lie on the floor
+      return;
+    }
+    // look for the player
+    const eye = b.pos.clone(); eye.y += 12;
+    const fwd = new THREE.Vector3(Math.sin(this.yaw), 0, Math.cos(this.yaw));
+    const pl = w.player;
+    const target = pl.body.pos.clone(); target.y += 12;
+    const to = target.clone().sub(eye);
+    const d = to.length();
+    to.divideScalar(d);
+    let seen = false;
+    if (pl.alive && !this.held && d < 1700 && to.dot(fwd) > 0.6) {
+      const r = w.traceRay(eye, to, d, { blockers: true, cubes: true, ignoreCube: this });
+      seen = r.type === 'none' && r.passes.length === 0;
+    }
+    if (seen) {
+      if (this.alert <= 0) w.events.emit('turretAlert', { pos: b.pos });
+      this.alert += dt;
+      this.aim.lerp(to, Math.min(1, dt * 8)).normalize();
+      if (this.alert > 0.55) {
+        this.shotTimer -= dt;
+        while (this.shotTimer <= 0) {
+          this.shotTimer += 0.1;
+          if (Math.random() < 0.6) w.damagePlayer(3);
+          const end = target.clone().add(new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).multiplyScalar(30));
+          w.spawnTracer(eye.clone().addScaledVector(fwd, 10), end, 0xffd28a);
+          w.events.emit('turretShot', { pos: b.pos });
+        }
+      }
+    } else {
+      this.alert = Math.max(0, this.alert - dt * 0.6);
+      const sweep = Math.sin(w.time * 0.9 + this.yaw) * 0.25;
+      this.aim.lerp(new THREE.Vector3(Math.sin(this.yaw + sweep), -0.05, Math.cos(this.yaw + sweep)), Math.min(1, dt * 3)).normalize();
+    }
+    // laser sight
+    this.laser.visible = true;
+    const hit = traceGrid(w.grid, eye, this.aim, 3000);
+    const end = eye.clone().addScaledVector(this.aim, hit ? hit.t : 3000);
+    if (seen && d < (hit ? hit.t : 3000)) end.copy(target);
+    const a = this.laser.geometry.attributes.position.array;
+    a[0] = eye.x + fwd.x * 9; a[1] = eye.y; a[2] = eye.z + fwd.z * 9;
+    a[3] = end.x; a[4] = end.y; a[5] = end.z;
+    this.laser.geometry.attributes.position.needsUpdate = true;
+    this.eyeMat.color.setHex(seen ? 0xff5040 : 0xff2a20);
+  }
+
+  dispose() {
+    super.dispose();
+    this.world.scene.remove(this.laser);
+  }
+}

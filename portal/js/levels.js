@@ -269,6 +269,37 @@ export const LEVELS = [
   },
   // ------------------------------------------------------------------ 08
   {
+    title: 'Hostile Hardware',
+    gun: 'both',
+    icons: ['portal', 'cube'],
+    build() {
+      const G = new Grid(34, 12, 35);
+      G.room(2, 1, 2, 30, 9, 28, { floor: 'metal', walls: 'metal', north: 'white', south: 'white', ceil: 'metal' });
+      G.paint(10, 9, 18, 30, 10, 28, 'white');              // ceiling above the turrets
+      G.fill(2, 1, 9, 14, 5, 10, 'metal');                  // cover wall
+      G.room(24, 1, 28, 28, 5, 33, { floor: 'metal', walls: 'metal', ceil: 'metal', lightEvery: 3 });
+      return {
+        grid: G,
+        start: { at: [6, 1, 4], yaw: PI },
+        entities: [
+          { type: 'sign', number: 8, title: 'Hostile Hardware', icons: ['portal', 'cube'], at: [2, 3.2, 5], dir: [1, 0, 0] },
+          { type: 'dispenser', at: [4, 7.75, 6] },
+          { type: 'turret', at: [12, 1, 22], yaw: PI },
+          { type: 'turret', at: [20, 1, 22], yaw: PI },
+          { type: 'turret', at: [27, 1, 25], yaw: PI },
+          { type: 'door', at: [26, 1, 28.25], axis: 'z', width: 4, height: 4, startOpen: true },
+          { type: 'exit', at: [26, 1, 31] },
+        ],
+        lines: [
+          [1.0, 'The devices beyond the wall are sentry turrets. They are not part of the test. They are, however, armed.'],
+          [7.0, 'A turret that has been knocked over stops firing. Approach from behind, or drop something on it.'],
+          [14.0, 'Turrets can be picked up. They do not enjoy it.'],
+        ],
+      };
+    },
+  },
+  // ------------------------------------------------------------------ 09
+  {
     title: 'Free Testing',
     gun: 'both',
     icons: ['cube', 'button', 'portal', 'fling', 'pellet', 'plate'],
@@ -284,11 +315,12 @@ export const LEVELS = [
         grid: G,
         start: { at: [28, 1, 12], yaw: 0 + PI },
         entities: [
-          { type: 'sign', number: 8, title: 'Free Testing', icons: ['cube', 'button', 'portal', 'fling', 'pellet', 'plate'], at: [2, 3.2, 26], dir: [1, 0, 0] },
+          { type: 'sign', number: 9, title: 'Free Testing', icons: ['cube', 'button', 'portal', 'fling', 'pellet', 'plate'], at: [2, 3.2, 26], dir: [1, 0, 0] },
           { type: 'dispenser', at: [30, 14.75, 20] },
           { type: 'dispenser', at: [36, 14.75, 20] },
           { type: 'cube', at: [8, 7.66, 46] },
           { type: 'cube', at: [46, 4.66, 10] },
+          { type: 'turret', at: [50, 4, 6], yaw: PI },
           { type: 'plate', at: [22, 1, 12], target: [9, 7, 47], apex: 9 },
           { type: 'plate', at: [9, 7, 42], target: [46, 4, 12], apex: 8 },
           { type: 'launcher', at: [2, 4.5, 37], dir: [1, 0, 0] },

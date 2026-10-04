@@ -26,6 +26,8 @@ export class Player {
     this.airTime = 0;
     this.prevPos = new THREE.Vector3();
     this.alive = true;
+    this.health = 100;
+    this.lastHurt = -10;
     this.body.onTeleport = (P) => this.onTeleport(P);
   }
 
@@ -140,6 +142,7 @@ export class Player {
     _wish.set(0, 0, 0).addScaledVector(_f, input.forward).addScaledVector(_r, input.side);
     let wishspeed = _wish.length();
     if (wishspeed > 0) _wish.divideScalar(wishspeed);
+    this.wish = _wish;
     wishspeed = Math.min(1, wishspeed) * PLAYER.maxSpeed * (this.ducked && b.onGround ? PLAYER.duckSpeedScale : 1);
 
     // --- jump (requires a fresh press, like HL2/Portal) ---

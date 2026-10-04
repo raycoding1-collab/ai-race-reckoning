@@ -15,6 +15,7 @@ export class Hud {
       death: $('death'),
       fps: $('fps'),
       ring: $('restart-ring'),
+      hurt: $('hurt'),
     };
     this.typing = null;
     this.queue = [];
@@ -71,6 +72,12 @@ export class Hud {
     this.typing = null;
     this.queue = [];
     this.el.sub.classList.remove('show');
+  }
+
+  hurt(k) {
+    if (Math.abs(k - (this.hurtK || 0)) < 0.01) return;
+    this.hurtK = k;
+    this.el.hurt.style.opacity = Math.min(1, k * 1.4).toFixed(2);
   }
 
   death(on) {

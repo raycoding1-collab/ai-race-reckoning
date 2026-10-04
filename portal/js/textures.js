@@ -195,7 +195,7 @@ function cubeFace(size) {
   return c;
 }
 
-export function makeSignTexture(number, title, icons, renderer) {
+export function makeSignTexture(number, title, icons, renderer, last = 9) {
   const W = 512, H = 1024;
   const c = document.createElement('canvas');
   c.width = W; c.height = H;
@@ -208,12 +208,12 @@ export function makeSignTexture(number, title, icons, renderer) {
   ctx.fillText(String(number).padStart(2, '0'), 30, 20);
   ctx.fillRect(30, 330, W - 60, 4);
   ctx.font = '600 34px "IBM Plex Mono", monospace';
-  ctx.fillText(String(number).padStart(2, '0') + '/08', 34, 352);
+  ctx.fillText(String(number).padStart(2, '0') + '/' + String(last).padStart(2, '0'), 34, 352);
   // progress bar
   ctx.fillStyle = '#d4d6d4';
   ctx.fillRect(30, 410, W - 60, 22);
   ctx.fillStyle = '#1b1d1f';
-  ctx.fillRect(30, 410, (W - 60) * Math.min(1, (number + 1) / 9), 22);
+  ctx.fillRect(30, 410, (W - 60) * Math.min(1, (number + 1) / (last + 1)), 22);
   ctx.font = '600 30px "IBM Plex Sans", Arial, sans-serif';
   const words = title.toUpperCase();
   ctx.fillText(words, 34, 456);

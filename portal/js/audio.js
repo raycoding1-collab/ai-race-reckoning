@@ -216,6 +216,9 @@ export class Audio {
     this.osc('sine', 784, 784, t, 0.5, 0.06);
     this.osc('sine', 1175, 1175, t + 0.12, 0.6, 0.05);
   }
+  turretShot() { if (this.ctx) { this.noise(this.t, 0.05, 0.22, 'bandpass', 2500, 900, 1.2); this.osc('square', 180, 90, this.t, 0.04, 0.05); } }
+  turretAlert() { if (this.ctx) { this.osc('sine', 1400, 1400, this.t, 0.12, 0.08); this.osc('sine', 1900, 1900, this.t + 0.14, 0.18, 0.07); } }
+  turretTip() { if (this.ctx) { this.osc('sine', 900, 120, this.t, 0.7, 0.08); this.noise(this.t, 0.3, 0.2, 'lowpass', 900, 150, 1); } }
   voiceBlip() { if (this.ctx) this.osc('sine', 500 + Math.random() * 300, 450, this.t, 0.035, 0.012); }
   complete() {
     if (!this.ctx) return;

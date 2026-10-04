@@ -9,7 +9,7 @@ import { ViewModel, PlayerModel } from './models.js';
 import { LEVELS } from './levels.js';
 import {
   Cube, FloorButton, Door, Fizzler, Goo, Exit, Dispenser, FaithPlate,
-  PelletLauncher, Receptacle, Glass, Sign, Wire, BlobShadow,
+  PelletLauncher, Receptacle, Glass, Sign, Wire, BlobShadow, Turret,
 } from './entities.js';
 
 class Emitter {
@@ -77,6 +77,9 @@ export class Game {
     ev.on('pelletExplode', () => a.pelletExplode());
     ev.on('receptacle', () => a.receptacle());
     ev.on('faith', () => a.faith());
+    ev.on('turretShot', (e) => near(e.pos, 2200) && a.turretShot());
+    ev.on('turretAlert', (e) => near(e.pos, 2200) && a.turretAlert());
+    ev.on('turretTip', (e) => near(e.pos, 2200) && a.turretTip());
   }
 
   // ------------------------------------------------------------------
@@ -159,6 +162,7 @@ export class Game {
   spawnEntity(e) {
     const map = {
       cube: () => this.spawnCube(new THREE.Vector3(C(e.at[0]), C(e.at[1]), C(e.at[2]))),
+      turret: () => this.spawnCube(new THREE.Vector3(C(e.at[0]), C(e.at[1]) + 30.05, C(e.at[2])), { yaw: e.yaw || 0 }, Turret),
       button: () => new FloorButton(this, e),
       door: () => new Door(this, e),
       fizzler: () => new Fizzler(this, e),
@@ -173,12 +177,12 @@ export class Game {
       wire: () => new Wire(this, e),
     };
     const ent = map[e.type]();
-    if (e.type !== 'cube') this.entities.push(ent);
+    if (e.type !== 'cube' && e.type !== 'turret') this.entities.push(ent);
     return ent;
   }
 
-  spawnCube(pos, opts = {}) {
-    const c = new Cube(this, pos, opts);
+  spawnCube(pos, opts = {}, Kind = Cube) {
+    const c = new Kind(this, pos, opts);
     c.body.onTeleport = (P) => c.onTeleported(P);
     this.cubes.push(c);
     c.sync();
@@ -235,8 +239,8 @@ export class Game {
       if (opts.cubes) {
         for (const c of this.cubes) {
           if (c === opts.ignoreCube || c.dissolving >= 0) continue;
-          const p = c.body.pos, h = CUBE.half;
-          const t = rayBox(o, d, [p.x - h, p.y - h, p.z - h, p.x + h, p.y + h, p.z + h]);
+          const p = c.body.pos, h = c.body.half;
+          const t = rayBox(o, d, [p.x - h.x, p.y - h.y, p.z - h.z, p.x + h.x, p.y + h.y, p.z + h.z]);
           if (t !== null && t < best.t) best = { t, type: 'cube', ent: c };
         }
       }
@@ -378,6 +382,7 @@ export class Game {
     const rel = c.body.vel.clone().sub(pv);
     if (rel.length() > 260) rel.setLength(260);
     c.body.vel.copy(pv).add(rel);
+    c.onDropped?.(rel.length());
     this.held = null;
     this.audio.drop();
   }
@@ -410,6 +415,14 @@ export class Game {
     c.yaw += dy * Math.min(1, dt * 12);
     if (bestD > CUBE.dropDistance) { this.heldFar += dt; if (this.heldFar > 0.25) this.dropCube(); }
     else this.heldFar = 0;
+  }
+
+  damagePlayer(n) {
+    const p = this.player;
+    if (!p.alive || this.completing) return;
+    p.health -= n;
+    p.lastHurt = this.time;
+    if (p.health <= 0) this.killPlayer();
   }
 
   killPlayer() {
@@ -456,6 +469,8 @@ export class Game {
       }
     }
     input.fire1 = input.fire2 = input.use = false;
+    if (p.alive && this.time - p.lastHurt > 1.2) p.health = Math.min(100, p.health + 45 * dt);
+    this.hud.hurt(p.alive ? 1 - p.health / 100 : 0);
 
     this.updateHeld(dt);
     for (const c of this.cubes.slice()) c.update(dt);
