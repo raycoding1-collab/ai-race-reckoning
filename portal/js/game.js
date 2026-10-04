@@ -8,9 +8,12 @@ import { createTextures } from './textures.js';
 import { ViewModel, PlayerModel } from './models.js';
 import { LEVELS } from './levels.js';
 import { Voice } from './voice.js';
+import { PostFX, QUALITY } from './post.js';
+import { RoomEnvironment } from '../vendor/addons/environments/RoomEnvironment.js';
 import {
   Cube, FloorButton, Door, Fizzler, Goo, Exit, Dispenser, FaithPlate,
   PelletLauncher, Receptacle, Glass, Sign, Wire, BlobShadow, Turret, Platform,
+  RocketTurret, Incinerator, Boss, Pipe, Graffiti,
 } from './entities.js';
 
 class Emitter {
@@ -50,6 +53,9 @@ export class Game {
     this.viewModel = new ViewModel();
     this.camera = new THREE.PerspectiveCamera(75, 1, 1, 24000);
     this.camera.layers.set(0);
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = 1.15;
+    this.quality = QUALITY.high;
     this.settings = { fov: 75, sensitivity: 1, invertY: false, volume: 0.7, depth: 5, showFps: false };
     this.levelIndex = 0;
     this.time = 0;
@@ -84,6 +90,11 @@ export class Game {
     ev.on('turretShot', (e) => near(e.pos, 2200) && a.turretShot());
     ev.on('turretAlert', (e) => near(e.pos, 2200) && a.turretAlert());
     ev.on('turretTip', (e) => near(e.pos, 2200) && a.turretTip());
+    ev.on('rocketLaunch', (e) => near(e.pos, 2600) && a.rocketLaunch());
+    ev.on('explosion', (e) => { a.explosion(Math.max(0.25, 1 - e.pos.distanceTo(this.player.body.pos) / 2400)); this.shake = Math.max(this.shake || 0, 1 - e.pos.distanceTo(this.player.body.pos) / 700); });
+    ev.on('coreDrop', () => a.coreDrop());
+    ev.on('incinerated', () => a.incinerate());
+    ev.on('glassBreak', () => a.glassBreak());
   }
 
   // ------------------------------------------------------------------
@@ -104,6 +115,7 @@ export class Game {
     const def = LEVELS[index];
     const L = def.build();
     this.def = def;
+    this.audio.setMood?.(def.music || 'test');
     this.grid = L.grid;
     this.time = 0;
     this.signals = new Map();
@@ -112,6 +124,9 @@ export class Game {
     this.shotBlockers = [];
     this.noPortalBoxes = [];
     this.receptacles = [];
+    this.rocketTargets = [];
+    this.timer = null;
+    this.ending = false;
     this.entities = [];
     this.cubes = [];
     this.bursts = [];
@@ -121,11 +136,14 @@ export class Game {
     this.lastLevel = LEVELS.length - 1;
 
     const scene = this.scene = new THREE.Scene();
-    scene.add(new THREE.HemisphereLight(0xf0f5ff, 0x55595f, 2.4));
-    const sun = new THREE.DirectionalLight(0xffffff, 1.6);
+    const pbr = this.quality.pbr;
+    scene.add(new THREE.HemisphereLight(0xf0f5ff, 0x55595f, pbr ? 0.32 : 2.4));
+    const sun = new THREE.DirectionalLight(0xfff8f0, pbr ? 0.4 : 1.6);
+    if (pbr) { scene.environment = this.envMap(); scene.environmentIntensity = 0.42; }
     sun.position.set(0.35, 1, 0.25);
     scene.add(sun);
-    for (const m of buildWorldMeshes(this.grid, this.textures)) scene.add(m);
+    this.worldMeshes = buildWorldMeshes(this.grid, this.textures, L.lights || [], pbr);
+    for (const m of this.worldMeshes) scene.add(m);
 
     // portals
     for (const P of this.portalList) { P.placed = false; P.fixed = false; P.version++; }
@@ -156,7 +174,8 @@ export class Game {
     // entities
     for (const e of L.entities) this.spawnEntity(e);
     this.lines = (L.lines || []).slice();
-    this.voice.preload([...this.lines.map((l) => this.wordsFor(l[1])), ...(L.triggers || []).map((t) => this.wordsFor(t.say))]);
+    const bossLines = L.entities.flatMap((e) => (e.lines ? [...(e.lines.hit || []), ...(e.lines.burn || [])] : []));
+    this.voice.preload([...this.lines.map((l) => this.wordsFor(l[1])), ...(L.triggers || []).map((t) => this.wordsFor(t.say)), ...bossLines, ...(L.finale ? [L.finale] : [])]);
     this.triggers = (L.triggers || []).map((t) => ({ ...t, done: false }));
     this.viewModel.visible = this.gun !== 'none';
     this.viewModel.setColor('blue');
@@ -189,7 +208,12 @@ export class Game {
 
   spawnEntity(e) {
     const map = {
-      cube: () => this.spawnCube(new THREE.Vector3(C(e.at[0]), C(e.at[1]), C(e.at[2]))),
+      cube: () => this.spawnCube(new THREE.Vector3(C(e.at[0]), C(e.at[1]), C(e.at[2])), { companion: e.companion }),
+      rocket: () => new RocketTurret(this, e),
+      incinerator: () => new Incinerator(this, e),
+      boss: () => new Boss(this, e),
+      pipe: () => new Pipe(this, e),
+      graffiti: () => new Graffiti(this, e),
       turret: () => this.spawnCube(new THREE.Vector3(C(e.at[0]), C(e.at[1]) + 30.05, C(e.at[2])), { yaw: e.yaw || 0 }, Turret),
       button: () => new FloorButton(this, e),
       door: () => new Door(this, e),
@@ -458,6 +482,22 @@ export class Game {
     if (p.health <= 0) this.killPlayer();
   }
 
+  // Final chamber cleared: the facility comes apart, then the credits.
+  bossDefeated() {
+    if (this.ending) return;
+    this.ending = true;
+    this.say(this.def.finale || 'Shutdown sequence initiated.');
+    this.audio.explosion(1);
+    this.shake = 1.5;
+    setTimeout(() => {
+      this.hud.ending();
+      this.audio.setMood?.('test');
+      this.audio.complete();
+      this.onComplete?.(this.levelIndex);
+      setTimeout(() => { this.hud.death(false); this.loadLevel(Math.min(this.levelIndex + 1, LEVELS.length - 1)); }, 14000);
+    }, 4500);
+  }
+
   killPlayer() {
     if (!this.player.alive || this.completing) return;
     this.player.alive = false;
@@ -513,6 +553,13 @@ export class Game {
 
     // fell out of the world
     if (p.body.pos.y < -400) this.killPlayer();
+
+    // neurotoxin countdown in the final chamber
+    if (this.timer !== null && p.alive && !this.completing) {
+      this.timer -= dt;
+      if (this.timer <= 0) { this.timer = 0; this.killPlayer(); }
+    }
+    this.hud.timer(this.timer !== null && p.alive ? this.timer : null);
     for (const c of this.cubes) if (c.body.pos.y < -400 && c.dissolving < 0) c.dissolve();
 
     // announcer
@@ -599,6 +646,11 @@ export class Game {
     this.updateVisuals(frameDt, alpha);
     const cam = this.camera;
     this.viewPose(alpha, cam.position, cam.quaternion);
+    if (this.shake > 0) {
+      this.shake = Math.max(0, this.shake - frameDt * 1.6);
+      const k = this.shake * this.shake * 6;
+      cam.position.x += (Math.random() - 0.5) * k; cam.position.y += (Math.random() - 0.5) * k; cam.position.z += (Math.random() - 0.5) * k;
+    }
     if (!p.alive) {
       const k = Math.min(1, (this.time - this.deathTime) / 0.8);
       cam.position.y -= k * 40;
@@ -606,17 +658,45 @@ export class Game {
     }
     cam.updateMatrixWorld();
     this.portalRenderer.maxDepth = this.settings.depth;
-    this.portalRenderer.render(this, this.scene, cam, this.visuals);
-    // first-person device on top
     const r = this.renderer;
+    const draw = () => {
+      this.portalRenderer.render(this, this.scene, cam, this.visuals);
+      // first-person device on top
+      if (this.viewModel.visible && p.alive) {
+        r.setScissorTest(false);
+        r.state.buffers.depth.setMask(true);
+        r.clearDepth();
+        r.render(this.viewModel.scene, this.viewModel.camera);
+      }
+    };
     if (this.viewModel.visible && p.alive) {
       const speed = Math.hypot(p.body.vel.x, p.body.vel.z);
       this.viewModel.update(frameDt, speed, p.body.onGround, look.dx, look.dy, !!this.held, this.time);
-      r.setScissorTest(false);
-      r.state.buffers.depth.setMask(true);
-      r.clearDepth();
-      r.render(this.viewModel.scene, this.viewModel.camera);
     }
+    if (this.post) this.post.render(draw, this.time);
+    else { r.setRenderTarget(null); draw(); }
+  }
+
+  envMap() {
+    if (!this._env) {
+      const pm = new THREE.PMREMGenerator(this.renderer);
+      this._env = pm.fromScene(new RoomEnvironment(), 0.04).texture;
+      pm.dispose();
+    }
+    return this._env;
+  }
+
+  // 'high' | 'medium' | 'low' (see post.js)
+  setQuality(name) {
+    const q = QUALITY[name] || QUALITY.high;
+    const changedPbr = this.quality && q.pbr !== this.quality.pbr;
+    this.qualityName = name;
+    this.quality = q;
+    this.post?.dispose();
+    this.post = q.post ? new PostFX(this.renderer, q) : null;
+    this.viewModel.scene.environment = q.pbr ? this.envMap() : null;
+    if (this.size) this.resize(this.size[0], this.size[1]);
+    if (changedPbr && this.scene) this.loadLevel(this.levelIndex);
   }
 
   // Called before each (possibly virtual) view is drawn: hide the portal we
@@ -635,6 +715,8 @@ export class Game {
   }
 
   resize(w, h) {
+    this.size = [w, h];
+    this.post?.setSize(w, h, this.renderer.getPixelRatio());
     this.camera.aspect = w / h;
     this.camera.fov = this.settings.fov;
     this.camera.updateProjectionMatrix();

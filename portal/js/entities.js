@@ -2,10 +2,15 @@ import * as THREE from 'three';
 import { CELL, GRAVITY, CUBE, PELLET, PORTAL } from './constants.js';
 import { Body, moveBody, groundBelow } from './physics.js';
 import { traceGrid } from './level.js';
-import { makeSignTexture } from './textures.js';
+import { makeSignTexture, makeGraffiti } from './textures.js';
 
 const C = (v) => v * CELL;
-const phong = (o) => new THREE.MeshPhongMaterial(o);
+// physically based stand-in for the old Phong materials: shininess maps to roughness
+const phong = (o) => {
+  const { shininess = 30, specular, ...rest } = o;
+  void specular;
+  return new THREE.MeshStandardMaterial({ roughness: Math.max(0.18, Math.min(0.9, 1 - shininess / 110)), metalness: 0.05, ...rest });
+};
 
 function noCull(o) { o.traverse((c) => { c.frustumCulled = false; }); return o; }
 
@@ -60,6 +65,7 @@ export class Cube {
     this.body.pos.copy(pos);
     this.yaw = opts.yaw || 0;
     this.dispenser = opts.dispenser || null;
+    this.companion = !!opts.companion;
     this.held = false;
     this.dissolving = -1;
     this.tumble = true;                      // free rotation while airborne
@@ -81,7 +87,7 @@ export class Cube {
 
   build() {
     if (!cubeGeo) cubeGeo = new THREE.BoxGeometry(CUBE.half * 2, CUBE.half * 2, CUBE.half * 2);
-    this.mat = phong({ map: this.world.textures.cube, shininess: 30, specular: 0x333333 });
+    this.mat = phong({ map: this.companion ? this.world.textures.companion : this.world.textures.cube, shininess: 30, specular: 0x333333 });
     this.cloneMat = this.mat.clone();
     this.mesh = new THREE.Mesh(cubeGeo, this.mat);
     this.clone = new THREE.Mesh(cubeGeo, this.cloneMat);
@@ -424,18 +430,31 @@ export class Goo {
     this.box = b;
     this.top = b[4];
     this.mat = new THREE.ShaderMaterial({
-      uniforms: { uTime: { value: 0 } },
+      uniforms: { uTime: { value: 0 }, uFire: { value: d.fire ? 1 : 0 } },
       vertexShader: `varying vec3 vW; void main(){ vec4 w = modelMatrix*vec4(position,1.0); vW=w.xyz; gl_Position=projectionMatrix*viewMatrix*w; }`,
-      fragmentShader: `uniform float uTime; varying vec3 vW;
+      fragmentShader: `uniform float uTime; uniform float uFire; varying vec3 vW;
         float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7))) * 43758.5453); }
         float n(vec2 p){ vec2 i=floor(p), f=fract(p); vec2 u=f*f*(3.0-2.0*f);
           return mix(mix(hash(i),hash(i+vec2(1,0)),u.x), mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),u.x), u.y); }
+        float h(vec2 p){ return n(p + vec2(uTime*0.15, uTime*0.07)) * 0.6 + n(p*2.3 - vec2(uTime*0.11, -uTime*0.13)) * 0.4; }
         void main(){
           vec2 p = vW.xz / 90.0;
-          float a = n(p + vec2(uTime*0.15, uTime*0.07)) * 0.6 + n(p*2.3 - vec2(uTime*0.11, -uTime*0.13)) * 0.4;
-          float spec = pow(smoothstep(0.55, 0.95, a), 3.0);
-          vec3 col = mix(vec3(0.16,0.12,0.05), vec3(0.32,0.27,0.10), a) + vec3(0.6,0.55,0.35)*spec*0.5;
+          float a = h(p);
+          // slow sludge: normal from the height field, murky body colour, a dull
+          // fresnel sheen and glints of the ceiling lights (all in linear light)
+          vec3 nr = normalize(vec3((a - h(p + vec2(0.04, 0.0))) * 1.4, 0.12, (a - h(p + vec2(0.0, 0.04))) * 1.4));
+          vec3 v = normalize(cameraPosition - vW);
+          float fr = pow(1.0 - max(dot(nr, v), 0.0), 4.0);
+          float spec = pow(max(dot(reflect(-v, nr), vec3(0.0, 1.0, 0.0)), 0.0), 60.0);
+          vec3 col = mix(vec3(0.018, 0.013, 0.004), vec3(0.07, 0.05, 0.012), a);
+          col += vec3(0.09, 0.085, 0.07) * fr + vec3(1.2, 1.1, 0.9) * spec * 0.6;
+          if (uFire > 0.5) {
+            float f = n(p * 1.7 + vec2(0.0, -uTime * 1.3)) * 0.6 + n(p * 4.1 - vec2(uTime * 0.7, uTime * 1.9)) * 0.4;
+            col = mix(vec3(0.25, 0.02, 0.0), vec3(3.2, 1.2, 0.2), smoothstep(0.35, 0.95, f));   // HDR so it blooms
+          }
           gl_FragColor = vec4(col, 1.0);
+          #include <tonemapping_fragment>
+          #include <colorspace_fragment>
         }`,
     });
     const m = new THREE.Mesh(new THREE.PlaneGeometry(b[3] - b[0], b[5] - b[2], 1, 1), this.mat);
@@ -464,6 +483,8 @@ export class Exit {
   constructor(world, d) {
     this.world = world;
     this.pos = new THREE.Vector3(C(d.at[0]), C(d.at[1]), C(d.at[2]));
+    this.radius = d.hidden ? C(d.radius || 2) : 44;
+    if (d.hidden) return;
     const g = new THREE.Group();
     const r = 46;
     const tubeMat = new THREE.MeshPhongMaterial({ color: 0xbfe3ff, transparent: true, opacity: 0.16, shininess: 90, side: THREE.DoubleSide, depthWrite: false });
@@ -487,7 +508,7 @@ export class Exit {
   update() {
     const b = this.world.player.body;
     const d = Math.hypot(b.pos.x - this.pos.x, b.pos.z - this.pos.z);
-    if (d < 44 && b.pos.y - b.half.y < this.pos.y + 20 && b.pos.y > this.pos.y) this.world.completeLevel();
+    if (d < this.radius && b.pos.y - b.half.y < this.pos.y + 20 && b.pos.y > this.pos.y) this.world.completeLevel();
   }
 }
 
@@ -702,6 +723,7 @@ export class Pellet {
             to.applyMatrix4(P.toOther);
             this.vel.applyQuaternion(P.toOtherQuat);
             ported = true;
+            if (PELLET.lifetime - this.age < 6) this.age = PELLET.lifetime - 6;   // portals recharge pellets
             w.events.emit('pelletPortal', {});
             break;
           }
@@ -731,7 +753,10 @@ export class Pellet {
           if (body.kind === 'player') continue;
           const p = body.pos, h = body.half;
           const b = [p.x - h.x, p.y - h.y, p.z - h.z, p.x + h.x, p.y + h.y, p.z + h.z];
-          if (to.x > b[0] && to.x < b[3] && to.y > b[1] && to.y < b[4] && to.z > b[2] && to.z < b[5]) this.reflectFromBox(from, b, to);
+          if (to.x > b[0] && to.x < b[3] && to.y > b[1] && to.y < b[4] && to.z > b[2] && to.z < b[5]) {
+            this.reflectFromBox(from, b, to);
+            body.owner?.knock?.();                      // pellets bowl turrets over
+          }
         }
       }
       this.pos.copy(to);
@@ -757,13 +782,25 @@ export class Pellet {
     this.mesh.children[1].material.rotation = this.age * 3;
   }
   reflectFromBox(from, b, to) {
+    let hit = false;
     for (let a = 0; a < 3; a++) {
       const f = from.getComponent(a);
       if (f <= b[a] || f >= b[a + 3]) {
         this.vel.setComponent(a, -this.vel.getComponent(a));
         to.setComponent(a, f);
+        hit = true;
       }
     }
+    if (hit) return;
+    // the box moved onto the pellet (a carried cube): leave by the nearest face, heading outward
+    let best = 0, side = 0, depth = Infinity;
+    for (let a = 0; a < 3; a++) {
+      const f = from.getComponent(a);
+      if (f - b[a] < depth) { depth = f - b[a]; best = a; side = -1; }
+      if (b[a + 3] - f < depth) { depth = b[a + 3] - f; best = a; side = 1; }
+    }
+    to.copy(from).setComponent(best, side < 0 ? b[best] - 0.5 : b[best + 3] + 0.5);
+    this.vel.setComponent(best, side * Math.abs(this.vel.getComponent(best)));
   }
   explode() {
     if (this.dead) return;
@@ -794,15 +831,33 @@ export class Glass {
     world.solids.push(this);
     world.shotBlockers.push(this);
     const geo = new THREE.BoxGeometry(b[3] - b[0], b[4] - b[1], b[5] - b[2]);
-    const m = new THREE.Mesh(geo, new THREE.MeshPhongMaterial({ color: 0xcfe8ff, transparent: true, opacity: 0.18, shininess: 100, depthWrite: false }));
+    // frosted observation glass glows from the lit booth behind it
+    const mat = d.frosted
+      ? new THREE.MeshStandardMaterial({ color: 0xe6f2ff, emissive: 0xcfe6ff, emissiveIntensity: 0.75, roughness: 0.25, transparent: true, opacity: 0.62 })
+      : new THREE.MeshPhongMaterial({ color: 0xcfe8ff, transparent: true, opacity: 0.18, shininess: 100, depthWrite: false });
+    const m = new THREE.Mesh(geo, mat);
     m.position.set((b[0] + b[3]) / 2, (b[1] + b[4]) / 2, (b[2] + b[5]) / 2);
     m.renderOrder = 7;
+    this.mesh = m;
+    this.breakable = !!d.breakable;
+    this.broken = false;
+    this.signal = d.signal;
     const edges = new THREE.LineSegments(new THREE.EdgesGeometry(geo), new THREE.LineBasicMaterial({ color: 0x8a9298 }));
     m.add(edges);
     world.scene.add(noCull(m));
   }
-  isSolid() { return true; }
-  blocksShot() { return true; }
+  isSolid() { return !this.broken; }
+  blocksShot() { return !this.broken; }
+  shatter() {
+    if (!this.breakable || this.broken) return;
+    this.broken = true;
+    this.mesh.visible = false;
+    const b = this.box;
+    const c = new THREE.Vector3((b[0] + b[3]) / 2, (b[1] + b[4]) / 2, (b[2] + b[5]) / 2);
+    this.world.spawnBurst(c, 0xcfe8ff, 90, 260);
+    this.world.events.emit('glassBreak', { pos: c });
+    if (this.signal) this.world.setSignal(this.signal, true);
+  }
   update() {}
 }
 
@@ -909,6 +964,7 @@ export class Turret extends Cube {
   knock() {
     if (this.tipped || this.dissolving >= 0) return;
     this.tipped = true;
+    this.frantic = 1.4;
     this.eyeMat.color.setHex(0x330000);
     this.laser.visible = false;
     this.world.events.emit('turretTip', { pos: this.body.pos });
@@ -934,6 +990,19 @@ export class Turret extends Cube {
     if (!this.held && !b.onGround) this.air += dt;
     else { if (this.air > 0.35 && !this.held) this.knock(); this.air = 0; }
     if (this.tipped) {
+      // a toppled turret sprays wildly for a moment before it shuts down
+      if (this.frantic > 0) {
+        this.frantic -= dt;
+        this.shotTimer -= dt;
+        if (this.shotTimer <= 0) {
+          this.shotTimer = 0.07;
+          const eye = b.pos.clone(); eye.y += 4;
+          const dir = new THREE.Vector3(Math.random() - 0.5, (Math.random() - 0.3) * 0.6, Math.random() - 0.5).normalize();
+          const hit = traceGrid(w.grid, eye, dir, 900);
+          w.spawnTracer(eye, eye.clone().addScaledVector(dir, hit ? hit.t : 900), 0xffd28a);
+          w.events.emit('turretShot', { pos: b.pos });
+        }
+      }
       this.tip = Math.min(1.45, this.tip + dt * 4);
       this.mesh.rotation.x = this.tip;
       this.mesh.position.y = b.pos.y - 18 * this.tip / 1.45;   // lie on the floor
@@ -1000,6 +1069,8 @@ export class Platform {
     this.home = b.slice();
     this.offset = new THREE.Vector3(...d.to.map(C));
     this.inputs = d.inputs || [];
+    this.once = !!d.once;
+    this.delay = d.delay || 0;
     this.speed = C(d.speed || 3) / this.offset.length();
     this.t = 0; this.dir = 1; this.wait = 0;
     this.box = b.slice();
@@ -1032,7 +1103,9 @@ export class Platform {
     const active = this.inputs.every((s) => this.world.getSignal(s));
     this.lightMat.color.setHex(active ? 0xffa030 : 0x3aa8ff);
     const prev = this.box.slice();
-    if (this.wait > 0) this.wait -= dt;
+    if (this.delay > 0) { this.delay -= dt; return; }
+    if (this.once) { if (active) this.t = Math.min(1, this.t + this.speed * dt); }
+    else if (this.wait > 0) this.wait -= dt;
     else if (active || this.t > 0) {
       const dir = active ? this.dir : -1;
       this.t = Math.min(1, Math.max(0, this.t + dir * this.speed * dt));
@@ -1049,4 +1122,394 @@ export class Platform {
       if (onTop && !(body.owner && body.owner.held)) { p.x += dx; p.y += dy; p.z += dz; if (body.owner?.prevPos) body.owner.prevPos.add(_tv.set(dx, dy, dz)); }
     }
   }
+}
+
+// ---------------------------------------------------------------------------
+// Rocket turret: a personality-core head on an arm. It tracks slowly with a
+// targeting laser (eye green = idle, yellow = locked, red = firing) and fires
+// slow rockets that fly straight, pass through portals and explode on impact.
+export class RocketTurret {
+  constructor(world, d) {
+    this.world = world;
+    this.base = new THREE.Vector3(C(d.at[0]), C(d.at[1]), C(d.at[2]));
+    this.head = this.base.clone(); this.head.y += 64;
+    this.aim = new THREE.Vector3(...(d.face || [0, 0, 1])).normalize();
+    this.lock = 0; this.cool = 1.5; this.state = 'idle';
+    this.inputs = d.inputs || [];
+    const g = new THREE.Group();
+    const dark = phong({ color: 0x2c2f33, shininess: 40 });
+    const white = phong({ color: 0xe9ecee, shininess: 70 });
+    const col = new THREE.Mesh(new THREE.CylinderGeometry(9, 14, 50, 16), dark); col.position.y = 25;
+    const ring = new THREE.Mesh(new THREE.CylinderGeometry(22, 24, 6, 24), dark); ring.position.y = 3;
+    this.pivot = new THREE.Group(); this.pivot.position.y = 64;
+    const core = new THREE.Mesh(new THREE.SphereGeometry(17, 24, 18), white);
+    const band = new THREE.Mesh(new THREE.TorusGeometry(17.2, 2.4, 8, 32), dark); band.rotation.y = Math.PI / 2;
+    this.eyeMat = new THREE.MeshBasicMaterial({ color: 0x40ff70 });
+    const eye = new THREE.Mesh(new THREE.CircleGeometry(5.5, 20), this.eyeMat); eye.position.z = 17.3;
+    const tube = new THREE.Mesh(new THREE.CylinderGeometry(4.5, 4.5, 30, 12), dark);
+    tube.rotation.x = Math.PI / 2; tube.position.set(16, -2, 6);
+    this.pivot.add(core, band, eye, tube);
+    g.add(col, ring, this.pivot);
+    g.position.copy(this.base);
+    world.scene.add(noCull(g));
+    this.laser = new THREE.Line(new THREE.BufferGeometry().setFromPoints([this.head, this.head]),
+      new THREE.LineBasicMaterial({ color: 0x5fffd0, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false }));
+    this.laser.frustumCulled = false;
+    world.scene.add(this.laser);
+    world.noPortalBoxes.push(boxAround(this.head, 40));
+  }
+  update(dt) {
+    const w = this.world, pl = w.player;
+    const active = this.inputs.every((s) => w.getSignal(s));
+    const target = pl.body.pos.clone(); target.y += 16;
+    const to = target.clone().sub(this.head);
+    const d = to.length(); to.divideScalar(d);
+    let seen = false;
+    if (active && pl.alive) {
+      const r = w.traceRay(this.head, to, d, { blockers: true, cubes: true });
+      seen = r.type === 'none' && r.passes.length === 0;
+    }
+    // slow, deliberate tracking
+    if (seen) {
+      const maxTurn = dt * 1.6;
+      const ang = this.aim.angleTo(to);
+      this.aim.lerp(to, ang > 1e-4 ? Math.min(1, maxTurn / ang) : 1).normalize();
+    }
+    this.cool -= dt;
+    const onTarget = seen && this.aim.angleTo(to) < 0.06;
+    if (onTarget && this.cool <= 0) {
+      this.lock += dt;
+      if (this.lock > 1.1) {
+        this.lock = 0; this.cool = 3.2;
+        const muzzle = this.head.clone().addScaledVector(this.aim, 26);
+        w.entities.push(new Rocket(w, muzzle, this.aim.clone().multiplyScalar(430)));
+        w.events.emit('rocketLaunch', { pos: this.head });
+        this.firedAt = w.time;
+      }
+    } else this.lock = Math.max(0, this.lock - dt * 2);
+    const firing = this.firedAt && w.time - this.firedAt < 0.4;
+    this.eyeMat.color.setHex(firing ? 0xff3020 : this.lock > 0 ? 0xffd030 : 0x40ff70);
+    this.pivot.rotation.set(0, Math.atan2(this.aim.x, this.aim.z), 0);
+    this.pivot.rotateX(-Math.asin(Math.max(-1, Math.min(1, this.aim.y))));
+    // targeting laser
+    const hit = traceGrid(w.grid, this.head, this.aim, 4000);
+    const end = this.head.clone().addScaledVector(this.aim, hit ? hit.t : 4000);
+    const a = this.laser.geometry.attributes.position.array;
+    a[0] = this.head.x; a[1] = this.head.y; a[2] = this.head.z; a[3] = end.x; a[4] = end.y; a[5] = end.z;
+    this.laser.geometry.attributes.position.needsUpdate = true;
+    this.laser.visible = active;
+  }
+}
+
+let flameTex = null;
+export class Rocket {
+  constructor(world, pos, vel) {
+    this.world = world; this.pos = pos; this.vel = vel; this.age = 0; this.dead = false;
+    if (!flameTex) {
+      const c = document.createElement('canvas'); c.width = c.height = 64;
+      const g = c.getContext('2d');
+      const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+      gr.addColorStop(0, 'rgba(255,250,220,1)'); gr.addColorStop(0.3, 'rgba(255,170,60,0.9)'); gr.addColorStop(1, 'rgba(255,60,0,0)');
+      g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
+      flameTex = new THREE.CanvasTexture(c);
+    }
+    this.mesh = new THREE.Group();
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(3, 3, 22, 10), phong({ color: 0xd9dcdf, shininess: 60 }));
+    body.rotation.x = Math.PI / 2;
+    const nose = new THREE.Mesh(new THREE.ConeGeometry(3, 7, 10), phong({ color: 0xc23a2a }));
+    nose.rotation.x = Math.PI / 2; nose.position.z = 14;
+    const flame = new THREE.Sprite(new THREE.SpriteMaterial({ map: flameTex, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, color: 0xffffff }));
+    flame.scale.setScalar(22); flame.position.z = -14;
+    this.mesh.add(body, nose, flame);
+    world.scene.add(noCull(this.mesh));
+    this.smokeT = 0;
+    this.sync();
+  }
+  sync() {
+    this.mesh.position.copy(this.pos);
+    this.mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), this.vel.clone().normalize());
+  }
+  update(dt) {
+    if (this.dead) return;
+    const w = this.world;
+    this.age += dt;
+    if (this.age > 20) return this.explode();
+    const steps = Math.ceil(this.vel.length() * dt / 5);
+    for (let s = 0; s < steps && !this.dead; s++) {
+      const from = this.pos.clone();
+      const to = from.clone().addScaledVector(this.vel, dt / steps);
+      let ported = false;
+      for (const P of w.portalList) {
+        if (!P.linked) continue;
+        const d0 = P.dist(from), d1 = P.dist(to);
+        if (d0 >= 0 && d1 < 0 && P.inOval(from.clone().lerp(to, d0 / (d0 - d1)), 0.95)) {
+          to.applyMatrix4(P.toOther); this.vel.applyQuaternion(P.toOtherQuat); ported = true; break;
+        }
+      }
+      if (!ported) {
+        if (w.grid.solidAt(to.x, to.y, to.z) && !inPortalHole(w, to)) { this.pos.copy(from); return this.explode(); }
+        for (const sld of w.solids) {
+          if (!sld.isSolid()) continue;
+          const b = sld.box;
+          if (to.x > b[0] && to.x < b[3] && to.y > b[1] && to.y < b[4] && to.z > b[2] && to.z < b[5]) { this.pos.copy(from); return this.explode(); }
+        }
+        for (const body of w.bodies) {
+          const p = body.pos, h = body.half;
+          if (Math.abs(to.x - p.x) < h.x + 3 && Math.abs(to.y - p.y) < h.y + 3 && Math.abs(to.z - p.z) < h.z + 3) { this.pos.copy(from); return this.explode(); }
+        }
+        for (const t of w.rocketTargets) {
+          if (t.hitTest(to)) { this.pos.copy(from); t.onRocket(this); return this.explode(); }
+        }
+      }
+      this.pos.copy(to);
+    }
+    this.smokeT -= dt;
+    if (this.smokeT <= 0) { this.smokeT = 0.05; w.spawnBurst(this.pos.clone().addScaledVector(this.vel, -0.04), 0x8a8a8a, 3, 25); }
+    this.sync();
+  }
+  explode() {
+    if (this.dead) return;
+    this.dead = true;
+    const w = this.world;
+    w.scene.remove(this.mesh);
+    w.spawnBurst(this.pos, 0xffa040, 70, 320);
+    w.spawnBurst(this.pos, 0x666666, 40, 140);
+    w.events.emit('explosion', { pos: this.pos.clone() });
+    const pb = w.player.body;
+    const d = pb.pos.distanceTo(this.pos);
+    if (d < 150) {
+      w.damagePlayer(Math.round(80 * (1 - d / 150)));
+      pb.vel.addScaledVector(pb.pos.clone().sub(this.pos).normalize(), 300 * (1 - d / 150));
+    }
+    for (const body of w.bodies) if (body.owner?.knock && body.pos.distanceTo(this.pos) < 140) body.owner.knock();
+    for (const sld of w.solids) {
+      if (!sld.shatter) continue;
+      const b = sld.box;
+      const cx = Math.max(b[0], Math.min(this.pos.x, b[3])), cy = Math.max(b[1], Math.min(this.pos.y, b[4])), cz = Math.max(b[2], Math.min(this.pos.z, b[5]));
+      if (Math.hypot(cx - this.pos.x, cy - this.pos.y, cz - this.pos.z) < 90) sld.shatter();
+    }
+  }
+  dispose() { this.world.scene.remove(this.mesh); }
+}
+
+// ---------------------------------------------------------------------------
+// Emergency incinerator: a glowing hatch in the wall. Anything dropped into
+// it (a cube, a core) is burned.
+export class Incinerator {
+  constructor(world, d) {
+    this.world = world;
+    this.pos = new THREE.Vector3(C(d.at[0]), C(d.at[1]), C(d.at[2]));
+    this.dir = new THREE.Vector3(...d.dir).normalize();
+    this.signal = d.signal;
+    if (this.signal) world.setSignal(this.signal, false);
+    const g = new THREE.Group();
+    const frame = new THREE.Mesh(new THREE.BoxGeometry(96, 72, 10), phong({ color: 0x3a3d41, shininess: 30 }));
+    frame.position.z = 4;
+    this.fireMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(3.0, 1.1, 0.25) });
+    const glow = new THREE.Mesh(new THREE.PlaneGeometry(78, 54), this.fireMat); glow.position.z = 9.6;
+    const grill = new THREE.Group();
+    for (let i = -3; i <= 3; i++) { const bar = new THREE.Mesh(new THREE.BoxGeometry(3, 54, 2), phong({ color: 0x1d1f21 })); bar.position.set(i * 11, 0, 10.5); grill.add(bar); }
+    const lip = new THREE.Mesh(new THREE.BoxGeometry(100, 6, 36), phong({ color: 0x55595d })); lip.position.set(0, -39, 18);
+    g.add(frame, glow, lip);
+    g.position.copy(this.pos);
+    g.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), this.dir);
+    world.scene.add(noCull(g));
+    world.noPortalBoxes.push(boxAround(this.pos, 70));
+    // intake: the volume in front of the hatch
+    const c = this.pos.clone().addScaledVector(this.dir, 30);
+    this.zone = [c.x - 50, c.y - 60, c.z - 50, c.x + 50, c.y + 40, c.z + 50];
+  }
+  update() {
+    const t = this.world.time;
+    this.fireMat.color.setRGB(2.6 + Math.sin(t * 13) * 0.4, 0.9 + Math.sin(t * 7) * 0.2, 0.2);
+    const z = this.zone;
+    for (const c of this.world.cubes) {
+      if (c.held || c.dissolving >= 0 || c.burned) continue;
+      const p = c.body.pos;
+      if (p.x > z[0] && p.x < z[3] && p.y > z[1] && p.y < z[4] && p.z > z[2] && p.z < z[5]) {
+        c.burned = true;
+        c.body.vel.copy(this.dir).multiplyScalar(-120);
+        c.dissolve();
+        this.world.spawnBurst(p, 0xff8a30, 60, 200);
+        this.world.events.emit('incinerated', { cube: c });
+        if (this.signal) this.world.setSignal(this.signal, true);
+      }
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Personality core: a carryable sphere that falls off the AI when it is hit.
+export class Core extends Cube {
+  constructor(world, pos, opts = {}) {
+    super(world, pos, { ...opts, half: [15, 15, 15] });
+    this.kind = 'core';
+    if (opts.eye) for (const m of [this.coreEye, this.cloneMats[2]]) m.color.copy(opts.eye);
+    this.tumble = true;
+  }
+  build() {
+    const shell = phong({ color: 0xe6e9eb, shininess: 70 });
+    const dark = phong({ color: 0x2a2c2f });
+    this.coreEye = new THREE.MeshBasicMaterial({ color: new THREE.Color(1.6, 0.9, 0.2) });
+    const g = new THREE.Group();
+    g.add(new THREE.Mesh(new THREE.SphereGeometry(15, 24, 18), shell));
+    const band = new THREE.Mesh(new THREE.TorusGeometry(15.2, 2, 8, 32), dark); g.add(band);
+    const handle = new THREE.Mesh(new THREE.TorusGeometry(9, 1.6, 6, 20, Math.PI), dark); handle.position.y = 14; g.add(handle);
+    const eye = new THREE.Mesh(new THREE.CircleGeometry(5, 20), this.coreEye); eye.position.z = 15.1; g.add(eye);
+    this.mesh = g;
+    this.clone = g.clone(true);
+    this.mats = [shell, dark, this.coreEye];
+    const map = new Map(this.mats.map((m) => [m, m.clone()]));
+    this.clone.traverse((o) => { if (o.material) o.material = map.get(o.material); });
+    this.cloneMats = [...map.values()];
+    this.mat = shell;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// The facility AI: a huge chassis hanging from the ceiling. Rockets that hit
+// it knock a personality core loose; every core must go in the incinerator
+// before the neurotoxin timer runs out.
+const _hv = new THREE.Vector3();
+export class Boss {
+  constructor(world, d) {
+    this.world = world;
+    this.pos = new THREE.Vector3(C(d.at[0]), C(d.at[1]), C(d.at[2]));
+    this.cores = d.cores || 3;
+    this.burned = 0;
+    this.scale = d.scale || 1.5;
+    this.radius = 78 * this.scale;
+    this.timer = d.timer || 240;
+    this.lines = d.lines || {};
+    this.out = 0;          // cores knocked loose but not yet burned
+    this.hitFlash = 0;
+    world.rocketTargets.push(this);
+    const g = new THREE.Group();
+    const white = phong({ color: 0xe6e8ea, shininess: 75 });
+    const dark = phong({ color: 0x24272b, shininess: 40 });
+    const metal = new THREE.MeshStandardMaterial({ color: 0x8a9096, roughness: 0.35, metalness: 0.8 });
+    const add = (geo, mat, x = 0, y = 0, z = 0, parent = g) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); parent.add(m); return m; };
+    // ceiling socket and a segmented spine curving down to the chassis
+    add(new THREE.CylinderGeometry(52, 58, 26, 32), dark, 0, 196, 0);
+    add(new THREE.CylinderGeometry(34, 34, 14, 28), metal, 0, 180, 0);
+    const spine = new THREE.CatmullRomCurve3([[0, 186, 0], [6, 140, 6], [-8, 96, 0], [0, 62, -4], [6, 34, 0]].map((p) => new THREE.Vector3(...p)));
+    add(new THREE.TubeGeometry(spine, 48, 12, 12), dark);
+    for (let t = 0.12; t < 0.9; t += 0.13) {
+      const r = add(new THREE.TorusGeometry(16, 4.5, 8, 24), white, ...spine.getPoint(t).toArray());
+      r.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), spine.getTangent(t));
+    }
+    // slack service cables
+    for (const [x, z, bx, bz] of [[-62, 40, -26, 22], [58, 34, 22, 26], [-40, -58, -18, -30], [50, -46, 26, -18]]) {
+      const c = new THREE.CatmullRomCurve3([new THREE.Vector3(x, 200, z), new THREE.Vector3(x * 0.9, 110, z * 0.9), new THREE.Vector3(bx, 30, bz)]);
+      add(new THREE.TubeGeometry(c, 24, 3.2, 6), dark);
+    }
+    // the chassis: a white shell with a dark waistband
+    const prof = [[0, 44], [24, 41], [42, 28], [50, 8], [47, -12], [36, -30], [18, -40], [0, -42]].map(([r, y]) => new THREE.Vector2(r, y));
+    const shell = add(new THREE.LatheGeometry(prof, 36), white, 0, 8, 0); shell.scale.set(1, 1, 0.82);
+    const band = add(new THREE.TorusGeometry(50, 3.5, 8, 40), dark, 0, 12, 0); band.rotation.x = Math.PI / 2; band.scale.set(1, 0.82, 1);
+    add(new THREE.TorusGeometry(40, 2.5, 8, 36), dark, 0, -20, 0).rotation.x = Math.PI / 2;
+    // neck and head, leaning forward (local +x) and down
+    const neck = add(new THREE.CylinderGeometry(15, 18, 56, 16), dark, 36, -30, 0); neck.rotation.z = 1.05;
+    const head = new THREE.Group(); head.position.set(68, -52, 0); head.rotation.z = -0.32; g.add(head); this.head = head;
+    add(new THREE.SphereGeometry(40, 36, 24), white, 0, 0, 0, head).scale.set(1.45, 0.72, 0.82);
+    add(new THREE.BoxGeometry(56, 5, 34), white, -8, 26, 0, head).rotation.z = 0.22;          // top fin
+    add(new THREE.TorusGeometry(42, 2.2, 6, 36), dark, 0, 0, 0, head).scale.set(1.42, 0.8, 1);  // seam
+    const face = add(new THREE.CylinderGeometry(22, 26, 10, 28), dark, 54, -2, 0, head); face.rotation.z = Math.PI / 2;
+    const ring = add(new THREE.TorusGeometry(14, 3, 8, 28), metal, 59.5, -2, 0, head); ring.rotation.y = Math.PI / 2;
+    this.eyeMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(2.2, 1.5, 0.3) });
+    add(new THREE.CircleGeometry(11, 28), this.eyeMat, 60, -2, 0, head).rotation.y = Math.PI / 2;
+    this.eyeLight = new THREE.PointLight(0xffc040, 0.6, 300, 1.5); this.eyeLight.position.set(80, -2, 0); head.add(this.eyeLight);
+    // personality cores clamped around the chassis
+    this.coreColors = [new THREE.Color(1.4, 0.5, 2.0), new THREE.Color(2.0, 0.9, 0.2), new THREE.Color(0.3, 1.2, 2.0), new THREE.Color(2.0, 0.3, 0.25)];
+    this.coreMounts = [];
+    const spots = [[-14, -26, 46], [-40, -14, -30], [14, -38, -34], [-46, -10, 18]];
+    for (let i = 0; i < this.cores; i++) {
+      const dir = new THREE.Vector3(...spots[i % spots.length]).normalize();
+      const m = add(new THREE.SphereGeometry(15, 24, 16), phong({ color: 0xd9dcde, shininess: 70 }), ...spots[i % spots.length]);
+      const e = add(new THREE.CircleGeometry(5, 20), new THREE.MeshBasicMaterial({ color: this.coreColors[i % 4] }), ...dir.clone().multiplyScalar(15.2).toArray(), m);
+      e.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), dir);
+      add(new THREE.TorusGeometry(15.4, 1.8, 6, 28), dark, 0, 0, 0, m).quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), new THREE.Vector3(dir.z, 0, -dir.x).normalize());
+      m.userData.eye = this.coreColors[i % 4];
+      this.coreMounts.push(m);
+    }
+    this.yaw = 0;
+    g.position.copy(this.pos);
+    g.scale.setScalar(this.scale);
+    this.group = g;
+    world.scene.add(noCull(g));
+    world.setSignal('bossDone', false);
+    world.events.on('incinerated', (e) => { if (e.cube.kind === 'core') this.coreBurned(); });
+    world.timer = this.timer;
+  }
+  hitTest(p) { return p.distanceTo(this.pos) < this.radius || p.distanceTo(this.head.getWorldPosition(_hv)) < 50 * this.scale; }
+  onRocket() {
+    const w = this.world;
+    this.hitFlash = 1;
+    const mount = this.coreMounts.find((m) => m.visible);
+    if (!mount) return;
+    mount.visible = false;
+    const at = mount.getWorldPosition(new THREE.Vector3());
+    const core = w.spawnCube(at, { eye: mount.userData.eye }, Core);
+    core.body.vel.set((Math.random() - 0.5) * 120, 80, (Math.random() - 0.5) * 120);
+    this.out++;
+    w.events.emit('coreDrop', { pos: at });
+    const lines = this.lines.hit || [];
+    if (lines[this.burned + this.out - 1]) w.say(lines[this.burned + this.out - 1]);
+  }
+  coreBurned() {
+    this.out = Math.max(0, this.out - 1);
+    this.burned++;
+    const w = this.world;
+    const lines = this.lines.burn || [];
+    if (this.burned >= this.cores) { w.timer = null; w.setSignal('bossDone', true); w.bossDefeated?.(); }
+    else if (lines[this.burned - 1]) w.say(lines[this.burned - 1]);
+  }
+  update(dt) {
+    const w = this.world;
+    // turn slowly to watch the player, with a restless sway
+    const pp = w.player.body.pos;
+    const want = Math.atan2(-(pp.z - this.pos.z), pp.x - this.pos.x) + Math.sin(w.time * 0.4) * 0.25;
+    let d = want - this.yaw; d = Math.atan2(Math.sin(d), Math.cos(d));
+    this.yaw += d * Math.min(1, dt * 0.9);
+    this.group.rotation.y = this.yaw;
+    this.eyeLight.intensity = 0.6 + this.hitFlash * 2;
+    this.group.position.y = this.pos.y + Math.sin(w.time * 0.9) * 6;
+    this.hitFlash = Math.max(0, this.hitFlash - dt * 2);
+    this.eyeMat.color.setRGB(2.2 + this.hitFlash * 3, 1.5 - this.hitFlash, 0.3);
+    this.group.position.x = this.pos.x + (Math.random() - 0.5) * this.hitFlash * 8;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Props for the maintenance areas
+export class Pipe {
+  constructor(world, d) {
+    const a = new THREE.Vector3(C(d.from[0]), C(d.from[1]), C(d.from[2]));
+    const b = new THREE.Vector3(C(d.to[0]), C(d.to[1]), C(d.to[2]));
+    const len = a.distanceTo(b);
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(d.r || 6, d.r || 6, len, 14), phong({ color: d.color || 0x6c5a48, shininess: 45 }));
+    m.position.copy(a).lerp(b, 0.5);
+    m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), b.clone().sub(a).normalize());
+    world.scene.add(noCull(m));
+    for (const p of [a, b]) {
+      const flange = new THREE.Mesh(new THREE.CylinderGeometry((d.r || 6) + 3, (d.r || 6) + 3, 4, 14), phong({ color: 0x3a3330 }));
+      flange.position.copy(p); flange.quaternion.copy(m.quaternion);
+      world.scene.add(noCull(flange));
+    }
+  }
+  update() {}
+}
+
+export class Graffiti {
+  constructor(world, d) {
+    const tex = makeGraffiti(d.lines, d.seed || 1, world.renderer);
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(C(d.w || 6), C(d.w || 6) / 2),
+      new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -4 }));
+    const n = new THREE.Vector3(...d.dir);
+    m.position.set(C(d.at[0]), C(d.at[1]), C(d.at[2])).addScaledVector(n, 0.5);
+    m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), n);
+    m.renderOrder = 3;
+    world.scene.add(noCull(m));
+  }
+  update() {}
 }

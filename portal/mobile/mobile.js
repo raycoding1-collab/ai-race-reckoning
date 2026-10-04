@@ -35,11 +35,12 @@ const game = new Game(renderer, audio, hud);
 window.__game = game;
 
 const defaults = {
-  voice: true, subtitles: false, fov: 80, sensitivity: 1, invertY: false, volume: 0.7, depth: 3, showFps: false,
+  voice: true, music: true, subtitles: false, quality: 'medium', fov: 80, sensitivity: 1, invertY: false, volume: 0.7, depth: 3, showFps: false,
   resolution: dpr >= 3 ? 0.55 : dpr >= 2 ? 0.7 : 1, buttons: 1, duckToggle: false, haptics: true,
 };
 const settings = Object.assign({}, defaults, store.get('settings-touch', {}));
 game.settings = settings;
+game.setQuality(settings.quality);
 let unlocked = Math.max(0, Math.min(LEVELS.length - 1, store.get('unlocked', 0)));
 
 // Dynamic resolution: drop render scale when the frame rate sags, raise it
@@ -265,6 +266,8 @@ function bindSetting(id, key, parse, fmt) {
     show();
     store.set('settings-touch', settings);
     if (key === 'volume') audio.setVolume(settings.volume);
+    if (key === 'music') audio.setMusic(settings.music);
+    if (key === 'quality') { game.setQuality(settings.quality); resize(); }
     if (key === 'resolution') dyn = 1;
     if (['fov', 'resolution', 'buttons'].includes(key)) resize();
     if (key === 'duckToggle') { duckLatched = false; $('t-duck').classList.remove('on'); }
@@ -285,7 +288,10 @@ bindSetting('set-ducktoggle', 'duckToggle');
 bindSetting('set-haptics', 'haptics');
 bindSetting('set-fps', 'showFps');
 bindSetting('set-voice', 'voice');
+bindSetting('set-quality', 'quality', String, () => '');
 bindSetting('set-subs', 'subtitles');
+bindSetting('set-music', 'music');
+audio.musicOn = settings.music;
 
 game.onComplete = (i) => {
   unlocked = Math.max(unlocked, Math.min(LEVELS.length - 1, i + 1));

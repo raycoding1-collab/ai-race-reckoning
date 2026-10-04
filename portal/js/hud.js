@@ -16,6 +16,7 @@ export class Hud {
       fps: $('fps'),
       ring: $('restart-ring'),
       hurt: $('hurt'),
+      timer: $('timer'),
     };
     this.typing = null;
     this.queue = [];
@@ -33,6 +34,7 @@ export class Hud {
 
   chamber(index, title) {
     const { card, cardNum, cardTitle } = this.el;
+    this.el.fade.classList.remove('white');
     cardNum.textContent = String(index).padStart(2, '0');
     cardTitle.textContent = title;
     card.classList.remove('show');
@@ -88,6 +90,22 @@ export class Hud {
     if (Math.abs(k - (this.hurtK || 0)) < 0.01) return;
     this.hurtK = k;
     this.el.hurt.style.opacity = Math.min(1, k * 1.4).toFixed(2);
+  }
+
+  // neurotoxin countdown (null hides it)
+  timer(sec) {
+    const el = this.el.timer;
+    if (sec === null) { if (!el.hidden) el.hidden = true; return; }
+    el.hidden = false;
+    const t = Math.max(0, Math.ceil(sec));
+    const txt = `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`;
+    if (el.textContent !== txt) el.textContent = txt;
+    el.classList.toggle('low', sec < 30);
+  }
+
+  ending() {
+    this.el.fadeText.innerHTML = '<strong>Escaped</strong><span>Momentum Test Chambers</span><em>An unofficial fan tribute to Valve\'s Portal.<br>Built from scratch: physics, portals, chambers, voice and sound.<br><br>Thank you for testing.</em>';
+    this.el.fade.classList.add('on', 'white');
   }
 
   death(on) {

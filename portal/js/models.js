@@ -4,14 +4,19 @@ import { COLORS } from './constants.js';
 // First-person portal device and the third-person test subject that you see
 // of yourself through portals. Both are built from primitives.
 
-const phong = (o) => new THREE.MeshPhongMaterial(o);
+// physically based stand-in for the old Phong materials: shininess maps to roughness
+const phong = (o) => {
+  const { shininess = 30, specular, ...rest } = o;
+  void specular;
+  return new THREE.MeshStandardMaterial({ roughness: Math.max(0.18, Math.min(0.9, 1 - shininess / 110)), metalness: 0.05, ...rest });
+};
 
 export class ViewModel {
   constructor() {
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(54, 1, 0.5, 400);
-    this.scene.add(new THREE.HemisphereLight(0xf2f6ff, 0x4a4f55, 2.2));
-    const d = new THREE.DirectionalLight(0xffffff, 2.2);
+    this.scene.add(new THREE.HemisphereLight(0xf2f6ff, 0x4a4f55, 0.9));
+    const d = new THREE.DirectionalLight(0xffffff, 1.1);
     d.position.set(-0.3, 1, 0.6);
     this.scene.add(d);
     this.root = new THREE.Group();

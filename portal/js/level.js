@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 import { CELL } from './constants.js';
 
-export const MAT = { EMPTY: 0, WHITE: 1, METAL: 2, LIGHT: 3 };
-export const PORTALABLE = new Set([MAT.WHITE]);
-const MAT_NAMES = { white: MAT.WHITE, metal: MAT.METAL, light: MAT.LIGHT };
+export const MAT = { EMPTY: 0, WHITE: 1, METAL: 2, LIGHT: 3, RUST: 4, CONCRETE: 5 };
+export const PORTALABLE = new Set([MAT.WHITE, MAT.CONCRETE]);
+const MAT_NAMES = { white: MAT.WHITE, metal: MAT.METAL, light: MAT.LIGHT, rust: MAT.RUST, concrete: MAT.CONCRETE };
 const matId = (m) => (typeof m === 'string' ? MAT_NAMES[m] : m);
 
 // A level is a voxel grid of 32-unit cells. Solid cells carry a surface
@@ -106,12 +106,14 @@ const DIRS = [
   [1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1],
 ];
 
-export function buildWorldMeshes(grid, textures, extraLights = []) {
+const _o = { x: 0, y: 0, z: 0 }, _d = { x: 0, y: 0, z: 0 };
+
+export function buildWorldMeshes(grid, textures, extraLights = [], pbr = false) {
   // gather light sources: exposed undersides of light panels
   const lights = [...extraLights];
   for (let y = 0; y < grid.ny; y++) for (let z = 0; z < grid.nz; z++) for (let x = 0; x < grid.nx; x++) {
     if (grid.get(x, y, z) === MAT.LIGHT && !grid.solid(x, y - 1, z)) {
-      lights.push({ x: (x + 0.5) * CELL, y: y * CELL - 6, z: (z + 0.5) * CELL, i: 1, r: 260 });
+      lights.push({ x: (x + 0.5) * CELL, y: y * CELL - 6, z: (z + 0.5) * CELL, i: 0.11, r: 300 });
     }
   }
   // spatial hash for lights so per-vertex lighting stays fast
@@ -135,11 +137,11 @@ export function buildWorldMeshes(grid, textures, extraLights = []) {
 
   const groups = new Map(); // key -> {pos, uv, col, idx}
   const group = (key) => {
-    if (!groups.has(key)) groups.set(key, { pos: [], uv: [], col: [], idx: [] });
+    if (!groups.has(key)) groups.set(key, { pos: [], uv: [], col: [], nrm: [], idx: [] });
     return groups.get(key);
   };
 
-  const ambientFor = (n) => (n[1] > 0 ? 0.50 : n[1] < 0 ? 0.42 : 0.46);
+  const ambientFor = (n) => (n[1] > 0 ? 0.30 : n[1] < 0 ? 0.24 : 0.28);
   const AO = [0.5, 0.68, 0.84, 1.0];
 
   for (let y = 0; y < grid.ny; y++) for (let z = 0; z < grid.nz; z++) for (let x = 0; x < grid.nx; x++) {
@@ -174,18 +176,28 @@ export function buildWorldMeshes(grid, textures, extraLights = []) {
         if (m === MAT.LIGHT) lum = 1.15;
         else {
           lum = ambientFor(n);
+          // sample point just in front of the face, nudged toward the face centre
           const q = [p[0] + n[0] * 2, p[1] + n[1] * 2, p[2] + n[2] * 2];
+          q[ua] += cu ? -1.5 : 1.5; q[va] += cv ? -1.5 : 1.5;
           for (const L of nearLights(q[0], q[1], q[2])) {
             const lx = L.x - q[0], ly = L.y - q[1], lz = L.z - q[2];
             const d2 = lx * lx + ly * ly + lz * lz;
             const d = Math.sqrt(d2) + 1e-3;
             const ndl = (lx * n[0] + ly * n[1] + lz * n[2]) / d;
             if (ndl <= 0) continue;
-            lum += L.i * 0.28 * ndl / (1 + d2 / (L.r * L.r));
+            let k = L.i * 0.42 * ndl / (1 + d2 / (L.r * L.r));
+            if (k < 0.01) continue;
+            // traced shadow: geometry between the surface and the light blocks it
+            _o.x = q[0]; _o.y = q[1]; _o.z = q[2];
+            _d.x = lx / d; _d.y = ly / d; _d.z = lz / d;
+            const hit = traceGrid(grid, _o, _d, d - 12);
+            if (hit && hit.t > 0) k *= 0.12;
+            lum += k;
           }
-          lum = Math.min(lum, 0.98) * AO[ao];
+          lum = Math.min(lum, 1.12) * AO[ao];
         }
         g.pos.push(p[0], p[1], p[2]);
+        g.nrm.push(n[0], n[1], n[2]);
         g.uv.push(p[ua] / 128, p[va] / 128);
         const tint = L_TINT[m] || L_TINT[1];
         g.col.push(lum * tint[0], lum * tint[1], lum * tint[2]);
@@ -208,8 +220,8 @@ export function buildWorldMeshes(grid, textures, extraLights = []) {
 
   const texFor = (m, orient) => {
     if (m === MAT.LIGHT) return textures.light;
-    if (m === MAT.WHITE) return [textures.whiteWall, textures.whiteFloor, textures.whiteCeil][orient];
-    return [textures.metalWall, textures.metalFloor, textures.metalCeil][orient];
+    const keys = KEYS[m] || KEYS[MAT.METAL];
+    return textures[keys[orient]];
   };
 
   const meshes = [];
@@ -220,10 +232,11 @@ export function buildWorldMeshes(grid, textures, extraLights = []) {
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.Float32BufferAttribute(g.pos, 3));
     geo.setAttribute('uv', new THREE.Float32BufferAttribute(g.uv, 2));
+    geo.setAttribute('normal', new THREE.Float32BufferAttribute(g.nrm, 3));
     geo.setAttribute('color', new THREE.Float32BufferAttribute(g.col, 3));
     geo.setIndex(g.idx);
     geo.computeBoundingSphere();
-    if (!mats.has(k)) mats.set(k, new THREE.MeshBasicMaterial({ map: texFor(m, orient), vertexColors: true }));
+    if (!mats.has(k)) mats.set(k, pbr ? pbrMaterial(m, orient, textures) : new THREE.MeshBasicMaterial({ map: texFor(m, orient), vertexColors: true }));
     const mat = mats.get(k);
     const mesh = new THREE.Mesh(geo, mat);
     mesh.frustumCulled = false;
@@ -232,6 +245,22 @@ export function buildWorldMeshes(grid, textures, extraLights = []) {
     meshes.push(mesh);
   }
   return meshes;
+}
+
+// Physically based surface: albedo x baked light (vertex colour), with
+// normal and roughness maps and image-based reflections from the scene's
+// environment. Light panels are emissive above 1.0 so they bloom.
+const KEYS = { [MAT.WHITE]: ['whiteWall', 'whiteFloor', 'whiteCeil'], [MAT.METAL]: ['metalWall', 'metalFloor', 'metalCeil'], [MAT.RUST]: ['rustWall', 'rustFloor', 'rustCeil'], [MAT.CONCRETE]: ['concWall', 'concFloor', 'concCeil'] };
+function pbrMaterial(m, orient, textures) {
+  if (m === MAT.LIGHT) {
+    return new THREE.MeshStandardMaterial({ color: 0x000000, emissive: 0xffffff, emissiveMap: textures.light, emissiveIntensity: 2.6, roughness: 0.4 });
+  }
+  const key = KEYS[m][orient];
+  return new THREE.MeshStandardMaterial({
+    map: textures[key], normalMap: textures[key + 'N'], roughnessMap: textures[key + 'R'],
+    roughness: 1, metalness: m === MAT.METAL ? 0.35 : m === MAT.RUST ? 0.45 : 0.0, vertexColors: true,
+    normalScale: new THREE.Vector2(0.8, 0.8), envMapIntensity: m === MAT.WHITE ? 0.6 : m === MAT.CONCRETE ? 0.3 : 0.8,
+  });
 }
 
 // subtle colour grading per material (white panels read slightly cool)

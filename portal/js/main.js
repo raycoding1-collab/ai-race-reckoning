@@ -30,9 +30,10 @@ const hud = new Hud();
 const game = new Game(renderer, audio, hud);
 window.__game = game;
 
-const defaults = { voice: true, subtitles: false, fov: 75, sensitivity: 3, invertY: false, volume: 0.7, depth: 5, showFps: false, resolution: 1 };
+const defaults = { voice: true, music: true, subtitles: false, quality: 'high', fov: 75, sensitivity: 3, invertY: false, volume: 0.7, depth: 5, showFps: false, resolution: 1 };
 const settings = Object.assign({}, defaults, store.get('settings', {}));
 game.settings = settings;
+game.setQuality(settings.quality);
 let unlocked = Math.max(0, Math.min(LEVELS.length - 1, store.get('unlocked', 0)));
 
 function resize() {
@@ -169,6 +170,8 @@ function bindSetting(id, key, parse, fmt) {
     show();
     store.set('settings', settings);
     if (key === 'volume') audio.setVolume(settings.volume);
+    if (key === 'music') audio.setMusic(settings.music);
+    if (key === 'quality') { game.setQuality(settings.quality); resize(); }
     if (key === 'fov' || key === 'resolution') resize();
   });
 }
@@ -180,7 +183,10 @@ bindSetting('set-res', 'resolution', parseFloat, (v) => Math.round(v * 100) + '%
 bindSetting('set-invert', 'invertY');
 bindSetting('set-fps', 'showFps');
 bindSetting('set-voice', 'voice');
+bindSetting('set-quality', 'quality', String, () => '');
 bindSetting('set-subs', 'subtitles');
+bindSetting('set-music', 'music');
+audio.musicOn = settings.music;
 
 game.onComplete = (i) => {
   unlocked = Math.max(unlocked, Math.min(LEVELS.length - 1, i + 1));

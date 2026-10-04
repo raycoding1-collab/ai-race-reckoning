@@ -6,6 +6,8 @@ export class Audio {
     this.ctx = null;
     this.volume = 0.7;
     this.holdNode = null;
+    this.mood = 'test';
+    this.musicOn = true;
   }
 
   init() {
@@ -38,6 +40,7 @@ export class Audio {
     for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
     this.noiseBuf = nb;
     this.startAmbience();
+    this.startMusic();
   }
 
   setVolume(v) {
@@ -184,6 +187,8 @@ export class Audio {
     g.gain.setTargetAtTime(0.0001, this.t, 0.05);
     o.stop(this.t + 0.3); o2.stop(this.t + 0.3);
     this.holdNode = null;
+    this.mood = 'test';
+    this.musicOn = true;
   }
   impact(speed) {
     if (!this.ctx) return;
@@ -220,6 +225,17 @@ export class Audio {
   turretShot() { if (this.ctx) { this.noise(this.t, 0.05, 0.22, 'bandpass', 2500, 900, 1.2); this.osc('square', 180, 90, this.t, 0.04, 0.05); } }
   turretAlert() { if (this.ctx) { this.osc('sine', 1400, 1400, this.t, 0.12, 0.08); this.osc('sine', 1900, 1900, this.t + 0.14, 0.18, 0.07); } }
   turretTip() { if (this.ctx) { this.osc('sine', 900, 120, this.t, 0.7, 0.08); this.noise(this.t, 0.3, 0.2, 'lowpass', 900, 150, 1); } }
+  rocketLaunch() { if (this.ctx) { this.noise(this.t, 0.9, 0.35, 'bandpass', 600, 2500, 1.2, this.dry, 0.02); this.osc('sawtooth', 90, 160, this.t, 0.6, 0.08); } }
+  explosion(k = 1) {
+    if (!this.ctx) return;
+    const t = this.t;
+    this.noise(t, 1.6, 0.7 * k, 'lowpass', 3000, 60, 0.8, this.dry, 0.004);
+    this.osc('sine', 120, 30, t, 1.2, 0.45 * k);
+    this.noise(t + 0.05, 0.4, 0.3 * k, 'highpass', 2000, 800, 0.7);
+  }
+  coreDrop() { if (this.ctx) { this.osc('sine', 1200, 300, this.t, 0.5, 0.08); this.noise(this.t, 0.3, 0.2, 'bandpass', 900, 300, 2); } }
+  incinerate() { if (this.ctx) { this.noise(this.t, 1.4, 0.5, 'lowpass', 600, 2400, 1, this.dry, 0.05); this.osc('sawtooth', 70, 40, this.t, 1.2, 0.08); } }
+  glassBreak() { if (this.ctx) { for (let i = 0; i < 10; i++) this.osc('sine', 2500 + Math.random() * 3500, 1800, this.t + i * 0.025, 0.25, 0.04); this.noise(this.t, 0.5, 0.35, 'highpass', 4000, 2500, 0.7); } }
   voiceBlip() { if (this.ctx) this.osc('sine', 500 + Math.random() * 300, 450, this.t, 0.035, 0.012); }
   complete() {
     if (!this.ctx) return;
@@ -239,5 +255,102 @@ export class Audio {
     const hg = ctx.createGain(); hg.gain.value = 0.008;
     hum.connect(hg).connect(this.master);
     hum.start();
+  }
+
+  // --- generative score ----------------------------------------------------
+  // A small ambient engine in the spirit of the test-chamber soundtrack: slow
+  // detuned pads and sparse glassy plinks while testing, a filtered drone with
+  // distant metal in the maintenance areas, and a driving pulse for the core.
+  startMusic() {
+    const ctx = this.ctx;
+    this.mus = ctx.createGain();
+    this.mus.gain.value = this.musicOn ? 1 : 0;
+    this.mus.connect(this.master);
+    this.mus.connect(this.reverb);
+    this.next = { chord: ctx.currentTime + 0.5, plink: ctx.currentTime + 3, pulse: ctx.currentTime + 0.5, clank: ctx.currentTime + 4 };
+    this.step = 0; this.chordN = 0;
+    this.musicTimer = window.setInterval(() => this.scheduleMusic(), 150);
+  }
+  setMood(mood) {
+    if (mood === this.mood) return;
+    this.mood = mood;
+    if (!this.ctx) return;
+    // let the current material ring out, start the new mood on the next beat
+    const t = this.ctx.currentTime + 0.3;
+    this.next.chord = this.next.pulse = t;
+    this.step = 0;
+  }
+  setMusic(on) {
+    this.musicOn = on;
+    if (this.mus) this.mus.gain.setTargetAtTime(on ? 1 : 0, this.ctx.currentTime, 0.4);
+  }
+  scheduleMusic() {
+    const ctx = this.ctx;
+    if (!ctx || ctx.state !== 'running' || !this.musicOn) return;
+    const ahead = ctx.currentTime + 0.5, m = this.mood, n = this.next;
+    const hz = (k) => 440 * Math.pow(2, (k - 69) / 12);
+    if (m === 'none') return;
+    const prog = m === 'test' ? [[50, 57, 62, 65, 69], [46, 53, 58, 62, 69], [48, 55, 60, 64, 67], [45, 52, 57, 61, 64]]
+      : m === 'escape' ? [[38, 45, 50, 53], [37, 44, 49, 53], [39, 46, 51, 54], [38, 45, 50, 56]]
+        : [[38, 50, 57, 60], [34, 46, 53, 62], [36, 48, 55, 60], [33, 45, 52, 61]];
+    const chord = prog[this.chordN % prog.length];
+    while (n.chord < ahead) {
+      const len = m === 'boss' ? 7.5 : 9;
+      const c = prog[this.chordN % prog.length];
+      for (const k of (m === 'escape' ? c.slice(0, 2) : c.slice(1))) this.pad(hz(k), n.chord, len + 3, m === 'escape' ? 'sawtooth' : 'triangle', m === 'boss' ? 0.016 : 0.012, m === 'escape' ? 420 : 1100);
+      if (m === 'escape') this.pad(hz(c[0]), n.chord, len + 3, 'sawtooth', 0.02, 260, true);
+      this.chordN++;
+      n.chord += len;
+    }
+    if (m !== 'boss') {
+      while (n.plink < ahead) {
+        const scale = m === 'test' ? [74, 76, 77, 79, 81, 84, 86, 88, 89] : [74, 75, 79, 80, 86];
+        if (m === 'test' || Math.random() < 0.4) this.plink(hz(scale[(Math.random() * scale.length) | 0]), n.plink, m === 'test' ? 0.022 : 0.014);
+        n.plink += m === 'test' ? 1.4 + Math.random() * 2.6 : 2.5 + Math.random() * 4;
+      }
+    }
+    if (m === 'escape') {
+      while (n.clank < ahead) {
+        this.noise(n.clank, 0.5, 0.025, 'bandpass', 900 + Math.random() * 1600, 400, 9, this.mus);
+        n.clank += 4 + Math.random() * 7;
+      }
+    }
+    if (m === 'boss') {
+      while (n.pulse < ahead) {
+        const t = n.pulse, root = hz(chord[0]);
+        const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = root;
+        const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.Q.value = 6;
+        f.frequency.setValueAtTime(1400, t); f.frequency.exponentialRampToValueAtTime(180, t + 0.2);
+        o.connect(f);
+        this.env(f, t, 0.004, this.step % 4 === 0 ? 0.07 : 0.045, 0.22).connect(this.mus);
+        o.start(t); o.stop(t + 0.3);
+        if (this.step % 2 === 1) this.noise(t, 0.05, 0.012, 'highpass', 7000, 7000, 0.7, this.mus);
+        if (this.step % 8 === 4) this.noise(t, 0.18, 0.03, 'bandpass', 220, 120, 1.5, this.mus);
+        this.step++;
+        n.pulse += 60 / 128 / 2;
+      }
+    }
+  }
+  pad(f, t0, dur, type, peak, cutoff, sweep = false) {
+    const ctx = this.ctx;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0, t0);
+    g.gain.linearRampToValueAtTime(peak, t0 + 2.5);
+    g.gain.setValueAtTime(peak, t0 + dur - 3);
+    g.gain.linearRampToValueAtTime(0, t0 + dur);
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = cutoff;
+    if (sweep) { lp.frequency.setValueAtTime(cutoff * 0.7, t0); lp.frequency.linearRampToValueAtTime(cutoff * 2.2, t0 + dur / 2); lp.frequency.linearRampToValueAtTime(cutoff * 0.7, t0 + dur); }
+    lp.connect(g).connect(this.mus);
+    for (const d of [-6, 6]) {
+      const o = ctx.createOscillator(); o.type = type; o.frequency.value = f; o.detune.value = d;
+      o.connect(lp); o.start(t0); o.stop(t0 + dur + 0.1);
+    }
+  }
+  plink(f, t0, peak) {
+    for (const [mul, k] of [[1, 1], [2.76, 0.35], [5.4, 0.12]]) {
+      const o = this.ctx.createOscillator(); o.type = 'sine'; o.frequency.value = f * mul;
+      this.env(o, t0, 0.004, peak * k, 1.6 / mul).connect(this.mus);
+      o.start(t0); o.stop(t0 + 2);
+    }
   }
 }

@@ -97,7 +97,7 @@ function rimMaterial(color, glow) {
         float inner = 1.0 - smoothstep(0.0, 0.08, r);
         float i = core * 1.4 + wisps + inner * 0.6;
         vec3 col = mix(uColor, uGlow, clamp(core * 1.2 + inner, 0.0, 1.0));
-        gl_FragColor = vec4(col * i * uOpen, 1.0);
+        gl_FragColor = vec4(col * i * uOpen * 0.75, 1.0);
       }`,
     transparent: true,
     blending: THREE.AdditiveBlending,

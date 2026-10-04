@@ -1,146 +1,222 @@
 {
 "Hello, and welcome to the Momentum Research Annex.": {
 "file": "cd7a2562c6.mp3",
-"dur": 3.26
+"dur": 3.35
 },
 "A portal joins two points in space. Whatever goes in one comes out of the other.": {
 "file": "6bb30a81e9.mp3",
-"dur": 4.97
+"dur": 5.06
 },
 "Please walk through the blue portal in front of you. W, A, S, D to move. Mouse to look.": {
 "file": "f4e68c0ca5.mp3",
-"dur": 6.12
+"dur": 6.25
 },
 "You have been issued a single-aperture portal device.": {
 "file": "a4c08d1887.mp3",
-"dur": 3.0
+"dur": 3.1
 },
 "Left mouse places the blue portal on any light-coloured surface. The orange end is fixed, for your safety and our convenience.": {
 "file": "401354f4a6.mp3",
-"dur": 8.34
+"dur": 8.54
 },
 "Retrieve the cube from the balcony and place it on the button.": {
 "file": "94b19abbd9.mp3",
-"dur": 3.52
+"dur": 3.63
 },
 "Your device has been upgraded. Right mouse now places the orange portal.": {
 "file": "e4fb0b01a5.mp3",
-"dur": 4.69
+"dur": 4.8
 },
 "The liquid below is not part of the test. Please do not become part of the liquid.": {
 "file": "ae9e03bfaa.mp3",
-"dur": 5.01
+"dur": 5.25
 },
 "There is a cube in the alcove on the far wall. You will need it.": {
 "file": "ceeaf79878.mp3",
-"dur": 3.65
+"dur": 3.85
 },
 "Momentum is conserved through portals. Speed in, speed out. Direction is negotiable.": {
 "file": "97f3d31a48.mp3",
-"dur": 5.97
+"dur": 6.11
 },
 "Place a portal on the floor below and one high on the white wall. Then step off the ledge.": {
 "file": "39a23cee2a.mp3",
-"dur": 5.39
+"dur": 5.46
 },
 "Your long-fall boots make landings painless. The goo does not.": {
 "file": "01915a3181.mp3",
-"dur": 4.07
+"dur": 4.18
 },
 "The shimmering field is a material emancipation grid.": {
 "file": "63329d97f4.mp3",
-"dur": 3.43
+"dur": 3.61
 },
 "It vaporises anything not authorised to pass, and closes any portals you have open. The cube is not authorised.": {
 "file": "e9cd0a0b35.mp3",
-"dur": 7.42
+"dur": 7.77
 },
 "Portals cannot be fired through the grid. They can be fired through other openings.": {
 "file": "0f391b6c12.mp3",
-"dur": 4.75
+"dur": 4.91
 },
 "High-energy pellets travel in straight lines and rebound off every surface.": {
 "file": "331ee568f0.mp3",
-"dur": 4.82
+"dur": 4.93
 },
 "They are fatal on contact. Guide one into the receptacle with your portals.": {
 "file": "7894def7cb.mp3",
-"dur": 4.91
+"dur": 5.06
 },
 "The aerial faith plate will deliver you to the upper ledge.": {
 "file": "9a027935fa.mp3",
-"dur": 3.31
+"dur": 3.42
 },
 "You may bring the cube. Hold on to it. The plate is very confident and very fast.": {
 "file": "bd51abbf5e.mp3",
-"dur": 5.33
+"dur": 5.53
 },
 "There is no ledge in this chamber. Make your own momentum.": {
 "file": "05a86a4e71.mp3",
-"dur": 3.41
+"dur": 3.5
 },
 "Put one portal on the floor and the other on the ceiling directly above it. Then fall.": {
 "file": "59753d6b99.mp3",
-"dur": 5.14
+"dur": 5.38
 },
 "Once you are going fast enough, move the ceiling portal to the white wall.": {
 "file": "17601f1212.mp3",
-"dur": 4.05
+"dur": 4.17
 },
 "This chamber features a moving platform. It moves only while the button is held down.": {
 "file": "00d49ebead.mp3",
-"dur": 5.39
+"dur": 5.53
 },
 "The cube you need is in the alcove across the liquid. Portals will get you there and back.": {
 "file": "706fde2f1f.mp3",
-"dur": 5.38
+"dur": 5.53
 },
 "The button is inside a sealed glass enclosure. Portals cannot be fired through glass.": {
 "file": "9c7dc2c1ec.mp3",
-"dur": 5.39
+"dur": 5.53
 },
 "Portals can, however, be fired at the ceiling. Gravity will handle the rest.": {
 "file": "4b639d2d0a.mp3",
-"dur": 4.69
+"dur": 4.89
 },
 "The devices beyond the wall are sentry turrets. They are not part of the test. They are, however, armed.": {
 "file": "89a50a8249.mp3",
-"dur": 6.44
+"dur": 6.59
 },
 "A turret that has been knocked over stops firing. Approach from behind, or drop something on it.": {
 "file": "ec7e2f4f57.mp3",
-"dur": 6.1
+"dur": 6.29
 },
 "Turrets can be picked up. They do not enjoy it.": {
 "file": "89e04a2f8e.mp3",
-"dur": 2.77
+"dur": 2.92
+},
+"This Weighted Companion Cube will accompany you through the test. Please take care of it.": {
+"file": "f57aec2516.mp3",
+"dur": 5.38
+},
+"A pellet patrols the corridor ahead. Hold your companion in front of you and it will keep you safe.": {
+"file": "c15621ad30.mp3",
+"dur": 6.24
+},
+"Congratulations. You have completed every test. Please step onto the platform for your celebration.": {
+"file": "bd73aa9291.mp3",
+"dur": 6.64
+},
+"The celebration is just ahead. It is warm, and it is final.": {
+"file": "5be286acc8.mp3",
+"dur": 4.17
+},
+"Please do not resist. The incinerator is part of the celebration.": {
+"file": "8bf012db16.mp3",
+"dur": 4.44
+},
+"Where are you? You are not supposed to be back here.": {
+"file": "fe491d3955.mp3",
+"dur": 2.86
+},
+"The rocket sentry in the next room will escort you back to the incinerator.": {
+"file": "8db7076805.mp3",
+"dur": 4.36
+},
+"Oh. It is you. I have released a deadly neurotoxin. You have four minutes.": {
+"file": "a038f33ab8.mp3",
+"dur": 5.21
+},
+"The rocket sentry is not part of a test. It is just here to watch you lose.": {
+"file": "f997900157.mp3",
+"dur": 4.96
 },
 "Testing is complete. This is a free-play chamber. Nothing here is graded.": {
 "file": "a6324ba54c.mp3",
-"dur": 4.84
+"dur": 5.0
 },
 "There are cubes, faith plates, a pellet launcher and plenty of white walls. Enjoy them responsibly.": {
 "file": "d030878a6c.mp3",
-"dur": 6.36
+"dur": 6.51
 },
 "That is a Weighted Storage Cube. Press E to pick it up, and E again to put it down. The large red button opens the door.": {
 "file": "4bcdf9e172.mp3",
-"dur": 7.97
+"dur": 8.2
+},
+"You have reached the end of the test. Please place your companion in the emergency incinerator. It cannot follow you any further.": {
+"file": "da5cddb333.mp3",
+"dur": 7.71
+},
+"That was not part of the protocol. Return to the platform at once.": {
+"file": "de0910c7c4.mp3",
+"dur": 4.27
+},
+"I can see you now. Please hold still for the sentry.": {
+"file": "873a0afaea.mp3",
+"dur": 3.31
+},
+"No. Stop. I was only ever trying to help you. I am going to remember this, test subject.": {
+"file": "879b10a105.mp3",
+"dur": 5.72
+},
+"That piece was load bearing. Put it back.": {
+"file": "3bbeb47f4c.mp3",
+"dur": 2.75
+},
+"You are dismantling a federally funded research intelligence.": {
+"file": "364b52878b.mp3",
+"dur": 3.93
+},
+"Stop that. Those cores keep me reasonable.": {
+"file": "c6ff86e9cd.mp3",
+"dur": 2.71
+},
+"Interesting. That one was my conscience. I feel lighter already.": {
+"file": "0daf7c1645.mp3",
+"dur": 4.36
+},
+"Two down. Neurotoxin is still on schedule, in case you were wondering.": {
+"file": "b3f02f7d5c.mp3",
+"dur": 4.72
+},
+"Shutdown sequence initiated.": {
+"file": "d4c057c8ab.mp3",
+"dur": 2.12
 },
 "Please walk through the blue portal in front of you. Drag on the left of the screen to move and on the right to look.": {
 "file": "efb9470b5b.mp3",
-"dur": 6.5
+"dur": 6.79
 },
 "The blue button places the blue portal on any light-coloured surface. The orange end is fixed, for your safety and our convenience.": {
 "file": "c8d8c4f36f.mp3",
-"dur": 8.34
+"dur": 8.58
 },
 "Your device has been upgraded. The orange button now places the orange portal.": {
 "file": "8c9d83c1f4.mp3",
-"dur": 5.05
+"dur": 5.28
 },
 "That is a Weighted Storage Cube. Tap Grab to pick it up, and Grab again to put it down. The large red button opens the door.": {
 "file": "426e524c85.mp3",
-"dur": 8.04
+"dur": 8.32
 }
 }

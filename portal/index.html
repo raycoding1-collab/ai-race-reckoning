@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Momentum Test Chambers</title>
-<meta name="description" content="A browser recreation of portal-gun physics: recursive see-through portals, momentum-conserving flings, cubes, buttons, emancipation grids, energy pellets and faith plates across twelve test chambers.">
+<meta name="description" content="A browser recreation of portal-gun physics: recursive see-through portals, momentum-conserving flings, cubes, buttons, emancipation grids, energy pellets, faith plates, turrets, a rocket sentry and a final confrontation across sixteen test chambers.">
 <meta name="theme-color" content="#0b0c0e">
 <meta name="color-scheme" content="dark">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -29,6 +29,7 @@
   <div id="card"><span id="card-num">00</span><span id="card-title">Orientation</span></div>
   <div id="restart-ring" hidden><span>Restarting</span></div>
   <div id="fps" hidden></div>
+  <div id="timer" hidden></div>
 </div>
 <div id="hurt"></div>
 <div id="death"></div>
@@ -48,7 +49,7 @@
   <section id="menu-start" class="panel" hidden>
     <p class="eyebrow">Momentum Research Annex</p>
     <h1>Test<br>Chambers</h1>
-    <p class="lede">Two portals. One gun. Momentum is conserved. A browser recreation of portal physics with recursive see-through portals, flings, cubes, grids, pellets, faith plates, moving platforms and turrets.</p>
+    <p class="lede">Two portals. One gun. Momentum is conserved. A browser recreation of portal physics across sixteen chambers: recursive see-through portals, flings, cubes, grids, pellets, faith plates, turrets, an escape through the maintenance areas and a final confrontation.</p>
     <div class="actions">
       <button id="btn-play" class="primary">Start testing</button>
       <button id="btn-new">New game</button>
@@ -82,11 +83,13 @@
 
   <section id="menu-settings" class="panel" hidden>
     <p class="eyebrow">Settings</p>
+    <label class="set"><span>Graphics</span><select id="set-quality"><option value="high">High (bloom, HDR, anti-aliasing)</option><option value="medium">Medium (lit materials)</option><option value="low">Low (fastest)</option></select><output id="set-quality-v"></output></label>
     <label class="set"><span id="sens-label">Mouse sensitivity</span><input id="set-sens" type="range" min="0.5" max="10" step="0.1"><output id="set-sens-v"></output></label>
     <label class="set"><span>Field of view</span><input id="set-fov" type="range" min="60" max="110" step="1"><output id="set-fov-v"></output></label>
     <label class="set"><span>Portal recursion</span><input id="set-depth" type="range" min="1" max="8" step="1"><output id="set-depth-v"></output></label>
     <label class="set"><span>Resolution scale</span><input id="set-res" type="range" min="0.5" max="1" step="0.05"><output id="set-res-v"></output></label>
     <label class="set check"><span>Announcer voice</span><input id="set-voice" type="checkbox"></label>
+    <label class="set check"><span>Music</span><input id="set-music" type="checkbox"></label>
     <label class="set check"><span>Subtitles</span><input id="set-subs" type="checkbox"></label>
     <label class="set"><span>Volume</span><input id="set-vol" type="range" min="0" max="1" step="0.05"><output id="set-vol-v"></output></label>
     <label class="set touch-only"><span>Button size</span><input id="set-btn" type="range" min="0.7" max="1.4" step="0.05"><output id="set-btn-v"></output></label>

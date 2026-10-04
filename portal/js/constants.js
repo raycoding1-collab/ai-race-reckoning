@@ -47,7 +47,7 @@ export const CUBE = {
 export const PELLET = {
   radius: 10,
   speed: 420,
-  lifetime: 11,
+  lifetime: 12,                      // seconds; passing a portal tops it up to at least 6 left
 };
 
 export const COLORS = {
