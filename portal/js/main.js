@@ -75,28 +75,38 @@ canvas.addEventListener('mousedown', (e) => {
 });
 canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 document.addEventListener('mousemove', (e) => {
-  if (!playing || document.pointerLockElement !== canvas) return;
+  if (!playing || (document.pointerLockElement !== canvas && !freeMouse)) return;
   const k = (settings.sensitivity * 0.022 * Math.PI) / 180;
   const dx = e.movementX * k, dy = e.movementY * k * (settings.invertY ? -1 : 1);
   game.player.look(dx, dy);
   look.dx += dx; look.dy += dy;
 });
 
+// Some embeds and browsers refuse pointer lock. Rather than leave the player
+// stuck on the menu, fall back to looking with plain mouse movement.
+let freeMouse = false;
+function playUnlocked() {
+  freeMouse = true;
+  playing = true;
+  showMenu(null);
+}
 function lockPointer() {
   audio.init();
   audio.setVolume(settings.volume);
-  if (!canvas.requestPointerLock) { $('lock-note').hidden = false; return; }
+  if (freeMouse || !canvas.requestPointerLock) { playUnlocked(); return; }
+  const fail = () => { if (document.pointerLockElement !== canvas) playUnlocked(); };
   let p;
   try { p = canvas.requestPointerLock({ unadjustedMovement: true }); } catch { p = null; }
   if (p && p.catch) p.catch(() => {
     // unadjustedMovement is not supported everywhere; retry plainly
-    try { const q = canvas.requestPointerLock(); if (q && q.catch) q.catch(() => { $('lock-note').hidden = false; }); } catch { $('lock-note').hidden = false; }
+    try { const q = canvas.requestPointerLock(); if (q && q.catch) q.catch(fail); } catch { fail(); }
   });
+  setTimeout(fail, 700);   // no answer at all (sandboxed frame)
 }
-document.addEventListener('pointerlockerror', () => { $('lock-note').hidden = false; });
+document.addEventListener('pointerlockerror', () => { if (document.pointerLockElement !== canvas) playUnlocked(); });
+window.addEventListener('keydown', (e) => { if (freeMouse && playing && (e.code === 'Escape' || e.code === 'KeyP')) { playing = false; keys.clear(); showMenu('pause'); } });
 // clicking the game view while paused resumes, like most PC shooters
 canvas.addEventListener('click', () => { if (started && !playing) lockPointer(); });
-
 document.addEventListener('pointerlockchange', () => {
   if (document.pointerLockElement === canvas) {
     playing = true;
