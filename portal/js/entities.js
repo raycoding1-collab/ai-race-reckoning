@@ -46,6 +46,9 @@ export class BlobShadow {
 // ---------------------------------------------------------------------------
 // Weighted storage cube
 let cubeGeo = null;
+const _up = new THREE.Vector3(0, 1, 0), _one = new THREE.Vector3(1, 1, 1);
+const _tq = new THREE.Quaternion(), _tv = new THREE.Vector3();
+const _axes = [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]].map((a) => new THREE.Vector3(...a));
 export class Cube {
   constructor(world, pos, opts = {}) {
     this.world = world;
@@ -58,6 +61,10 @@ export class Cube {
     this.dispenser = opts.dispenser || null;
     this.held = false;
     this.dissolving = -1;
+    this.tumble = true;                      // free rotation while airborne
+    this.q = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), this.yaw);
+    this.spin = new THREE.Vector3();
+    this.wasGround = true;
     this.build(world);
     this.clone.visible = false;
     this.mesh.rotation.order = this.clone.rotation.order = 'YXZ';
@@ -126,6 +133,7 @@ export class Cube {
     }
     const pre = b.vel.length();
     moveBody(this.world, b, dt);
+    this.updateRotation(dt);
     for (const h of b.hits) {
       if (h.ent && h.ent.isBody && h.ent.owner && h.ent.owner.knock && h.speed > 110) h.ent.owner.knock();
     }
@@ -138,15 +146,59 @@ export class Cube {
   }
 
   onTeleported(P) {
-    // rotate the yaw through the portal (cube stays upright)
+    // carry the full orientation (and any spin) through the portal
+    this.q.premultiply(P.toOtherQuat);
+    this.spin.applyQuaternion(P.toOtherQuat);
     const f = new THREE.Vector3(Math.sin(this.yaw), 0, Math.cos(this.yaw)).applyQuaternion(P.toOtherQuat);
     if (Math.hypot(f.x, f.z) > 0.1) this.yaw = Math.atan2(f.x, f.z);
+  }
+
+  // Visual rotation: tumble in flight, settle flat on whichever face lands.
+  updateRotation(dt) {
+    const b = this.body;
+    if (this.held || !this.tumble) {
+      _tq.setFromAxisAngle(_up, this.yaw);
+      this.q.slerp(_tq, Math.min(1, dt * 14));
+      this.spin.set(0, 0, 0);
+      this.wasGround = true;
+      return;
+    }
+    if (!b.onGround) {
+      if (this.wasGround) {
+        // leaving the ground: roll in the direction of travel
+        const h = _tv.set(b.vel.x, 0, b.vel.z);
+        const sp = h.length();
+        if (sp > 60) this.spin.crossVectors(_up, h.divideScalar(sp)).multiplyScalar(Math.min(7, sp / 90));
+      }
+      const w = this.spin.length();
+      if (w > 1e-3) {
+        _tq.setFromAxisAngle(_tv.copy(this.spin).divideScalar(w), w * dt);
+        this.q.premultiply(_tq).normalize();
+      }
+      this.spin.multiplyScalar(Math.max(0, 1 - dt * 0.3));
+    } else {
+      this.spin.set(0, 0, 0);
+      // which local axis points most nearly up? rotate it exactly up
+      let best = null, bestDot = -2;
+      for (const a of _axes) {
+        const d = _tv.copy(a).applyQuaternion(this.q).y;
+        if (d > bestDot) { bestDot = d; best = a; }
+      }
+      _tv.copy(best).applyQuaternion(this.q);
+      _tq.setFromUnitVectors(_tv, _up).multiply(this.q);
+      this.q.slerp(_tq, Math.min(1, dt * 12));
+      // keep yaw in sync for picking up
+      const f = _tv.set(0, 0, 1).applyQuaternion(this.q);
+      if (Math.abs(f.y) < 0.7) this.yaw = Math.atan2(f.x, f.z);
+    }
+    this.wasGround = b.onGround;
   }
 
   sync() {
     const b = this.body;
     this.mesh.position.copy(b.pos);
-    this.mesh.rotation.set(0, this.yaw, 0);
+    if (this.tumble) this.mesh.quaternion.copy(this.q);
+    else this.mesh.rotation.set(0, this.yaw, 0);
     // render a clipped copy on the far side while passing through a portal
     const P = b.holes.find((p) => p.linked && Math.abs(p.dist(b.pos)) < b.half.y * 1.8);
     if (P && this.dissolving < 0) {
@@ -155,7 +207,7 @@ export class Cube {
       for (const m of this.mats) m.clippingPlanes = [this.planeA];
       for (const m of this.cloneMats) m.clippingPlanes = [this.planeB];
       this.clone.visible = true;
-      const m = new THREE.Matrix4().compose(b.pos, new THREE.Quaternion().setFromEuler(this.mesh.rotation), new THREE.Vector3(1, 1, 1));
+      const m = new THREE.Matrix4().compose(b.pos, this.mesh.quaternion, _one);
       m.premultiply(P.toOther);
       m.decompose(this.clone.position, this.clone.quaternion, this.clone.scale);
     } else {
@@ -757,7 +809,7 @@ export class Glass {
 // Chamber sign (number, title, hazard icons)
 export class Sign {
   constructor(world, d) {
-    const tex = makeSignTexture(d.number, d.title, d.icons || [], world.renderer);
+    const tex = makeSignTexture(d.number, d.title, d.icons || [], world.renderer, world.lastLevel);
     const m = new THREE.Mesh(new THREE.PlaneGeometry(56, 112), new THREE.MeshBasicMaterial({ map: tex }));
     const back = new THREE.Mesh(new THREE.BoxGeometry(60, 116, 3), phong({ color: 0x8b9094 }));
     back.position.z = -1.6;
@@ -808,6 +860,7 @@ export class Turret extends Cube {
   constructor(world, pos, opts = {}) {
     super(world, pos, { ...opts, half: [12, 30, 12] });
     this.kind = 'turret';
+    this.tumble = false;
     this.tipped = false;
     this.tip = 0;
     this.alert = 0;
@@ -932,5 +985,67 @@ export class Turret extends Cube {
   dispose() {
     super.dispose();
     this.world.scene.remove(this.laser);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Moving platform: a solid slab shuttling between two points. With inputs it
+// only runs while they are all active (and returns home otherwise). Bodies
+// standing on it ride along.
+export class Platform {
+  constructor(world, d) {
+    this.world = world;
+    const b = d.box.map(C);
+    this.home = b.slice();
+    this.offset = new THREE.Vector3(...d.to.map(C));
+    this.inputs = d.inputs || [];
+    this.speed = C(d.speed || 3) / this.offset.length();
+    this.t = 0; this.dir = 1; this.wait = 0;
+    this.box = b.slice();
+    world.solids.push(this);
+    world.shotBlockers.push(this);
+    const w = b[3] - b[0], h = b[4] - b[1], dz = b[5] - b[2];
+    const g = new THREE.Group();
+    const slab = new THREE.Mesh(new THREE.BoxGeometry(w, h, dz), phong({ color: 0x55595e, shininess: 40 }));
+    const top = new THREE.Mesh(new THREE.BoxGeometry(w - 6, 1, dz - 6), phong({ color: 0xd9dcde, shininess: 20 }));
+    top.position.y = h / 2 + 0.5;
+    this.lightMat = new THREE.MeshBasicMaterial({ color: 0x3aa8ff });
+    const edge = new THREE.Mesh(new THREE.BoxGeometry(w + 0.6, 3, dz + 0.6), this.lightMat);
+    edge.position.y = h / 2 - 4;
+    g.add(slab, top, edge);
+    this.group = noCull(g);
+    world.scene.add(g);
+    this.place();
+  }
+  place() {
+    const e = this.t * this.t * (3 - 2 * this.t);
+    for (let a = 0; a < 3; a++) {
+      const o = this.offset.getComponent(a) * e;
+      this.box[a] = this.home[a] + o; this.box[a + 3] = this.home[a + 3] + o;
+    }
+    this.group.position.set((this.box[0] + this.box[3]) / 2, (this.box[1] + this.box[4]) / 2, (this.box[2] + this.box[5]) / 2);
+  }
+  isSolid() { return true; }
+  blocksShot() { return true; }
+  update(dt) {
+    const active = this.inputs.every((s) => this.world.getSignal(s));
+    this.lightMat.color.setHex(active ? 0xffa030 : 0x3aa8ff);
+    const prev = this.box.slice();
+    if (this.wait > 0) this.wait -= dt;
+    else if (active || this.t > 0) {
+      const dir = active ? this.dir : -1;
+      this.t = Math.min(1, Math.max(0, this.t + dir * this.speed * dt));
+      if (active && (this.t === 1 || this.t === 0)) { this.dir = this.t === 1 ? -1 : 1; this.wait = 1.2; }
+    }
+    this.place();
+    const dx = this.box[0] - prev[0], dy = this.box[1] - prev[1], dz = this.box[2] - prev[2];
+    if (!dx && !dy && !dz) return;
+    // carry riders
+    for (const body of this.world.bodies) {
+      const p = body.pos, h = body.half;
+      const onTop = Math.abs(p.y - h.y - prev[4]) < 3 &&
+        p.x + h.x > prev[0] && p.x - h.x < prev[3] && p.z + h.z > prev[2] && p.z - h.z < prev[5];
+      if (onTop && !(body.owner && body.owner.held)) { p.x += dx; p.y += dy; p.z += dz; if (body.owner?.prevPos) body.owner.prevPos.add(_tv.set(dx, dy, dz)); }
+    }
   }
 }

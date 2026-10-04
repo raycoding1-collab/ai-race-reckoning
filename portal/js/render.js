@@ -127,6 +127,7 @@ function fillMaterial(color, glow) {
   });
 }
 
+const _close = new THREE.Matrix4();
 let dotTex = null;
 export function dotTexture() {
   if (dotTex) return dotTex;
@@ -199,8 +200,23 @@ export class PortalVisual {
   }
   update(time, dt) {
     const P = this.portal;
-    this.group.visible = P.placed;
-    if (!P.placed) return;
+    // closing animation when a portal is fizzled: shrink where it was
+    if (!P.placed) {
+      if (this.wasPlaced) { this.closing = 0.22; this.wasPlaced = false; this.fill.visible = true; }
+      this.closing = Math.max(0, (this.closing || 0) - dt);
+      this.group.visible = this.closing > 0;
+      if (this.closing > 0) {
+        const k = this.closing / 0.22;
+        this.group.matrix.copy(P.matrix).multiply(_close.makeScale(k, k, 1));
+        this.group.matrixWorldNeedsUpdate = true;
+        this.rimMat.uniforms.uTime.value = time;
+        this.fillMat.uniforms.uTime.value = time;
+      }
+      return;
+    }
+    this.wasPlaced = true;
+    this.closing = 0;
+    this.group.visible = true;
     const open = Math.min(1, (time - P.openedAt) / 0.28);
     const e = 1 - Math.pow(1 - open, 3);
     this.scale = Math.max(0.02, e);
@@ -237,6 +253,8 @@ const _frustum = new THREE.Frustum();
 const _pm = new THREE.Matrix4();
 const _sphere = new THREE.Sphere();
 const _scale = new THREE.Matrix4();
+const _sub = new THREE.Matrix4();
+const _box = new THREE.Box3();
 
 export class PortalRenderer {
   constructor(renderer) {
@@ -270,6 +288,7 @@ export class PortalRenderer {
       m.frustumCulled = false;
     }
     this.vcams = [];
+    this.bounds = [];
     this.stats = { views: 0 };
   }
 
@@ -420,20 +439,60 @@ export class PortalRenderer {
     if (recurse) for (const { P, mouth } of visible) if (!mouth) this.drawDepth(P, visuals.get(P), cam, level);
     // idle fill for portals we did not see through
     for (const [P, vis] of visuals) {
-      vis.fill.visible = P.placed && (!P.linked || !recurse);
+      vis.fill.visible = (P.placed && (!P.linked || !recurse)) || vis.closing > 0;
     }
     world.onBeforeView?.(cam, level, skip);
+    const culled = this.cull(scene, cam, rect, skip);
     this.setSceneStencil(scene, level);
     r.render(scene, cam);
+    for (const o of culled) o.visible = true;
     for (const { P, rect: pr } of held) {
       this.setScissor(pr);
       this.drawMask(P, visuals.get(P), cam, level + 1, THREE.DecrementStencilOp);
     }
   }
 
+  // Per-view culling of whole top-level objects against the sub-frustum
+  // seen through the current portal (its screen rectangle) and the exit
+  // portal's plane. Through a small portal most of the level is skipped.
+  computeBounds(scene) {
+    scene.updateMatrixWorld();
+    this.bounds.length = 0;
+    for (const o of scene.children) {
+      if (o.isLight || o.userData.noCull || o.isPoints || o.isLine || o.isSprite) continue;
+      let sph = o.userData.sphere;
+      if (!sph || !o.userData.world) {
+        _box.setFromObject(o);
+        if (_box.isEmpty()) continue;
+        sph = o.userData.sphere || (o.userData.sphere = new THREE.Sphere());
+        _box.getBoundingSphere(sph);
+      }
+      this.bounds.push(o);
+    }
+  }
+
+  cull(scene, cam, rect, skip) {
+    const out = [];
+    const proj = cam.userData.stdProj || cam.projectionMatrix;
+    const r = rect || [-1, -1, 1, 1];
+    const sx = 2 / (r[2] - r[0]), sy = 2 / (r[3] - r[1]);
+    _sub.set(sx, 0, 0, -(r[2] + r[0]) / (r[2] - r[0]), 0, sy, 0, -(r[3] + r[1]) / (r[3] - r[1]), 0, 0, 1, 0, 0, 0, 0, 1);
+    _pm.multiplyMatrices(_sub, proj).multiply(cam.matrixWorldInverse);
+    _frustum.setFromProjectionMatrix(_pm);
+    for (const o of this.bounds) {
+      if (!o.visible) continue;
+      const sph = o.userData.sphere;
+      let hide = !_frustum.intersectsSphere(sph);
+      if (!hide && skip && skip.dist(sph.center) < -sph.radius) hide = true;   // behind the exit portal
+      if (hide) { o.visible = false; out.push(o); }
+    }
+    return out;
+  }
+
   render(world, scene, camera, visuals) {
     const r = this.renderer;
     this.stats.views = 0;
+    this.computeBounds(scene);
     camera.userData.stdProj = camera.projectionMatrix;
     r.setScissorTest(false);
     r.state.buffers.color.setMask(true);

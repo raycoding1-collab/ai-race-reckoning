@@ -269,6 +269,72 @@ export const LEVELS = [
   },
   // ------------------------------------------------------------------ 08
   {
+    title: 'Transit',
+    gun: 'both',
+    icons: ['cube', 'button', 'portal', 'goo'],
+    build() {
+      const G = new Grid(46, 14, 26);
+      G.room(2, 1, 2, 40, 10, 20, { floor: 'metal', walls: 'metal', west: 'white', ceil: 'metal' });
+      G.fill(2, 1, 2, 10, 3, 20, 'metal');                  // start platform
+      G.fill(32, 1, 2, 40, 3, 20, 'metal');                 // far platform
+      G.room(18, 5, 20, 24, 9, 24, { floor: 'metal', walls: 'white', ceil: 'metal', lightEvery: 3 });   // cube alcove
+      G.room(40, 3, 9, 45, 7, 13, { floor: 'metal', walls: 'metal', ceil: 'metal', lightEvery: 3 });
+      return {
+        grid: G,
+        start: { at: [5, 3, 14], yaw: -PI / 2 },
+        entities: [
+          { type: 'sign', number: 8, title: 'Transit', icons: ['cube', 'button', 'portal', 'goo'], at: [2, 5.2, 6], dir: [1, 0, 0] },
+          { type: 'goo', box: [10, 0, 2, 32, 2.4, 20] },
+          { type: 'cube', at: [21, 5.66, 22] },
+          { type: 'button', at: [5, 3, 5], signal: 'b1' },
+          { type: 'wire', signal: 'b1', points: [[6.6, 3, 5], [9.8, 3, 5], [9.8, 3, 9]] },
+          { type: 'platform', box: [10, 2, 9, 14, 3, 13], to: [18, 0, 0], speed: 3, inputs: ['b1'] },
+          { type: 'door', at: [40.25, 3, 11], axis: 'x', width: 4, height: 4, startOpen: true },
+          { type: 'exit', at: [43, 3, 11] },
+        ],
+        lines: [
+          [1.0, 'This chamber features a moving platform. It moves only while the button is held down.'],
+          [7.0, 'The cube you need is in the alcove across the liquid. Portals will get you there and back.'],
+        ],
+      };
+    },
+  },
+  // ------------------------------------------------------------------ 09
+  {
+    title: 'Delivery',
+    gun: 'both',
+    icons: ['cube', 'button', 'portal'],
+    build() {
+      const G = new Grid(38, 16, 24);
+      G.room(2, 1, 2, 30, 12, 20, { floor: 'metal', walls: 'metal', ceil: 'metal' });
+      G.paint(2, 0, 2, 10, 1, 20, 'white');                 // floor by the start
+      G.paint(18, 0, 9, 22, 1, 13, 'white');                // floor inside the cage
+      G.paint(17, 12, 8, 23, 13, 14, 'white');              // ceiling above the cage
+      G.room(30, 1, 9, 36, 5, 13, { floor: 'metal', walls: 'metal', ceil: 'metal', lightEvery: 3 });
+      return {
+        grid: G,
+        start: { at: [5, 1, 14], yaw: -PI / 2 },
+        entities: [
+          { type: 'sign', number: 9, title: 'Delivery', icons: ['cube', 'button', 'portal'], at: [2, 3.2, 6], dir: [1, 0, 0] },
+          { type: 'dispenser', at: [5, 10.75, 6] },
+          { type: 'glass', box: [17.8, 1, 8.8, 18, 4, 13.2] },
+          { type: 'glass', box: [22, 1, 8.8, 22.2, 4, 13.2] },
+          { type: 'glass', box: [18, 1, 8.8, 22, 4, 9] },
+          { type: 'glass', box: [18, 1, 13, 22, 4, 13.2] },
+          { type: 'button', at: [20, 1, 11], signal: 'b1' },
+          { type: 'wire', signal: 'b1', points: [[22.4, 1, 11], [30, 1, 11]] },
+          { type: 'door', at: [30.25, 1, 11], axis: 'x', width: 4, height: 4, inputs: ['b1'] },
+          { type: 'exit', at: [34, 1, 11] },
+        ],
+        lines: [
+          [1.0, 'The button is inside a sealed glass enclosure. Portals cannot be fired through glass.'],
+          [7.0, 'Portals can, however, be fired at the ceiling. Gravity will handle the rest.'],
+        ],
+      };
+    },
+  },
+  // ------------------------------------------------------------------ 10
+  {
     title: 'Hostile Hardware',
     gun: 'both',
     icons: ['portal', 'cube'],
@@ -282,7 +348,7 @@ export const LEVELS = [
         grid: G,
         start: { at: [6, 1, 4], yaw: PI },
         entities: [
-          { type: 'sign', number: 8, title: 'Hostile Hardware', icons: ['portal', 'cube'], at: [2, 3.2, 5], dir: [1, 0, 0] },
+          { type: 'sign', number: 10, title: 'Hostile Hardware', icons: ['portal', 'cube'], at: [2, 3.2, 5], dir: [1, 0, 0] },
           { type: 'dispenser', at: [4, 7.75, 6] },
           { type: 'turret', at: [12, 1, 22], yaw: PI },
           { type: 'turret', at: [20, 1, 22], yaw: PI },
@@ -298,7 +364,7 @@ export const LEVELS = [
       };
     },
   },
-  // ------------------------------------------------------------------ 09
+  // ------------------------------------------------------------------ 11
   {
     title: 'Free Testing',
     gun: 'both',
@@ -315,7 +381,7 @@ export const LEVELS = [
         grid: G,
         start: { at: [28, 1, 12], yaw: 0 + PI },
         entities: [
-          { type: 'sign', number: 9, title: 'Free Testing', icons: ['cube', 'button', 'portal', 'fling', 'pellet', 'plate'], at: [2, 3.2, 26], dir: [1, 0, 0] },
+          { type: 'sign', number: 11, title: 'Free Testing', icons: ['cube', 'button', 'portal', 'fling', 'pellet', 'plate'], at: [2, 3.2, 26], dir: [1, 0, 0] },
           { type: 'dispenser', at: [30, 14.75, 20] },
           { type: 'dispenser', at: [36, 14.75, 20] },
           { type: 'cube', at: [8, 7.66, 46] },

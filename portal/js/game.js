@@ -9,7 +9,7 @@ import { ViewModel, PlayerModel } from './models.js';
 import { LEVELS } from './levels.js';
 import {
   Cube, FloorButton, Door, Fizzler, Goo, Exit, Dispenser, FaithPlate,
-  PelletLauncher, Receptacle, Glass, Sign, Wire, BlobShadow, Turret,
+  PelletLauncher, Receptacle, Glass, Sign, Wire, BlobShadow, Turret, Platform,
 } from './entities.js';
 
 class Emitter {
@@ -114,6 +114,7 @@ export class Game {
     this.held = null;
     this.completing = false;
     this.gun = def.gun;
+    this.lastLevel = LEVELS.length - 1;
 
     const scene = this.scene = new THREE.Scene();
     scene.add(new THREE.HemisphereLight(0xf0f5ff, 0x55595f, 2.4));
@@ -175,6 +176,7 @@ export class Game {
       glass: () => new Glass(this, e),
       sign: () => new Sign(this, e),
       wire: () => new Wire(this, e),
+      platform: () => new Platform(this, e),
     };
     const ent = map[e.type]();
     if (e.type !== 'cube' && e.type !== 'turret') this.entities.push(ent);
@@ -315,6 +317,7 @@ export class Game {
       const up = portalUpFor(n, r.dir);
       const fit = fitPortal(this, r.point, n, up, P);
       if (fit) {
+        if (P.placed) this.spawnBurst(P.pos.clone().addScaledVector(P.normal, 4), COLORS[color + 'Glow'], 30, 120);
         P.set(fit.pos, fit.normal, fit.up, this.time);
         this.audio.portalOpen(color);
         ok = true;
@@ -582,7 +585,7 @@ export class Game {
   onBeforeView(cam, level, skip) {
     _v.setFromMatrixPosition(cam.matrixWorld);
     for (const [P, vis] of this.visuals) {
-      vis.group.visible = P.placed && P !== skip;
+      vis.group.visible = (P.placed || vis.closing > 0) && P !== skip;
       vis.points.visible = _v.distanceTo(P.pos) > 70;   // sparks right on the lens look like blobs
     }
     const pm = this.playerModel;

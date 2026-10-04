@@ -150,7 +150,8 @@ export function buildWorldMeshes(grid, textures, extraLights = []) {
       if (!grid.inBounds(ex, ey, ez) || grid.solid(ex, ey, ez)) continue;
       const axis = n[0] ? 0 : n[1] ? 1 : 2;
       const orient = n[1] > 0 ? 1 : n[1] < 0 ? 2 : 0;
-      const g = group(m * 3 + orient);
+      const CH = 20;   // spatial chunks so portal views can cull walls they can't see
+      const g = group(`${m * 3 + orient}|${Math.floor(x / CH)},${Math.floor(y / CH)},${Math.floor(z / CH)}`);
       const ua = axis === 0 ? 2 : 0;           // in-plane axes
       const va = axis === 1 ? 2 : 1;
       const base = [x * CELL, y * CELL, z * CELL];
@@ -212,15 +213,18 @@ export function buildWorldMeshes(grid, textures, extraLights = []) {
   };
 
   const meshes = [];
+  const mats = new Map();
   for (const [key, g] of groups) {
-    const m = Math.floor(key / 3), orient = key % 3;
+    const k = parseInt(key, 10);
+    const m = Math.floor(k / 3), orient = k % 3;
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.Float32BufferAttribute(g.pos, 3));
     geo.setAttribute('uv', new THREE.Float32BufferAttribute(g.uv, 2));
     geo.setAttribute('color', new THREE.Float32BufferAttribute(g.col, 3));
     geo.setIndex(g.idx);
     geo.computeBoundingSphere();
-    const mat = new THREE.MeshBasicMaterial({ map: texFor(m, orient), vertexColors: true });
+    if (!mats.has(k)) mats.set(k, new THREE.MeshBasicMaterial({ map: texFor(m, orient), vertexColors: true }));
+    const mat = mats.get(k);
     const mesh = new THREE.Mesh(geo, mat);
     mesh.frustumCulled = false;
     mesh.matrixAutoUpdate = false;
