@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Momentum Test Chambers</title>
 <meta name="description" content="A browser recreation of portal-gun physics: recursive see-through portals, momentum-conserving flings, cubes, buttons, emancipation grids, energy pellets and faith plates across twelve test chambers.">
 <meta name="theme-color" content="#0b0c0e">
@@ -34,6 +34,16 @@
 <div id="death"></div>
 <div id="fade"><div id="fade-text"></div></div>
 
+<div id="touch" aria-hidden="true">
+  <div id="stick"><div id="stick-knob"></div></div>
+  <button class="tb" id="t-pause" aria-label="Pause"><svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg></button>
+  <button class="tb" id="t-use" aria-label="Pick up or drop"><span>E</span><small>Grab</small></button>
+  <button class="tb" id="t-duck" aria-label="Crouch"><svg viewBox="0 0 24 24"><path d="M5 9l7 7 7-7"/></svg><small>Crouch</small></button>
+  <button class="tb" id="t-jump" aria-label="Jump"><svg viewBox="0 0 24 24"><path d="M5 15l7-7 7 7"/></svg><small>Jump</small></button>
+  <button class="tb portal blue" id="t-blue" aria-label="Fire blue portal"></button>
+  <button class="tb portal orange" id="t-orange" aria-label="Fire orange portal"></button>
+</div>
+
 <div id="overlay">
   <section id="menu-start" class="panel" hidden>
     <p class="eyebrow">Momentum Research Annex</p>
@@ -46,9 +56,10 @@
       <button data-open="settings" data-from="start">Settings</button>
       <button data-open="help" data-from="start">Controls</button>
     </div>
-    <p id="touch-note" class="note" hidden>This device looks touch-only. <a href="mobile/index.html">Open the touch edition</a>: the same game with on-screen controls.</p>
-    <p id="lock-note" class="note" hidden>The browser refused to capture the mouse. Click the game view to try again, or open the page in its own tab.</p>
-    <p class="fine">Needs a keyboard and mouse. Click to capture the pointer; press Esc to pause. On a phone or tablet? <a href="mobile/index.html">Play the touch edition</a>. An unofficial fan tribute to Valve's <em>Portal</em>, built from scratch.</p>
+    <p id="touch-note" class="note" hidden></p>
+    <p id="lock-note" class="note" hidden></p>
+    <p class="fine desktop-only">Keyboard and mouse. Click to capture the pointer; press Esc to pause. On a phone or tablet the game switches to touch controls automatically. An unofficial fan tribute to Valve's <em>Portal</em>, built from scratch.</p>
+    <p class="fine touch-only">Touch controls: left thumb moves, right thumb looks. The game always plays sideways; turn your phone to landscape. Progress and settings are saved on this device. An unofficial fan tribute to Valve's <em>Portal</em>.</p>
   </section>
 
   <section id="menu-pause" class="panel" hidden>
@@ -71,19 +82,31 @@
 
   <section id="menu-settings" class="panel" hidden>
     <p class="eyebrow">Settings</p>
-    <label class="set"><span>Mouse sensitivity</span><input id="set-sens" type="range" min="0.5" max="10" step="0.1"><output id="set-sens-v"></output></label>
+    <label class="set"><span id="sens-label">Mouse sensitivity</span><input id="set-sens" type="range" min="0.5" max="10" step="0.1"><output id="set-sens-v"></output></label>
     <label class="set"><span>Field of view</span><input id="set-fov" type="range" min="60" max="110" step="1"><output id="set-fov-v"></output></label>
     <label class="set"><span>Portal recursion</span><input id="set-depth" type="range" min="1" max="8" step="1"><output id="set-depth-v"></output></label>
     <label class="set"><span>Resolution scale</span><input id="set-res" type="range" min="0.5" max="1" step="0.05"><output id="set-res-v"></output></label>
     <label class="set"><span>Volume</span><input id="set-vol" type="range" min="0" max="1" step="0.05"><output id="set-vol-v"></output></label>
-    <label class="set check"><span>Invert mouse Y</span><input id="set-invert" type="checkbox"></label>
+    <label class="set touch-only"><span>Button size</span><input id="set-btn" type="range" min="0.7" max="1.4" step="0.05"><output id="set-btn-v"></output></label>
+    <label class="set check touch-only"><span>Crouch is a toggle</span><input id="set-ducktoggle" type="checkbox"></label>
+    <label class="set check touch-only"><span>Vibration</span><input id="set-haptics" type="checkbox"></label>
+    <label class="set check"><span id="invert-label">Invert mouse Y</span><input id="set-invert" type="checkbox"></label>
     <label class="set check"><span>Show frame rate</span><input id="set-fps" type="checkbox"></label>
     <div class="actions row"><button data-back>Back</button></div>
   </section>
 
   <section id="menu-help" class="panel" hidden>
     <p class="eyebrow">Controls</p>
-    <dl class="keys">
+    <dl class="keys touch-only">
+      <dt>Left thumb</dt><dd>Drag anywhere on the left half to move (analog)</dd>
+      <dt>Right thumb</dt><dd>Drag anywhere on the right half to look</dd>
+      <dt>Blue / orange</dt><dd>Tap the round buttons to fire that portal</dd>
+      <dt>Grab</dt><dd>Pick up or drop a cube or turret</dd>
+      <dt>Jump</dt><dd>Jump (crouch while jumping to reach higher)</dd>
+      <dt>Crouch</dt><dd>Hold to crouch, or make it a toggle in Settings</dd>
+      <dt>Pause</dt><dd>Top-right button: restart, chambers, settings</dd>
+    </dl>
+    <dl class="keys desktop-only">
       <dt>W A S D</dt><dd>Move</dd>
       <dt>Mouse</dt><dd>Look</dd>
       <dt>Left click / 1</dt><dd>Blue portal</dd>
@@ -101,6 +124,22 @@
 
 <div id="nowebgl" hidden><p>This game needs WebGL, which is not available in this browser.</p></div>
 
-<script type="module" src="js/main.js"></script>
+<script type="module">
+  // One page, two front ends: touch devices get on-screen controls and a
+  // forced landscape layout; everything else gets keyboard and mouse.
+  const q = new URLSearchParams(location.search);
+  const touchy = (matchMedia('(pointer: coarse)').matches && !matchMedia('(any-pointer: fine)').matches) ||
+    (navigator.maxTouchPoints > 0 && /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)) ||
+    (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));      // iPadOS reports as a Mac
+  if ((touchy || q.has('touch')) && !q.has('desktop')) {
+    document.body.classList.add('touch');
+    const l = document.createElement('link');
+    l.rel = 'stylesheet'; l.href = 'mobile/mobile.css';
+    document.head.appendChild(l);
+    import('./mobile/mobile.js');
+  } else {
+    import('./js/main.js');
+  }
+</script>
 </body>
 </html>

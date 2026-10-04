@@ -3,7 +3,7 @@ html, body { touch-action: none; overscroll-behavior: none; -webkit-user-select:
 :root { --bs: 1; --safe-l: env(safe-area-inset-left, 0px); --safe-r: env(safe-area-inset-right, 0px); --safe-b: env(safe-area-inset-bottom, 0px); --safe-t: env(safe-area-inset-top, 0px); }
 
 #touch { position: fixed; inset: 0; pointer-events: none; z-index: 5; }
-body.in-menu #touch { display: none; }
+
 .tb {
   position: absolute; pointer-events: auto; touch-action: none;
   width: calc(64px * var(--bs)); height: calc(64px * var(--bs)); padding: 0; border-radius: 50%;
@@ -53,19 +53,23 @@ button { min-height: 46px; }
 .fine a { color: var(--ink); }
 .set { grid-template-columns: 1fr minmax(110px, 40%) 46px; }
 input[type=range] { height: 28px; }
-@media (orientation: landscape) and (max-height: 520px) {
-  .panel { width: min(640px, 100%); }
-  .actions { grid-template-columns: 1fr 1fr; }
-  .actions .primary { grid-column: 1 / -1; }
-  .lede { margin-bottom: 14px; font-size: 14px; }
-  h1 br { display: none; }
-}
+/* short landscape screens (set from JS, so it also applies when rotated) */
+body.compact .panel { width: min(640px, 100%); }
+body.compact .actions { grid-template-columns: 1fr 1fr; }
+body.compact .actions .primary { grid-column: 1 / -1; }
+body.compact .lede { margin-bottom: 14px; font-size: 14px; }
+body.compact h1 br { display: none; }
 
 #rotate { position: fixed; inset: 0; z-index: 20; display: grid; place-content: center; justify-items: center; gap: 14px; padding: 24px; text-align: center; background: #0b0c0e; }
 #rotate[hidden] { display: none; }
 #rotate svg { fill: none; stroke: var(--ink); stroke-width: 2.5; stroke-linecap: round; }
 #rotate p { margin: 0; color: #d3d7da; }
-@media (orientation: portrait) {
-  #subtitle { top: calc(66px + var(--safe-t)); max-width: calc(100vw - 32px); }
-}
 #t-pause svg { width: 50%; height: 50%; }
+
+/* this stylesheet is only loaded for touch devices (see the loader in ../index.html) */
+body.touch #touch { display: block; }
+body.touch.in-menu #touch { display: none; }
+body.touch label.set.touch-only { display: grid; }
+body.touch p.touch-only { display: block; }
+body.touch dl.keys.touch-only { display: grid; }
+body.rot { position: absolute; top: 0; left: 0; transform-origin: 0 0; overflow: hidden; }

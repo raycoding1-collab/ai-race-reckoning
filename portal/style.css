@@ -112,3 +112,7 @@ input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--blue); }
   .set { grid-template-columns: 1fr 110px 42px; }
   #card-num { font-size: 44px; }
 }
+
+/* touch-only pieces stay hidden in the desktop front end */
+#touch, .touch-only { display: none; }
+body.touch .desktop-only { display: none; }

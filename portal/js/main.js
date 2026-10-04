@@ -188,7 +188,6 @@ game.onFinished = () => {
   setTimeout(() => { document.exitPointerLock?.(); started = false; showMenu('start'); }, 4000);
 };
 
-if (window.matchMedia && matchMedia('(pointer: coarse)').matches && !matchMedia('(any-pointer: fine)').matches) $('touch-note').hidden = false;
 $('btn-play').textContent = unlocked > 0 ? `Continue · Chamber ${String(unlocked).padStart(2, '0')}` : 'Start testing';
 $('btn-new').hidden = unlocked === 0;
 

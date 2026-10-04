@@ -45,13 +45,30 @@ let unlocked = Math.max(0, Math.min(LEVELS.length - 1, store.get('unlocked', 0))
 // Dynamic resolution: drop render scale when the frame rate sags, raise it
 // again when there is headroom, so the game stays smooth on any phone.
 let dyn = 1;
+// Always landscape: when the phone is held upright (or the frame is taller
+// than wide, as inside embeds where orientation lock is not allowed), the
+// whole page is rotated 90 degrees so the game still plays sideways.
+let rot = false;
+const W = () => (rot ? window.innerHeight : window.innerWidth);
+const H = () => (rot ? window.innerWidth : window.innerHeight);
+function applyRotation() {
+  rot = window.innerHeight > window.innerWidth;
+  const b = document.body;
+  b.classList.toggle('rot', rot);
+  b.style.width = rot ? window.innerHeight + 'px' : '';
+  b.style.height = rot ? window.innerWidth + 'px' : '';
+  b.style.transform = rot ? `translateX(${window.innerWidth}px) rotate(90deg)` : '';
+}
+// screen point -> point in the (possibly rotated) page
+const local = (t) => (rot ? [t.clientY, window.innerWidth - t.clientX] : [t.clientX, t.clientY]);
 function resize() {
-  const w = window.innerWidth, h = window.innerHeight;
+  applyRotation();
+  const w = W(), h = H();
+  document.body.classList.toggle('compact', h < 520);
   renderer.setPixelRatio(Math.min(dpr, 2) * settings.resolution * dyn);
   renderer.setSize(w, h, false);
   game.resize(w, h);
   document.documentElement.style.setProperty('--bs', settings.buttons);
-  checkOrientation();
 }
 window.addEventListener('resize', resize);
 window.addEventListener('orientationchange', () => setTimeout(resize, 150));
@@ -87,7 +104,7 @@ function heldButton(id) {
 function onStart(e) {
   if (!playing) return;
   // only the game view and the control buttons belong to the game; let taps
-  // on overlays (the rotate prompt, menus) through as normal clicks
+  // on overlays (menus) through as normal clicks
   const t0 = e.changedTouches[0];
   if (t0 && t0.target !== canvas && !(t0.target.closest && t0.target.closest('#touch'))) return;
   e.preventDefault();
@@ -95,15 +112,16 @@ function onStart(e) {
   for (const t of e.changedTouches) {
     const btn = t.target.closest && t.target.closest('.tb');
     if (btn) { touches.set(t.identifier, { role: 'btn', el: btn }); press(btn, true); continue; }
-    const leftSide = t.clientX < window.innerWidth * 0.42;
+    const [lx, ly] = local(t);
+    const leftSide = lx < W() * 0.42;
     const hasStick = [...touches.values()].some((v) => v.role === 'stick');
     if (leftSide && !hasStick) {
-      touches.set(t.identifier, { role: 'stick', ox: t.clientX, oy: t.clientY, x: t.clientX, y: t.clientY });
-      stick.style.transform = `translate(${t.clientX}px, ${t.clientY}px)`;
+      touches.set(t.identifier, { role: 'stick', ox: lx, oy: ly, x: lx, y: ly });
+      stick.style.transform = `translate(${lx}px, ${ly}px)`;
       stick.classList.add('on');
       knob.style.transform = '';
     } else {
-      touches.set(t.identifier, { role: 'look', x: t.clientX, y: t.clientY });
+      touches.set(t.identifier, { role: 'look', x: lx, y: ly });
     }
   }
 }
@@ -114,14 +132,15 @@ function onMove(e) {
   for (const t of e.changedTouches) {
     const s = touches.get(t.identifier);
     if (!s) continue;
+    const [lx, ly] = local(t);
     if (s.role === 'look') {
       // radians per CSS pixel, scaled with field of view so it feels the same at any FOV
       const k = settings.sensitivity * 0.0052 * (settings.fov / 80);
-      const dx = (t.clientX - s.x) * k, dy = (t.clientY - s.y) * k * (settings.invertY ? -1 : 1);
+      const dx = (lx - s.x) * k, dy = (ly - s.y) * k * (settings.invertY ? -1 : 1);
       game.player.look(dx, dy);
       look.dx += dx; look.dy += dy;
     }
-    s.x = t.clientX; s.y = t.clientY;
+    s.x = lx; s.y = ly;
     if (s.role === 'stick') {
       let dx = s.x - s.ox, dy = s.y - s.oy;
       const len = Math.hypot(dx, dy);
@@ -186,7 +205,6 @@ function showMenu(which) {
   playing = !which && started;
   if (which === 'chambers') buildChambers();
   if (which) { touches.clear(); stick.classList.remove('on'); for (const b of document.querySelectorAll('.tb')) b.classList.remove('down'); }
-  checkOrientation();
 }
 
 function goFullscreen() {
@@ -214,12 +232,6 @@ function startLevel(i) {
   resume();
 }
 
-let rotateOk = false;
-function checkOrientation() {
-  const portrait = window.innerHeight > window.innerWidth * 1.05;
-  $('rotate').hidden = !(portrait && playing && !rotateOk);
-}
-$('btn-rotate-ok').addEventListener('click', () => { rotateOk = true; checkOrientation(); });
 
 $('btn-play').addEventListener('click', () => startLevel(Math.min(unlocked, LEVELS.length - 1)));
 $('btn-new').addEventListener('click', () => startLevel(0));
@@ -259,6 +271,9 @@ function bindSetting(id, key, parse, fmt) {
   });
 }
 const pct = (v) => Math.round(v * 100) + '%';
+{ const r = $('set-sens'); r.min = '0.3'; r.max = '3'; r.step = '0.05'; }
+if ($('sens-label')) $('sens-label').textContent = 'Look sensitivity';
+if ($('invert-label')) $('invert-label').textContent = 'Invert look Y';
 bindSetting('set-sens', 'sensitivity', parseFloat, (v) => v.toFixed(2));
 bindSetting('set-fov', 'fov', parseInt);
 bindSetting('set-depth', 'depth', parseInt);
