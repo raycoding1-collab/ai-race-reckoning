@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Momentum Test Chambers · Touch</title>
+<meta name="description" content="The touch edition of Momentum Test Chambers: the full portal-physics game with all twelve chambers, recursive portals, flings, cubes, turrets and faith plates, played with on-screen controls.">
+<meta name="theme-color" content="#0b0c0e">
+<meta name="color-scheme" content="dark">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="mobile.css">
+<script type="importmap">{ "imports": { "three": "../vendor/three.module.min.js" } }</script>
+</head>
+<body class="in-menu">
+<canvas id="game" aria-label="Game view"></canvas>
+
+<div id="hud" aria-hidden="true">
+  <svg id="crosshair" viewBox="-20 -20 40 40" width="40" height="40">
+    <circle r="1.4" class="dot"/>
+    <path class="half blue" d="M -4 -11 A 11 11 0 0 0 -4 11"/>
+    <path class="half orange" d="M 4 -11 A 11 11 0 0 1 4 11"/>
+    <path class="fill blue" d="M -4 -11 A 11 11 0 0 0 -4 11 L -6 8 A 8.5 8.5 0 0 1 -6 -8 Z"/>
+    <path class="fill orange" d="M 4 -11 A 11 11 0 0 1 4 11 L 6 8 A 8.5 8.5 0 0 0 6 -8 Z"/>
+  </svg>
+  <div id="subtitle" role="status"></div>
+  <div id="card"><span id="card-num">00</span><span id="card-title">Orientation</span></div>
+  <div id="restart-ring" hidden><span>Restarting</span></div>
+  <div id="fps" hidden></div>
+</div>
+<div id="hurt"></div>
+<div id="death"></div>
+<div id="fade"><div id="fade-text"></div></div>
+
+<!-- touch controls -->
+<div id="touch" aria-hidden="true">
+  <div id="stick"><div id="stick-knob"></div></div>
+  <button class="tb" id="t-pause" aria-label="Pause"><svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg></button>
+  <button class="tb" id="t-use" aria-label="Pick up or drop"><span>E</span><small>Grab</small></button>
+  <button class="tb" id="t-duck" aria-label="Crouch"><svg viewBox="0 0 24 24"><path d="M5 9l7 7 7-7"/></svg><small>Crouch</small></button>
+  <button class="tb" id="t-jump" aria-label="Jump"><svg viewBox="0 0 24 24"><path d="M5 15l7-7 7 7"/></svg><small>Jump</small></button>
+  <button class="tb portal blue" id="t-blue" aria-label="Fire blue portal"></button>
+  <button class="tb portal orange" id="t-orange" aria-label="Fire orange portal"></button>
+</div>
+
+<div id="rotate" hidden>
+  <svg viewBox="0 0 48 48" width="56" height="56"><rect x="14" y="6" width="20" height="36" rx="3"/><path d="M40 30a14 14 0 0 1-14 14M8 18A14 14 0 0 1 22 4"/></svg>
+  <p>Turn your device sideways for the best view.</p>
+  <button id="btn-rotate-ok">Play in portrait anyway</button>
+</div>
+
+<div id="overlay">
+  <section id="menu-start" class="panel" hidden>
+    <p class="eyebrow">Momentum Research Annex · Touch</p>
+    <h1>Test <br>Chambers</h1>
+    <p class="lede">The full game, built for touch: all twelve chambers, recursive see-through portals, flings, cubes, grids, pellets, faith plates, platforms and turrets.</p>
+    <div class="actions">
+      <button id="btn-play" class="primary">Start testing</button>
+      <button id="btn-new">New game</button>
+      <button data-open="chambers" data-from="start">Chamber select</button>
+      <button data-open="settings" data-from="start">Settings</button>
+      <button data-open="help" data-from="start">Controls</button>
+    </div>
+    <p class="fine">Plays in fullscreen landscape. Progress and settings are saved on this device. Using a keyboard and mouse? <a href="../">Open the desktop edition</a>. An unofficial fan tribute to Valve's <em>Portal</em>.</p>
+  </section>
+
+  <section id="menu-pause" class="panel" hidden>
+    <p class="eyebrow">Paused</p>
+    <h2>Testing suspended</h2>
+    <div class="actions">
+      <button id="btn-resume" class="primary">Resume</button>
+      <button id="btn-restart">Restart chamber</button>
+      <button data-open="chambers" data-from="pause">Chamber select</button>
+      <button data-open="settings" data-from="pause">Settings</button>
+      <button data-open="help" data-from="pause">Controls</button>
+    </div>
+  </section>
+
+  <section id="menu-chambers" class="panel wide" hidden>
+    <p class="eyebrow">Chamber select</p>
+    <div id="chamber-list"></div>
+    <div class="actions row"><button data-back>Back</button></div>
+  </section>
+
+  <section id="menu-settings" class="panel" hidden>
+    <p class="eyebrow">Settings</p>
+    <label class="set"><span>Look sensitivity</span><input id="set-sens" type="range" min="0.3" max="3" step="0.05"><output id="set-sens-v"></output></label>
+    <label class="set"><span>Field of view</span><input id="set-fov" type="range" min="60" max="110" step="1"><output id="set-fov-v"></output></label>
+    <label class="set"><span>Portal recursion</span><input id="set-depth" type="range" min="1" max="8" step="1"><output id="set-depth-v"></output></label>
+    <label class="set"><span>Resolution scale</span><input id="set-res" type="range" min="0.35" max="1" step="0.05"><output id="set-res-v"></output></label>
+    <label class="set"><span>Button size</span><input id="set-btn" type="range" min="0.7" max="1.4" step="0.05"><output id="set-btn-v"></output></label>
+    <label class="set"><span>Volume</span><input id="set-vol" type="range" min="0" max="1" step="0.05"><output id="set-vol-v"></output></label>
+    <label class="set check"><span>Invert look Y</span><input id="set-invert" type="checkbox"></label>
+    <label class="set check"><span>Crouch is a toggle</span><input id="set-ducktoggle" type="checkbox"></label>
+    <label class="set check"><span>Vibration</span><input id="set-haptics" type="checkbox"></label>
+    <label class="set check"><span>Show frame rate</span><input id="set-fps" type="checkbox"></label>
+    <div class="actions row"><button data-back>Back</button></div>
+  </section>
+
+  <section id="menu-help" class="panel" hidden>
+    <p class="eyebrow">Controls</p>
+    <dl class="keys">
+      <dt>Left thumb</dt><dd>Drag anywhere on the left half to move (analog)</dd>
+      <dt>Right thumb</dt><dd>Drag anywhere on the right half to look</dd>
+      <dt>Blue / orange</dt><dd>Fire that portal (tap) — the round buttons</dd>
+      <dt>Grab</dt><dd>Pick up or drop a cube or turret</dd>
+      <dt>Jump</dt><dd>Jump (crouch while jumping to reach higher)</dd>
+      <dt>Crouch</dt><dd>Hold to crouch, or toggle in Settings</dd>
+      <dt>Pause</dt><dd>Top-right button: restart, chambers, settings</dd>
+    </dl>
+    <p class="fine">Portals only stick to light-coloured panels. Whatever enters one portal leaves the other at the same speed, turned to face out of it. Fall into a floor portal to be launched out of a wall portal.</p>
+    <div class="actions row"><button data-back>Back</button></div>
+  </section>
+</div>
+
+<div id="nowebgl" hidden><p>This game needs WebGL, which is not available in this browser.</p></div>
+
+<script type="module" src="mobile.js"></script>
+</body>
+</html>

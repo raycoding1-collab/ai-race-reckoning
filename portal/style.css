@@ -78,6 +78,7 @@ h1::after { content: ""; display: block; margin-top: 14px; width: 120px; height:
 h2 { margin: 0 0 18px; font: 700 30px var(--display); font-stretch: 90%; }
 .lede { margin: 0 0 22px; color: #d3d7da; line-height: 1.5; }
 .note { margin: 16px 0 0; padding: 10px 12px; border-left: 3px solid var(--orange); background: rgba(255,138,28,0.1); font-size: 14px; line-height: 1.45; }
+.note a, .fine a { color: var(--ink); }
 .note[hidden] { display: none; }
 .fine { margin: 18px 0 0; font-size: 13px; color: var(--muted); line-height: 1.5; }
 .actions { display: grid; gap: 8px; }

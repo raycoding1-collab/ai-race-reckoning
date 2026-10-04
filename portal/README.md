@@ -10,6 +10,9 @@ A browser game recreating portal-gun physics, built from scratch with three.js (
 - **Objects**: cubes that tumble in flight and settle on a face, moving platforms you can ride, cubes you can carry through portals, sentry turrets (sight cone, laser, about 2 s to kill you, knocked over by bumping, dropping or hitting them with a cube), buttons, doors, emancipation grids, goo, energy pellets with receptacles, aerial faith plates and cube dispensers.
 - **Chambers**: twelve, from 00 to 11. Chamber 11 is a free-play sandbox. Every chamber has been completed by a scripted playthrough that uses only in-game actions (aim, shoot, walk, jump, pick up, drop).
 
+## Touch edition (`mobile/`)
+The same game for phones and tablets: all chambers, mechanics, recursive portals and settings, played with touch controls. The left thumb drives an analog stick and the right thumb looks around. On-screen buttons cover blue and orange portals, grab, jump, crouch (hold or toggle) and pause, with vibration feedback. It opens fullscreen in landscape and scales resolution automatically to keep the frame rate up. Announcer lines are reworded for touch. Progress is shared with the desktop edition on the same browser. All twelve chambers pass the scripted playthrough in this edition too.
+
 ## Performance
 Each portal view draws only the objects and 20-cell level chunks visible through that portal's screen rectangle and in front of its exit plane. A frame with several nested portal views stays at about 100 to 250 draw calls.
 
