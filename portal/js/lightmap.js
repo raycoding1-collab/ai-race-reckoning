@@ -103,7 +103,9 @@ export function buildLightmappedMeshes(grid, textures, lm, pbr) {
       p[f.ua] += cu * r.w * CELL; p[f.va] += cv * r.h * CELL;
       g.pos.push(p[0], p[1], p[2]);
       g.nrm.push(n[0], n[1], n[2]);
-      g.uv.push(p[f.ua] / 128, p[f.va] / 128);
+      // fixture tubes run along the strip
+      if (r.m === MAT.LIGHT && r.h > r.w) g.uv.push(p[f.va] / 128, p[f.ua] / 128);
+      else g.uv.push(p[f.ua] / 128, p[f.va] / 128);
       if (r.cx >= 0) g.uv1.push((r.cx + 1 + cu * r.w * PER) / W, (r.cy + 1 + cv * r.h * PER) / rows);
       else g.uv1.push(0, 0);
     }

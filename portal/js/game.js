@@ -760,7 +760,7 @@ export class Game {
       // eye adaptation (Source's HDR auto exposure): expose for the light around the camera
       let lum = 0;
       for (let i = 0; i < 18; i += 3) lum += 0.2126 * this._cube[i] + 0.7152 * this._cube[i + 1] + 0.0722 * this._cube[i + 2];
-      const target = Math.min(1.7, Math.max(0.7, (this.def.exposureKey || 0.36) / Math.max(lum / 6, 1e-3)));
+      const target = Math.min(1.7, Math.max(0.7, (this.def.exposureKey || 0.3) / Math.max(lum / 6, 1e-3)));
       this.exposure += (target - this.exposure) * (this.snapExposure ? 1 : 1 - Math.exp(-frameDt * 1.2));
       this.snapExposure = false;
     } else {

@@ -14,7 +14,7 @@
 import { CELL } from './constants.js';
 import { MAT } from './level.js';
 
-export const BAKE_VERSION = 4;
+export const BAKE_VERSION = 5;
 export const LUX = 8;                  // world units per luxel (VRAD default: 16)
 const PER = CELL / LUX;                // luxels per cell edge
 export const LM_RANGE = 3;             // stored value = lighting / LM_RANGE, sRGB encoded
@@ -29,13 +29,14 @@ const BOUNCES = 3;
 const PATCH_RAYS = 96;
 const AO_RAYS = 16, AO_LEN = 44;
 const PROBE_RAYS = 32;
-// reflectivity per material, as VRAD derives it from each texture's average colour
+// Reflectivity per material and orientation [wall, floor, ceiling]: the
+// average linear colour of each generated texture, as VRAD derives it from
+// each texture's average (textures.albedoAvg).
 export const REFLECT = {
-  [MAT.WHITE]: [0.66, 0.68, 0.70],
-  [MAT.METAL]: [0.075, 0.08, 0.085],
-  [MAT.CONCRETE]: [0.40, 0.40, 0.38],
-  [MAT.RUST]: [0.25, 0.17, 0.12],
-  [MAT.LIGHT]: [0.5, 0.5, 0.5],
+  [MAT.WHITE]: [[0.67, 0.669, 0.685], [0.487, 0.486, 0.495], [0.562, 0.562, 0.573]],
+  [MAT.METAL]: [[0.04, 0.045, 0.052], [0.028, 0.029, 0.033], [0.02, 0.022, 0.025]],
+  [MAT.RUST]: [[0.061, 0.084, 0.076], [0.067, 0.051, 0.046], [0.069, 0.059, 0.052]],
+  [MAT.CONCRETE]: [[0.227, 0.224, 0.211], [0.178, 0.176, 0.166], [0.227, 0.224, 0.211]],
 };
 
 export const DIRS = [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]];
@@ -229,7 +230,7 @@ export function bake(grid, extraLights = [], onProgress = () => {}) {
     let i = Math.floor(p[ua] / LUX - r.u0 * PER), j = Math.floor(p[va] / LUX - r.v0 * PER);
     i = Math.max(0, Math.min(r.w * PER - 1, i)); j = Math.max(0, Math.min(r.h * PER - 1, j));
     const k = ((r.cy + 1 + j) * W + r.cx + 1 + i) * 3;
-    const rf = REFLECT[r.m] || REFLECT[MAT.METAL];
+    const rf = (REFLECT[r.m] || REFLECT[MAT.METAL])[r.d === 2 ? 1 : r.d === 3 ? 2 : 0];
     out[0] = total[k] * rf[0]; out[1] = total[k + 1] * rf[1]; out[2] = total[k + 2] * rf[2];
   };
   const hitPos = [0, 0, 0];
