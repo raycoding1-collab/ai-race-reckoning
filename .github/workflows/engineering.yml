@@ -1,0 +1,24 @@
+name: engineering
+
+on:
+  push:
+    paths: ['engineering/**', '.github/workflows/engineering.yml']
+  pull_request:
+    paths: ['engineering/**', '.github/workflows/engineering.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  models:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Octave and ngspice
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends octave ngspice
+      - name: Run the MATLAB models and the TINA netlists, check they agree
+        run: engineering/run.sh
+      - name: Check the committed netlists match r1_params.m
+        run: git diff --exit-code -- engineering/tina engineering/ngspice
