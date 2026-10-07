@@ -23,7 +23,7 @@ export class Lightmaps {
   get(hash) { const e = this.cache.get(hash); return e && !(e instanceof Promise) ? e : null; }
   load(hash, grid) {
     if (this.cache.has(hash)) return Promise.resolve(this.cache.get(hash));
-    const loadImg = (src) => new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = src; });
+    const loadImg = (src) => new Promise((res, rej) => { const im = new window.Image(); im.onload = () => res(im); im.onerror = rej; im.src = src; });
     const base = new URL(`../lightmaps/${hash}`, import.meta.url).href;
     const p = Promise.all([loadImg(base + '.png'), loadImg(base + '.dir.png')]).then(([img, dimg]) => {
       {
