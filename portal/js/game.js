@@ -9,6 +9,7 @@ import { ViewModel, PlayerModel } from './models.js';
 import { LEVELS } from './levels.js';
 import { Voice } from './voice.js';
 import { PostFX, QUALITY } from './post.js';
+import { Lightmaps, buildLightmappedMeshes, sampleAmbientCube, ambientCubeToSH } from './lightmap.js';
 import { RoomEnvironment } from '../vendor/addons/environments/RoomEnvironment.js';
 import {
   Cube, FloorButton, Door, Fizzler, Goo, Exit, Dispenser, FaithPlate,
@@ -51,10 +52,16 @@ export class Game {
     this.portalList = [this.portals.blue, this.portals.orange];
     this.portalRenderer = new PortalRenderer(renderer);
     this.viewModel = new ViewModel();
+    // baked lighting: lightmaps for the world, ambient cubes for moving things
+    this.lightmaps = new Lightmaps();
+    this.probe = new THREE.LightProbe();
+    this.vmProbe = new THREE.LightProbe();
+    this.viewModel.scene.add(this.vmProbe);
+    this._cube = new Array(18).fill(0);
     this.camera = new THREE.PerspectiveCamera(75, 1, 1, 24000);
     this.camera.layers.set(0);
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.15;
+    this.renderer.toneMappingExposure = this.exposure = 1.15;
     this.quality = QUALITY.high;
     this.settings = { fov: 75, sensitivity: 1, invertY: false, volume: 0.7, depth: 5, showFps: false };
     this.levelIndex = 0;
@@ -137,13 +144,13 @@ export class Game {
 
     const scene = this.scene = new THREE.Scene();
     const pbr = this.quality.pbr;
-    scene.add(new THREE.HemisphereLight(0xf0f5ff, 0x55595f, pbr ? 0.32 : 2.4));
-    const sun = new THREE.DirectionalLight(0xfff8f0, pbr ? 0.4 : 1.6);
-    if (pbr) { scene.environment = this.envMap(); scene.environmentIntensity = 0.42; }
-    sun.position.set(0.35, 1, 0.25);
-    scene.add(sun);
-    this.worldMeshes = buildWorldMeshes(this.grid, this.textures, L.lights || [], pbr);
-    for (const m of this.worldMeshes) scene.add(m);
+    void pbr;
+    this.levelLights = L.lights || [];
+    this.lmHash = this.lightmaps.hashFor(this.grid, this.levelLights);
+    this.lm = this.lightmaps.get(this.lmHash);
+    this.worldMeshes = [];
+    this.sceneLights = [];
+    this.buildWorld();
 
     // portals
     for (const P of this.portalList) { P.placed = false; P.fixed = false; P.version++; }
@@ -183,8 +190,82 @@ export class Game {
     this.hud.chamber(index, def.title);
     this.hud.clearSay();
     this.updateCrosshair();
+    this.captureEnv();
+    this.snapExposure = true;
     this.precompile();
+    this.requestLightmap(index);
     this.onLevelLoaded?.(index);
+  }
+
+  // World geometry and static lighting: baked lightmaps when this chamber has
+  // them (they stream in after the first load), per-vertex lighting otherwise.
+  buildWorld() {
+    const scene = this.scene, pbr = this.quality.pbr;
+    for (const o of this.sceneLights) scene.remove(o);
+    for (const m of this.worldMeshes) { scene.remove(m); m.geometry.dispose(); }
+    if (this.lm) {
+      this.worldMeshes = buildLightmappedMeshes(this.grid, this.textures, this.lm, pbr);
+      this.sceneLights = pbr ? [this.probe] : [];
+    } else {
+      const hemi = new THREE.HemisphereLight(0xf0f5ff, 0x55595f, pbr ? 0.32 : 2.4);
+      const sun = new THREE.DirectionalLight(0xfff8f0, pbr ? 0.4 : 1.6);
+      sun.position.set(0.35, 1, 0.25);
+      this.sceneLights = [hemi, sun];
+      this.worldMeshes = buildWorldMeshes(this.grid, this.textures, this.levelLights, pbr);
+    }
+    for (const o of this.sceneLights) scene.add(o);
+    for (const m of this.worldMeshes) scene.add(m);
+    scene.environment = pbr ? this.envMap() : null;
+    scene.environmentIntensity = 0.42;
+    this.viewModel.scene.environment = pbr ? this.envMap() : null;
+  }
+
+  requestLightmap(index) {
+    const hash = this.lmHash, grid = this.grid;
+    // resolves once this chamber is lit (used by tests and screenshots)
+    this.lit = this.lightmaps.ready.then(() => {
+      let p = null;
+      if (!this.lm && this.lightmaps.has(hash)) {
+        p = this.lightmaps.load(hash, grid).then((e) => {
+          if (this.lmHash !== hash || this.lm) return;
+          this.lm = e;
+          this.buildWorld();
+          this.captureEnv();
+          this.snapExposure = true;
+        }).catch(() => {});
+      }
+      // stream the next chamber's lighting in the background
+      const next = LEVELS[index + 1];
+      if (next) {
+        const L = next.build();
+        const h = this.lightmaps.hashFor(L.grid, L.lights || []);
+        if (this.lightmaps.has(h)) this.lightmaps.load(h, L.grid).catch(() => {});
+      }
+      return p;
+    });
+  }
+
+  // Reflections: a cube capture of the lit chamber from the player's start,
+  // filtered for every roughness level, like Source's env_cubemap.
+  captureEnv() {
+    if (!this.lm || !this.quality.pbr) return;
+    const s = this.scene;
+    const pm = this._pmrem || (this._pmrem = new THREE.PMREMGenerator(this.renderer));
+    const at = this.player.body.pos.clone(); at.y += PLAYER.eyeHeight - this.player.body.half.y;
+    const hidden = [this.playerModel.group, this.playerModel.clone, this.viewModel.root].filter((o) => o.visible);
+    for (const o of hidden) o.visible = false;
+    s.environment = null;
+    s.position.set(-at.x, -at.y, -at.z);
+    s.updateMatrixWorld(true);
+    const rt = pm.fromScene(s, 0, 2, 8000);
+    s.position.set(0, 0, 0);
+    s.updateMatrixWorld(true);
+    for (const o of hidden) o.visible = true;
+    this.levelEnv?.dispose();
+    this.levelEnv = rt;
+    s.environment = rt.texture;
+    s.environmentIntensity = 1;
+    this.viewModel.scene.environment = rt.texture;
   }
 
   precompile() {
@@ -657,6 +738,21 @@ export class Game {
       cam.quaternion.multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, k * 1.2)));
     }
     cam.updateMatrixWorld();
+    if (this.lm && sampleAmbientCube(this.lm, this.grid, cam.position, this._cube)) {
+      ambientCubeToSH(this._cube, this.probe.sh);
+      this.vmProbe.sh.copy(this.probe.sh);
+      this.vmProbe.intensity = 1;
+      // eye adaptation (Source's HDR auto exposure): expose for the light around the camera
+      let lum = 0;
+      for (let i = 0; i < 18; i += 3) lum += 0.2126 * this._cube[i] + 0.7152 * this._cube[i + 1] + 0.0722 * this._cube[i + 2];
+      const target = Math.min(1.7, Math.max(0.7, (this.def.exposureKey || 0.36) / Math.max(lum / 6, 1e-3)));
+      this.exposure += (target - this.exposure) * (this.snapExposure ? 1 : 1 - Math.exp(-frameDt * 1.2));
+      this.snapExposure = false;
+    } else {
+      this.vmProbe.intensity = 0;
+      this.exposure = 1.15;
+    }
+    this.renderer.toneMappingExposure = this.exposure;
     this.portalRenderer.maxDepth = this.settings.depth;
     const r = this.renderer;
     const draw = () => {

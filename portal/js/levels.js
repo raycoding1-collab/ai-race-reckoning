@@ -455,6 +455,7 @@ export const LEVELS = [
     title: 'Final Test',
     gun: 'both',
     music: 'escape',
+    exposureKey: 0.26,
     icons: ['portal', 'goo'],
     build() {
       const G = new Grid(58, 18, 14);
@@ -494,6 +495,7 @@ export const LEVELS = [
     title: 'Maintenance',
     gun: 'both',
     music: 'escape',
+    exposureKey: 0.26,
     icons: ['portal', 'fling'],
     build() {
       const G = new Grid(50, 16, 32);
@@ -532,6 +534,7 @@ export const LEVELS = [
     title: 'Core',
     gun: 'both',
     music: 'boss',
+    exposureKey: 0.26,
     icons: ['portal'],
     build() {
       const G = new Grid(44, 20, 44);

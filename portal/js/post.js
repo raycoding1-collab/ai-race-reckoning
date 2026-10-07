@@ -25,12 +25,18 @@ class DrawPass extends Pass {
 }
 
 const VignetteShader = {
-  uniforms: { tDiffuse: { value: null }, strength: { value: 0.32 }, grain: { value: 0.025 }, time: { value: 0 } },
+  uniforms: { tDiffuse: { value: null }, strength: { value: 0.38 }, grain: { value: 0.02 }, time: { value: 0 } },
   vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
   fragmentShader: `uniform sampler2D tDiffuse; uniform float strength; uniform float grain; uniform float time; varying vec2 vUv;
     float h(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233)) + time) * 43758.5453); }
     void main(){
       vec4 c = texture2D(tDiffuse, vUv);
+      // colour grade in display space: the cool, contrasty test-chamber look
+      float l = dot(c.rgb, vec3(0.2126, 0.7152, 0.0722));
+      c.rgb = mix(vec3(l), c.rgb, 0.86);                                   // a little less saturated
+      c.rgb = mix(c.rgb, c.rgb * c.rgb * (3.0 - 2.0 * c.rgb), 0.32);       // S-curve
+      c.rgb += pow(1.0 - c.rgb, vec3(3.0)) * vec3(-0.012, 0.010, 0.026);   // teal shadows
+      c.rgb *= vec3(0.975, 1.0, 1.03);                                     // cool highlights
       vec2 d = vUv - 0.5;
       float v = 1.0 - strength * smoothstep(0.25, 0.75, dot(d, d) * 2.0);
       c.rgb *= v;
@@ -50,7 +56,7 @@ export class PostFX {
     this.drawPass = new DrawPass();
     this.composer.addPass(this.drawPass);
     if (preset.bloom) {
-      this.bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.32, 0.45, 1.05);
+      this.bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.4, 0.5, 1.6);
       this.composer.addPass(this.bloom);
     }
     this.composer.addPass(new OutputPass());
