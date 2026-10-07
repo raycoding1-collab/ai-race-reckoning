@@ -257,6 +257,27 @@ export class Audio {
     hum.start();
   }
 
+  // elevator ride: motor hum and air rushing past the tube
+  elevator(on) {
+    if (!this.ctx) return;
+    const ctx = this.ctx, t = ctx.currentTime;
+    if (on && !this.elev) {
+      const src = ctx.createBufferSource(); src.buffer = this.noiseBuf; src.loop = true;
+      const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 380;
+      const hum = ctx.createOscillator(); hum.type = 'sawtooth'; hum.frequency.value = 52;
+      const hf = ctx.createBiquadFilter(); hf.type = 'lowpass'; hf.frequency.value = 160;
+      const g = ctx.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.16, t + 1.2);
+      const hg = ctx.createGain(); hg.gain.value = 0.25;
+      src.connect(f).connect(g); hum.connect(hf).connect(hg).connect(g); g.connect(this.dry);
+      src.start(); hum.start();
+      this.elev = { src, hum, g };
+    } else if (!on && this.elev) {
+      const e = this.elev; this.elev = null;
+      e.g.gain.setTargetAtTime(0, t, 0.3);
+      e.src.stop(t + 1.5); e.hum.stop(t + 1.5);
+    }
+  }
+
   // --- generative score ----------------------------------------------------
   // A small ambient engine in the spirit of the test-chamber soundtrack: slow
   // detuned pads and sparse glassy plinks while testing, a filtered drone with

@@ -112,6 +112,11 @@ export class Hud {
     this.el.death.classList.toggle('on', on);
   }
 
+  fade(on, text = '') {
+    if (on) this.el.fadeText.innerHTML = text;
+    this.el.fade.classList.toggle('on', on);
+  }
+
   complete(index, title) {
     this.el.fadeText.innerHTML = `<span>Chamber ${String(index).padStart(2, '0')}</span><strong>Complete</strong>`;
     this.el.fade.classList.add('on');

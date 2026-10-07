@@ -11,6 +11,7 @@ import { Voice } from './voice.js';
 import { PostFX, QUALITY } from './post.js';
 import { Lightmaps, buildLightmappedMeshes, sampleAmbientCube, ambientCubeToSH } from './lightmap.js';
 import { ObjectProbes } from './probes.js';
+import { Elevator } from './elevator.js';
 import { RoomEnvironment } from '../vendor/addons/environments/RoomEnvironment.js';
 import {
   Cube, FloorButton, Door, Fizzler, Goo, Exit, Dispenser, FaithPlate,
@@ -620,7 +621,17 @@ export class Game {
       if (this.time - this.deathTime > 2.2) { this.restart(); return; }
     } else {
       p.update(dt, { forward: 0, side: 0, jump: false, duck: false });
-      if (this.time - this.completeTime > 2.4) {
+      const nextIndex = this.levelIndex + 1;
+      if (nextIndex < LEVELS.length && !window.__test) {
+        // ride the elevator up to the next chamber
+        const el = this.elevator || (this.elevator = new Elevator(this.textures));
+        if (!el.active && this.time - this.completeTime > 1.6) { el.start(); this.hud.fade(false); this.audio.elevator?.(true); }
+        if (el.active) {
+          el.update(dt);
+          if (el.t > 5.6) this.hud.fade(true);
+          if (el.t > 6.9) { el.stop(); this.audio.elevator?.(false); this.loadLevel(nextIndex); return; }
+        }
+      } else if (this.time - this.completeTime > 2.4) {
         const next = this.levelIndex + 1;
         if (next < LEVELS.length) this.loadLevel(next);
         else { this.completing = false; this.hud.finished(); this.onFinished?.(); }
@@ -760,8 +771,11 @@ export class Game {
     this.objProbes.update(frameDt, this.scene);
     this.portalRenderer.maxDepth = this.settings.depth;
     const r = this.renderer;
+    const riding = this.elevator?.active;
+    if (riding) r.toneMappingExposure = 1.1;
     const draw = () => {
-      this.portalRenderer.render(this, this.scene, cam, this.visuals);
+      if (riding) this.elevator.render(r, cam, p, PLAYER.eyeHeight);
+      else this.portalRenderer.render(this, this.scene, cam, this.visuals);
       // first-person device on top
       if (this.viewModel.visible && p.alive) {
         r.setScissorTest(false);
