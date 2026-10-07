@@ -10,6 +10,7 @@ import { LEVELS } from './levels.js';
 import { Voice } from './voice.js';
 import { PostFX, QUALITY } from './post.js';
 import { Lightmaps, buildLightmappedMeshes, sampleAmbientCube, ambientCubeToSH } from './lightmap.js';
+import { ObjectProbes } from './probes.js';
 import { RoomEnvironment } from '../vendor/addons/environments/RoomEnvironment.js';
 import {
   Cube, FloorButton, Door, Fizzler, Goo, Exit, Dispenser, FaithPlate,
@@ -58,6 +59,7 @@ export class Game {
     this.vmProbe = new THREE.LightProbe();
     this.viewModel.scene.add(this.vmProbe);
     this._cube = new Array(18).fill(0);
+    this.objProbes = new ObjectProbes(this);
     this.camera = new THREE.PerspectiveCamera(75, 1, 1, 24000);
     this.camera.layers.set(0);
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -192,6 +194,8 @@ export class Game {
     this.updateCrosshair();
     this.captureEnv();
     this.snapExposure = true;
+    this.objProbes.scanT = 0;
+    this.objProbes.scan(this.scene);
     this.precompile();
     this.requestLightmap(index);
     this.onLevelLoaded?.(index);
@@ -753,6 +757,7 @@ export class Game {
       this.exposure = 1.15;
     }
     this.renderer.toneMappingExposure = this.exposure;
+    this.objProbes.update(frameDt, this.scene);
     this.portalRenderer.maxDepth = this.settings.depth;
     const r = this.renderer;
     const draw = () => {

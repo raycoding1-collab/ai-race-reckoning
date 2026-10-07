@@ -64,7 +64,23 @@ export class Lightmaps {
 
 // World geometry from the baker's merged rectangles, with two UV sets: world
 // space for the surface textures and atlas space for the lightmap.
+const RECESS = 5;
 export function buildLightmappedMeshes(grid, textures, lm, pbr) {
+  const hous = { pos: [], nrm: [] };
+  // four inner walls of a fixture's recess (drawn double sided)
+  const housing = (f, r, sink) => {
+    const W0 = r.w * 32, H0 = r.h * 32;
+    const edges = [[[0, 0], [1, 0]], [[1, 0], [1, 1]], [[1, 1], [0, 1]], [[0, 1], [0, 0]]];
+    for (const [[a0, b0], [a1, b1]] of edges) {
+      const q = [];
+      for (const [cu, cv, dz] of [[a0, b0, 0], [a1, b1, 0], [a1, b1, sink], [a0, b0, sink]]) {
+        const p = f.o.slice();
+        p[f.ua] += cu * W0; p[f.va] += cv * H0; p[f.axis] -= f.n[f.axis] * dz;
+        q.push(p);
+      }
+      for (const i of [0, 1, 2, 0, 2, 3]) { hous.pos.push(...q[i]); hous.nrm.push(...f.n); }
+    }
+  };
   const { rects, W } = lm.charts;
   const rows = lm.rows;
   const groups = new Map();
@@ -78,8 +94,12 @@ export function buildLightmappedMeshes(grid, textures, lm, pbr) {
     if (!groups.has(key)) groups.set(key, { pos: [], uv: [], uv1: [], nrm: [], idx: [] });
     const g = groups.get(key);
     const vi = g.pos.length / 3;
+    // fixtures sit in a shallow recessed housing
+    const sink = r.m === MAT.LIGHT ? RECESS : 0;
+    if (sink) housing(f, r, sink);
     for (const [cu, cv] of [[0, 0], [1, 0], [1, 1], [0, 1]]) {
       const p = f.o.slice();
+      p[f.axis] -= n[f.axis] * sink;
       p[f.ua] += cu * r.w * CELL; p[f.va] += cv * r.h * CELL;
       g.pos.push(p[0], p[1], p[2]);
       g.nrm.push(n[0], n[1], n[2]);
@@ -95,6 +115,15 @@ export function buildLightmappedMeshes(grid, textures, lm, pbr) {
   }
   const mats = new Map();
   const meshes = [];
+  if (hous.pos.length) {
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(hous.pos, 3));
+    geo.setAttribute('normal', new THREE.Float32BufferAttribute(hous.nrm, 3));
+    geo.computeBoundingSphere();
+    const mesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: 0x2a2e33, side: THREE.DoubleSide }));
+    mesh.frustumCulled = false; mesh.matrixAutoUpdate = false; mesh.userData.world = true;
+    meshes.push(mesh);
+  }
   for (const [key, g] of groups) {
     const k = parseInt(key, 10);
     const m = Math.floor(k / 3), orient = k % 3;
