@@ -3,6 +3,7 @@ import { CELL, CUBE, PORTAL, PLAYER, COLORS } from './constants.js';
 import { buildWorldMeshes, traceGrid, PORTALABLE } from './level.js';
 import { Portal, pairPortals, fitPortal, portalUpFor } from './portal.js';
 import { PortalRenderer, PortalVisual, dotTexture } from './render.js';
+import { FX } from './fx.js';
 import { Player } from './player.js';
 import { createTextures } from './textures.js';
 import { ViewModel, PlayerModel } from './models.js';
@@ -164,6 +165,7 @@ export class Game {
       P.set(new THREE.Vector3(C(fp.at[0]), C(fp.at[1]), C(fp.at[2])), new THREE.Vector3(...fp.normal), new THREE.Vector3(...fp.up), -10);
       P.fixed = true;
     }
+    this.fx?.dispose(); this.fx = new FX(this, scene);
 
     // player
     this.player = new Player(this);
@@ -457,16 +459,13 @@ export class Game {
       const up = portalUpFor(n, r.dir);
       const fit = fitPortal(this, r.point, n, up, P);
       if (fit) {
-        if (P.placed) this.spawnBurst(P.pos.clone().addScaledVector(P.normal, 4), COLORS[color + 'Glow'], 30, 120);
         P.set(fit.pos, fit.normal, fit.up, this.time);
         this.audio.portalOpen(color);
         ok = true;
       }
     }
-    if (!ok) {
-      this.audio.portalFail();
-      if (r.type !== 'none') this.spawnBurst(r.point.clone().addScaledVector(r.dir, -2), COLORS[color + 'Glow'], 18, 90);
-    }
+    if (!ok) this.audio.portalFail();
+    this.fx.shot(P, r, ok, color);
     this.updateCrosshair();
   }
 
@@ -687,6 +686,7 @@ export class Game {
   updateVisuals(frameDt, alpha) {
     const p = this.player, b = p.body;
     for (const vis of this.visuals.values()) vis.update(this.time, frameDt);
+    this.fx.update(this.time, frameDt);
     for (const br of this.bursts) {
       br.age += frameDt;
       if (br.pts) {

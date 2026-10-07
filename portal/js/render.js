@@ -54,80 +54,153 @@ function tunnelGeometry(z0, z1) {
   return g;
 }
 
-function ringGeometry(inner, outer) {
-  const pos = [], uv = [], idx = [];
-  for (let i = 0; i <= SEG; i++) {
-    const a = (i / SEG) * Math.PI * 2;
+// Oval band between two scales of the portal outline. The shaders work from
+// the local position, so the band can be any size without changing the look.
+function ringGeometry(inner, outer, seg = 128) {
+  const pos = [], idx = [];
+  for (let i = 0; i <= seg; i++) {
+    const a = (i / seg) * Math.PI * 2;
     const c = Math.cos(a), s = Math.sin(a);
     pos.push(c * PORTAL.halfWidth * inner, s * PORTAL.halfHeight * inner, 0);
     pos.push(c * PORTAL.halfWidth * outer, s * PORTAL.halfHeight * outer, 0);
-    uv.push(i / SEG, 0, i / SEG, 1);
   }
-  for (let i = 0; i < SEG; i++) {
+  for (let i = 0; i < seg; i++) {
     const a = i * 2;
     idx.push(a, a + 2, a + 1, a + 1, a + 2, a + 3);
   }
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-  g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
   g.setIndex(idx);
   return g;
 }
 
-const NOISE_GLSL = `
-float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7))) * 43758.5453123); }
-float vnoise(vec2 p){ vec2 i=floor(p), f=fract(p); vec2 u=f*f*(3.0-2.0*f);
-  return mix(mix(hash(i),hash(i+vec2(1,0)),u.x), mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),u.x), u.y); }
-float fbm(vec2 p){ float v=0.0, a=0.5; for(int i=0;i<4;i++){ v+=a*vnoise(p); p*=2.03; a*=0.5; } return v; }
+// Shared GLSL: 3D value noise + fbm (cheap, seamless when sampled on a circle)
+export const NOISE_GLSL = `
+float h31(vec3 p){ p = fract(p * 0.3183099 + 0.1); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
+float vn3(vec3 x){ vec3 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(mix(h31(i), h31(i + vec3(1,0,0)), f.x), mix(h31(i + vec3(0,1,0)), h31(i + vec3(1,1,0)), f.x), f.y),
+             mix(mix(h31(i + vec3(0,0,1)), h31(i + vec3(1,0,1)), f.x), mix(h31(i + vec3(0,1,1)), h31(i + vec3(1,1,1)), f.x), f.y), f.z); }
+float fbm3(vec3 p){ float v = 0.0, a = 0.5; for (int i = 0; i < 4; i++){ v += a * vn3(p); p = p * 2.03 + vec3(1.7, 9.2, 3.1); a *= 0.5; } return v; }
+mat2 rot2(float a){ float c = cos(a), s = sin(a); return mat2(c, s, -s, c); }
 `;
-
-function rimMaterial(color, glow) {
-  return new THREE.ShaderMaterial({
-    uniforms: { uTime: { value: 0 }, uColor: { value: new THREE.Color(color) }, uGlow: { value: new THREE.Color(glow) }, uOpen: { value: 1 } },
-    vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
-    fragmentShader: `${NOISE_GLSL}
-      uniform float uTime; uniform vec3 uColor; uniform vec3 uGlow; uniform float uOpen; varying vec2 vUv;
-      void main(){
-        float a = vUv.x * 6.2831853;
-        float r = vUv.y;                       // 0 inner edge -> 1 outer edge
-        float n = fbm(vec2(a * 2.0 + uTime * 1.7, r * 3.0 - uTime * 2.3));
-        float n2 = fbm(vec2(a * 5.0 - uTime * 2.9, r * 6.0 + uTime));
-        float core = smoothstep(0.0, 0.18, r) * (1.0 - smoothstep(0.18, 0.55 + n * 0.35, r));
-        float wisps = (1.0 - smoothstep(0.1, 1.0, r)) * smoothstep(0.45, 0.85, n2) * 0.9;
-        float inner = 1.0 - smoothstep(0.0, 0.08, r);
-        float i = core * 1.4 + wisps + inner * 0.6;
-        vec3 col = mix(uColor, uGlow, clamp(core * 1.2 + inner, 0.0, 1.0));
-        gl_FragColor = vec4(col * i * uOpen * 0.75, 1.0);
-      }`,
-    transparent: true,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false,
-    side: THREE.DoubleSide,
-    polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -8,
-  });
+// Shader tail: tone map + colour space when drawing straight to the screen
+// (both are no-ops when rendering into the HDR post-processing target).
+export const OUT_GLSL = '\n#include <tonemapping_fragment>\n#include <colorspace_fragment>\n';
+// Premultiplied "over": rgb is added, alpha darkens what is behind. Keeps
+// coloured glows saturated on bright white walls, where additive washes out.
+export function premultiplied(mat) {
+  mat.transparent = true;
+  mat.blending = THREE.CustomBlending;
+  mat.blendSrc = THREE.OneFactor; mat.blendDst = THREE.OneMinusSrcAlphaFactor;
+  mat.blendSrcAlpha = THREE.ZeroFactor; mat.blendDstAlpha = THREE.OneFactor;
+  mat.depthWrite = false;
+  return mat;
 }
 
+const LOCAL_VS = `varying vec2 vP; void main(){ vP = position.xy; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`;
+const HALF = new THREE.Vector2(PORTAL.halfWidth, PORTAL.halfHeight);
+
+// The animated fiery border: a turbulent band hugging the oval, white-hot at
+// the inner edge, flowing around the rim and fading out into a soft glow.
+function rimMaterial(color, glow) {
+  return premultiplied(new THREE.ShaderMaterial({
+    uniforms: {
+      uTime: { value: 0 }, uOpen: { value: 1 }, uFlash: { value: 0 }, uSeed: { value: Math.random() * 50 },
+      uColor: { value: new THREE.Color(color) }, uGlow: { value: new THREE.Color(glow) }, uHalf: { value: HALF },
+    },
+    vertexShader: LOCAL_VS,
+    fragmentShader: `${NOISE_GLSL}
+      uniform float uTime, uOpen, uFlash, uSeed; uniform vec3 uColor, uGlow; uniform vec2 uHalf; varying vec2 vP;
+      void main(){
+        vec2 q = vP / uHalf;
+        float e = max(length(q), 1e-4);
+        float d = (e - 1.0) / (length(vP / (uHalf * uHalf)) / e);   // signed distance to the edge (units, + outside)
+        vec2 cs = q / e;
+        float t = uTime + uSeed;
+        // two noise layers sampled on rotating circles: flames flow around the oval
+        float n1 = fbm3(vec3(rot2(t * 0.55) * cs * 3.4, d * 0.11 - t * 1.25));
+        float n2 = fbm3(vec3(rot2(-t * 0.9) * cs * 7.5 + 4.0, d * 0.24 - t * 2.3));
+        float n = smoothstep(0.22, 0.78, n1 * 0.7 + n2 * 0.5 - 0.1);
+        float dout = max(d, 0.0);
+        float h = 2.6 + 12.0 * n * n;                                      // tongue length
+        float flame = (1.0 - smoothstep(h * 0.35, h, dout)) * smoothstep(-5.0, -0.5, d);
+        float lick = flame * (0.25 + 0.75 * n) * (0.5 + 1.0 * n2) * (1.0 - 0.5 * dout / h);                           // turbulent brightness
+        float core = exp(-abs(d + 0.6) / 1.1);                         // hot inner edge
+        float glow = exp(-dout / 9.0) * smoothstep(-6.0, 0.0, d);
+        float inner = d < 0.0 ? exp(d / 2.5) : 0.0;                    // light spilling into the opening
+        float tint = d < 0.0 ? exp(d / 12.0) : 0.0;                    // faint coloured edge of the view
+        float lim = (1.0 - smoothstep(1.3, 1.46, e)) * smoothstep(0.8, 0.86, e);
+        vec3 col = uColor * (lick * 1.15 + glow * 0.22 + inner * 0.8 + tint * 0.15)
+                 + uGlow * (core * (0.8 + 0.9 * n) + pow(lick, 3.0) * 1.4)
+                 + (uColor * 1.6 + uGlow * 0.6) * uFlash * exp(-abs(d) / 7.0) * 2.2;
+        float a = clamp(flame * 0.97 + core * 0.9 + glow * 0.25 + inner * 0.55 + tint * 0.12, 0.0, 1.0);
+        col *= lim * uOpen; a *= lim * min(uOpen, 1.0);
+        gl_FragColor = vec4(col, a);
+        ${OUT_GLSL}
+      }`,
+    side: THREE.DoubleSide,
+    polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -8,
+  }));
+}
+
+// Unlinked portal: a churning, swirling coloured vortex instead of a view.
 function fillMaterial(color, glow) {
   return new THREE.ShaderMaterial({
-    uniforms: { uTime: { value: 0 }, uColor: { value: new THREE.Color(color) }, uGlow: { value: new THREE.Color(glow) } },
-    vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
+    uniforms: { uTime: { value: 0 }, uFlash: { value: 0 }, uColor: { value: new THREE.Color(color) }, uGlow: { value: new THREE.Color(glow) }, uHalf: { value: HALF } },
+    vertexShader: LOCAL_VS,
     fragmentShader: `${NOISE_GLSL}
-      uniform float uTime; uniform vec3 uColor; uniform vec3 uGlow; varying vec2 vUv;
+      uniform float uTime, uFlash; uniform vec3 uColor, uGlow; uniform vec2 uHalf; varying vec2 vP;
       void main(){
-        vec2 p = (vUv - 0.5) * 2.0;
-        float r = length(p);
-        float a = atan(p.y, p.x);
-        float swirl = fbm(vec2(a * 1.5 + r * 4.0 - uTime * 1.2, r * 3.0 - uTime * 0.6));
-        float s2 = fbm(vec2(a * 3.0 - r * 6.0 + uTime * 0.8, uTime * 0.3 + r));
-        vec3 base = uColor * (0.25 + 0.55 * swirl) + uGlow * pow(s2, 3.0) * 0.8;
-        base = mix(base, uGlow, smoothstep(0.75, 1.0, r) * 0.7);
-        gl_FragColor = vec4(base, 1.0);
+        vec2 q = vP / uHalf;
+        float r = length(q);
+        float t = uTime;
+        vec2 p1 = rot2(t * 0.8 + r * 4.2) * q;          // twist grows outward: spiral arms
+        vec2 p2 = rot2(-t * 0.45 + r * 6.5) * q * 1.6;
+        float n1 = fbm3(vec3(p1 * 2.4, t * 0.3));
+        float n2 = fbm3(vec3(p2 * 3.6 + n1 * 1.4, t * 0.45 + 3.0));
+        float arms = 0.5 + 0.5 * sin(atan(p1.y, p1.x) * 3.0 + n2 * 5.0 - r * 3.0);
+        float v = clamp(n1 * 0.7 + n2 * 0.75 + arms * 0.3 - 0.45, 0.0, 1.0);
+        float edge = smoothstep(0.5, 1.0, r);
+        vec3 col = uColor * (0.10 + 1.1 * v + edge * 0.55) + uGlow * (pow(v, 3.0) * 1.4 + edge * edge * edge * 1.1);
+        col *= 0.55 + 0.45 * smoothstep(0.0, 0.6, r);   // deeper in the middle
+        col += (uColor + uGlow * 0.5) * uFlash * 1.5;
+        gl_FragColor = vec4(col, 1.0);
+        ${OUT_GLSL}
       }`,
     polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -4,
   });
 }
 
-const _close = new THREE.Matrix4();
+// Embers peeling off the rim and drifting out of the wall (animated on the GPU)
+function rimSparksMaterial(glow) {
+  const m = new THREE.ShaderMaterial({
+    uniforms: { uTime: { value: 0 }, uOpen: { value: 1 }, uRes: { value: new THREE.Vector2(1280, 720) }, uGlow: { value: new THREE.Color(glow).multiplyScalar(2.2) }, uHalf: { value: HALF } },
+    vertexShader: `attribute vec4 aSeed; uniform float uTime, uOpen; uniform vec2 uRes, uHalf; varying float vA;
+      void main(){
+        float age = fract(uTime * aSeed.z + aSeed.y);
+        float a = aSeed.x + age * aSeed.w;
+        float r = 1.0 + age * (0.08 + 0.1 * fract(aSeed.y * 7.0));
+        vec3 p = vec3(cos(a) * uHalf.x * r, sin(a) * uHalf.y * r, 0.8 + age * (6.0 + 8.0 * fract(aSeed.y * 13.0)));
+        vec4 mv = modelViewMatrix * vec4(p, 1.0);
+        gl_Position = projectionMatrix * mv;
+        float px = 0.9 * projectionMatrix[1][1] * uRes.y * 0.5 / max(-mv.z, 1.0);
+        vA = sin(3.14159 * age) * uOpen * clamp(px / 2.0, 0.15, 1.0);
+        gl_PointSize = clamp(px, 2.0, 24.0);
+      }`,
+    fragmentShader: `uniform vec3 uGlow; varying float vA;
+      void main(){ vec2 c = gl_PointCoord - 0.5; float a = exp(-dot(c, c) * 14.0) * vA; gl_FragColor = vec4(uGlow * a, 0.0); ${OUT_GLSL} }`,
+  });
+  premultiplied(m);
+  return m;
+}
+
+// physical viewport height for screen-sized point sprites
+const _vp = new THREE.Vector4();
+export function trackResolution(obj, uniform) {
+  obj.onBeforeRender = (renderer) => { renderer.getCurrentViewport(_vp); uniform.value.set(_vp.z, _vp.w); };
+}
+
+const _m = new THREE.Matrix4();
 let dotTex = null;
 export function dotTexture() {
   if (dotTex) return dotTex;
@@ -140,108 +213,154 @@ export function dotTexture() {
   return dotTex;
 }
 
-// Visual representation of a single portal (rim, idle fill, particles)
+const OPEN_TIME = 0.25, CLOSE_TIME = 0.25, FLASH_TIME = 0.45;
+const LIGHT_POWER = 7000, LIGHT_FLASH = 9000;
+let RIM_GEO = null;
+
+// Visual representation of a single portal (rim, idle fill, embers, light).
+// `local` is the opening/closing transform relative to the portal's frame; the
+// stencil mask uses it too, so the hole grows out of the impact point.
 export class PortalVisual {
   constructor(portal, scene) {
     this.portal = portal;
     this.scale = 1;
+    this.closing = 0;
+    this.local = new THREE.Matrix4();
+    this.impact = new THREE.Vector2();
+    this.impactVersion = -1;
+    this.onEvent = null;            // (type, matrix, portal) for the fx layer
+    this.lastMatrix = new THREE.Matrix4();
+    this.seenVersion = portal.version;
     const color = COLORS[portal.color], glow = COLORS[portal.color + 'Glow'];
+    RIM_GEO ||= ringGeometry(0.8, 1.48);
     this.group = new THREE.Group();
     this.group.matrixAutoUpdate = false;
     this.rimMat = rimMaterial(color, glow);
-    this.rim = new THREE.Mesh(ringGeometry(0.98, 1.32), this.rimMat);
+    this.rim = new THREE.Mesh(RIM_GEO, this.rimMat);
     this.rim.position.z = 0.6;
     this.rim.renderOrder = 5;
     this.fillMat = fillMaterial(color, glow);
     this.fill = new THREE.Mesh(discGeometry(PORTAL.surfaceOffset + 0.05), this.fillMat);
-    // soft light splash on the wall around the portal
-    this.splashMat = new THREE.ShaderMaterial({
-      uniforms: { uColor: { value: new THREE.Color(color) }, uOpen: { value: 1 } },
-      vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
-      fragmentShader: `uniform vec3 uColor; uniform float uOpen; varying vec2 vUv;
-        void main(){
-          vec2 p = (vUv - 0.5) * 2.0 / vec2(${(2 / 4.2).toFixed(4)}, ${(2 / 3.2).toFixed(4)});
-          float e = length(p);                 // 1.0 on the portal's edge
-          if (e < 1.0) discard;
-          float a = (1.0 - smoothstep(1.0, 2.0, e)) * 0.3 * uOpen;
-          gl_FragColor = vec4(uColor * a, 1.0);
-        }`,
-      transparent: true, blending: THREE.AdditiveBlending, depthWrite: false,
-      polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -6,
-    });
-    const splash = new THREE.Mesh(new THREE.PlaneGeometry(PORTAL.halfWidth * 4.2, PORTAL.halfHeight * 3.2), this.splashMat);
-    splash.position.z = 0.4;
-    splash.renderOrder = 4;
-    this.group.add(this.rim, this.fill, splash);
+    this.group.add(this.rim, this.fill);
 
-    // particles drifting off the rim
-    const N = 70;
-    this.pData = new Float32Array(N * 4);
+    // embers drifting off the rim
+    const N = 90;
+    const seed = new Float32Array(N * 4);
+    for (let i = 0; i < N; i++) {
+      seed[i * 4] = Math.random() * Math.PI * 2;
+      seed[i * 4 + 1] = Math.random();
+      seed[i * 4 + 2] = 0.5 + Math.random() * 0.9;
+      seed[i * 4 + 3] = (Math.random() - 0.5) * 1.6;
+    }
     const pg = new THREE.BufferGeometry();
-    this.pPos = new Float32Array(N * 3);
-    pg.setAttribute('position', new THREE.BufferAttribute(this.pPos, 3));
-    for (let i = 0; i < N; i++) this.resetParticle(i, Math.random());
-    this.pMat = new THREE.PointsMaterial({
-      color: glow, size: 3.2, map: dotTexture(), transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true,
-    });
+    pg.setAttribute('position', new THREE.BufferAttribute(new Float32Array(N * 3), 3));
+    pg.setAttribute('aSeed', new THREE.BufferAttribute(seed, 4));
+    this.pMat = rimSparksMaterial(glow);
     this.points = new THREE.Points(pg, this.pMat);
-    this.points.frustumCulled = false;
+    this.points.renderOrder = 6;
+    trackResolution(this.points, this.pMat.uniforms.uRes);
     this.group.add(this.points);
-    for (const o of [this.rim, this.fill, splash]) o.frustumCulled = false;
+    for (const o of [this.rim, this.fill, this.points]) o.frustumCulled = false;
     scene.add(this.group);
     this.group.visible = false;
+
+    // a portal moved while open collapses where it was
+    this.ghostMat = rimMaterial(color, glow);
+    this.ghost = new THREE.Mesh(RIM_GEO, this.ghostMat);
+    this.ghost.matrixAutoUpdate = false;
+    this.ghost.frustumCulled = false;
+    this.ghost.renderOrder = 5;
+    this.ghost.visible = false;
+    this.ghostT = 0;
+    this.ghostM = new THREE.Matrix4();
+    scene.add(this.ghost);
+
+    // soft coloured light on nearby surfaces; always in the scene (intensity 0
+    // when closed) so the light count, and so every shader, stays the same
+    this.light = new THREE.PointLight(color, 0, 230, 2);
+    scene.add(this.light);
   }
-  resetParticle(i, age = 0) {
-    const a = Math.random() * Math.PI * 2;
-    this.pData[i * 4] = a;
-    this.pData[i * 4 + 1] = age;
-    this.pData[i * 4 + 2] = 0.4 + Math.random() * 0.8; // speed
-    this.pData[i * 4 + 3] = (Math.random() - 0.5) * 0.6;  // swirl
+
+  // where the shot landed, so the opening grows out of that point
+  setImpact(point) {
+    const P = this.portal;
+    const v = point.clone().applyMatrix4(P.inverse);
+    const u = v.x / PORTAL.halfWidth, w = v.y / PORTAL.halfHeight, l = Math.hypot(u, w);
+    const k = l > 0.85 ? 0.85 / l : 1;     // keep inside the oval (screen bounds stay conservative)
+    this.impact.set(u * k * PORTAL.halfWidth, w * k * PORTAL.halfHeight);
+    this.impactVersion = P.version;
   }
+
   update(time, dt) {
     const P = this.portal;
-    // closing animation when a portal is fizzled: shrink where it was
+    // re-placed while open: the old one collapses
+    if (P.placed && this.wasPlaced && P.version !== this.seenVersion && !this.lastMatrix.equals(P.matrix)) {
+      this.ghostT = CLOSE_TIME;
+      this.ghostM.copy(this.lastMatrix);
+      this.onEvent?.('close', this.lastMatrix, P);
+    }
+    this.seenVersion = P.version;
+    this.updateGhost(time, dt);
+
     if (!P.placed) {
-      if (this.wasPlaced) { this.closing = 0.22; this.wasPlaced = false; this.fill.visible = true; }
-      this.closing = Math.max(0, (this.closing || 0) - dt);
+      if (this.wasPlaced) { this.closing = CLOSE_TIME; this.wasPlaced = false; this.onEvent?.('close', this.lastMatrix, P); }
+      this.closing = Math.max(0, this.closing - dt);
       this.group.visible = this.closing > 0;
+      this.fill.visible = this.closing > 0;
+      const k = this.closing / CLOSE_TIME;
       if (this.closing > 0) {
-        const k = this.closing / 0.22;
-        this.group.matrix.copy(P.matrix).multiply(_close.makeScale(k, k, 1));
+        // collapse: the oval pinches to a point in a last bright flash
+        const s = Math.pow(k, 0.7);
+        this.local.makeScale(s, s, 1);
+        this.group.matrix.copy(this.lastMatrix).multiply(this.local);
         this.group.matrixWorldNeedsUpdate = true;
-        this.rimMat.uniforms.uTime.value = time;
-        this.fillMat.uniforms.uTime.value = time;
+        this.setUniforms(time, 1, (1 - k) * 0.8, 1 - k);
       }
+      this.light.intensity = this.closing > 0 ? LIGHT_POWER * k + LIGHT_FLASH * 0.5 * (1 - k) * k * 4 : 0;
       return;
     }
     this.wasPlaced = true;
     this.closing = 0;
     this.group.visible = true;
-    const open = Math.min(1, (time - P.openedAt) / 0.28);
-    const e = 1 - Math.pow(1 - open, 3);
+    this.lastMatrix.copy(P.matrix);
+    const age = time - P.openedAt;
+    const o = Math.min(1, Math.max(0, age / OPEN_TIME));
+    const e = 1 - Math.pow(1 - o, 3);
+    const flash = Math.pow(Math.max(0, 1 - age / FLASH_TIME), 2);
     this.scale = Math.max(0.02, e);
-    this.group.matrix.copy(P.matrix).multiply(_close.makeScale(this.scale, this.scale, 1));
+    const off = this.impactVersion === P.version ? 1 - e : 0;
+    this.local.makeScale(this.scale, this.scale, 1).setPosition(this.impact.x * off, this.impact.y * off, 0);
+    this.group.matrix.copy(P.matrix).multiply(this.local);
     this.group.matrixWorldNeedsUpdate = true;
-    this.rimMat.uniforms.uTime.value = time;
-    this.rimMat.uniforms.uOpen.value = 0.6 + 0.4 * e;
-    this.fillMat.uniforms.uTime.value = time;
-    this.splashMat.uniforms.uOpen.value = e;
-    const N = this.pPos.length / 3;
-    for (let i = 0; i < N; i++) {
-      let age = this.pData[i * 4 + 1] + dt * this.pData[i * 4 + 2];
-      if (age > 1) { this.resetParticle(i); age = 0; }
-      this.pData[i * 4 + 1] = age;
-      const a = this.pData[i * 4] + age * this.pData[i * 4 + 3] * 3;
-      const r = 1.0 + age * 0.25;
-      this.pPos[i * 3] = Math.cos(a) * PORTAL.halfWidth * r;
-      this.pPos[i * 3 + 1] = Math.sin(a) * PORTAL.halfHeight * r;
-      this.pPos[i * 3 + 2] = 1 + age * 10;
-    }
-    this.points.geometry.attributes.position.needsUpdate = true;
-    this.pMat.opacity = 0.8 * e;
+    this.setUniforms(time, 0.7 + 0.3 * e, flash, e);
+    this.light.position.copy(P.pos).addScaledVector(P.normal, 26);
+    const flicker = 0.94 + 0.06 * Math.sin(time * 11.3) * Math.sin(time * 6.7 + 1.3);
+    this.light.intensity = LIGHT_POWER * e * flicker + LIGHT_FLASH * flash;
   }
+
+  setUniforms(time, open, flash, sparks) {
+    this.rimMat.uniforms.uTime.value = time;
+    this.rimMat.uniforms.uOpen.value = open;
+    this.rimMat.uniforms.uFlash.value = flash;
+    this.fillMat.uniforms.uTime.value = time;
+    this.fillMat.uniforms.uFlash.value = flash;
+    this.pMat.uniforms.uTime.value = time;
+    this.pMat.uniforms.uOpen.value = sparks;
+  }
+
+  updateGhost(time, dt) {
+    this.ghostT = Math.max(0, this.ghostT - dt);
+    this.ghost.visible = this.ghostT > 0;
+    if (!this.ghost.visible) return;
+    const k = this.ghostT / CLOSE_TIME, s = Math.pow(k, 0.7);
+    this.ghost.matrix.copy(this.ghostM).multiply(_m.makeScale(s, s, 1).setPosition(0, 0, 0.6));
+    this.ghost.matrixWorld.copy(this.ghost.matrix);
+    this.ghostMat.uniforms.uTime.value = time;
+    this.ghostMat.uniforms.uFlash.value = (1 - k) * 0.8;
+  }
+
   dispose(scene) {
-    scene.remove(this.group);
+    scene.remove(this.group, this.ghost, this.light);
   }
 }
 
@@ -314,8 +433,10 @@ export class PortalRenderer {
   }
 
   portalMatrix(P, vis) {
-    const s = vis ? vis.scale : 1;
-    return _scale.copy(P.matrix).multiply(_sub.makeScale(s, s, 1));
+    // opening transform (grows out of the impact point, always inside the
+    // full oval, so the screen bounds below stay conservative)
+    _scale.copy(P.matrix);
+    return vis ? _scale.multiply(vis.local) : _scale;
   }
 
   drawMask(P, vis, cam, ref, op) {
