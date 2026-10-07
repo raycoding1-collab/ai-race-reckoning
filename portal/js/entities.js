@@ -3,6 +3,10 @@ import { CELL, GRAVITY, CUBE, PELLET, PORTAL } from './constants.js';
 import { Body, moveBody, groundBelow } from './physics.js';
 import { traceGrid } from './level.js';
 import { makeSignTexture, makeGraffiti } from './textures.js';
+import {
+  buildCube, buildButton, buildDoor, buildTurret, animateTurret, buildWallDevice, buildFaithPlate,
+  buildDispenser, buildFizzler, buildAntline, buildGlassFrame, buildRocketTurret, withClone, CUBE_RING, IND_ON, IND_OFF,
+} from './models.js';
 
 const C = (v) => v * CELL;
 // physically based stand-in for the old Phong materials: shininess maps to roughness
@@ -50,7 +54,6 @@ export class BlobShadow {
 
 // ---------------------------------------------------------------------------
 // Weighted storage cube
-let cubeGeo = null;
 const NO_CLIP = new THREE.Plane(new THREE.Vector3(0, 1, 0), 1e7);
 const _up = new THREE.Vector3(0, 1, 0), _one = new THREE.Vector3(1, 1, 1);
 const _tq = new THREE.Quaternion(), _tv = new THREE.Vector3();
@@ -86,13 +89,21 @@ export class Cube {
   }
 
   build() {
-    if (!cubeGeo) cubeGeo = new THREE.BoxGeometry(CUBE.half * 2, CUBE.half * 2, CUBE.half * 2);
-    this.mat = phong({ map: this.companion ? this.world.textures.companion : this.world.textures.cube, shininess: 30, specular: 0x333333 });
-    this.cloneMat = this.mat.clone();
-    this.mesh = new THREE.Mesh(cubeGeo, this.mat);
-    this.clone = new THREE.Mesh(cubeGeo, this.cloneMat);
-    this.mats = [this.mat];
-    this.cloneMats = [this.cloneMat];
+    const m = buildCube(this.companion);
+    const c = withClone(m.group, m.mats);
+    this.mesh = c.mesh; this.clone = c.clone;
+    this.mats = c.mats; this.cloneMats = c.cloneMats;
+    this.mat = m.bodyMat;
+    this.ringMats = [m.ringMat, c.map.get(m.ringMat)];
+  }
+
+  // visual only: the emblem ring turns orange while the cube holds a button down
+  updateLights() {
+    const lit = this.world.time - (this.buttonTime ?? -1) < 0.15;
+    if (lit === this.lit || !this.ringMats) return;
+    this.lit = lit;
+    const hex = lit ? CUBE_RING.on : this.companion ? CUBE_RING.companionOff : CUBE_RING.off;
+    for (const m of this.ringMats) m.emissive.setHex(hex);
   }
 
   push(dir, speed) {
@@ -104,6 +115,7 @@ export class Cube {
   }
 
   update(dt) {
+    this.updateLights();
     if (this.dissolving >= 0) {
       this.dissolving += dt;
       const k = Math.min(1, this.dissolving / 0.9);
@@ -250,15 +262,11 @@ export class FloorButton {
     this.cubeOnly = !!d.cubeOnly;
     this.pressed = false;
     this.depress = 0;
-    const g = new THREE.Group();
-    const base = new THREE.Mesh(new THREE.CylinderGeometry(46, 50, 7, 40), phong({ color: 0x9aa0a4, shininess: 40 }));
-    base.position.y = 3.5;
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(40, 2.2, 8, 40), new THREE.MeshBasicMaterial({ color: 0x3aa8ff }));
-    ring.rotation.x = Math.PI / 2; ring.position.y = 7.2;
-    this.ringMat = ring.material;
-    this.pad = new THREE.Mesh(new THREE.CylinderGeometry(36, 37, 6, 40), phong({ color: 0xc7262b, shininess: 60, specular: 0x552222 }));
-    this.pad.position.y = 9;
-    g.add(base, ring, this.pad);
+    const model = buildButton();
+    const g = model.group;
+    this.ringMat = model.ringMat;
+    this.pad = model.pad;
+    this.pad.position.y = 3;
     g.position.copy(this.pos);
     world.scene.add(noCull(g));
     this.group = g;
@@ -274,7 +282,10 @@ export class FloorButton {
       if (b.owner && b.owner.held) continue;
       const bottom = b.pos.y - b.half.y;
       if (bottom > p.y + 16 || bottom < p.y - 4) continue;
-      if (Math.abs(b.pos.x - p.x) < 38 + b.half.x * 0.5 && Math.abs(b.pos.z - p.z) < 38 + b.half.z * 0.5) down = true;
+      if (Math.abs(b.pos.x - p.x) < 38 + b.half.x * 0.5 && Math.abs(b.pos.z - p.z) < 38 + b.half.z * 0.5) {
+        down = true;
+        if (b.owner) b.owner.buttonTime = this.world.time;   // lights the cube's emblem
+      }
     }
     if (down !== this.pressed) {
       this.pressed = down;
@@ -282,8 +293,8 @@ export class FloorButton {
       this.world.events.emit(down ? 'buttonDown' : 'buttonUp', { pos: p });
     }
     this.depress += ((down ? 1 : 0) - this.depress) * Math.min(1, dt * 14);
-    this.pad.position.y = 9 - this.depress * 4.5;
-    this.ringMat.color.setHex(down ? 0xffa030 : 0x3aa8ff);
+    this.pad.position.y = 3 - this.depress * 6;
+    this.ringMat.emissive.setHex(down ? IND_ON : IND_OFF);
   }
 }
 
@@ -305,35 +316,35 @@ export class Door {
     else this.box = [this.pos.x - this.w / 2, this.pos.y, this.pos.z - t, this.pos.x + this.w / 2, this.pos.y + this.h, this.pos.z + t];
     world.solids.push(this);
     world.shotBlockers.push(this);
-    const g = new THREE.Group();
-    const panelMat = phong({ color: 0xdfe3e6, shininess: 20 });
-    const stripeMat = new THREE.MeshBasicMaterial({ color: 0x2a2d30 });
-    this.lightMat = new THREE.MeshBasicMaterial({ color: 0x3aa8ff });
-    this.left = new THREE.Group(); this.right = new THREE.Group();
-    for (const [side, grp] of [[-1, this.left], [1, this.right]]) {
-      const panel = new THREE.Mesh(new THREE.BoxGeometry(this.w / 2, this.h, 8), panelMat);
-      panel.position.x = side * this.w / 4;
-      const stripe = new THREE.Mesh(new THREE.BoxGeometry(6, this.h * 0.9, 8.6), stripeMat);
-      stripe.position.x = side * 6;
-      const light = new THREE.Mesh(new THREE.BoxGeometry(3, this.h * 0.6, 8.8), this.lightMat);
-      light.position.x = side * 14;
-      grp.add(panel, stripe, light);
-      grp.position.y = this.h / 2;
-      g.add(grp);
-    }
-    // frame
-    const frameMat = phong({ color: 0x55595d, shininess: 30 });
-    const top = new THREE.Mesh(new THREE.BoxGeometry(this.w + 16, 10, 14), frameMat);
-    top.position.y = this.h + 1;
-    const l = new THREE.Mesh(new THREE.BoxGeometry(8, this.h, 14), frameMat); l.position.set(-this.w / 2 - 2, this.h / 2, 0);
-    const r = l.clone(); r.position.x = this.w / 2 + 2;
-    g.add(top, l, r);
+    this.model = this.buildModel(world);
+    const g = this.model.group;
     g.position.copy(this.pos);
     if (this.axis === 0) g.rotation.y = Math.PI / 2;
     world.scene.add(noCull(g));
     this.group = g;
     const pad = 12;
     world.noPortalBoxes.push([this.box[0] - pad, this.box[1] - pad, this.box[2] - pad, this.box[3] + pad, this.box[4] + pad, this.box[5] + pad]);
+  }
+  // visual: find the wall faces around the opening so the frame lips sit on
+  // them, and put indicator signs on solid wall to the viewer's right
+  buildModel(world) {
+    const ax = this.axis === 0 ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 0, 1);
+    const lat = this.axis === 0 ? new THREE.Vector3(0, 0, -1) : new THREE.Vector3(1, 0, 0);
+    const at = (x, y, z) => this.pos.clone().addScaledVector(lat, x).addScaledVector(ax, z).setY(this.pos.y + y);
+    const solid = (v) => world.grid.solidAt(v.x, v.y, v.z);
+    let lo = -6, hi = 6;
+    if (solid(at(0, this.h + 8, 0))) {
+      lo = 0; hi = 0;
+      while (lo > -64 && solid(at(0, this.h + 8, lo - 1))) lo--;
+      while (hi < 64 && solid(at(0, this.h + 8, hi + 1))) hi++;
+      hi += 1;
+    }
+    const sx = this.w / 2 + 34, sy = this.h * 0.62;
+    const wallAt = (x, z) => [-13, 0, 13].every((d) => solid(at(x + d, sy, z)) && solid(at(x + d, sy + 12, z)) && solid(at(x + d, sy - 12, z)));
+    const signs = [];
+    if (wallAt(-sx, lo + 1)) signs.push({ x: -sx, z: lo, flip: true });
+    if (wallAt(sx, hi - 1)) signs.push({ x: sx, z: hi, flip: false });
+    return buildDoor(this.w, this.h, [lo, hi], signs);
   }
   isSolid() { return this.solidState; }
   blocksShot() { return this.solidState; }
@@ -345,11 +356,8 @@ export class Door {
     }
     const speed = 1.6;
     this.open += Math.sign((want ? 1 : 0) - this.open) * Math.min(Math.abs((want ? 1 : 0) - this.open), dt * speed);
-    const e = this.open * this.open * (3 - 2 * this.open);
-    this.left.position.x = -e * this.w / 2;
-    this.right.position.x = e * this.w / 2;
+    this.model.update(this.open, want);
     this.solidState = this.open < 0.6;
-    this.lightMat.color.setHex(want ? 0xffa030 : 0x3aa8ff);
   }
 }
 
@@ -366,40 +374,9 @@ export class Fizzler {
     world.shotBlockers.push(this);
     const w = this.axis === 0 ? b[5] - b[2] : b[3] - b[0];
     const h = b[4] - b[1];
-    this.mat = new THREE.ShaderMaterial({
-      uniforms: { uTime: { value: 0 }, uSize: { value: new THREE.Vector2(w, h) } },
-      vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
-      fragmentShader: `uniform float uTime; uniform vec2 uSize; varying vec2 vUv;
-        float h(vec2 p){ return fract(sin(dot(p, vec2(41.3, 289.1))) * 43758.5); }
-        void main(){
-          vec2 p = vUv * uSize / 8.0;
-          float lines = 0.0;
-          for (int i=0;i<3;i++){
-            float fi=float(i);
-            float y = p.y * (0.6 + fi*0.3) + uTime * (1.5 + fi) + sin(p.x*0.7 + uTime*2.0 + fi)*0.6;
-            lines += smoothstep(0.92, 1.0, fract(y)) * (0.4 + 0.3*fi);
-          }
-          float sparkle = step(0.995, h(floor(p*2.0) + floor(uTime*12.0)));
-          float edge = smoothstep(0.0, 0.04, vUv.x) * smoothstep(0.0, 0.04, 1.0-vUv.x);
-          vec3 col = vec3(0.35, 0.65, 1.0) * (0.10 + lines * 0.6) + vec3(0.8,0.9,1.0)*sparkle;
-          gl_FragColor = vec4(col * edge, 1.0);
-        }`,
-      transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide,
-    });
-    const plane = new THREE.Mesh(new THREE.PlaneGeometry(w, h), this.mat);
-    plane.renderOrder = 6;
-    const g = new THREE.Group();
-    g.add(plane);
-    // emitter strips on both sides
-    const emMat = phong({ color: 0x3c4044 });
-    const glow = new THREE.MeshBasicMaterial({ color: 0x8cc8ff });
-    for (const s of [-1, 1]) {
-      const em = new THREE.Mesh(new THREE.BoxGeometry(8, h, 10), emMat);
-      em.position.x = s * (w / 2 - 2);
-      const gl = new THREE.Mesh(new THREE.BoxGeometry(2, h * 0.96, 11), glow);
-      gl.position.x = s * (w / 2 - 6);
-      g.add(em, gl);
-    }
+    const model = buildFizzler(w, h);
+    this.mat = model.mat;
+    const g = model.group;
     g.position.set((b[0] + b[3]) / 2, (b[1] + b[4]) / 2, (b[2] + b[5]) / 2);
     if (this.axis === 0) g.rotation.y = Math.PI / 2;
     world.scene.add(noCull(g));
@@ -520,15 +497,8 @@ export class Dispenser {
     this.pos = new THREE.Vector3(C(d.at[0]), C(d.at[1]), C(d.at[2]));  // bottom of the tube
     this.cube = null;
     this.respawnTimer = 0.2;
-    const g = new THREE.Group();
-    const tube = new THREE.Mesh(new THREE.CylinderGeometry(34, 34, 40, 32, 1, true), phong({ color: 0xd8dcdf, side: THREE.DoubleSide }));
-    tube.position.y = 20;
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(34, 4, 8, 32), phong({ color: 0x4a4e52 }));
-    ring.rotation.x = Math.PI / 2;
-    const glass = new THREE.Mesh(new THREE.CylinderGeometry(33, 33, 60, 32, 1, true),
-      new THREE.MeshPhongMaterial({ color: 0xcfe8ff, transparent: true, opacity: 0.14, depthWrite: false, side: THREE.DoubleSide }));
-    glass.position.y = -30;
-    g.add(tube, ring, glass);
+    const model = buildDispenser();
+    const g = model.group;
     g.position.copy(this.pos);
     world.scene.add(noCull(g));
   }
@@ -553,29 +523,17 @@ export class FaithPlate {
     this.apex = C(d.apex);
     this.cool = 0;
     this.flip = 0;
-    const g = new THREE.Group();
-    const base = new THREE.Mesh(new THREE.BoxGeometry(76, 6, 76), phong({ color: 0x3e4246 }));
-    base.position.y = 3;
-    this.plate = new THREE.Group();
-    const top = new THREE.Mesh(new THREE.BoxGeometry(64, 4, 64), phong({ color: 0xe2e5e7 }));
-    const arrowCanvas = document.createElement('canvas'); arrowCanvas.width = arrowCanvas.height = 128;
-    const ac = arrowCanvas.getContext('2d');
-    ac.fillStyle = '#e2e5e7'; ac.fillRect(0, 0, 128, 128);
-    ac.fillStyle = '#ff9a2e';
-    ac.beginPath(); ac.moveTo(64, 14); ac.lineTo(104, 62); ac.lineTo(78, 62); ac.lineTo(78, 112); ac.lineTo(50, 112); ac.lineTo(50, 62); ac.lineTo(24, 62); ac.closePath(); ac.fill();
-    const at = new THREE.CanvasTexture(arrowCanvas); at.colorSpace = THREE.SRGBColorSpace;
-    const arrow = new THREE.Mesh(new THREE.PlaneGeometry(56, 56), new THREE.MeshBasicMaterial({ map: at }));
-    arrow.rotation.x = -Math.PI / 2; arrow.position.y = 2.1;
-    const dir = new THREE.Vector3().subVectors(this.target, this.pos); dir.y = 0;
-    arrow.rotation.z = Math.atan2(-dir.x, -dir.z);
-    top.add(arrow);
-    top.position.set(0, 0, 32);
-    this.plate.add(top);
+    const model = buildFaithPlate();
+    const g = model.group;
+    this.lightMat = model.lightMat;
+    this.plate = model.plate;
     this.plate.position.set(0, 8, -32);
+    model.hingeMesh.position.copy(this.plate.position);
+    const dir = new THREE.Vector3().subVectors(this.target, this.pos); dir.y = 0;
     const holder = new THREE.Group();
-    holder.add(this.plate);
+    holder.add(this.plate, model.hingeMesh);
     holder.rotation.y = Math.atan2(dir.x, dir.z) + Math.PI;
-    g.add(base, holder);
+    g.add(holder);
     g.position.copy(this.pos);
     world.scene.add(noCull(g));
     world.noPortalBoxes.push([this.pos.x - 48, this.pos.y - 2, this.pos.z - 48, this.pos.x + 48, this.pos.y + 12, this.pos.z + 48]);
@@ -594,6 +552,7 @@ export class FaithPlate {
     this.cool -= dt;
     this.flip = Math.max(0, this.flip - dt * 3);
     this.plate.rotation.x = -Math.sin(Math.min(1, this.flip) * Math.PI) * 0.9;
+    this.lightMat.emissive.setHex(this.flip > 0 ? IND_ON : IND_OFF);
     if (this.cool > 0) return;
     for (const b of this.world.bodies) {
       if (!b.solid || (b.owner && b.owner.held)) continue;
@@ -623,14 +582,15 @@ export class PelletLauncher {
     this.pellet = null;
     this.timer = 1.0;
     this.stopSignal = d.stopSignal;
-    world.scene.add(noCull(wallDevice(this.pos, this.dir, 0xffd27a, (m) => { this.coreMat = m; })));
+    world.scene.add(noCull(this.device(false)));
     world.noPortalBoxes.push(boxAround(this.pos, 52));
   }
   update(dt) {
-    if (this.stopSignal && this.world.getSignal(this.stopSignal)) { this.coreMat.color.setHex(0x444444); return; }
+    if (this.stopSignal && this.world.getSignal(this.stopSignal)) { this.coreMat.color.setHex(0x444444); this.ringMat.emissiveIntensity = 0.15; return; }
     if (this.pellet && !this.pellet.dead) return;
     this.timer -= dt;
-    this.coreMat.color.setHSL(0.11, 1, 0.5 + 0.3 * Math.sin(this.world.time * 10));
+    this.coreMat.color.setHSL(0.11, 1, 0.5 + 0.3 * Math.sin(this.world.time * 10)).multiplyScalar(1.8);
+    this.ringMat.emissiveIntensity = 1.2 + 0.5 * Math.sin(this.world.time * 10);
     if (this.timer <= 0) {
       this.pellet = new Pellet(this.world, this.pos.clone().addScaledVector(this.dir, 22), this.dir.clone().multiplyScalar(PELLET.speed));
       this.world.entities.push(this.pellet);
@@ -648,13 +608,14 @@ export class Receptacle {
     this.signal = d.signal;
     this.active = false;
     world.setSignal(this.signal, false);
-    world.scene.add(noCull(wallDevice(this.pos, this.dir, 0x3a3e42, (m) => { this.coreMat = m; }, true)));
+    world.scene.add(noCull(this.device(true)));
     world.noPortalBoxes.push(boxAround(this.pos, 52));
     world.receptacles.push(this);
   }
   capture() {
     this.active = true;
-    this.coreMat.color.setHex(0xffc65a);
+    this.coreMat.color.setHex(0xffc65a).multiplyScalar(2.2);
+    this.ringMat.emissive.setHex(IND_ON);
     this.world.setSignal(this.signal, true);
     this.world.events.emit('receptacle', { pos: this.pos });
   }
@@ -663,21 +624,17 @@ export class Receptacle {
 
 function boxAround(p, r) { return [p.x - r, p.y - r, p.z - r, p.x + r, p.y + r, p.z + r]; }
 
-function wallDevice(pos, dir, coreColor, setCore, catcher = false) {
-  const g = new THREE.Group();
-  const body = new THREE.Mesh(new THREE.BoxGeometry(56, 56, 16), phong({ color: 0xcfd3d6, shininess: 30 }));
-  body.position.z = 8;
-  const rim = new THREE.Mesh(new THREE.TorusGeometry(20, 4, 10, 32), phong({ color: 0x2f3236 }));
-  rim.position.z = 17;
-  const coreMat = new THREE.MeshBasicMaterial({ color: coreColor });
-  setCore(coreMat);
-  const core = new THREE.Mesh(catcher ? new THREE.CircleGeometry(17, 32) : new THREE.SphereGeometry(10, 16, 12), coreMat);
-  core.position.z = catcher ? 16.5 : 14;
-  g.add(body, rim, core);
-  g.position.copy(pos);
-  g.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), dir);
-  return g;
+// round wall housing shared by launchers and receptacles (visual)
+function device(catcher) {
+  const m = buildWallDevice(catcher);
+  this.coreMat = m.coreMat;
+  this.ringMat = m.ringMat;
+  m.group.position.copy(this.pos);
+  m.group.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), this.dir);
+  return m.group;
 }
+PelletLauncher.prototype.device = device;
+Receptacle.prototype.device = device;
 
 let pelletGlowTex = null;
 export class Pellet {
@@ -834,7 +791,7 @@ export class Glass {
     // frosted observation glass glows from the lit booth behind it
     const mat = d.frosted
       ? new THREE.MeshStandardMaterial({ color: 0xe6f2ff, emissive: 0xcfe6ff, emissiveIntensity: 0.75, roughness: 0.25, transparent: true, opacity: 0.62 })
-      : new THREE.MeshPhongMaterial({ color: 0xcfe8ff, transparent: true, opacity: 0.18, shininess: 100, depthWrite: false });
+      : new THREE.MeshStandardMaterial({ color: 0xcfe8ff, roughness: 0.04, metalness: 0, transparent: true, opacity: 0.16, depthWrite: false, envMapIntensity: 1.5 });
     const m = new THREE.Mesh(geo, mat);
     m.position.set((b[0] + b[3]) / 2, (b[1] + b[4]) / 2, (b[2] + b[5]) / 2);
     m.renderOrder = 7;
@@ -842,8 +799,7 @@ export class Glass {
     this.breakable = !!d.breakable;
     this.broken = false;
     this.signal = d.signal;
-    const edges = new THREE.LineSegments(new THREE.EdgesGeometry(geo), new THREE.LineBasicMaterial({ color: 0x8a9298 }));
-    m.add(edges);
+    m.add(buildGlassFrame([b[3] - b[0], b[4] - b[1], b[5] - b[2]]));
     world.scene.add(noCull(m));
   }
   isSolid() { return !this.broken; }
@@ -887,24 +843,13 @@ export class Wire {
     this.world = world;
     this.signal = d.signal;
     const pts = d.points.map((p) => new THREE.Vector3(C(p[0]), C(p[1]), C(p[2])));
-    const positions = [];
-    for (let i = 0; i < pts.length - 1; i++) {
-      const a = pts[i], b = pts[i + 1];
-      const len = a.distanceTo(b);
-      const n = Math.max(1, Math.floor(len / 20));
-      for (let k = 0; k < n; k++) positions.push(a.clone().lerp(b, k / n));
-    }
-    positions.push(pts[pts.length - 1]);
-    const geo = new THREE.BoxGeometry(5, 0.6, 5);
-    this.mat = new THREE.MeshBasicMaterial({ color: 0x3aa8ff });
-    this.mesh = new THREE.InstancedMesh(geo, this.mat, positions.length);
-    const m = new THREE.Matrix4();
-    positions.forEach((p, i) => { m.makeTranslation(p.x, p.y + 0.4, p.z); this.mesh.setMatrixAt(i, m); });
+    this.ant = buildAntline(pts);
+    this.mesh = this.ant.mesh;
     this.mesh.frustumCulled = false;
     world.scene.add(this.mesh);
   }
   update() {
-    this.mat.color.setHex(this.world.getSignal(this.signal) ? 0xffa030 : 0x3aa8ff);
+    this.ant.set(this.world.getSignal(this.signal));
   }
 }
 
@@ -931,41 +876,30 @@ export class Turret extends Cube {
   }
 
   build() {
-    const white = phong({ color: 0xeeeeee, shininess: 70, specular: 0x777777 });
-    const dark = phong({ color: 0x2a2c2f, shininess: 30 });
-    this.eyeMat = new THREE.MeshBasicMaterial({ color: 0xff2a20 });
-    const g = new THREE.Group();
-    const body = new THREE.Mesh(new THREE.SphereGeometry(10, 24, 18), white);
-    body.scale.set(1, 2.1, 0.95); body.position.y = 6;
-    const slit = new THREE.Mesh(new THREE.BoxGeometry(2.2, 34, 19.5), dark);
-    slit.position.y = 6;
-    const eye = new THREE.Mesh(new THREE.SphereGeometry(2.6, 14, 10), this.eyeMat);
-    eye.position.set(0, 12, 8.9);
-    const sideL = new THREE.Mesh(new THREE.BoxGeometry(3, 18, 8), white); sideL.position.set(-10.5, 6, 0);
-    const sideR = sideL.clone(); sideR.position.x = 10.5;
-    g.add(body, slit, eye, sideL, sideR);
-    for (let i = 0; i < 3; i++) {
-      const a = (i / 3) * Math.PI * 2 + Math.PI / 3;
-      const leg = new THREE.Mesh(new THREE.BoxGeometry(2, 26, 2), dark);
-      leg.position.set(Math.sin(a) * 9, -19, Math.cos(a) * 9);
-      leg.rotation.set(Math.cos(a) * 0.35, 0, -Math.sin(a) * 0.35);
-      g.add(leg);
-    }
-    this.mesh = g;
-    this.clone = g.clone(true);
-    this.mats = [white, dark, this.eyeMat];
-    const map = new Map(this.mats.map((m) => [m, m.clone()]));
-    this.clone.traverse((o) => { if (o.material) o.material = map.get(o.material); });
-    this.cloneMats = [...map.values()];
-    this.mat = white;
+    const m = buildTurret();
+    const c = withClone(m.group, [m.white, m.dark, m.eyeMat, m.glowMat]);
+    this.mesh = c.mesh; this.clone = c.clone;
+    this.mats = c.mats; this.cloneMats = c.cloneMats;
+    this.eyeMat = m.eyeMat;
+    this.cloneEye = c.map.get(m.eyeMat);
+    this.mat = m.white;
+    this.deploy = 0;
+    this.eyeState = 1;
   }
 
+  // visual only: shells part while the turret is alert; eye glow by state
+  animateModel(dt) {
+    const want = !this.tipped && !this.held && this.alert > 0.05 ? 1 : 0;
+    this.deploy += Math.sign(want - this.deploy) * Math.min(Math.abs(want - this.deploy), dt * 3.5);
+    animateTurret(this.mesh, this.deploy, this.eyeState, this.eyeMat, this.world.time);
+    animateTurret(this.clone, this.deploy, this.eyeState, this.cloneEye, this.world.time);
+  }
 
   knock() {
     if (this.tipped || this.dissolving >= 0) return;
     this.tipped = true;
     this.frantic = 1.4;
-    this.eyeMat.color.setHex(0x330000);
+    this.eyeState = 0;
     this.laser.visible = false;
     this.world.events.emit('turretTip', { pos: this.body.pos });
   }
@@ -976,6 +910,7 @@ export class Turret extends Cube {
 
   update(dt) {
     super.update(dt);
+    this.animateModel(dt);
     if (this.removed || this.dissolving >= 0) { this.laser.visible = false; return; }
     const b = this.body, w = this.world;
     // walking into a turret shoves it over
@@ -1049,7 +984,7 @@ export class Turret extends Cube {
     a[0] = eye.x + fwd.x * 9; a[1] = eye.y; a[2] = eye.z + fwd.z * 9;
     a[3] = end.x; a[4] = end.y; a[5] = end.z;
     this.laser.geometry.attributes.position.needsUpdate = true;
-    this.eyeMat.color.setHex(seen ? 0xff5040 : 0xff2a20);
+    this.eyeState = seen ? 2 : 1;
   }
 
   dispose() {
@@ -1136,20 +1071,11 @@ export class RocketTurret {
     this.aim = new THREE.Vector3(...(d.face || [0, 0, 1])).normalize();
     this.lock = 0; this.cool = 1.5; this.state = 'idle';
     this.inputs = d.inputs || [];
-    const g = new THREE.Group();
-    const dark = phong({ color: 0x2c2f33, shininess: 40 });
-    const white = phong({ color: 0xe9ecee, shininess: 70 });
-    const col = new THREE.Mesh(new THREE.CylinderGeometry(9, 14, 50, 16), dark); col.position.y = 25;
-    const ring = new THREE.Mesh(new THREE.CylinderGeometry(22, 24, 6, 24), dark); ring.position.y = 3;
-    this.pivot = new THREE.Group(); this.pivot.position.y = 64;
-    const core = new THREE.Mesh(new THREE.SphereGeometry(17, 24, 18), white);
-    const band = new THREE.Mesh(new THREE.TorusGeometry(17.2, 2.4, 8, 32), dark); band.rotation.y = Math.PI / 2;
-    this.eyeMat = new THREE.MeshBasicMaterial({ color: 0x40ff70 });
-    const eye = new THREE.Mesh(new THREE.CircleGeometry(5.5, 20), this.eyeMat); eye.position.z = 17.3;
-    const tube = new THREE.Mesh(new THREE.CylinderGeometry(4.5, 4.5, 30, 12), dark);
-    tube.rotation.x = Math.PI / 2; tube.position.set(16, -2, 6);
-    this.pivot.add(core, band, eye, tube);
-    g.add(col, ring, this.pivot);
+    const model = buildRocketTurret();
+    const g = model.group;
+    this.pivot = model.pivot;
+    this.eyeMat = model.eyeMat;
+    this.eyeGlow = model.glowMat;
     g.position.copy(this.base);
     world.scene.add(noCull(g));
     this.laser = new THREE.Line(new THREE.BufferGeometry().setFromPoints([this.head, this.head]),
@@ -1189,6 +1115,8 @@ export class RocketTurret {
     } else this.lock = Math.max(0, this.lock - dt * 2);
     const firing = this.firedAt && w.time - this.firedAt < 0.4;
     this.eyeMat.color.setHex(firing ? 0xff3020 : this.lock > 0 ? 0xffd030 : 0x40ff70);
+    this.eyeGlow.color.copy(this.eyeMat.color);
+    this.eyeMat.color.multiplyScalar(1.8);
     this.pivot.rotation.set(0, Math.atan2(this.aim.x, this.aim.z), 0);
     this.pivot.rotateX(-Math.asin(Math.max(-1, Math.min(1, this.aim.y))));
     // targeting laser
