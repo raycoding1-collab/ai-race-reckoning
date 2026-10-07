@@ -763,6 +763,7 @@ export class Game {
       const target = Math.min(1.7, Math.max(0.7, (this.def.exposureKey || 0.3) / Math.max(lum / 6, 1e-3)));
       this.exposure += (target - this.exposure) * (this.snapExposure ? 1 : 1 - Math.exp(-frameDt * 1.2));
       this.snapExposure = false;
+      if (!Number.isFinite(this.exposure)) this.exposure = 1.15;
     } else {
       this.vmProbe.intensity = 0;
       this.exposure = 1.15;

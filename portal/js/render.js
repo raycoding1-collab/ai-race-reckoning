@@ -124,14 +124,14 @@ function rimMaterial(color, glow) {
         float dout = max(d, 0.0);
         float h = 2.6 + 12.0 * n * n;                                      // tongue length
         float flame = (1.0 - smoothstep(h * 0.35, h, dout)) * smoothstep(-5.0, -0.5, d);
-        float lick = flame * (0.25 + 0.75 * n) * (0.5 + 1.0 * n2) * (1.0 - 0.5 * dout / h);                           // turbulent brightness
+        float lick = max(0.0, flame * (0.25 + 0.75 * n) * (0.5 + 1.0 * n2) * (1.0 - 0.5 * dout / h));                           // turbulent brightness
         float core = exp(-abs(d + 0.6) / 1.1);                         // hot inner edge
         float glow = exp(-dout / 9.0) * smoothstep(-6.0, 0.0, d);
         float inner = d < 0.0 ? exp(d / 2.5) : 0.0;                    // light spilling into the opening
         float tint = d < 0.0 ? exp(d / 12.0) : 0.0;                    // faint coloured edge of the view
         float lim = (1.0 - smoothstep(1.3, 1.46, e)) * smoothstep(0.8, 0.86, e);
         vec3 col = uColor * (lick * 1.15 + glow * 0.22 + inner * 0.8 + tint * 0.15)
-                 + uGlow * (core * (0.8 + 0.9 * n) + pow(lick, 3.0) * 1.4)
+                 + uGlow * (core * (0.8 + 0.9 * n) + pow(max(lick, 0.0), 3.0) * 1.4)
                  + (uColor * 1.6 + uGlow * 0.6) * uFlash * exp(-abs(d) / 7.0) * 2.2;
         float a = clamp(flame * 0.97 + core * 0.9 + glow * 0.25 + inner * 0.55 + tint * 0.12, 0.0, 1.0);
         col *= lim * uOpen; a *= lim * min(uOpen, 1.0);

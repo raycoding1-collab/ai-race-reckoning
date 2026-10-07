@@ -69,16 +69,19 @@ export function buildLightmappedMeshes(grid, textures, lm, pbr) {
   const hous = { pos: [], nrm: [] };
   // four inner walls of a fixture's recess (drawn double sided)
   const housing = (f, r, sink) => {
-    const W0 = r.w * 32, H0 = r.h * 32;
-    const edges = [[[0, 0], [1, 0]], [[1, 0], [1, 1]], [[1, 1], [0, 1]], [[0, 1], [0, 0]]];
-    for (const [[a0, b0], [a1, b1]] of edges) {
-      const q = [];
-      for (const [cu, cv, dz] of [[a0, b0, 0], [a1, b1, 0], [a1, b1, sink], [a0, b0, sink]]) {
-        const p = f.o.slice();
-        p[f.ua] += cu * W0; p[f.va] += cv * H0; p[f.axis] -= f.n[f.axis] * dz;
-        q.push(p);
+    const edges = [[[0, 0], [1, 0], r.w], [[1, 0], [1, 1], r.h], [[1, 1], [0, 1], r.w], [[0, 1], [0, 0], r.h]];
+    for (const [[a0, b0], [a1, b1], cells] of edges) {
+      for (let c = 0; c < cells; c++) {
+        const t0 = c / cells, t1 = (c + 1) / cells;
+        const q = [];
+        for (const [t, dz] of [[t0, 0], [t1, 0], [t1, sink], [t0, sink]]) {
+          const p = f.o.slice();
+          p[f.ua] += (a0 + (a1 - a0) * t) * r.w * CELL; p[f.va] += (b0 + (b1 - b0) * t) * r.h * CELL;
+          p[f.axis] -= f.n[f.axis] * dz;
+          q.push(p);
+        }
+        for (const i of [0, 1, 2, 0, 2, 3]) { hous.pos.push(...q[i]); hous.nrm.push(...f.n); }
       }
-      for (const i of [0, 1, 2, 0, 2, 3]) { hous.pos.push(...q[i]); hous.nrm.push(...f.n); }
     }
   };
   const { rects, W } = lm.charts;
@@ -93,27 +96,33 @@ export function buildLightmappedMeshes(grid, textures, lm, pbr) {
     const key = `${r.m * 3 + orient}|${Math.floor(cell[0] / 20)},${Math.floor(cell[1] / 20)},${Math.floor(cell[2] / 20)}`;
     if (!groups.has(key)) groups.set(key, { pos: [], uv: [], uv1: [], nrm: [], idx: [] });
     const g = groups.get(key);
-    const vi = g.pos.length / 3;
     // fixtures sit in a shallow recessed housing
     const sink = r.m === MAT.LIGHT ? RECESS : 0;
     if (sink) housing(f, r, sink);
-    for (const [cu, cv] of [[0, 0], [1, 0], [1, 1], [0, 1]]) {
+    // A vertex at every cell corner: merged rectangles would leave
+    // T-junctions with their neighbours, which GPUs rasterise as pinhole cracks.
+    const vi = g.pos.length / 3;
+    for (let j = 0; j <= r.h; j++) for (let k = 0; k <= r.w; k++) {
       const p = f.o.slice();
       p[f.axis] -= n[f.axis] * sink;
-      p[f.ua] += cu * r.w * CELL; p[f.va] += cv * r.h * CELL;
+      p[f.ua] += k * CELL; p[f.va] += j * CELL;
       g.pos.push(p[0], p[1], p[2]);
       g.nrm.push(n[0], n[1], n[2]);
       // fixture tubes run along the strip
       if (r.m === MAT.LIGHT && r.h > r.w) g.uv.push(p[f.va] / 128, p[f.ua] / 128);
       else g.uv.push(p[f.ua] / 128, p[f.va] / 128);
-      if (r.cx >= 0) g.uv1.push((r.cx + 1 + cu * r.w * PER) / W, (r.cy + 1 + cv * r.h * PER) / rows);
+      if (r.cx >= 0) g.uv1.push((r.cx + 1 + k * PER) / W, (r.cy + 1 + j * PER) / rows);
       else g.uv1.push(0, 0);
     }
     const uvec = [0, 0, 0], vvec = [0, 0, 0];
     uvec[f.ua] = 1; vvec[f.va] = 1;
     const cz = [uvec[1] * vvec[2] - uvec[2] * vvec[1], uvec[2] * vvec[0] - uvec[0] * vvec[2], uvec[0] * vvec[1] - uvec[1] * vvec[0]];
     const rh = cz[0] * n[0] + cz[1] * n[1] + cz[2] * n[2] > 0;
-    for (const t of rh ? [0, 1, 2, 0, 2, 3] : [0, 2, 1, 0, 3, 2]) g.idx.push(vi + t);
+    const row = r.w + 1;
+    for (let j = 0; j < r.h; j++) for (let k = 0; k < r.w; k++) {
+      const q = [vi + j * row + k, vi + j * row + k + 1, vi + (j + 1) * row + k + 1, vi + (j + 1) * row + k];
+      for (const t of rh ? [0, 1, 2, 0, 2, 3] : [0, 2, 1, 0, 3, 2]) g.idx.push(q[t]);
+    }
   }
   const mats = new Map();
   const meshes = [];

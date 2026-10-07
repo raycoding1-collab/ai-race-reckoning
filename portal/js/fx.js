@@ -65,7 +65,7 @@ class Sparks {
           vLen = len; vW = w;
           vec3 hot = vec3(1.0, 0.96, 0.9) * max(max(aCol.r, aCol.g), aCol.b);
           vCol = mix(hot, aCol.rgb, smoothstep(0.0, 0.4, life));
-          vA = pow(1.0 - life, 1.5) * min(1.0, wt / 1.2);
+          vA = pow(clamp(1.0 - life, 0.0, 1.0), 1.5) * min(1.0, wt / 1.2);
         }`,
       fragmentShader: `varying vec3 vCol; varying vec2 vQ; varying float vLen, vW, vA;
         void main(){
@@ -325,9 +325,9 @@ class Shafts {
         void main(){
           vec3 V = cameraPosition - vW;
           float dist = length(V);
-          float facing = abs(dot(normalize(vN), V / dist));
+          float facing = abs(dot(normalize(vN + 1e-6), V / max(dist, 1e-3)));
           float ends = smoothstep(0.0, 0.08, vUv.x) * smoothstep(1.0, 0.92, vUv.x);
-          float fall = pow(1.0 - vUv.y, 2.2);
+          float fall = pow(clamp(1.0 - vUv.y, 0.0, 1.0), 2.2);
           float rays = 0.5 + 0.5 * vn3(vec3(vUv.x * vUv.z / 18.0, vUv.y * 1.2, uTime * 0.05));
           float a = ends * fall * rays * smoothstep(0.05, 0.5, facing) * smoothstep(40.0, 160.0, dist) * 0.09;
           gl_FragColor = vec4(vec3(0.85, 0.92, 1.0) * a, 0.0);
