@@ -56,9 +56,10 @@
       <button data-open="chambers" data-from="start">Chamber select</button>
       <button data-open="settings" data-from="start">Settings</button>
       <button data-open="help" data-from="start">Controls</button>
+      <button class="fs-btn desktop-only">Full screen</button>
     </div>
     <p id="touch-note" class="note" hidden></p>
-    <p id="lock-note" class="note" hidden></p>
+    <p id="lock-note" class="note lock-note" hidden></p>
     <p class="fine desktop-only">Keyboard and mouse. Click to capture the pointer; press Esc to pause. On a phone or tablet the game switches to touch controls automatically. An unofficial fan tribute to Valve's <em>Portal</em>, built from scratch.</p>
     <p class="fine touch-only">Touch controls: left thumb moves, right thumb looks. The game always plays sideways; turn your phone to landscape. Progress and settings are saved on this device. An unofficial fan tribute to Valve's <em>Portal</em>.</p>
   </section>
@@ -72,7 +73,9 @@
       <button data-open="chambers" data-from="pause">Chamber select</button>
       <button data-open="settings" data-from="pause">Settings</button>
       <button data-open="help" data-from="pause">Controls</button>
+      <button class="fs-btn desktop-only">Full screen</button>
     </div>
+    <p class="note lock-note" hidden></p>
   </section>
 
   <section id="menu-chambers" class="panel wide" hidden>
@@ -89,6 +92,7 @@
     <label class="set"><span>Portal recursion</span><input id="set-depth" type="range" min="1" max="8" step="1"><output id="set-depth-v"></output></label>
     <label class="set"><span>Resolution scale</span><input id="set-res" type="range" min="0.5" max="1" step="0.05"><output id="set-res-v"></output></label>
     <label class="set check"><span>Announcer voice</span><input id="set-voice" type="checkbox"></label>
+    <label class="set check desktop-only"><span>Full screen while playing</span><input id="set-fullscreen" type="checkbox"></label>
     <label class="set check"><span>Music</span><input id="set-music" type="checkbox"></label>
     <label class="set check"><span>Subtitles</span><input id="set-subs" type="checkbox"></label>
     <label class="set"><span>Volume</span><input id="set-vol" type="range" min="0" max="1" step="0.05"><output id="set-vol-v"></output></label>

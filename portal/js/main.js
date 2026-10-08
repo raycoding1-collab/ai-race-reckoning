@@ -30,7 +30,7 @@ const hud = new Hud();
 const game = new Game(renderer, audio, hud);
 window.__game = game;
 
-const defaults = { voice: true, music: true, subtitles: false, quality: 'high', fov: 75, sensitivity: 3, invertY: false, volume: 0.7, depth: 5, showFps: false, resolution: 1 };
+const defaults = { fullscreen: true, voice: true, music: true, subtitles: false, quality: 'high', fov: 75, sensitivity: 3, invertY: false, volume: 0.7, depth: 5, showFps: false, resolution: 1 };
 const settings = Object.assign({}, defaults, store.get('settings', {}));
 game.settings = settings;
 game.setQuality(settings.quality);
@@ -83,17 +83,47 @@ document.addEventListener('mousemove', (e) => {
   look.dx += dx; look.dy += dy;
 });
 
+// Inside an embedded viewer (an iframe without pointer-lock or full-screen
+// permission) the mouse cannot be captured, so offer the standalone page.
+const framed = (() => { try { return window.self !== window.top; } catch { return true; } })();
+const STANDALONE = 'https://raw.githack.com/raycoding1-collab/ai-race-reckoning/ccr-aa157575-t0w3qp/portal/index.html';
+function showStandaloneNote(reason) {
+  for (const n of document.querySelectorAll('.lock-note')) {
+    n.innerHTML = `${reason} <a href="${STANDALONE}" target="_blank" rel="noopener">Open the standalone game</a> for full screen and proper mouse capture.`;
+    n.hidden = false;
+  }
+}
+if (framed) showStandaloneNote('You are playing inside an embedded viewer, which can let the mouse slip out of the game.');
+
+function enterFullscreen() {
+  const el = document.documentElement;
+  if (document.fullscreenElement || !document.fullscreenEnabled || !el.requestFullscreen) return;
+  el.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
+}
+function toggleFullscreen() {
+  if (document.fullscreenElement) document.exitFullscreen?.();
+  else if (document.fullscreenEnabled) enterFullscreen();
+  else showStandaloneNote('Full screen is blocked in this viewer.');
+}
+for (const b of document.querySelectorAll('.fs-btn')) b.addEventListener('click', toggleFullscreen);
+document.addEventListener('fullscreenchange', () => {
+  for (const b of document.querySelectorAll('.fs-btn')) b.textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen';
+});
+
 // Some embeds and browsers refuse pointer lock. Rather than leave the player
 // stuck on the menu, fall back to looking with plain mouse movement.
 let freeMouse = false;
 function playUnlocked() {
   freeMouse = true;
+  showStandaloneNote('Mouse capture is not available here, so the cursor can leave the game.');
   playing = true;
   showMenu(null);
 }
 function lockPointer() {
   audio.init();
   audio.setVolume(settings.volume);
+  // full screen and pointer lock both need this click, so ask for both now
+  if (settings.fullscreen) enterFullscreen();
   if (freeMouse || !canvas.requestPointerLock) { playUnlocked(); return; }
   const fail = () => { if (document.pointerLockElement !== canvas) playUnlocked(); };
   let p;
@@ -106,6 +136,8 @@ function lockPointer() {
 }
 document.addEventListener('pointerlockerror', () => { if (document.pointerLockElement !== canvas) playUnlocked(); });
 window.addEventListener('keydown', (e) => { if (freeMouse && playing && (e.code === 'Escape' || e.code === 'KeyP')) { playing = false; keys.clear(); showMenu('pause'); } });
+// without pointer lock, pause when the cursor leaves the game instead of drifting
+document.documentElement.addEventListener('mouseleave', () => { if (freeMouse && playing) { playing = false; keys.clear(); showMenu('pause'); } });
 // clicking the game view while paused resumes, like most PC shooters
 canvas.addEventListener('click', () => { if (started && !playing) lockPointer(); });
 document.addEventListener('pointerlockchange', () => {
@@ -186,6 +218,7 @@ bindSetting('set-voice', 'voice');
 bindSetting('set-quality', 'quality', String, () => '');
 bindSetting('set-subs', 'subtitles');
 bindSetting('set-music', 'music');
+bindSetting('set-fullscreen', 'fullscreen');
 audio.musicOn = settings.music;
 
 game.onComplete = (i) => {
