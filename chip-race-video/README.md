@@ -11,7 +11,8 @@ A 44-second lyric video about the AI chip race. Everything (song, vocals, visual
 |---|---|---|
 | Song definition | `src/song.py` | Tempo (128 BPM), key (F minor), chords, arrangement, and the lyrics with a note for every syllable. This is the single source of truth. |
 | Speech | `src/tts.py`, `src/festdump.scm` | Festival (HTS voice) speaks each line and exports phoneme and syllable timings. |
-| Singing | `src/sing.py` | WORLD vocoder: retimes each syllable so its vowel lands on the beat, sets pitch to the melody (slides, vibrato), and renders the lead, double, octave and harmony layers. |
+| Singing | `src/sing.py` | WORLD vocoder: retimes each syllable so its vowel lands on the beat, then performs it (an intensity arc from breathy verse to belted chorus, scoops, vibrato, phrase falls). Renders the lead, double, whisper, octave, harmonies, a gang stack, breaths, and a synthesized ooh/aah choir. |
+| Cinematic layer | `src/cinema.py` | Bells, brass, strings, taiko, picture-synced sound design (laser, 180-ton slam, stamps, marker) and the tape-stop and stutter effects. |
 | Instrumental and mix | `src/music.py`, `src/dsp.py` | Chiptune voices (NES-style pulse, 4-bit triangle, LFSR noise) inside an electro-pop production: synthesized kick, clap and 808-style hats, sidechained supersaws, sub and reese bass, risers, impacts, a channel-vocoder "robot choir", plate reverb, ping-pong throws, a reference-matched master EQ and a limiter. |
 | Timeline | `src/export_timeline.py` | Writes `web/timeline.js` with every word's exact time, so the karaoke sync is exact by construction. |
 | Visuals | `web/index.html` | A deterministic canvas renderer (`renderAt(t)`) with 12 scenes. Open `web/index.html?play` over a local server to preview it with audio. |

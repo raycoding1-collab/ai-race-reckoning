@@ -112,8 +112,9 @@ def drums():
                 hits = [0, 2.5] if rel % 2 == 0 else [0, 1.75, 2.5]
                 for b in hits:
                     place(kick, stereo(K * 0.9), bar_t(bar, b)); kick_times.append(bar_t(bar, b))
-                place(clap, stereo(C * 0.8), bar_t(bar, 2))
-                steps = [i / 2 for i in range(8)]
+                if rel >= 2:
+                    place(clap, stereo(C * 0.8), bar_t(bar, 2))
+                steps = [i / 2 for i in range(8)] if rel >= 2 else [0.5, 1.5, 2.5, 3.5]
             else:
                 for b in range(4):
                     place(kick, stereo(K), bar_t(bar, b)); kick_times.append(bar_t(bar, b))
@@ -431,7 +432,17 @@ def vocal_bus():
     harm = chain(load("harm"), presence=1.0, air=4.0)
     harm_lo = chain(load("harm_lo"), presence=0.0, air=2.0)
 
+    gang = sum(chain(load(f"gang{g}"), presence=1.5, air=3.0) for g in range(4))
+    whisper = chain(load("whisper"), presence=0.0, air=5.0, comp=False)
+    breath = filt(load("breath"), "hp", 400)
+    # verse line 1 opens as a filtered 'radio' voice, full range from line 2
+    radio_end = int(song.LINES[1]["bar"] * BAR * SR)
+    lo = filt(filt(lead, "hp", 500), "lp", 3200)
+    lead = lead.copy(); lead[:radio_end] = softclip(lo[:radio_end] * 2.2, 2.0) * 0.6
     dry = stereo(lead * 0.9)
+    dry += np.stack([gang * 0.07, np.roll(gang, int(0.009 * SR)) * 0.07])
+    dry += np.stack([whisper * 0.2, np.roll(whisper, int(0.013 * SR)) * 0.2])
+    dry += stereo(breath * 0.16)
     dry += np.stack([dbl * 0.32, np.roll(dbl, int(0.011 * SR)) * 0.30])
     dry += np.stack([octv * 0.26, np.roll(octv, int(0.017 * SR)) * 0.26])
     dry += stereo(harm * 0.26, -0.7) + stereo(harm_lo * 0.22, 0.7)
@@ -444,7 +455,15 @@ def vocal_bus():
         throw[a:b] = lead[a:b]
     dly = pingpong(throw, 3 * B / 4, fb=0.42, n_taps=5, lp=4200) * 0.35
     plate = convolve(filt(dry.mean(0), "hp", 300), reverb_ir(2.2, damp=7000, predelay=0.03, seed=9)) * 0.16
-    return dry + dly + plate, lead
+    # the tag sings into a cathedral; the drop-gap 'sand' tail too
+    cath_in = np.zeros(N)
+    for a_t, b_t in [(bar_t(11, 2), bar_t(11, 3)), (bar_t(20), bar_t(22))]:
+        a, b = int(a_t * SR), int(b_t * SR); cath_in[a:b] = dry.mean(0)[a:b]
+    cath = convolve(filt(cath_in, "hp", 250), reverb_ir(5.5, damp=5000, predelay=0.06, seed=12)) * 0.5
+    ch, _ = sf.read(os.path.join(STEMS, "vox_choir.wav")); chm = np.zeros((2, N)); chm[:, :min(N, len(ch))] = ch[:N].T
+    choir = filt(chm, "hp", 120) * 0.42
+    choir += convolve(choir.mean(0), reverb_ir(3.5, damp=6000, predelay=0.04, seed=14)) * 0.35
+    return dry + dly + plate + cath + choir, lead
 
 
 def vocoder(mod, carrier, n_bands=28, fmin=120, fmax=9000):
@@ -561,18 +580,36 @@ def main():
     vduck = 1 - 0.25 * np.clip(venv / (np.percentile(venv[venv > 1e-4], 90) + 1e-9), 0, 1)
     music = music * vduck + music_rev
 
-    mix = drum_bus + music + vox * 1.6 + efx
+    import cinema
+    orch, sfx, perc = cinema.build_layer(N)
+    orch_rev = convolve(filt(orch.mean(0), "hp", 200), reverb_ir(3.2, damp=6000, seed=15)) * 0.25
+    perc_rev = convolve(filt(perc.mean(0), "hp", 120), reverb_ir(2.6, damp=4000, seed=16)) * 0.3
+    music = music + (orch * 1.0 + orch_rev) * sc_soft
+    drum_bus = drum_bus + perc * 0.9 + perc_rev + sfx * 0.8
+    # time effects on the band (vocals untouched): tape stop into the gap, stutter into the tag
+    band = music + drum_bus
+    band = cinema.tape_stop(band, bar_t(11, 3), 0.3)
+    band = cinema.stutter(band, bar_t(19, 3), bar_t(20))
+    # dynamics arc: intimate verse, full chorus
+    arc = np.ones(N)
+    for (a_t, b_t, g0, g1) in [(0, bar_t(2), 0.6, 0.6), (bar_t(2), bar_t(6), 0.55, 0.6), (bar_t(6), bar_t(10), 0.66, 0.7),
+                               (bar_t(10), bar_t(12), 0.38, 0.62), (bar_t(20), bar_t(22), 0.5, 0.5)]:
+        i, j = int(a_t * SR), int(b_t * SR)
+        arc[i:j] = np.linspace(g0, g1, j - i)
+    from scipy.ndimage import uniform_filter1d as _uf
+    arc = _uf(arc, int(0.05 * SR))
+    mix = band * arc + vox * 1.6 + efx
     # silence everything in the drop gap except the vocal tail and the reverse cymbal/coin
     gap_a, gap_b = int(bar_t(11, 3) * SR), int(bar_t(12) * SR)
-    keep = vox[:, gap_a:gap_b] * 1.6 + d["cym"][:, gap_a:gap_b] * 0.28 + efx[:, gap_a:gap_b]
+    keep = vox[:, gap_a:gap_b] * 1.6 + d["cym"][:, gap_a:gap_b] * 0.28 + efx[:, gap_a:gap_b] + band[:, gap_a:gap_b] * 0.0
     mix[:, gap_a:gap_b] = keep
 
     # master: glue, tilt EQ, soft clip, limit, normalise loudness
     mix = filt(mix, "hp", 28)
-    mix = compress(mix, thresh_db=-16, ratio=2, attack=0.02, release=0.2, makeup_db=2, knee=8)
+    mix = compress(mix, thresh_db=-14, ratio=1.6, attack=0.03, release=0.25, makeup_db=1, knee=10)
     mix = match_eq(mix, strength=0.6)
     mix = mix / np.max(np.abs(mix)) * 0.9
-    target = -10.0
+    target = -11.0
     for _ in range(4):
         cur = lufs(np.clip(softclip(mix * 1.0, 1.0), -1, 1))
         mix *= 10 ** ((target - cur) / 20)

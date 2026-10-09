@@ -925,7 +925,18 @@ const SCHEDULE = [
   ["end", barT(22), 1e9, sEnd],
 ];
 
-function renderAt(t) {
+// picture follows the audio's time effects: tape stop into the drop gap, stutter into the tag
+function visTime(t) {
+  const ts = barT(11, 3), td = 0.3;
+  if (t >= ts - td && t < ts) { const p = (t - (ts - td)) / td; return ts - td + td * (1 - Math.pow(1 - p, 2.5)) / 2.5; }
+  const sa = barT(19, 3), sb = barT(20), sl = BEAT / 4;
+  if (t >= sa && t < sb) return sa + ((t - sa) % sl);
+  return t;
+}
+
+function renderAt(tReal) {
+  const t = visTime(tReal);
+  const stut = tReal >= barT(19, 3) && tReal < barT(20) ? Math.floor((tReal - barT(19, 3)) / (BEAT / 4)) : -1;
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.globalAlpha = 1; ctx.globalCompositeOperation = "source-over"; ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
   ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
@@ -943,6 +954,10 @@ function renderAt(t) {
     const f = t >= c ? Math.exp(-(t - c) / 0.05) : 0;
     if (f > 0.02) { ctx.fillStyle = `rgba(255,245,225,${0.35 * f})`; ctx.fillRect(0, 0, W, H); }
   });
+  if (stut >= 0) { // glitch: each repeat shifts and tints
+    ctx.save(); ctx.globalCompositeOperation = "difference"; ctx.fillStyle = `rgba(255,164,27,${0.08 * stut})`; ctx.fillRect(0, 0, W, H); ctx.restore();
+    ctx.drawImage(cv, 0, 0, W, H / 2, (stut % 2 ? 14 : -14) * stut, 0, W, H / 2);
+  }
   post(t, { bloom: mode === "light" || name === "line" ? 0.12 : 0.32, grain: name === "line" ? 0.1 : 0.07, vig: name === "line" ? 0.35 : 0.6 });
 }
 
