@@ -5,6 +5,7 @@ import { Portal, pairPortals, fitPortal, portalUpFor } from './portal.js';
 import { PortalRenderer, PortalVisual, dotTexture } from './render.js';
 import { FX } from './fx.js';
 import { Player } from './player.js';
+import { overlapsAnything } from './physics.js';
 import { createTextures } from './textures.js';
 import { ViewModel, PlayerModel } from './models.js';
 import { LEVELS } from './levels.js';
@@ -27,7 +28,7 @@ class Emitter {
 }
 
 const C = (v) => v * CELL;
-const _v = new THREE.Vector3(), _v2 = new THREE.Vector3(), _feet = new THREE.Vector3();
+const _v = new THREE.Vector3(), _v2 = new THREE.Vector3(), _feet = new THREE.Vector3(), _q = new THREE.Quaternion();
 export const NO_CLIP = new THREE.Plane(new THREE.Vector3(0, 1, 0), 1e7);   // keeps everything
 
 function rayBox(o, d, b) {
@@ -485,18 +486,28 @@ export class Game {
     if (!this.player.alive) return;
     if (this.held) { this.dropCube(); return; }
     const eye = this.eye(), fwd = this.aim();
-    const r = this.traceRay(eye, fwd, PLAYER.useDistance, { blockers: true, cubes: true });
-    let cube = r.type === 'cube' ? r.ent : null;
+    // FindUseEntity: trace along the view (through portals, too) and accept
+    // what it hits within PLAYER_USE_RADIUS, measured horizontally from the
+    // eye and vertically from the player's hull, so things at your feet count
+    const b = this.player.body;
+    const useDist = (pt) => {
+      const dy = Math.max(0, b.pos.y - b.half.y - pt.y, pt.y - (b.pos.y + b.half.y));
+      return Math.hypot(pt.x - eye.x, pt.z - eye.z, dy);
+    };
+    const r = this.traceRay(eye, fwd, 1024, { blockers: true, cubes: true });
+    let cube = r.type === 'cube' && (r.passes.length ? r.total : useDist(r.point)) < PLAYER.useRadius ? r.ent : null;
     if (!cube) {
-      // a little forgiveness, like the original's use cone
+      // ...then the nearest usable object roughly in view (the use cone)
       let best = 36;
       for (const c of this.cubes) {
         if (c.dissolving >= 0) continue;
         const to = _v.subVectors(c.body.pos, eye);
         const along = to.dot(fwd);
-        if (along < 0 || along > PLAYER.useDistance + 20) continue;
+        if (along < 0 || along > PLAYER.useRadius + 30 || along < to.length() * 0.8) continue;
         const off = _v2.copy(fwd).multiplyScalar(along).sub(to).length();
-        if (off < best) { best = off; cube = c; }
+        if (off >= best) continue;
+        const los = this.traceRay(eye, to.normalize(), along + 40, { blockers: true, cubes: true });
+        if (los.type === 'cube' && los.ent === c && !los.passes.length) { best = off; cube = c; }
       }
     }
     if (cube && this.player.body.groundEnt !== cube.body) this.pickUp(cube);
@@ -509,7 +520,9 @@ export class Game {
     c.body.ignore = this.player.body;
     this.player.body.ignore = c.body;
     c.holdYaw = c.yaw - this.player.yaw;
-    this.heldFar = 0;
+    this.heldTime = 0;
+    this.heldError = 0;
+    this.heldTarget = null;
     this.audio.pickup();
   }
 
@@ -534,29 +547,79 @@ export class Game {
     if (!c) return;
     if (c.dissolving >= 0 || c.removed) { this.dropCube(); return; }
     if (this.player.body.groundEnt === c.body && this.player.body.onGround) { this.dropCube(); return; }
+    // CGrabController: drop once the error between where the object should be
+    // and where it is, averaged over about a second, passes 12 units. The
+    // average only starts a second after the pickup.
+    this.heldTime += dt;
+    if (this.heldTarget && this.heldTime > CUBE.dropGrace) {
+      const err = this.heldTarget.distanceTo(c.body.pos);
+      this.heldError += (err - this.heldError) * Math.min(1, dt);
+      if (this.heldError > CUBE.dropError) { this.dropCube(); return; }
+    }
+    const pb = this.player.body;
     const eye = this.eye(), fwd = this.aim();
-    const reach = CUBE.holdDistance + CUBE.half;
-    const r = this.traceRay(eye, fwd, reach, { blockers: true });
-    const target = r.type === 'none' ? r.point : r.point.clone().addScaledVector(r.dir, -CUBE.half * 1.25);
+    // carry pitch is clamped to +-75 degrees
+    const sMax = Math.sin(CUBE.holdPitch);
+    if (Math.abs(fwd.y) > sMax) {
+      const k = Math.cos(CUBE.holdPitch) / (Math.hypot(fwd.x, fwd.z) || 1);
+      fwd.set(fwd.x * k, Math.sign(fwd.y) * sMax, fwd.z * k);
+    }
+    // UpdateObject: hold the object's centre (24 + radius) ahead of the eye,
+    // where radius = the player's half-diagonal + the object's extent along the
+    // view; if a wall is closer than half of (24 + 2 radius), hold it in close
+    const h = c.body.half;
+    const radial = Math.abs(fwd.x) * h.x + Math.abs(fwd.y) * h.y + Math.abs(fwd.z) * h.z;
+    const radius = Math.hypot(pb.half.x, pb.half.z) + radial;
+    const distance = 24 + radius * 2;
+    const probe = this.traceRay(eye, fwd, distance, { blockers: true });
+    const hold = probe.type !== 'none' && probe.total < distance * 0.5 ? radius * 0.5 : distance - radius;
+    const r = this.traceRay(eye, fwd, hold, { blockers: true });
+    // against a surface nearer than that, rest the object on it rather than in it
+    const target = r.type === 'none' ? r.point : r.point.clone().addScaledVector(r.dir, -radial - 0.5);
+    if (!r.passes.length) {
+      // and never inside the player: keep `radius` from the hull's centre line
+      const ny = Math.max(pb.pos.y - pb.half.y, Math.min(pb.pos.y + pb.half.y, target.y));
+      const dx = target.x - pb.pos.x, dyy = target.y - ny, dz = target.z - pb.pos.z;
+      const len = Math.hypot(dx, dyy, dz);
+      if (len < radius && len > 1e-3) {
+        const s = radius / len;
+        target.set(pb.pos.x + dx * s, ny + dyy * s, pb.pos.z + dz * s);
+      }
+    }
+    // the object is a box, not a point: where the box would poke into a wall
+    // or another object, hold it back along the view until it fits (the
+    // physics shadow in Source slides it to the same kind of spot)
+    if (!r.passes.length && !c.body.holes.length && overlapsAnything(this, c.body, target)) {
+      const from = _v.copy(eye).addScaledVector(fwd, Math.min(radius, hold));
+      let lo = 0, hi = 1;
+      for (let i = 0; i < 6; i++) {
+        const m = (lo + hi) / 2;
+        if (overlapsAnything(this, c.body, _feet.lerpVectors(from, target, m))) hi = m; else lo = m;
+      }
+      target.lerpVectors(from, target, lo);
+    }
     let yaw = this.player.yaw + c.holdYaw;
     for (const P of r.passes) yaw = rotateYaw(yaw, P.toOtherQuat);
     // pick the target that is nearest to the cube, possibly via a portal
-    let best = target.clone(), bestD = target.distanceTo(c.body.pos), bestYaw = yaw;
+    let best = target.clone(), bestD = target.distanceTo(c.body.pos), bestYaw = yaw, via = null;
     for (const P of this.portalList) {
       if (!P.linked) continue;
       const t2 = target.clone().applyMatrix4(P.toOther);
       const d2 = t2.distanceTo(c.body.pos);
-      if (d2 < bestD) { best = t2; bestD = d2; bestYaw = rotateYaw(yaw, P.toOtherQuat); }
+      if (d2 < bestD) { best = t2; bestD = d2; bestYaw = rotateYaw(yaw, P.toOtherQuat); via = P; }
     }
-    const to = best.sub(c.body.pos);
-    const v = to.multiplyScalar(16);
+    // follow the target's own motion, plus a pull toward it (a stiff shadow
+    // controller: the carried object keeps up with turns and flings)
+    const carry = _v2.copy(pb.vel);
+    if (via) carry.applyQuaternion(via.toOtherQuat);
+    if (this.heldTarget && this.heldTarget.distanceTo(best) < 48) carry.subVectors(best, this.heldTarget).divideScalar(dt);
+    this.heldTarget = best.clone();
+    const v = best.sub(c.body.pos).multiplyScalar(20).add(carry);
     if (v.length() > CUBE.holdMaxSpeed) v.setLength(CUBE.holdMaxSpeed);
     c.body.vel.copy(v);
     let dy = bestYaw - c.yaw;
     dy = Math.atan2(Math.sin(dy), Math.cos(dy));
     c.yaw += dy * Math.min(1, dt * 12);
-    if (bestD > CUBE.dropDistance) { this.heldFar += dt; if (this.heldFar > 0.25) this.dropCube(); }
-    else this.heldFar = 0;
   }
 
   damagePlayer(n) {
@@ -638,7 +701,7 @@ export class Game {
       }
     }
     input.fire1 = input.fire2 = input.use = false;
-    if (p.alive && this.time - p.lastHurt > 1.2) p.health = Math.min(100, p.health + 45 * dt);
+    if (p.alive && this.time - p.lastHurt > PLAYER.regenDelay) p.health = Math.min(100, p.health + PLAYER.regenRate * dt);
     this.hud.hurt(p.alive ? 1 - p.health / 100 : 0);
 
     this.updateHeld(dt);
@@ -742,6 +805,7 @@ export class Game {
     this.updateVisuals(frameDt, alpha);
     const cam = this.camera;
     this.viewPose(alpha, cam.position, cam.quaternion);
+    cam.quaternion.multiply(p.punchQuat(_q));
     if (this.shake > 0) {
       this.shake = Math.max(0, this.shake - frameDt * 1.6);
       const k = this.shake * this.shake * 6;

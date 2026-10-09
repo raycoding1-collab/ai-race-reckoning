@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { CELL, GRAVITY, CUBE, PELLET, PORTAL } from './constants.js';
-import { Body, moveBody, groundBelow } from './physics.js';
+import { Body, moveBody, groundBelow, funnel } from './physics.js';
 import { traceGrid } from './level.js';
 import { makeSignTexture, makeGraffiti } from './textures.js';
 import {
@@ -143,6 +143,7 @@ export class Cube {
         }
       } else {
         b.vel.y -= GRAVITY * dt;
+        funnel(this.world, b, dt, 250);          // sv_props_funnel_into_portals
       }
       // slide into a floor portal we are mostly over
       for (const P of b.holes) {
@@ -520,7 +521,9 @@ export class FaithPlate {
     this.world = world;
     this.pos = new THREE.Vector3(C(d.at[0]), C(d.at[1]), C(d.at[2]));
     this.target = new THREE.Vector3(C(d.target[0]), C(d.target[1]), C(d.target[2]));
-    this.apex = C(d.apex);
+    this.apex = C(d.apex ?? 4);
+    this.speed = d.speed ?? (d.apex === undefined ? 450 : 0);
+    this.exact = !!d.exact;
     this.cool = 0;
     this.flip = 0;
     const model = buildFaithPlate();
@@ -538,8 +541,27 @@ export class FaithPlate {
     world.scene.add(noCull(g));
     world.noPortalBoxes.push([this.pos.x - 48, this.pos.y - 2, this.pos.z - 48, this.pos.x + 48, this.pos.y + 12, this.pos.z + 48]);
   }
+  // Our chambers aim each plate with an apex height. A plate may instead give
+  // `speed` (trigger_catapult playerSpeed, default 450): the flight time is
+  // distance / speed and the upward velocity is whatever reaches the target
+  // in that time ("added upward velocity"). With `exact`, the launch speed is
+  // exactly `speed` and the lower of the two ballistic arcs is used.
   launchVelocity(from) {
     const g = GRAVITY;
+    if (this.speed) {
+      const d = new THREE.Vector3().subVectors(this.target, from);
+      const hd = Math.hypot(d.x, d.z), s = this.speed;
+      if (this.exact && hd > 1) {
+        const disc = s ** 4 - g * (g * hd * hd + 2 * d.y * s * s);
+        if (disc >= 0) {
+          const tan = (s * s - Math.sqrt(disc)) / (g * hd);
+          const c = 1 / Math.sqrt(1 + tan * tan);
+          return new THREE.Vector3(d.x / hd * s * c, s * c * tan, d.z / hd * s * c);
+        }
+      }
+      const T = Math.max(0.05, d.length() / s);
+      return new THREE.Vector3(d.x / T, d.y / T + 0.5 * g * T, d.z / T);
+    }
     const apexY = Math.max(this.apex + this.pos.y, this.target.y + 20, from.y + 20);
     const up = apexY - from.y;
     const vy = Math.sqrt(2 * g * up);
@@ -565,6 +587,7 @@ export class FaithPlate {
       b.pos.y += 2;
       b.onGround = false;
       b.lastTeleport = this.world.time; // suppress ground snap for a moment
+      if (b.owner && 'airSuppress' in b.owner) b.owner.airSuppress = 0.25;   // targeted catapults mute air control for 1/4 s
       this.cool = 0.6;
       this.flip = 1;
       this.world.events.emit('faith', { pos: this.pos });
@@ -581,6 +604,7 @@ export class PelletLauncher {
     this.dir = new THREE.Vector3(...d.dir).normalize();
     this.pellet = null;
     this.timer = 1.0;
+    this.speed = d.speed || PELLET.speed;          // point_energy_ball_launcher min/max speed
     this.stopSignal = d.stopSignal;
     world.scene.add(noCull(this.device(false)));
     world.noPortalBoxes.push(boxAround(this.pos, 52));
@@ -592,7 +616,7 @@ export class PelletLauncher {
     this.coreMat.color.setHSL(0.11, 1, 0.5 + 0.3 * Math.sin(this.world.time * 10)).multiplyScalar(1.8);
     this.ringMat.emissiveIntensity = 1.2 + 0.5 * Math.sin(this.world.time * 10);
     if (this.timer <= 0) {
-      this.pellet = new Pellet(this.world, this.pos.clone().addScaledVector(this.dir, 22), this.dir.clone().multiplyScalar(PELLET.speed));
+      this.pellet = new Pellet(this.world, this.pos.clone().addScaledVector(this.dir, 22), this.dir.clone().multiplyScalar(this.speed));
       this.world.entities.push(this.pellet);
       this.world.events.emit('pelletLaunch', { pos: this.pos });
       this.timer = 2.0;
@@ -680,7 +704,7 @@ export class Pellet {
             to.applyMatrix4(P.toOther);
             this.vel.applyQuaternion(P.toOtherQuat);
             ported = true;
-            if (PELLET.lifetime - this.age < 6) this.age = PELLET.lifetime - 6;   // portals recharge pellets
+            if (PELLET.lifetime - this.age < PELLET.minLifeAfterPortal) this.age = PELLET.lifetime - PELLET.minLifeAfterPortal;   // portals recharge pellets
             w.events.emit('pelletPortal', {});
             break;
           }
@@ -857,6 +881,8 @@ export class Wire {
 // ---------------------------------------------------------------------------
 // Sentry turret: a carryable body with a sight cone and a laser. Knocking it
 // over (push, drop, fall, hit with a cube) shuts it down for good.
+const TURRET_RANGE = 1500;                  // fixed in Portal 1
+const TURRET_COS = Math.cos(Math.PI / 3);   // 120 degree sight cone
 export class Turret extends Cube {
   constructor(world, pos, opts = {}) {
     super(world, pos, { ...opts, half: [12, 30, 12] });
@@ -952,7 +978,7 @@ export class Turret extends Cube {
     const d = to.length();
     to.divideScalar(d);
     let seen = false;
-    if (pl.alive && !this.held && d < 1700 && to.dot(fwd) > 0.6) {
+    if (pl.alive && !this.held && d < TURRET_RANGE && to.dot(fwd) > TURRET_COS) {
       const r = w.traceRay(eye, to, d, { blockers: true, cubes: true, ignoreCube: this });
       seen = r.type === 'none' && r.passes.length === 0;
     }

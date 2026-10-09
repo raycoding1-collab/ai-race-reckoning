@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { CELL, PORTAL, MAX_VELOCITY } from './constants.js';
+import { CELL, PORTAL, MAX_VELOCITY, GRAVITY } from './constants.js';
 
 // Axis-aligned box collision against the voxel grid and dynamic entities,
 // with portal "holes": while a body overlaps a linked portal's volume, the
@@ -335,3 +335,83 @@ export function moveBody(world, body, dt) {
   }
 }
 
+
+// --- stairs ----------------------------------------------------------------
+// Source's WalkMove/StepMove: a grounded mover that is blocked sideways tries
+// again from up to sv_stepsize higher, then settles back down, and keeps
+// whichever attempt got further. Anything lower than the step is walked onto.
+const _s0 = new THREE.Vector3(), _sv0 = new THREE.Vector3(), _sA = new THREE.Vector3(), _svA = new THREE.Vector3();
+export function stepMove(world, body, dt, step) {
+  if (!(step > 0)) { moveBody(world, body, dt); return; }
+  _s0.copy(body.pos); _sv0.copy(body.vel);
+  const tp = body.lastTeleport;
+  moveBody(world, body, dt);
+  if (body.lastTeleport !== tp || body.holes.length || !body.hits.some((h) => h.axis !== 1)) return;
+  _sA.copy(body.pos); _svA.copy(body.vel);
+  const hitsA = body.hits.slice(), downA = body.blockedDown, groundA = body.groundEnt;
+  const restoreA = () => {
+    body.pos.copy(_sA); body.vel.copy(_svA);
+    body.hits = hitsA; body.blockedDown = downA; body.groundEnt = groundA;
+  };
+  body.pos.copy(_s0); body.vel.copy(_sv0); body.vel.y = 0;
+  moveAxis(world, body, 1, step);
+  const raised = body.pos.y - _s0.y;
+  if (raised < 1) { restoreA(); return; }
+  moveBody(world, body, dt);
+  if (body.lastTeleport !== tp) return;
+  const hitsB = body.hits.slice();
+  const down = moveAxis(world, body, 1, -(raised + 0.5));
+  const dA = Math.hypot(_sA.x - _s0.x, _sA.z - _s0.z), dB = Math.hypot(body.pos.x - _s0.x, body.pos.z - _s0.z);
+  if (!down || dB <= dA + 0.01) { restoreA(); return; }
+  body.vel.y = _svA.y;
+  body.hits = hitsB;
+  body.blockedDown = true;
+  body.groundEnt = down.ent;
+}
+
+// --- funnelling -------------------------------------------------------------
+// sv_player_funnel_into_portals / sv_props_funnel_into_portals: a body moving
+// fast at a portal it is about to clip the rim of is steered so that it goes
+// in cleanly. Only the sideways part of the velocity changes, and only as much
+// as is needed for the body's box to fit through the opening.
+const _fp = new THREE.Vector3();
+export function funnel(world, body, dt, minSpeed = 250, lookDir = null, eye = null) {
+  const g = GRAVITY;
+  for (const P of world.portalList) {
+    if (!P.linked) continue;
+    const n = P.normal;
+    const vn = body.vel.dot(n);
+    if (vn > -minSpeed) continue;
+    const d = P.dist(body.pos);
+    if (d <= 0) continue;
+    // time to reach the plane, with gravity's component along the normal
+    const an = -g * n.y;
+    let t;
+    if (Math.abs(an) < 1e-6) t = d / -vn;
+    else {
+      const disc = vn * vn - 2 * an * d;
+      if (disc < 0) continue;
+      t = (-vn - Math.sqrt(disc)) / an;
+      if (!(t > 0)) t = (-vn + Math.sqrt(disc)) / an;
+    }
+    if (!(t > 0) || t > PORTAL.funnelTime) continue;
+    if (lookDir && eye && lookDir.dot(_fp.subVectors(P.pos, eye)) <= 0) continue;   // the player must be facing it
+    _fp.copy(body.pos).addScaledVector(body.vel, t);
+    _fp.y -= 0.5 * g * t * t;
+    const pc = [P.pos.x, P.pos.y, P.pos.z], fp = [_fp.x, _fp.y, _fp.z], hh = [body.half.x, body.half.y, body.half.z];
+    let near = true;
+    for (const ax of [P.uAxis, P.vAxis]) if (Math.abs(fp[ax] - pc[ax]) > P.ext[ax] + hh[ax]) near = false;
+    if (!near) continue;   // a clear miss is left alone
+    const k = Math.min(1, dt * 10);
+    for (const ax of [P.uAxis, P.vAxis]) {
+      const room = Math.max(0, P.ext[ax] - hh[ax] - 1);
+      const off = fp[ax] - pc[ax];
+      const want = Math.max(-room, Math.min(room, off));
+      if (want === off) continue;
+      const dv = (want - off) / t * k;
+      if (ax === 0) body.vel.x += dv; else if (ax === 1) body.vel.y += dv; else body.vel.z += dv;
+    }
+    return P;
+  }
+  return null;
+}
