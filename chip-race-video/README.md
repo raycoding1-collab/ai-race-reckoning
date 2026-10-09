@@ -15,7 +15,7 @@ A 44-second lyric video about the AI chip race. Everything (song, vocals, visual
 | Cinematic layer | `src/cinema.py` | Bells, brass, strings, taiko, picture-synced sound design (laser, 180-ton slam, stamps, marker) and the tape-stop and stutter effects. |
 | Instrumental and mix | `src/music.py`, `src/dsp.py` | Chiptune voices (NES-style pulse, 4-bit triangle, LFSR noise) inside an electro-pop production: synthesized kick, clap and 808-style hats, sidechained supersaws, sub and reese bass, risers, impacts, a channel-vocoder "robot choir", plate reverb, ping-pong throws, a reference-matched master EQ and a limiter. |
 | Timeline | `src/export_timeline.py` | Writes `web/timeline.js` with every word's exact time, so the karaoke sync is exact by construction. |
-| Visuals | `web/index.html` | A deterministic canvas renderer (`renderAt(t)`) with 12 scenes. Open `web/index.html?play` over a local server to preview it with audio. |
+| Visuals | `web/v3.html` | three.js scenes (PBR metal and glass, plasma shaders, particles, bloom) under a kinetic-typography layer, rendered deterministically with `renderAt(t)`. `web/index.html` is the earlier 2D version. |
 | Render | `src/render.mjs` | Headless Chromium captures every frame; ffmpeg muxes them with the audio. |
 
 ## Rebuild
@@ -24,7 +24,7 @@ A 44-second lyric video about the AI chip race. Everything (song, vocals, visual
 apt-get install espeak-ng festival festvox-us-slt-hts
 pip install numpy scipy soundfile pyworld
 python3 src/tts.py && python3 src/sing.py && python3 src/music.py && python3 src/export_timeline.py
-PW_PATH=$(npm root -g)/playwright node src/render.mjs frames build/frames 30
+npm install && PAGE=v3.html PW_PATH=$(npm root -g)/playwright node src/render.mjs frames build/frames 30
 ffmpeg -framerate 30 -i build/frames/f%05d.jpg -i audio/silicon_shield.wav -c:v libx264 -crf 23 -pix_fmt yuv420p -c:a aac -b:a 256k -shortest silicon_shield_pilot.mp4
 ```
 
