@@ -16,13 +16,14 @@ const server = http.createServer((req, res) => {
 const port = server.address().port;
 const [mode, out, ...rest] = process.argv.slice(2);
 fs.mkdirSync(out, { recursive: true });
-const browser = await chromium.launch({ args: ["--disable-gpu-vsync", "--force-color-profile=srgb"] });
+const browser = await chromium.launch({ args: ["--disable-gpu-vsync", "--force-color-profile=srgb", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] });
 const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
 page.on("pageerror", e => console.error("PAGE ERROR", e.message));
 page.on("console", m => { if (m.type() === "error") console.error("console:", m.text()); });
-await page.goto(`http://127.0.0.1:${port}/web/index.html`);
+await page.goto(`http://127.0.0.1:${port}/web/${process.env.PAGE || "index.html"}`);
 await page.evaluate(() => window.ready);
 const canvas = await page.$("canvas");
+page.setDefaultTimeout(600000);
 async function shot(t, file) {
   await page.evaluate(t => window.renderAt(t), t);
   await canvas.screenshot({ path: file, type: "jpeg", quality: 93 });
