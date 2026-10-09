@@ -2,3 +2,4 @@ build/
 audio/*.wav
 __pycache__/
 node_modules/
+preview/
