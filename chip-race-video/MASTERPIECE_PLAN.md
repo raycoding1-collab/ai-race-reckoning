@@ -34,3 +34,14 @@ Scope: upgrade every part (song, vocals, music, visuals, pipeline) and build the
 - If the container was reset, reinstall: `apt-get install espeak-ng festival festvox-us-slt-hts rubberband-cli sox`; `pip install scipy soundfile pyworld`; `cd chip-race-video && npm install`; Playwright is global (`PW_PATH=$(npm root -g)/playwright`); WebGL needs the SwiftShader flags already in `src/render.mjs`.
 - Hugging Face is blocked, so there are no Whisper or Demucs models. Our own song has exact timings, so this doesn't matter.
 - Work autonomously. Send the user proactive progress previews (contact sheets, style frames) at each phase. Pause only if blocked.
+
+## Research rule (user's explicit request)
+Research online whenever it would improve any part, not only in Phase 2. When a scene, sound or technique feels weak, or when a better method might exist, search before settling. Examples:
+- singing and vocal synthesis or vocoders
+- mixing and mastering for drama
+- three.js techniques (GPU particles, raymarching, refraction, volumetrics, text effects)
+- kinetic-typography craft and motion-design principles (easing, anticipation, overlap)
+- how top motion designers transition between scenes
+- standout Claude-made videos and their prompts.
+
+Note the useful findings and sources in `docs/TECHNIQUES.md`.
