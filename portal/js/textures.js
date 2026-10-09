@@ -270,6 +270,9 @@ function decals(n, seed, draw) {
   return out;
 }
 
+// Depth covered by the height in the normal map's alpha (lightmap.js POM_DEPTH)
+export const HEIGHT_RANGE = 2.0;
+
 // Turn a surface into albedo canvas + normal / roughness data, and record its
 // mean linear albedo (useful as a radiosity reflectivity).
 function finish(S, renderer, bump = 1) {
@@ -299,7 +302,8 @@ function finish(S, renderer, bump = 1) {
       nd[j] = (-dx * il * 0.5 + 0.5) * 255 + 0.5;
       nd[j + 1] = (dy * il * 0.5 + 0.5) * 255 + 0.5;
       nd[j + 2] = (il * 0.5 + 0.5) * 255 + 0.5;
-      nd[j + 3] = 255;
+      // alpha: height for parallax occlusion (1 = surface, 0 = HEIGHT_RANGE units deep)
+      nd[j + 3] = clamp01(1 + Math.min(0, H[row + x]) / HEIGHT_RANGE) * 255 + 0.5;
       const rv = clamp01(S.rough[row + x]) * 255 + 0.5;
       rd[j] = rd[j + 1] = rd[j + 2] = rv; rd[j + 3] = 255;
     }
@@ -1018,4 +1022,170 @@ export function createTextures(renderer) {
   Object.defineProperty(res, 'albedoAvg', { value: albedoAvg });
   Object.defineProperty(res, 'genMs', { value: performance.now() - t0 });
   return res;
+}
+
+// ---------------------------------------------------------------------------
+// Decals (decals.js): a repeating hazard stripe, an atlas of painted markings
+// and labels, and stencilled chamber numbers. All drawn with canvas 2D.
+export const DECAL_CELLS = {
+  // [x, y, w, h] in atlas pixels (1024 x 1024, y down)
+  arrow: [0, 0, 256, 256],
+  label_touch: [256, 48, 256, 160],
+  label_goo: [512, 48, 256, 160],
+  label_field: [768, 48, 256, 160],
+  grime: [0, 256, 256, 256],
+  drip: [256, 256, 256, 256],
+  scorch: [512, 256, 256, 256],
+  chevron: [768, 256, 256, 256],
+};
+
+function wear(ctx, x, y, w, h, r, n, size) {
+  // knock small flecks out of the paint
+  ctx.save();
+  ctx.globalCompositeOperation = 'destination-out';
+  for (let i = 0; i < n; i++) {
+    ctx.fillStyle = `rgba(0,0,0,${0.25 + r() * 0.75})`;
+    ctx.beginPath();
+    ctx.ellipse(x + r() * w, y + r() * h, 0.5 + r() * size, 0.5 + r() * size * 0.6, r() * 3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function blotch(ctx, cx, cy, rad, r, color, alpha, n) {
+  for (let i = 0; i < n; i++) {
+    const a = r() * Math.PI * 2, d = Math.pow(r(), 0.7) * rad;
+    const x = cx + Math.cos(a) * d, y = cy + Math.sin(a) * d * 0.8;
+    const s = rad * (0.12 + r() * 0.3) * (1 - d / rad * 0.6);
+    const g = ctx.createRadialGradient(x, y, 0, x, y, s);
+    g.addColorStop(0, `rgba(${color},${alpha * (0.5 + r() * 0.5)})`);
+    g.addColorStop(1, `rgba(${color},0)`);
+    ctx.fillStyle = g;
+    ctx.fillRect(x - s, y - s, s * 2, s * 2);
+  }
+}
+
+function label(ctx, [x, y, w, h], r, lines, icon) {
+  const pad = 8;
+  ctx.fillStyle = '#e9e6dc';
+  ctx.fillRect(x + pad, y + pad, w - pad * 2, h - pad * 2);
+  ctx.strokeStyle = '#1b1c1d'; ctx.lineWidth = 6;
+  ctx.strokeRect(x + pad + 7, y + pad + 7, w - pad * 2 - 14, h - pad * 2 - 14);
+  // warning triangle
+  const tx = x + 62, ty = y + h / 2 + 4, ts = 40;
+  ctx.fillStyle = '#e2b11a'; ctx.strokeStyle = '#1b1c1d'; ctx.lineWidth = 5; ctx.lineJoin = 'round';
+  ctx.beginPath(); ctx.moveTo(tx, ty - ts); ctx.lineTo(tx + ts * 1.05, ty + ts * 0.75); ctx.lineTo(tx - ts * 1.05, ty + ts * 0.75); ctx.closePath();
+  ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#1b1c1d'; ctx.strokeStyle = '#1b1c1d'; ctx.lineWidth = 4;
+  if (icon) drawIcon(ctx, icon, tx, ty + 8, 13);
+  else { ctx.fillRect(tx - 3.5, ty - 18, 7, 26); ctx.fillRect(tx - 3.5, ty + 14, 7, 7); }
+  ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+  lines.forEach((t, i) => {
+    ctx.font = `${i === 0 ? 800 : 600} ${i === 0 ? 28 : 19}px "IBM Plex Sans", Arial, sans-serif`;
+    ctx.fillText(t, x + 114, y + h / 2 + (i - (lines.length - 1) / 2) * 32, w - 132);
+  });
+  wear(ctx, x + pad, y + pad, w - pad * 2, h - pad * 2, r, 160, 2.2);
+}
+
+let decalCache = null;
+export function makeDecalTextures(renderer) {
+  if (decalCache) return decalCache;
+  const r = rng(4242);
+  // hazard stripe: yellow and black at 45 degrees, tiles along u
+  const [hc, hx] = canvas(256, 64);
+  hx.fillStyle = '#c99a1c'; hx.fillRect(0, 0, 256, 64);
+  hx.fillStyle = '#1c1c1b';
+  for (let k = -2; k < 6; k++) {
+    hx.beginPath();
+    hx.moveTo(k * 64, 64); hx.lineTo(k * 64 + 32, 64); hx.lineTo(k * 64 + 96, 0); hx.lineTo(k * 64 + 64, 0); hx.closePath(); hx.fill();
+  }
+  // grime and scuffs, then worn flecks
+  hx.globalAlpha = 0.18; blotch(hx, 128, 32, 140, r, '60,48,30', 0.5, 40); hx.globalAlpha = 1;
+  wear(hx, 0, 0, 256, 64, r, 70, 1.1);
+  const hazard = toTexture(hc, renderer);
+  hazard.wrapT = THREE.ClampToEdgeWrapping;
+
+  const [c, ctx] = canvas(1024);
+  ctx.clearRect(0, 0, 1024, 1024);
+  // floor arrow (worn white paint), pointing up
+  {
+    const [x, y] = DECAL_CELLS.arrow;
+    ctx.fillStyle = '#ecefee';
+    ctx.beginPath();
+    ctx.moveTo(x + 128, y + 20); ctx.lineTo(x + 222, y + 118); ctx.lineTo(x + 160, y + 118); ctx.lineTo(x + 160, y + 236);
+    ctx.lineTo(x + 96, y + 236); ctx.lineTo(x + 96, y + 118); ctx.lineTo(x + 34, y + 118); ctx.closePath(); ctx.fill();
+    wear(ctx, x, y, 256, 256, r, 420, 3);
+  }
+  {
+    const [x, y] = DECAL_CELLS.chevron;
+    ctx.fillStyle = '#ecefee';
+    for (const oy of [40, 128]) {
+      ctx.beginPath();
+      ctx.moveTo(x + 128, y + oy); ctx.lineTo(x + 230, y + oy + 84); ctx.lineTo(x + 190, y + oy + 84); ctx.lineTo(x + 128, y + oy + 34);
+      ctx.lineTo(x + 66, y + oy + 84); ctx.lineTo(x + 26, y + oy + 84); ctx.closePath(); ctx.fill();
+    }
+    wear(ctx, x, y, 256, 256, r, 420, 3);
+  }
+  label(ctx, DECAL_CELLS.label_touch, r, ['DO NOT', 'TOUCH'], null);
+  label(ctx, DECAL_CELLS.label_goo, r, ['CAUTION', 'TOXIC LIQUID'], 'goo');
+  label(ctx, DECAL_CELLS.label_field, r, ['CAUTION', 'ACTIVE FIELD'], null);
+  // grime: a soft irregular stain
+  {
+    const [x, y] = DECAL_CELLS.grime;
+    blotch(ctx, x + 128, y + 128, 105, r, '38,30,20', 0.22, 70);
+    blotch(ctx, x + 128, y + 140, 60, r, '30,24,16', 0.25, 30);
+  }
+  // drips: streaks rising from the bottom edge of a wall
+  {
+    const [x, y] = DECAL_CELLS.drip;
+    ctx.save();
+    ctx.filter = 'blur(4px)';
+    for (let i = 0; i < 18; i++) {
+      const sx = x + 24 + r() * 200, len = 30 + r() * 150, wd = 4 + r() * 14;
+      const g = ctx.createLinearGradient(0, y + 250, 0, y + 250 - len);
+      g.addColorStop(0, `rgba(40,32,22,${0.1 + r() * 0.16})`); g.addColorStop(1, 'rgba(40,32,22,0)');
+      ctx.fillStyle = g; ctx.fillRect(sx, y + 250 - len, wd, len);
+    }
+    ctx.restore();
+    const g = ctx.createLinearGradient(0, y + 256, 0, y + 170);
+    g.addColorStop(0, 'rgba(36,30,22,0.35)'); g.addColorStop(1, 'rgba(36,30,22,0)');
+    ctx.fillStyle = g; ctx.fillRect(x, y + 170, 256, 86);
+  }
+  // scorch: soot with radial streaks
+  {
+    const [x, y] = DECAL_CELLS.scorch;
+    const g = ctx.createRadialGradient(x + 128, y + 128, 4, x + 128, y + 128, 120);
+    g.addColorStop(0, 'rgba(8,7,6,0.92)'); g.addColorStop(0.35, 'rgba(14,12,10,0.7)'); g.addColorStop(1, 'rgba(20,18,15,0)');
+    ctx.fillStyle = g; ctx.fillRect(x, y, 256, 256);
+    ctx.strokeStyle = 'rgba(10,9,8,0.35)';
+    for (let i = 0; i < 60; i++) {
+      const a = r() * Math.PI * 2, r0 = 20 + r() * 30, r1 = r0 + 30 + r() * 70;
+      ctx.lineWidth = 1 + r() * 4;
+      ctx.beginPath(); ctx.moveTo(x + 128 + Math.cos(a) * r0, y + 128 + Math.sin(a) * r0); ctx.lineTo(x + 128 + Math.cos(a) * r1, y + 128 + Math.sin(a) * r1); ctx.stroke();
+    }
+  }
+  const atlas = toTexture(c, renderer);
+  atlas.wrapS = atlas.wrapT = THREE.ClampToEdgeWrapping;
+
+  // stencilled chamber numbers
+  const numbers = new Map();
+  const number = (n) => {
+    if (numbers.has(n)) return numbers.get(n);
+    const [nc, nx] = canvas(512, 256);
+    const s = String(n).padStart(2, '0');
+    nx.strokeStyle = '#26282a'; nx.lineWidth = 26; nx.lineCap = 'butt'; nx.lineJoin = 'miter';
+    for (let i = 0; i < s.length; i++) digitPath(nx, s[i], 96 + i * 196, 20, 120, 216);
+    // stencil bridges
+    nx.globalCompositeOperation = 'destination-out';
+    nx.fillStyle = '#000';
+    for (let i = 0; i < s.length; i++) { nx.fillRect(96 + i * 196 + 54, 0, 10, 44); nx.fillRect(96 + i * 196 + 54, 214, 10, 42); }
+    nx.globalCompositeOperation = 'source-over';
+    wear(nx, 0, 0, 512, 256, rng(n * 31 + 7), 500, 3);
+    const t = toTexture(nc, renderer);
+    t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping;
+    numbers.set(n, t);
+    return t;
+  };
+  decalCache = { hazard, atlas, number };
+  return decalCache;
 }

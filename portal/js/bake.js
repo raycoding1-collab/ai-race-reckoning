@@ -14,9 +14,9 @@
 import { CELL } from './constants.js';
 import { MAT } from './level.js';
 
-export const BAKE_VERSION = 5;
-export const LUX = 8;                  // world units per luxel (VRAD default: 16)
-const PER = CELL / LUX;                // luxels per cell edge
+export const BAKE_VERSION = 6;
+export const PER = 5;                  // luxels per cell edge
+export const LUX = CELL / PER;         // 6.4 world units per luxel (VRAD default: 16; crisper shadows read better here)
 export const LM_RANGE = 3;             // stored value = lighting / LM_RANGE, sRGB encoded
 export const ATLAS_W = 1024;
 const CHUNK = 20;                      // must match the world mesh chunking
@@ -25,9 +25,9 @@ export const PROBE_STEP = 2;           // cells between ambient-cube probes
 // tunables (display units: a lit white wall at about 1.0 reads as fully lit)
 const LE = 2.2;                        // fixture radiance
 const POINT = 1.15;                    // scale for extra point lights from level data
-const BOUNCES = 3;
-const PATCH_RAYS = 96;
-const AO_RAYS = 16, AO_LEN = 44;
+const BOUNCES = 4;
+const PATCH_RAYS = 128;
+const AO_RAYS = 24, AO_LEN = 48;
 const PROBE_RAYS = 32;
 // Reflectivity per material and orientation [wall, floor, ceiling]: the
 // average linear colour of each generated texture, as VRAD derives it from
@@ -359,7 +359,7 @@ export function bake(grid, extraLights = [], onProgress = () => {}) {
         const fu = Math.max(0, Math.min(r.w - 1, (i + 0.5) / PER - 0.5)), fv = Math.max(0, Math.min(r.h - 1, (j + 0.5) / PER - 0.5));
         const u0 = Math.floor(fu), v0 = Math.floor(fv), u1 = Math.min(r.w - 1, u0 + 1), v1 = Math.min(r.h - 1, v0 + 1);
         const au = fu - u0, av = fv - v0;
-        const a = Math.pow(ao[li], 1.3);
+        const a = Math.pow(ao[li], 1.6);       // contact shadows in corners and under ledges
         for (let ch = 0; ch < 3; ch++) {
           const v = (pr[(v0 * r.w + u0) * 3 + ch] * (1 - au) + pr[(v0 * r.w + u1) * 3 + ch] * au) * (1 - av) +
             (pr[(v1 * r.w + u0) * 3 + ch] * (1 - au) + pr[(v1 * r.w + u1) * 3 + ch] * au) * av;

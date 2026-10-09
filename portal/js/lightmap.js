@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 import { MAT } from './level.js';
-import { buildCharts, rectFrame, probeDims, decodeProbes, levelHash, LM_RANGE, PROBE_STEP, ATLAS_W } from './bake.js';
+import { buildCharts, rectFrame, probeDims, decodeProbes, levelHash, LM_RANGE, PROBE_STEP, ATLAS_W, PER } from './bake.js';
 import { CELL } from './constants.js';
+import { shadowUniforms, SHADOW_GLSL } from './shadows.js';
 
 // Run-time half of the lightmapper (see bake.js): loads each chamber's baked
 // atlas, builds the merged world geometry with lightmap UVs, and lights
@@ -65,7 +66,7 @@ export class Lightmaps {
 // World geometry from the baker's merged rectangles, with two UV sets: world
 // space for the surface textures and atlas space for the lightmap.
 const RECESS = 5;
-export function buildLightmappedMeshes(grid, textures, lm, pbr) {
+export function buildLightmappedMeshes(grid, textures, lm, pbr, opts = {}) {
   const hous = { pos: [], nrm: [] };
   // four inner walls of a fixture's recess (drawn double sided)
   const housing = (f, r, sink) => {
@@ -87,7 +88,6 @@ export function buildLightmappedMeshes(grid, textures, lm, pbr) {
   const { rects, W } = lm.charts;
   const rows = lm.rows;
   const groups = new Map();
-  const PER = CELL / 8;
   for (const r of rects) {
     const f = rectFrame(r);
     const n = f.n;
@@ -145,7 +145,7 @@ export function buildLightmappedMeshes(grid, textures, lm, pbr) {
     geo.setAttribute('uv1', new THREE.Float32BufferAttribute(g.uv1, 2));
     geo.setIndex(g.idx);
     geo.computeBoundingSphere();
-    if (!mats.has(k)) mats.set(k, worldMaterial(m, orient, textures, lm, pbr));
+    if (!mats.has(k)) mats.set(k, worldMaterial(m, orient, textures, lm, pbr, opts));
     const mesh = new THREE.Mesh(geo, mats.get(k));
     mesh.frustumCulled = false;
     mesh.matrixAutoUpdate = false;
@@ -155,7 +155,126 @@ export function buildLightmappedMeshes(grid, textures, lm, pbr) {
   return meshes;
 }
 
-function worldMaterial(m, orient, textures, lm, pbr) {
+// World surface shading, on top of three's standard material:
+//  - bumped lightmaps (Source's radiosity normal mapping, simplified): the
+//    baker stores the dominant direction of the direct light per luxel, so
+//    normal-map detail catches the light from the actual fixtures;
+//  - a fake specular highlight from that same direction, so glossy floors
+//    and panels pick up the fixtures above them;
+//  - parallax occlusion mapping with soft self-shadowing from the height map
+//    in the normal map's alpha, so panel gaps and grout read as recessed;
+//  - dynamic shadows (shadows.js) that remove the direct share of the baked
+//    light where a moving prop blocks it.
+// Faces are axis aligned with world-space UVs (u, v = in-plane axes / 128),
+// so the parallax tangent frame is just the face's in-plane world axes.
+const POM_DEPTH = 2.0;                // world units, matches textures.js HEIGHT_RANGE
+const WORLD_VERT_PARS = 'varying vec3 vWPos;\nvarying vec3 vWNrm;\n';
+const WORLD_FRAG_PARS = /* glsl */`
+uniform sampler2D lmDir;
+varying vec3 vWPos;
+varying vec3 vWNrm;
+`;
+const WORLD_FRAG_PRE = /* glsl */`
+#ifdef USE_NORMALMAP
+vec2 pomUv = vNormalMapUv;
+vec2 pomDx = dFdx( vNormalMapUv ), pomDy = dFdy( vNormalMapUv );
+#endif
+vec3 lmDv = texture2D( lmDir, vLightMapUv ).rgb * 2.0 - 1.0;
+float lmDl = length( lmDv );
+vec3 lmLw = lmDl > 0.02 ? lmDv / lmDl : vec3( 0.0, 1.0, 0.0 );
+float directShare = clamp( lmDl * 1.15, 0.0, 0.92 );
+float pomShade = 1.0, pomAO = 1.0;
+float dynDark = 0.0;
+#ifdef WORLD_SHADOWS
+{
+  float dsh = dynShadow( vWPos, vWNrm );
+  float dao = dynOcclusion( vWPos, vWNrm );
+  if ( dsh < 1.0 || dao > 0.0 ) {
+    // mostly the direct share of the baked light is blocked (where the local
+    // fixture light agrees with the shadow camera), plus some of the bounce
+    // light and reflections, as the prop also hides part of the room
+    float agree = smoothstep( -0.1, 0.6, dot( lmLw, dynShadowDir ) );
+    float grazing = smoothstep( 0.05, 0.4, dot( vWNrm, dynShadowDir ) );
+    dynDark = 1.0 - ( 1.0 - ( 1.0 - dsh ) * grazing * min( 0.3 + directShare * agree, 0.88 ) ) * ( 1.0 - dao * 0.45 );
+  }
+}
+#endif
+#ifdef WORLD_POM
+{
+  vec3 toEye = cameraPosition - vWPos;
+  float dist = length( toEye );
+  float fade = 1.0 - smoothstep( 240.0, 520.0, dist );
+  if ( fade > 0.0 ) {
+    vec3 n = vWNrm, an = abs( n );
+    vec3 T = an.x > 0.5 ? vec3( 0.0, 0.0, 1.0 ) : vec3( 1.0, 0.0, 0.0 );
+    vec3 B = an.y > 0.5 ? vec3( 0.0, 0.0, 1.0 ) : vec3( 0.0, 1.0, 0.0 );
+    vec3 v = toEye / dist;
+    float vz = max( dot( v, n ), 0.15 );
+    // thin grooves would be stepped over at grazing angles: fade the offset there
+    float depth = ${POM_DEPTH.toFixed(2)} * fade * smoothstep( 0.18, 0.5, vz ) / 128.0;
+    vec2 slope = - vec2( dot( v, T ), dot( v, B ) ) / vz * depth;
+    float steps = floor( mix( 12.0, 4.0, vz ) );
+    float layer = 1.0 / steps;
+    vec2 duv = slope * layer;
+    float cur = 0.0;
+    vec2 uv = pomUv;
+    float h = 1.0 - textureGrad( normalMap, uv, pomDx, pomDy ).a;
+    float prevH = h;
+    for ( int i = 0; i < 12; i ++ ) {
+      if ( cur >= h || float( i ) >= steps ) break;
+      prevH = h;
+      uv += duv; cur += layer;
+      h = 1.0 - textureGrad( normalMap, uv, pomDx, pomDy ).a;
+    }
+    if ( cur > 0.0 ) {
+      float a = h - cur, b = prevH - ( cur - layer );
+      float w = clamp( a / ( a - b - 1e-5 ), 0.0, 1.0 );
+      uv -= duv * w;
+      cur -= layer * w;
+    }
+    pomUv = uv;
+    // walls and floors of grooves see less of the room
+    pomAO = 1.0 - cur * 0.8;
+    // the groove's own lip shades its floor from the dominant fixture
+    if ( cur > 0.03 && lmDl > 0.05 ) {
+      vec3 lt = vec3( dot( lmLw, T ), dot( lmLw, B ), dot( lmLw, n ) );
+      if ( lt.z > 0.05 ) {
+        vec2 ls = lt.xy / max( lt.z, 0.25 ) * depth;
+        float occ = 0.0;
+        for ( int i = 1; i <= 4; i ++ ) {
+          float t = float( i ) * 0.25 * cur;
+          float sd = 1.0 - textureGrad( normalMap, uv + ls * t, pomDx, pomDy ).a;
+          occ = max( occ, ( cur - t - sd ) * 5.0 );
+        }
+        pomShade = 1.0 - clamp( occ, 0.0, 1.0 ) * directShare;
+      }
+    }
+  }
+}
+#endif
+`;
+const WORLD_LIGHTMAP = /* glsl */`
+  vec4 lightMapTexel = texture2D( lightMap, vLightMapUv );
+  vec3 lightMapIrradiance = lightMapTexel.rgb * lightMapIntensity;
+  lightMapIrradiance *= pomShade * pomAO * ( 1.0 - dynDark );
+  if ( lmDl > 0.02 ) {
+    vec3 L = normalize( ( viewMatrix * vec4( lmLw, 0.0 ) ).xyz );
+    float ng = max( dot( nonPerturbedNormal, L ), 0.25 );
+    #ifdef WORLD_SPEC
+    {
+      // fixtures are long area lights: widen the lobe
+      PhysicalMaterial sm = material;
+      sm.roughness = max( material.roughness, 0.32 );
+      vec3 C = lightMapIrradiance * directShare / ng;
+      reflectedLight.directSpecular += C * saturate( dot( normal, L ) ) * BRDF_GGX( L, geometryViewDir, normal, sm ) * WORLD_SPEC;
+    }
+    #endif
+    lightMapIrradiance *= clamp( 1.0 + min( lmDl, 1.0 ) * ( max( dot( normal, L ), 0.0 ) / ng - 1.0 ), 0.25, 1.9 );
+  }
+  irradiance += lightMapIrradiance;
+`;
+
+function worldMaterial(m, orient, textures, lm, pbr, opts = {}) {
   const lightMap = lm.texture;
   if (m === MAT.LIGHT) {
     return pbr
@@ -170,29 +289,43 @@ function worldMaterial(m, orient, textures, lm, pbr) {
     normalScale: new THREE.Vector2(1, 1),
     envMapIntensity: m === MAT.METAL ? 1.0 : m === MAT.WHITE ? 0.8 : 0.5,
   });
-  // All static light is in the lightmap: ignore the ambient light probe (it is
-  // there for dynamic objects), but keep point lights such as the portals' glow.
-  // Bumped lightmaps (Source's radiosity normal mapping, simplified): the baker
-  // stores the dominant direction of the direct light per luxel, so normal
-  // map detail catches the light from the actual fixtures.
+  const spec = m === MAT.METAL ? 0.55 : m === MAT.WHITE ? 0.45 : m === MAT.RUST ? 0.3 : 0.25;
+  return patchLitSurface(mat, lm, { ...opts, spec });
+}
+
+// Shading shared by the world and the decals painted on it (decals.js): all
+// static light comes from the lightmap, so ignore the ambient light probe (it
+// is there for dynamic objects), but keep point lights such as the portals'
+// glow. opts: { pom, shadows, spec, decal }
+export function patchLitSurface(mat, lm, opts = {}) {
+  const spec = opts.spec ?? 0.3;
+  mat.defines = { WORLD_SPEC: spec.toFixed(2) };
+  if (opts.pom && !opts.decal) mat.defines.WORLD_POM = '';
+  if (opts.shadows) mat.defines.WORLD_SHADOWS = '';
   mat.onBeforeCompile = (s) => {
     s.uniforms.lmDir = { value: lm.dir };
-    s.fragmentShader = 'uniform sampler2D lmDir;\n' + s.fragmentShader
-      .replace('#include <lights_fragment_maps>', THREE.ShaderChunk.lights_fragment_maps.replace(
-        'irradiance += lightMapIrradiance;',
-        `vec3 dv = texture2D( lmDir, vLightMapUv ).rgb * 2.0 - 1.0;
-        float dl = length( dv );
-        if ( dl > 0.02 ) {
-          vec3 L = normalize( ( viewMatrix * vec4( dv / dl, 0.0 ) ).xyz );
-          float ng = max( dot( nonPerturbedNormal, L ), 0.25 );
-          lightMapIrradiance *= clamp( 1.0 + min( dl, 1.0 ) * ( max( dot( normal, L ), 0.0 ) / ng - 1.0 ), 0.25, 1.9 );
-        }
-        irradiance += lightMapIrradiance;`))
+    Object.assign(s.uniforms, shadowUniforms);
+    s.vertexShader = WORLD_VERT_PARS + s.vertexShader
+      .replace('#include <project_vertex>', '#include <project_vertex>\nvWPos = ( modelMatrix * vec4( transformed, 1.0 ) ).xyz;\nvWNrm = normalize( mat3( modelMatrix ) * objectNormal );');
+    const grad = (tex, uv) => `textureGrad( ${tex}, ${uv}, pomDx, pomDy )`;
+    let f = WORLD_FRAG_PARS + s.fragmentShader
+      .replace('#include <packing>', '#include <packing>\n' + SHADOW_GLSL)
+      .replace('#include <lights_fragment_maps>', THREE.ShaderChunk.lights_fragment_maps
+        .replace(/vec4 lightMapTexel[\s\S]*?irradiance \+= lightMapIrradiance;/, WORLD_LIGHTMAP)
+        .replace('radiance += getIBLRadiance( geometryViewDir, geometryNormal, material.roughness );',
+          'radiance += getIBLRadiance( geometryViewDir, geometryNormal, material.roughness ) * ( 1.0 - dynDark * 0.85 ) * pomAO;'))
       .replace('#include <lights_fragment_begin>', THREE.ShaderChunk.lights_fragment_begin
         .replace('vec3 irradiance = getAmbientLightIrradiance( ambientLightColor );', 'vec3 irradiance = vec3( 0.0 );')
         .replace('irradiance += getLightProbeIrradiance( lightProbe, geometryNormal );', ''));
+    if (opts.decal) f = f.replace('#include <map_fragment>', WORLD_FRAG_PRE + '#include <map_fragment>');
+    else {
+      f = f.replace('#include <map_fragment>', WORLD_FRAG_PRE + THREE.ShaderChunk.map_fragment.replace('texture2D( map, vMapUv )', grad('map', 'pomUv')))
+        .replace('#include <roughnessmap_fragment>', THREE.ShaderChunk.roughnessmap_fragment.replace('texture2D( roughnessMap, vRoughnessMapUv )', grad('roughnessMap', 'pomUv')))
+        .replace('#include <normal_fragment_maps>', THREE.ShaderChunk.normal_fragment_maps.replace('texture2D( normalMap, vNormalMapUv )', grad('normalMap', 'pomUv')));
+    }
+    s.fragmentShader = f;
   };
-  mat.customProgramCacheKey = () => 'lm-world';
+  mat.customProgramCacheKey = () => `lm-world|${!!opts.decal}|${!!mat.defines.WORLD_POM}|${!!opts.shadows}|${spec}`;
   return mat;
 }
 

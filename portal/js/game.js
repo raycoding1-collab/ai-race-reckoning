@@ -13,6 +13,9 @@ import { Voice } from './voice.js';
 import { PostFX, QUALITY } from './post.js';
 import { Lightmaps, buildLightmappedMeshes, sampleAmbientCube, ambientCubeToSH } from './lightmap.js';
 import { ObjectProbes } from './probes.js';
+import { DynamicShadows } from './shadows.js';
+import { GooReflection } from './goo.js';
+import { Decals } from './decals.js';
 import { Elevator } from './elevator.js';
 import { RoomEnvironment } from '../vendor/addons/environments/RoomEnvironment.js';
 import {
@@ -63,6 +66,9 @@ export class Game {
     this.viewModel.scene.add(this.vmProbe);
     this._cube = new Array(18).fill(0);
     this.objProbes = new ObjectProbes(this);
+    this.shadows = new DynamicShadows(renderer);
+    this.gooReflection = new GooReflection(renderer);
+    this.decals = new Decals(this);
     this.camera = new THREE.PerspectiveCamera(75, 1, 1, 24000);
     this.camera.layers.set(0);
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -186,6 +192,9 @@ export class Game {
 
     // entities
     for (const e of L.entities) this.spawnEntity(e);
+    this.levelDecals = L.decals || [];
+    this.decals.clear();
+    this.decals.rebuild();
     this.lines = (L.lines || []).slice();
     const bossLines = L.entities.flatMap((e) => (e.lines ? [...(e.lines.hit || []), ...(e.lines.burn || [])] : []));
     this.voice.preload([...this.lines.map((l) => this.wordsFor(l[1])), ...(L.triggers || []).map((t) => this.wordsFor(t.say)), ...bossLines, ...(L.finale ? [L.finale] : [])]);
@@ -212,7 +221,7 @@ export class Game {
     for (const o of this.sceneLights) scene.remove(o);
     for (const m of this.worldMeshes) { scene.remove(m); m.geometry.dispose(); }
     if (this.lm) {
-      this.worldMeshes = buildLightmappedMeshes(this.grid, this.textures, this.lm, pbr);
+      this.worldMeshes = buildLightmappedMeshes(this.grid, this.textures, this.lm, pbr, { pom: this.quality.pom, shadows: this.quality.shadows > 0 });
       this.sceneLights = pbr ? [this.probe] : [];
     } else {
       const hemi = new THREE.HemisphereLight(0xf0f5ff, 0x55595f, pbr ? 0.32 : 2.4);
@@ -223,6 +232,8 @@ export class Game {
     }
     for (const o of this.sceneLights) scene.add(o);
     for (const m of this.worldMeshes) scene.add(m);
+    this.shadows.setLevel(this);
+    if (this.entities?.length) this.decals.rebuild();
     scene.environment = pbr ? this.envMap() : null;
     scene.environmentIntensity = 0.42;
     this.viewModel.scene.environment = pbr ? this.envMap() : null;
@@ -853,6 +864,8 @@ export class Game {
       const speed = Math.hypot(p.body.vel.x, p.body.vel.z);
       this.viewModel.update(frameDt, speed, p.body.onGround, look.dx, look.dy, !!this.held, this.time);
     }
+    this.shadows.update(this, frameDt);
+    this.gooReflection.update(this);
     if (this.post) this.post.render(draw, this.time);
     else { r.setRenderTarget(null); draw(); }
   }
@@ -870,13 +883,17 @@ export class Game {
   setQuality(name) {
     const q = QUALITY[name] || QUALITY.high;
     const changedPbr = this.quality && q.pbr !== this.quality.pbr;
+    const changedWorld = this.quality && (q.pom !== this.quality.pom || (q.shadows > 0) !== (this.quality.shadows > 0));
     this.qualityName = name;
     this.quality = q;
     this.post?.dispose();
     this.post = q.post ? new PostFX(this.renderer, q) : null;
+    this.shadows.setResolution(q.shadows || 0);
+    this.gooReflection.setEnabled(!!q.planar);
     this.viewModel.scene.environment = q.pbr ? this.envMap() : null;
     if (this.size) this.resize(this.size[0], this.size[1]);
     if (changedPbr && this.scene) this.loadLevel(this.levelIndex);
+    else if (changedWorld && this.scene && this.lm) { this.buildWorld(); this.captureEnv(); }
   }
 
   // Called before each (possibly virtual) view is drawn: hide the portal we

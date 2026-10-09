@@ -3,6 +3,7 @@ import { CELL, GRAVITY, CUBE, PELLET, PORTAL } from './constants.js';
 import { Body, moveBody, groundBelow, funnel } from './physics.js';
 import { traceGrid } from './level.js';
 import { makeSignTexture, makeGraffiti } from './textures.js';
+import { makeGooMaterial } from './goo.js';
 import {
   buildCube, buildButton, buildDoor, buildTurret, animateTurret, buildWallDevice, buildFaithPlate,
   buildDispenser, buildFizzler, buildAntline, buildGlassFrame, buildRocketTurret, withClone, CUBE_RING, IND_ON, IND_OFF,
@@ -17,6 +18,9 @@ const phong = (o) => {
 };
 
 function noCull(o) { o.traverse((c) => { c.frustumCulled = false; }); return o; }
+// wall- and ceiling-mounted fixtures are left out of the dynamic shadows (shadows.js):
+// one shadow direction for the whole room would throw them across the floor
+function noShadow(o) { o.traverse((c) => { c.userData.noShadow = true; }); return o; }
 
 // ---------------------------------------------------------------------------
 // Blob shadow: cheap contact shadow projected straight down onto the grid
@@ -39,6 +43,8 @@ export class BlobShadow {
     scene.add(this.mesh);
   }
   update(world, pos, bottom) {
+    // real shadows (shadows.js) replace the blob where they run
+    if (world.shadows?.active) { this.mesh.visible = false; return; }
     const hit = traceGrid(world.grid, new THREE.Vector3(pos.x, bottom + 1, pos.z), new THREE.Vector3(0, -1, 0), 400);
     if (!hit) { this.mesh.visible = false; return; }
     const y = bottom + 1 - hit.t;
@@ -407,37 +413,15 @@ export class Goo {
     const b = d.box.map(C);
     this.box = b;
     this.top = b[4];
-    this.mat = new THREE.ShaderMaterial({
-      uniforms: { uTime: { value: 0 }, uFire: { value: d.fire ? 1 : 0 } },
-      vertexShader: `varying vec3 vW; void main(){ vec4 w = modelMatrix*vec4(position,1.0); vW=w.xyz; gl_Position=projectionMatrix*viewMatrix*w; }`,
-      fragmentShader: `uniform float uTime; uniform float uFire; varying vec3 vW;
-        float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7))) * 43758.5453); }
-        float n(vec2 p){ vec2 i=floor(p), f=fract(p); vec2 u=f*f*(3.0-2.0*f);
-          return mix(mix(hash(i),hash(i+vec2(1,0)),u.x), mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),u.x), u.y); }
-        float h(vec2 p){ return n(p + vec2(uTime*0.15, uTime*0.07)) * 0.6 + n(p*2.3 - vec2(uTime*0.11, -uTime*0.13)) * 0.4; }
-        void main(){
-          vec2 p = vW.xz / 90.0;
-          float a = h(p);
-          // slow sludge: normal from the height field, murky body colour, a dull
-          // fresnel sheen and glints of the ceiling lights (all in linear light)
-          vec3 nr = normalize(vec3((a - h(p + vec2(0.04, 0.0))) * 1.4, 0.12, (a - h(p + vec2(0.0, 0.04))) * 1.4));
-          vec3 v = normalize(cameraPosition - vW);
-          float fr = pow(1.0 - max(dot(nr, v), 0.0), 4.0);
-          float spec = pow(max(dot(reflect(-v, nr), vec3(0.0, 1.0, 0.0)), 0.0), 60.0);
-          vec3 col = mix(vec3(0.018, 0.013, 0.004), vec3(0.07, 0.05, 0.012), a);
-          col += vec3(0.09, 0.085, 0.07) * fr + vec3(1.2, 1.1, 0.9) * spec * 0.6;
-          if (uFire > 0.5) {
-            float f = n(p * 1.7 + vec2(0.0, -uTime * 1.3)) * 0.6 + n(p * 4.1 - vec2(uTime * 0.7, uTime * 1.9)) * 0.4;
-            col = mix(vec3(0.25, 0.02, 0.0), vec3(3.2, 1.2, 0.2), smoothstep(0.35, 0.95, f));   // HDR so it blooms
-          }
-          gl_FragColor = vec4(col, 1.0);
-          #include <tonemapping_fragment>
-          #include <colorspace_fragment>
-        }`,
-    });
-    const m = new THREE.Mesh(new THREE.PlaneGeometry(b[3] - b[0], b[5] - b[2], 1, 1), this.mat);
+    // murky, reflective sludge (goo.js)
+    this.gooMat = makeGooMaterial(b, d.fire);
+    this.mat = { uniforms: this.gooMat.userData.goo };
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(b[3] - b[0], b[5] - b[2], 1, 1), this.gooMat);
     m.rotation.x = -Math.PI / 2;
     m.position.set((b[0] + b[3]) / 2, this.top, (b[2] + b[5]) / 2);
+    m.userData.noShadow = true;
+    m.onBeforeRender = (r, sc, cam) => world.gooReflection?.beforeDraw(this, cam);
+    this.mesh = m;
     world.scene.add(noCull(m));
     world.noPortalBoxes.push([b[0], b[1] - 40, b[2], b[3], b[4] + 2, b[5]]);
   }
@@ -824,7 +808,7 @@ export class Glass {
     this.broken = false;
     this.signal = d.signal;
     m.add(buildGlassFrame([b[3] - b[0], b[4] - b[1], b[5] - b[2]]));
-    world.scene.add(noCull(m));
+    world.scene.add(noShadow(noCull(m)));
   }
   isSolid() { return !this.broken; }
   blocksShot() { return !this.broken; }
@@ -854,7 +838,7 @@ export class Sign {
     const n = new THREE.Vector3(...d.dir);
     g.position.set(C(d.at[0]), C(d.at[1]), C(d.at[2])).addScaledVector(n, 3.5);
     g.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), n);
-    world.scene.add(noCull(g));
+    world.scene.add(noShadow(noCull(g)));
     this.world = world;
   }
   update() {}
@@ -1444,11 +1428,11 @@ export class Pipe {
     const m = new THREE.Mesh(new THREE.CylinderGeometry(d.r || 6, d.r || 6, len, 14), phong({ color: d.color || 0x6c5a48, shininess: 45 }));
     m.position.copy(a).lerp(b, 0.5);
     m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), b.clone().sub(a).normalize());
-    world.scene.add(noCull(m));
+    world.scene.add(noShadow(noCull(m)));
     for (const p of [a, b]) {
       const flange = new THREE.Mesh(new THREE.CylinderGeometry((d.r || 6) + 3, (d.r || 6) + 3, 4, 14), phong({ color: 0x3a3330 }));
       flange.position.copy(p); flange.quaternion.copy(m.quaternion);
-      world.scene.add(noCull(flange));
+      world.scene.add(noShadow(noCull(flange)));
     }
   }
   update() {}
@@ -1463,7 +1447,7 @@ export class Graffiti {
     m.position.set(C(d.at[0]), C(d.at[1]), C(d.at[2])).addScaledVector(n, 0.5);
     m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), n);
     m.renderOrder = 3;
-    world.scene.add(noCull(m));
+    world.scene.add(noShadow(noCull(m)));
   }
   update() {}
 }
