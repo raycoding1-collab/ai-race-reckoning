@@ -209,31 +209,44 @@ export const LEVELS = [
   {
     title: 'High Energy',
     gun: 'both',
-    icons: ['portal', 'pellet'],
+    icons: ['portal', 'pellet', 'goo'],
     build() {
-      const G = new Grid(40, 14, 30);
-      G.room(2, 1, 2, 30, 10, 26, { floor: 'metal', walls: 'metal', ceil: 'metal' });
-      G.paint(3, 1, 26, 15, 10, 27, 'white');               // target wall where pellets hit
-      G.paint(1, 1, 12, 2, 10, 25, 'white');                // west wall panel
-      G.paint(10, 0, 8, 22, 1, 20, 'white');                // floor panel
-      G.room(30, 1, 4, 36, 5, 8, { floor: 'metal', walls: 'metal', ceil: 'metal', lightEvery: 3 });
-      const OB = obs(G, 'south', 26, 18, 26, 6, 9);
+      // A goo channel splits the chamber. A pellet caught in the first
+      // receptacle powers a ferry across; a second pellet, routed from the
+      // far side all the way back over the goo, opens the exit.
+      const G = new Grid(44, 14, 30);
+      G.room(2, 1, 2, 40, 12, 26, { floor: 'metal', walls: 'metal', ceil: 'metal', lightEvery: 5 });
+      G.fill(2, 1, 2, 40, 3, 10, 'metal');                  // near floor
+      G.fill(2, 1, 18, 40, 3, 26, 'metal');                 // far floor
+      G.paint(40, 4, 3, 41, 10, 9, 'white');                // east wall where the first pellet lands
+      G.paint(4, 4, 26, 33, 11, 27, 'white');               // long south wall
+      G.paint(1, 4, 19, 2, 10, 25, 'white');                // west wall where the second pellet lands
+      G.room(34, 3, 26, 38, 7, 29, { floor: 'metal', walls: 'metal', ceil: 'metal', lightEvery: 3 });
+      const OB = obs(G, 'east', 40, 12, 18, 7, 10);
       return {
         grid: G,
         lights: OB.lights,
-        start: { at: [24, 1, 10], yaw: PI / 2 },
+        start: { at: [6, 3, 5], yaw: -PI / 2 },
         entities: [
           ...OB.ents,
-          { type: 'sign', number: 5, title: 'High Energy', icons: ['portal', 'pellet'], at: [30, 3.2, 12], dir: [-1, 0, 0] },
-          { type: 'launcher', at: [8, 4.5, 2], dir: [0, 0, 1], stopSignal: 'r1' },
-          { type: 'receptacle', at: [30, 4.5, 18], dir: [-1, 0, 0], signal: 'r1' },
-          { type: 'wire', signal: 'r1', points: [[29.7, 1, 18], [29.7, 1, 8], [29.7, 1, 6]] },
-          { type: 'door', at: [30.25, 1, 6], axis: 'x', width: 4, height: 4, inputs: ['r1'] },
-          { type: 'exit', at: [34, 1, 6] },
+          { type: 'sign', number: 5, title: 'High Energy', icons: ['portal', 'pellet', 'goo'], at: [2, 4.6, 14], dir: [1, 0, 0] },
+          { type: 'goo', box: [2, 0, 10, 40, 2.4, 18] },
+          { type: 'launcher', at: [2, 6.5, 6], dir: [1, 0, 0], stopSignal: 'r1' },
+          { type: 'receptacle', at: [30, 8, 2], dir: [0, 0, 1], signal: 'r1' },
+          { type: 'wire', signal: 'r1', points: [[30, 3, 2.4], [20, 3, 2.4], [20, 3, 9.6]] },
+          { type: 'platform', box: [18, 2, 10, 22, 3, 14], to: [0, 0, 4], speed: 1.6, inputs: ['r1'] },
+          { type: 'launcher', at: [40, 6.5, 22], dir: [-1, 0, 0], stopSignal: 'r2' },
+          { type: 'receptacle', at: [12, 5, 2], dir: [0, 0, 1], signal: 'r2' },
+          { type: 'wire', signal: 'r2', points: [[12, 3, 2.4], [8, 3, 2.4]] },
+          { type: 'door', at: [36, 3, 26.25], axis: 'z', width: 4, height: 4, inputs: ['r2'] },
+          { type: 'exit', at: [36, 3, 28] },
         ],
         lines: [
-          [1.0, 'High-energy pellets travel in straight lines and rebound off every surface.'],
-          [6.0, 'They are fatal on contact. Guide one into the receptacle with your portals.'],
+          [1.0, 'High-energy pellets travel in straight lines and rebound off every surface. They are fatal on contact.'],
+          [8.0, 'Deliver a pellet to the receptacle to power the transport platform. Then do it again, from the other side.'],
+        ],
+        triggers: [
+          { box: [2, 3, 18, 40, 8, 26], say: 'The second receptacle is behind you. Pellets do not mind long journeys.' },
         ],
       };
     },
@@ -286,19 +299,29 @@ export const LEVELS = [
       G.paint(2, 17, 2, 12, 18, 14, 'white');
       G.fill(34, 1, 2, 56, 6, 14, 'metal');
       G.room(56, 6, 6, 61, 10, 10, { floor: 'metal', walls: 'metal', ceil: 'metal', lightEvery: 3 });
+      // stage two: the cube for the exit button waits on a shelf back at the start
+      G.fill(2, 3, 2, 6, 5, 6, 'metal');
+      G.paint(2, 4, 2, 6, 5, 6, 'white');
+      G.paint(56, 7, 2, 57, 12, 6, 'white');                // east wall beside the button
       return {
         grid: G,
         start: { at: [6, 3, 8], yaw: -PI / 2 },
         entities: [
           { type: 'sign', number: 7, title: 'Terminal Velocity', icons: ['portal', 'fling', 'fall', 'goo'], at: [2, 5.2, 4], dir: [1, 0, 0] },
           { type: 'goo', box: [12, 0, 2, 34, 2.4, 14] },
-          { type: 'door', at: [56.25, 6, 8], axis: 'x', width: 4, height: 4, startOpen: true },
+          { type: 'cube', at: [4, 5.66, 4] },
+          { type: 'button', at: [50, 6, 4], signal: 'b1' },
+          { type: 'wire', signal: 'b1', points: [[51.6, 6, 4], [55.6, 6, 4], [55.6, 6, 6]] },
+          { type: 'door', at: [56.25, 6, 8], axis: 'x', width: 4, height: 4, inputs: ['b1'] },
           { type: 'exit', at: [59, 6, 8] },
         ],
         lines: [
           [1.0, 'There is no ledge in this chamber. Make your own momentum.'],
           [6.0, 'Put one portal on the floor and the other on the ceiling directly above it. Then fall.'],
           [13.0, 'Once you are going fast enough, move the ceiling portal to the white wall.'],
+        ],
+        triggers: [
+          { box: [34, 6, 2, 56, 12, 14], say: 'The exit requires a cube. You left it on the shelf. Objects in motion can be redirected too.' },
         ],
       };
     },
@@ -379,32 +402,40 @@ export const LEVELS = [
   {
     title: 'Hostile Hardware',
     gun: 'both',
-    icons: ['portal', 'cube'],
+    icons: ['portal', 'cube', 'button'],
     build() {
+      // Three turrets face the entrance and guard the button. Drop cubes on
+      // them through a ceiling portal, then put a cube on the button.
       const G = new Grid(34, 12, 35);
-      G.room(2, 1, 2, 30, 9, 28, { floor: 'metal', walls: 'metal', north: 'white', south: 'white', ceil: 'metal' });
-      G.paint(10, 9, 18, 30, 10, 28, 'white');              // ceiling above the turrets
-      G.fill(2, 1, 9, 14, 5, 10, 'metal');                  // cover wall
+      G.room(2, 1, 2, 30, 9, 28, { floor: 'metal', walls: 'metal', ceil: 'metal' });
+      G.paint(8, 9, 14, 30, 10, 28, 'white');               // portable ceiling over the turret field
+      G.paint(3, 0, 4, 8, 1, 8, 'white');                   // floor panel behind the cover wall
+      G.fill(2, 1, 9, 16, 5, 10, 'metal');                  // cover wall
       G.room(24, 1, 28, 28, 5, 33, { floor: 'metal', walls: 'metal', ceil: 'metal', lightEvery: 3 });
-      const OB = obs(G, 'south', 28, 8, 16, 5, 8);
+      const OB = obs(G, 'east', 30, 14, 24, 5, 8);
       return {
         grid: G,
         lights: OB.lights,
         start: { at: [6, 1, 4], yaw: PI },
         entities: [
           ...OB.ents,
-          { type: 'sign', number: 10, title: 'Hostile Hardware', icons: ['portal', 'cube'], at: [2, 3.2, 5], dir: [1, 0, 0] },
-          { type: 'dispenser', at: [4, 7.75, 6] },
-          { type: 'turret', at: [12, 1, 22], yaw: PI },
-          { type: 'turret', at: [20, 1, 22], yaw: PI },
-          { type: 'turret', at: [27, 1, 25], yaw: PI },
-          { type: 'door', at: [26, 1, 28.25], axis: 'z', width: 4, height: 4, startOpen: true },
+          { type: 'sign', number: 10, title: 'Hostile Hardware', icons: ['portal', 'cube', 'button'], at: [30, 3.2, 5], dir: [-1, 0, 0] },
+          { type: 'cube', at: [10, 1.66, 4] },
+          { type: 'cube', at: [12, 1.66, 6] },
+          { type: 'cube', at: [14, 1.66, 4] },
+          { type: 'cube', at: [12, 1.66, 2.8] },
+          { type: 'turret', at: [10, 1, 19], yaw: PI },
+          { type: 'turret', at: [18, 1, 21], yaw: PI },
+          { type: 'turret', at: [25, 1, 19], yaw: PI },
+          { type: 'button', at: [22, 1, 25], signal: 'b1' },
+          { type: 'wire', signal: 'b1', points: [[23.6, 1, 25], [26, 1, 25], [26, 1, 27.6]] },
+          { type: 'door', at: [26, 1, 28.25], axis: 'z', width: 4, height: 4, inputs: ['b1'] },
           { type: 'exit', at: [26, 1, 31] },
         ],
         lines: [
           [1.0, 'The devices beyond the wall are sentry turrets. They are not part of the test. They are, however, armed.'],
-          [7.0, 'A turret that has been knocked over stops firing. Approach from behind, or drop something on it.'],
-          [14.0, 'Turrets can be picked up. They do not enjoy it.'],
+          [7.0, 'A turret that has been knocked over stops firing. Gravity is very good at knocking things over.'],
+          [15.0, 'The ceiling above them is portal-compatible. I mention this for no reason.'],
         ],
       };
     },
