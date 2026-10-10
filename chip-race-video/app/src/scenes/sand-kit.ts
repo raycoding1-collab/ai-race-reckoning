@@ -17,9 +17,9 @@ export const BR = (b: number) => b * BAR;
 
 // ---- handoffs (screen px, 1920x1080): computed once, shared by both sides of each cut
 /** sand -> tin: the ignited lattice atom IS the first frozen tin droplet. */
-export const H_SAND_TIN = { x: 640, y: 452, r: 26 };
+export const H_SAND_TIN = { x: 600, y: 470, r: 56 };
 /** tin -> laser: the pre-pulsed pancake (screen centre after tin's last punch-in). */
-export const H_TIN_LASER = { x: 900, y: 560, rx: 210, ry: 46 };
+export const H_TIN_LASER = { x: 1110, y: 500, rx: 210, ry: 46 };
 /** laser -> machine: the isotherm rings = the collector mirror's zones, face-on. */
 export const H_LASER_MACHINE = { x: 960, y: 540, radii: [70, 140, 215, 295, 380, 470] };
 /** machine -> tons: the bundled cable, a vertical line from the top edge down to (x, y). */
@@ -82,7 +82,7 @@ export function odometer(c: CanvasRenderingContext2D, text: string, prev: string
     c.fillStyle = col;
     if (old === g.ch || k >= 1) { c.fillText(g.ch, x0 + g.x, y); continue; }
     c.save();
-    c.beginPath(); c.rect(x0 + g.x - 2, y - size * 0.95, g.w + 4, size * 1.15); c.clip();
+    c.beginPath(); c.rect(x0 + g.x - 2, y - size * 0.8, g.w + 4, size * 0.92); c.clip();
     const dy = size * 1.05;
     c.fillText(g.ch, x0 + g.x, y + dy * (1 - e));
     if (old !== undefined) { c.globalAlpha *= 1 - e; c.fillText(old, x0 + g.x, y - dy * e); }

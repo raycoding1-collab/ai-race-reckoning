@@ -39,7 +39,7 @@ export default class SandScene extends Scene {
     uN: { value: Array.from({ length: NP }, () => new THREE.Vector3()) }, uC: { value: new Array(NP).fill(0) }, uP: { value: Array.from({ length: NP }, () => new THREE.Vector3()) },
     uT0: { value: new THREE.Vector3() }, uB0: { value: new THREE.Vector3() },
     uKey: { value: new THREE.Vector3() }, uRim: { value: new THREE.Vector3() }, uKeyI: { value: 1 },
-    uScan: { value: 2 }, uReink: { value: -1 }, uFar: { value: 1 }, uLatDim: { value: 0 }, uIgnite: { value: 0 }, uGlint: { value: 0 }, uFade: { value: 0 }, uTime: { value: 0 },
+    uScan: { value: 2 }, uReink: { value: -1 }, uFar: { value: 1 }, uLatDim: { value: 0 }, uIgnite: { value: 0 }, uGlint: { value: 0 }, uFade: { value: 0 }, uTime: { value: 0 }, uKeepR: { value: H_SAND_TIN.r },
   });
   hud = new Layer2D();
   atoms = new LineBatch(60000, { blend: 'normal' });
@@ -97,9 +97,9 @@ export default class SandScene extends Scene {
       [BT(7) + 0.36, -3.62, X], [BT(8), -3.7, L],
       [BT(8) + 0.36, -4.45, X], [BT(12), -4.55, L],
       [BT(12) + 0.33, -4.85, X], [BT(13), -4.9, L],
-      [BT(13) + 0.3, -5.1, X], [BT(14), -5.14, L],
-      [BT(14) + 0.3, -5.3, X], [BT(15), -5.33, L],
-      [BT(15) + 0.28, -Math.log10(1e6 / (0.058 * 1920 / H_SAND_TIN.r)) , X], [7.6, -5.4, L],
+      [BT(13) + 0.3, -5.15, X], [BT(14), -5.2, L],
+      [BT(14) + 0.3, -5.42, X], [BT(15), -5.46, L],
+      [BT(15) + 0.28, -Math.log10(1e6 / (0.058 * 1920 / H_SAND_TIN.r)) , X], [7.6, -5.72, L],
     ];
     this.notes = Array.from({ length: 8 }, (_, k) => k * BT(1) / 2);
 
@@ -111,7 +111,7 @@ export default class SandScene extends Scene {
     }
 
     // ---- the title made of lattice atoms
-    const fam = F.archivo(100, 900), size = 292, step = 13;
+    const fam = F.archivo(100, 900), size = 300, step = 14;
     const lines = [{ s: 'SILICON', x: 132, y: 492 }, { s: 'SHIELD', x: 132, y: 790 }];
     const camT = this.cam(BT(8) + 0.45);
     const proj = (su: number, sv: number) => this.project(camT, add(mul(this.T0, su * 1e-6), mul(this.B0, sv * 1e-6)));
@@ -269,7 +269,7 @@ export default class SandScene extends Scene {
   drawTitle(t: number, c: Cam, A: LineBatch, G: LineBatch) {
     const N = this.tAtoms.length;
     const pos = new Float32Array(N * 2), kk = new Float32Array(N), hot = new Float32Array(N);
-    const R = 5.3;
+    const R = 6.0;
     for (let i = 0; i < N; i++) {
       const a = this.tAtoms[i]!;
       const s = this.project(c, add(mul(this.T0, a.su * 1e-6), mul(this.B0, a.sv * 1e-6)));
@@ -298,8 +298,8 @@ export default class SandScene extends Scene {
       const x = pos[i * 2]!, y = pos[i * 2 + 1]!, h = clamp(hot[i]!);
       const mix3 = (a: number[], b: number[], m: number): [number, number, number] => [lerp(a[0]!, b[0]!, m), lerp(a[1]!, b[1]!, m), lerp(a[2]!, b[2]!, m)];
       A.seg2(x, y, x + 0.01, y, 2 * (R + 1.6), ink, k);
-      A.seg2(x, y, x + 0.01, y, 2 * R, mix3(mul(bone as V3, 0.42), mul(sig as V3, 1.2), h), k);
-      A.seg2(x - R * 0.22, y - R * 0.24, x - R * 0.22 + 0.01, y - R * 0.24, 2 * R * 0.62, mix3(mul(bone as V3, 0.8), mul(sig as V3, 1.8), h), k);
+      A.seg2(x, y, x + 0.01, y, 2 * R, mix3(mul(bone as V3, 0.55), mul(sig as V3, 1.2), h), k);
+      A.seg2(x - R * 0.22, y - R * 0.24, x - R * 0.22 + 0.01, y - R * 0.24, 2 * R * 0.62, mix3(mul(bone as V3, 0.95), mul(sig as V3, 1.8), h), k);
       A.seg2(x - R * 0.36, y - R * 0.4, x - R * 0.36 + 0.01, y - R * 0.4, 2 * R * 0.24, mix3(bone, [3, 2.6, 2.1], h), k);
       if (h > 0.05) G.seg2(x, y, x + 0.01, y, 2 * R * 2.6, [sig[0] * h * 0.6, sig[1] * h * 0.6, sig[2] * h * 0.6], 0.5);
     }

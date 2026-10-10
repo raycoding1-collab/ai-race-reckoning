@@ -107,7 +107,7 @@ export default class Grid2 extends Scene {
     c.translate(lerp(D.x, 960, ck) + sx * (1 - ck), lerp(D.y, 600, ck) + sy * (1 - ck));
     c.scale(scale, scale);
     c.translate(-D.x, -D.y);
-    this.drawDiagram(c, t);
+    this.drawDiagram(c, t, 1 - ck);
     c.restore();
     comp.draw(renderer, this.text.upload(), out);
 
@@ -126,8 +126,9 @@ export default class Grid2 extends Scene {
   // ---------------------------------------------------------------------------------------------
   energised(p: Path, t: number) { return clamp((t - p.e0) * p.speed, 0, p.len); }
 
-  drawDiagram(c: CanvasRenderingContext2D, t: number) {
+  drawDiagram(c: CanvasRenderingContext2D, t: number, fade: number) {
     const Y = BUS_Y;
+    c.globalAlpha = fade;
     const bone = C.bone;
     c.lineCap = 'round'; c.lineJoin = 'round';
     // cornfield: crop rows across the lower band (engraved parallels, perspective-free)
@@ -178,7 +179,8 @@ export default class Grid2 extends Scene {
       this.breaker(c, x, 640, true, SLAM.feed[i]!, t, `CB-${3 + i}`);
       this.hall(c, x, HALL_Y, SLAM.feed[i]! + 0.1, t, i);
     }
-    // site meter
+    // site meter (stays at full strength: it is the handoff)
+    c.globalAlpha = 1;
     const D = GRID2_DIAL;
     const frac = this.loadFrac(t);
     const pinned = clamp((t - 80.7) / 1.0);
@@ -186,6 +188,7 @@ export default class Grid2 extends Scene {
       frac, labelsA: ['0', '0.3', '0.6', '0.9', '1.2', '1.5'], titleA: 'SITE LOAD · GW', redFrom: 0.8,
       shakeDeg: 0.7 + 2.6 * pinned + 3 * pulses([...SLAM.feed], t, 0.05), t, hubGlow: pinned,
     });
+    c.globalAlpha = fade;
     // digital GW readout
     const gw = frac * 1.5;
     c.font = font(F.mono(600), 34); c.fillStyle = frac >= 0.8 ? C.signal : bone; c.textAlign = 'center';
@@ -200,6 +203,7 @@ export default class Grid2 extends Scene {
       x += karaokeWord(c, w, t, x, 424, F.archivo(100, 800), this.rowSizes.b, { dim: rgbaS(bone, 0.24), settled: bone, slam: 0.08 }) + this.rowSizes.b * 0.28;
     }
     drawTPP(c, 96, 905, this.tpp.value(t), { width: 280 });
+    c.globalAlpha = 1;
   }
 
   label(c: CanvasRenderingContext2D, x: number, y: number, a: string, b: string) {

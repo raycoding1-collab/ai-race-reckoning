@@ -23,9 +23,9 @@ export function buildLandscape(): THREE.DataTexture {
   for (let j = 0; j < BH; j++) {
     for (let i = 0; i < BW; i++) {
       const x = (i / (BW - 1)) * (TX.x1 - TX.x0), z = TX.z0 + (j / (BH - 1)) * (TX.z1 - TX.z0);
-      const f0 = fbm2(x * 0.075, z * 0.075, 4, 3) * 2.2;
-      const f1 = fbm2(x * 0.11 + 9, z * 0.09 - 4, 4, 11) * 2.2;
-      const rid = 1 - Math.abs(fbm2(x * 0.06 + 3, z * 0.06, 3, 17) * 2.8);       // ridged
+      const f0 = fbm2(x * 0.05, z * 0.05, 3, 3) * 2.4;
+      const f1 = fbm2(x * 0.07 + 9, z * 0.06 - 4, 3, 11) * 2.2;
+      const rid = 1 - Math.abs(fbm2(x * 0.04 + 3, z * 0.04, 2, 17) * 2.8);       // ridged
       const f2 = (rid * rid - 0.35) * 1.5;
       // blocks, softened at their edges
       const bx = x / 6, bz = z / 5;
@@ -101,7 +101,7 @@ float H(vec2 c) {
     if (age < 0.0 || age > 2.4) continue;
     float r = length(c - uRip[i].xy);
     float wave = exp(-pow((r - age * 7.5) / 1.1, 2.0)) * cos((r - age * 7.5) * 3.2) * (1.0 - age / 2.4);
-    h += uRip[i].w * wave;
+    h += uRip[i].w * 0.45 * wave;
   }
   h += uBeat * 0.12 * land(c);
   return h * (1.0 - uFlat);
@@ -146,7 +146,7 @@ void main() {
   float hn = clamp(h / 0.5, 0.0, 1.3);
   float atomK = 1.0 - uMorph;
   float lift = clamp(h * 0.22, -0.2, 1.0);
-  float dark = clamp(0.10 + 0.42 * hn * atomK + 1.1 * lamRel + 0.16 * lift, 0.04, 0.92);
+  float dark = clamp(0.08 + 0.42 * hn * atomK + 0.6 * lamRel + 0.12 * lift, 0.04, 0.9);
   float ln1 = hatchF(vP.z / 0.0926, dark);
   float ln2 = hatchF(vP.z / 0.30, min(1.0, dark * 0.8 + 0.18)) * uCoarse;
   float ln = max(ln1, ln2);

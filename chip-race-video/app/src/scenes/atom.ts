@@ -12,13 +12,12 @@ import { rgba } from '../engine/palette';
 import { F, font } from '../engine/type';
 import { clamp, ease, lerp, mulberry32, prog, pulse, smoothstep } from '../engine/util';
 import { lineByScene, sparkHead2D as beamHead2D } from './_motifs';
+import { fenceMoves, type Move } from './atom-fence';
 import { LAT, buildLattice, makeHeightTexture, splat, siteX, siteY, drawBridgeLine, GLSL_HEIGHT } from './atom-kit';
 
 const DT_ROW = 0.125;        // one lattice row per 0.125 s: 15 rows = 1.875 s = exactly one bar
 const T_FENCE = 1.875;       // the border starts one bar in
 const DT_MOVE = 0.1171875;   // a 16th
-
-interface Move { r: number; c: number; sx: number; sy: number; dx: number; dy: number; src: number }
 
 export default class AtomScene extends Scene {
   layer = new Layer2D();
@@ -35,15 +34,7 @@ export default class AtomScene extends Scene {
     this.base = lat.data; this.amps = lat.amp;
     this.work = new Float32Array(lat.data.length);
     this.tex = makeHeightTexture(this.work);
-    // the fence: a random walk down the lattice, one atom per row, moved into the hollow SE of its site
-    const rnd = mulberry32(21);
-    let c = 15;
-    for (let r = 0; r < 14; r++) {
-      const a = this.amps[r * LAT.cols + c]!;
-      this.moves.push({ r, c, sx: siteX(c), sy: siteY(r), dx: siteX(c) + LAT.pitch / 2, dy: siteY(r) + LAT.pitch / 2, src: a });
-      const s = rnd();
-      c = clamp(c + (s < 0.3 ? -1 : s > 0.7 ? 1 : 0), 12, 19);
-    }
+    this.moves = fenceMoves(this.amps);
     // the LED dots that survive from the board before: sparse lattice sites already lit at frame 0
     const sr = mulberry32(5);
     for (let k = 0; k < 14; k++) this.sparse.push({ x: siteX(2 + Math.floor(sr() * 28)), y: siteY(Math.floor(sr() * 15)) });

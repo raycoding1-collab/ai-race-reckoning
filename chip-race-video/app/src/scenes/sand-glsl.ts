@@ -20,6 +20,7 @@ uniform float uIgnite;    // 0..1 the target atom ignites
 uniform float uGlint;     // flash on the facet glints (bell notes)
 uniform float uFade;      // 0..1 everything but the ignited atom fades to black
 uniform float uTime;
+uniform float uKeepR;  // px radius of the ignited atom
 
 // hatch with LOD: line spacing ~7 px in object space; levels double as the footprint shrinks
 float hatchLOD(float u, float tone, float fw) {
@@ -87,50 +88,50 @@ void main() {
     // ---- conchoidal sub-facets: 3 octaves of Voronoi tilt the normal and add hairline borders
     vec3 nn = n; float ang = 0.35 + hash11(fac) * 2.4; float borders = 0.0;
     for (int k = 0; k < 3; k++) {
-      float s = 0.09 * pow(0.1, float(k));
+      float s = 0.05 * pow(0.1, float(k));
       float cellPx = s / fw;
-      float w = smoothstep(16.0, 60.0, cellPx) * (1.0 - lat);
+      float w = smoothstep(70.0, 200.0, cellPx) * (1.0 - lat);
       if (w < 0.002) continue;
       vec3 v = voro(uv / s, fac + float(k) * 5.0);
       vec2 r = vec2(v.y, v.z) * 2.0 - 1.0;
-      nn += (T * r.x + B * r.y) * 0.30 * w;
+      nn += (T * r.x + B * r.y) * 0.2 * w;
       ang += (v.y - 0.5) * 0.9 * w;
-      borders = max(borders, pxLine(v.x * s / fw, 0.5, 1.4) * w * (0.55 + 0.45 * v.z));
+      borders = max(borders, pxLine(v.x * s / fw, 0.4, 1.2) * w * (0.35 + 0.65 * v.z));
     }
     nn = normalize(nn);
     // ---- growth terraces (step contours) at 150 nm and 15 nm
     float terr = 0.0, terrLit = 0.0;
     for (int k = 0; k < 2; k++) {
       float s = 1.6e-4 * pow(0.1, float(k));
-      float w = smoothstep(30.0, 110.0, s / fw) * (1.0 - lat * 0.85);
+      float w = smoothstep(60.0, 220.0, s / fw) * (1.0 - lat * 0.85);
       if (w < 0.002) continue;
       vec2 q = uv / s;
-      float h0 = snoise(vec2(0.0) * 0.8 + float(k) * 7.0) + 0.5 * snoise(vec2(0.0) * 2.1 + float(k) * 3.0);
-      float h = snoise(q * vec2(0.8, 0.55) + float(k) * 7.0) + 0.5 * snoise(q * 2.1 + float(k) * 3.0);
-      float hv = (h - h0) * 3.0 + 0.5;
+      float h0 = snoise(vec2(float(k) * 7.0)) + 0.25 * snoise(vec2(float(k) * 3.0));
+      float h = snoise(q * vec2(0.5, 0.33) + float(k) * 7.0) + 0.25 * snoise(q * 1.1 + float(k) * 3.0);
+      float hv = (h - h0) * 2.2 + 0.5;
       float fwv = fwidth(hv);
       float f = fract(hv), dd = min(f, 1.0 - f) / max(fwv, 1e-6);
       float ln = pxLine(dd, 0.6, 1.5) * w;
       vec2 gr = vec2(dFdx(hv), dFdy(hv));
-      float lit = sat(0.5 + 2.0 * dot(normalize(gr + 1e-6), normalize(vec2(-uKey.x, uKey.y))));
+      float lit = smoothstep(0.55, 0.95, dot(normalize(gr + 1e-6), normalize(vec2(-uKey.x, uKey.y))));
       terr = max(terr, ln); terrLit = max(terrLit, ln * lit);
     }
 
     // ---- shading: white-line engraving on ink
     float dif = sat(dot(nn, uKey)) * uKeyI;
-    float tone = 0.06 + 0.86 * pow(dif, 0.85);
+    float tone = 0.03 + 0.8 * pow(dif, 1.7);
     vec2 hd = vec2(cos(ang), sin(ang));
     float uh = dot(uv, hd);
     float cov = hatchLOD(uh, tone, fw);
     float rim = pow(1.0 - sat(cosv), 2.2) * sat(dot(nn, uRim) * 0.9 + 0.35);
     float covR = hatchLOD(dot(uv, vec2(-hd.y, hd.x)), sat(rim * 1.3), fw);
     float spec = pow(sat(dot(reflect(-uKey, nn), -rd)), 70.0) * uKeyI;
-    vec3 surf = C_BONE * 0.82 * cov;
+    vec3 surf = C_BONE * 0.74 * cov;
     surf += C_SIGNAL * (0.22 * rim + 1.05 * rim * covR);
     surf += C_EMBER * spec * (2.2 + 4.0 * uGlint);
     surf += C_BONE * 0.95 * pxLine(em / fw, 0.5, 1.5) * (1.0 - lat);
-    surf += C_BONE * 0.42 * borders;
-    surf += mix(C_BONE * 0.45, C_SIGNAL * 1.25, terrLit) * terr;
+    surf += C_BONE * 0.3 * borders;
+    surf += mix(C_BONE * 0.4, C_SIGNAL * 1.3, terrLit) * terr;
     // re-ink band during the dive snaps
     if (uReink > -0.5) {
       float b = exp(-abs(yTop / 1080.0 - uReink) * 26.0);
@@ -158,7 +159,7 @@ void main() {
         bd = min(bd, sdSegment(q, Cq, Dq)); bd = min(bd, sdSegment(q, Dq, o + vec2(0.0, 0.5431))); bd = min(bd, sdSegment(q, Dq, o + vec2(0.384, 0.5431)));
       }
       float Rpx = R / fwn;
-      float dim = 1.0 - uLatDim * 0.72;
+      float dim = 1.0 - uLatDim * 0.88;
       vec3 lc = C_INK;
       // bonds: hairlines that stop at the atoms
       float bond = pxLine(bd / fwn, 0.35, 1.2) * smoothstep(R * 1.15, R * 1.5, ad);
@@ -166,7 +167,7 @@ void main() {
       vec2 qa = (q - ac) / R; float r2 = dot(qa, qa);
       if (r2 < 1.0) {
         float nz = sqrt(1.0 - r2);
-        vec3 sn = normalize(T * qa.x - B * qa.y * 0.0 + B * qa.y + n * nz);
+        vec3 sn = normalize(T * qa.x + B * qa.y + n * nz);
         float d2 = sat(dot(sn, uKey));
         float tn = 0.08 + 0.88 * pow(d2, 0.8);
         float lines = hatchD(qa.y * 4.5 + qa.x * 1.2, tn, fwidth(qa.y * 4.5 + qa.x * 1.2));
@@ -204,12 +205,12 @@ void main() {
   if (uIgnite > 0.0) {
     vec2 c0 = vec2(960.0 + uShift.x, 540.0 - uShift.y);
     float r = length(px - c0);
-    col += C_SIGNAL * uIgnite * 1.1 * exp(-r / 60.0) + C_EMBER * uIgnite * 0.9 * exp(-r / 22.0);
+    col += C_SIGNAL * uIgnite * 0.9 * exp(-r / (uKeepR * 2.2)) * step(uKeepR, r) + C_EMBER * uIgnite * 0.5 * exp(-r / uKeepR) * step(uKeepR, r);
   }
   // fade: keep only the ignited atom
   if (uFade > 0.0) {
     vec2 c0 = vec2(960.0 + uShift.x, 540.0 - uShift.y);
-    float keep = 1.0 - smoothstep(30.0, 34.0, length(px - c0)) ;
+    float keep = 1.0 - smoothstep(uKeepR * 1.05, uKeepR * 1.2, length(px - c0));
     col = mix(col, mix(C_INK, col, keep), uFade);
   }
   // raster reveal (SEM scan) with a hot scanline

@@ -53,7 +53,7 @@ export function karaokeWord(c: CanvasRenderingContext2D, w: Word, t: number, x: 
   const hotFor = o.hotFor ?? 0.35;
   const cool = clamp((t - w.end) / hotFor);
   const sungCol = o.sung ?? C.signal, settled = o.settled ?? C.bone;
-  c.textBaseline = 'alphabetic';
+  c.textBaseline = 'alphabetic'; c.textAlign = 'left';
   const a0 = o.alphaIn ?? 1;
   // slam: scale pulse around the word's left-baseline anchor
   const sl = o.slam ? 1 + o.slam * pulse(t, w.start, 0.07) : 1;
@@ -135,6 +135,7 @@ export interface DialOpts {
   minor?: number;          // minor ticks between majors
   alpha?: number;
   hubGlow?: number;
+  noNeedle?: boolean;
 }
 export const DIAL_A0 = 135;      // deg, canvas (clockwise from +x): bottom-left
 export const DIAL_SWEEP = 270;
@@ -196,11 +197,12 @@ export function drawDial(c: CanvasRenderingContext2D, cx: number, cy: number, R:
   const ft = clamp(flip * 1.6 - 0.2);
   const tTxt = ft > 0.5 && o.titleB ? o.titleB : o.titleA;
   c.save();
-  c.translate(cx, cy + R * 0.42); c.scale(1, Math.max(0.04, Math.abs(Math.cos(ft * Math.PI))));
+  c.translate(cx, cy + R * 0.3); c.scale(1, Math.max(0.04, Math.abs(Math.cos(ft * Math.PI))));
   c.font = font(F.mono(500), 14 * k); c.fillStyle = rgbaS(C.bone, 0.72); c.letterSpacing = `${2.4 * k}px`;
   c.fillText(tTxt, 0, 0); c.letterSpacing = '0px';
   c.restore();
   // needle
+  if (o.noNeedle) { c.beginPath(); c.arc(cx, cy, 15 * k, 0, TAU); c.fillStyle = C.ink; c.fill(); c.lineWidth = 3 * k; c.strokeStyle = rgbaS(C.bone, 0.9); c.stroke(); c.restore(); return; }
   const sh = (o.shakeDeg ?? 0) * Math.sin(t * 190) * 0.6 + (o.shakeDeg ?? 0) * Math.sin(t * 331 + 1) * 0.4;
   const a = ang(o.frac) + sh * Math.PI / 180;
   const ux = Math.cos(a), uy = Math.sin(a), px = -uy, py = ux;

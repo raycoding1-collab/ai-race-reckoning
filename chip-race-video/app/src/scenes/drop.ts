@@ -11,6 +11,7 @@ import { F, font, measure, fitSize } from '../engine/type';
 import { HEX, LIN } from '../engine/palette';
 import { ease, clamp, lerp, pulse, hash, frameIdx, TAU, smoothstep, springStep, mulberry32, keys } from '../engine/util';
 // NOTE: _motifs.ts has an unterminated doc comment that swallows beamHead/beamParticles; use the originals.
+import { DIE_DIVE_GLSL } from './drop-lattice';
 import { lineByScene, sparkHead as beamHead, sparkParticles as beamParticles, TPP_THRESHOLD } from './_motifs';
 
 const BEAT = 60 / 128;
@@ -112,40 +113,7 @@ vec4 disc(vec2 px) {
   return vec4(col, 1.0);
 }
 
-// zoom into one die: wafer -> die -> blocks -> fins and gates (node1 opens on this lattice)
-vec3 dieDive(vec2 px) {
-  float Z = uDieZoom;
-  vec2 q = (px - uC) / Z;                 // reticle units, die centre at origin
-  float P = uPitch;
-  vec3 col = C_INK;
-  float lane = 0.0;
-  // die lanes
-  vec2 g0 = abs(fract(q / P + 0.5) - 0.5) * P * Z;
-  float d0 = min(g0.x, g0.y);
-  col += C_SIGNAL * 0.55 * (1.0 - smoothstep(0.6, 1.7, d0));
-  // die interior fill, slightly raised
-  vec2 cell = floor(q / P + 0.5);
-  float inside = step(max(abs(q.x - cell.x * P), abs(q.y - cell.y * P)), P * 0.5 - 1.0 / Z);
-  col += C_BLOOD * 0.10 * inside * (0.5 + hash12(cell));
-  // blocks (P/6), cells (P/36)
-  float s1 = P / 6.0, s2 = P / 36.0, s3 = P / 216.0;
-  float a1 = smoothstep(7.0, 32.0, s1 * Z), a2 = smoothstep(7.0, 30.0, s2 * Z);
-  vec2 g1 = abs(fract(q / s1 + 0.5) - 0.5) * s1 * Z;
-  col += C_SIGNAL * 0.40 * a1 * (1.0 - smoothstep(0.6, 1.6, min(g1.x, g1.y)));
-  vec2 g2 = abs(fract(q / s2 + 0.5) - 0.5) * s2 * Z;
-  col += C_SIGNAL * 0.32 * a2 * (1.0 - smoothstep(0.6, 1.5, min(g2.x, g2.y)));
-  // fins (vertical, pitch s3) and gates (horizontal bars, pitch s2)
-  float a3 = smoothstep(4.0, 22.0, s3 * Z);
-  float fx = abs(fract(q.x / s3 + 0.5) - 0.5) * s3 * Z;
-  float finW = 0.085 * s3 * Z;
-  float fin = 1.0 - smoothstep(finW - 0.7, finW + 0.7, fx);
-  float gy = abs(fract(q.y / s2 + 0.5) - 0.5) * s2 * Z;
-  float gateW = 0.17 * s2 * Z;
-  float gate = 1.0 - smoothstep(gateW - 0.8, gateW + 0.8, gy);
-  col = mix(col, col + C_SIGNAL * 0.9 * fin, a3);
-  col = mix(col, col * 0.35 + C_BLOOD * 0.9 * gate + C_SIGNAL * 0.25 * gate * fin, a3 * gate);
-  return col;
-}
+${DIE_DIVE_GLSL}
 
 void main() {
   vec2 px0 = FRAG_PX;
