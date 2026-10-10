@@ -20,6 +20,33 @@ Phase 1 is done: `chip-race-video/silicon_shield.mp4` (1080p30, 2:22, 92 MB) is 
 
 **Judging (you can't hear audio):** measure in code. Check integrated LUFS and true peak; per-section loudness (choruses at least 3 LU above verses); spectral balance against a pop-style tilt; vocal f0 against the melody (cents error); stem RMS balance; clipping; and kick onsets against events.json. Use at most 3 downscaled spectrogram images. The user is the ears: send them the MP3 and ask for feedback.
 
+**Research results (2026-10-10; use these, don't re-research).** Details are in `docs/RESEARCH_ears.md` (measuring) and `docs/RESEARCH_hands.md` (improving); the working test scripts are in `tools/research/` (fix their paths first, see its README).
+- **Network, beyond §1 of TECHNIQUES:** these work: `git clone` from github.com, archive.ubuntu.com debs, conda-forge via micromamba (CPU torch), npm, and storage.googleapis.com (ailia-models ONNX exports of CLAP, PANNs, Demucs, Crepe, YAMNet, VGGish). Still blocked: Hugging Face, essentia.upf.edu, dl.fbaipublicfiles.com, the Azure CDN, zenodo and alphacephei. That rules out Audiobox Aesthetics, SongEval, Essentia TF models, MERT, RVC, so-vits-svc and Seed-VC.
+- **Listening kit (all tested):**
+  - sherpa-onnx Whisper base.en: word error rate (WER) per lyric line, about 12 s of CPU per 20 s of audio.
+  - LAION-CLAP ONNX: prompt scores such as "female pop singer" vs "robotic voice" and "muddy mix".
+  - CED or PANNs: AudioSet tags (watch "Singing").
+  - pyloudnorm, librosa, essentia, madmom: loudness, key, tempo and the bar grid.
+- **Baseline diagnosis of v1:**
+  - Choruses score WER ~0.28, and the line "Nobody's slowing the silicon down" scores 0.6-1.0. Every engine misses "weapon" and "slowing".
+  - CLAP's singer-minus-robotic gap drops to ~0 in chorus 2/3 and the bridge, while its "muddy" score rises from 0.27 to 0.40.
+  - Band-passing to 1-7 kHz lifts the "Female singing" tag from 0.00 to 0.10.
+  - All of this points to **low-mid masking of the vocal**. Fixes: carve 200-500 Hz out of the pads, bass and chords under the vocal (sidechain or dynamic EQ keyed by the vocal), add vocal presence, and sharpen the consonants of "weapon" and "slowing".
+- **Targets for v2:**
+  - WER at most 0.2 on chorus lines, and no line above 0.4.
+  - Singer-minus-robotic gap above 0 in every chorus; "muddy" at most 0.27; a higher "Singing" tag.
+  - -9 to -10 LUFS, at most -1 dBTP.
+  - Re-run the kit after each change and keep a v1/v2 table in `docs/`.
+- **Upgrade kit (tested; licences safe for commercial use).** Sampled rendering is fast, about 1 s of CPU per 15 s of music.
+  - CC0 Sonic Pi drum samples, with sidechain.
+  - pedalboard, with the Dragonfly reverb VST3 or Faust zita_rev1.
+  - A 4x-oversampled lookahead limiter at -1 dBTP (`pedalboard.Limiter` is not a brickwall).
+  - Sampled piano, strings, choir and pads via sfizz or tinysoundfont: VSCO-2-CE, VCSL and Karoryfer (CC0); FluidR3 and MuseScore General (MIT); Salamander piano v3 (CC-BY: credit it).
+- **Avoid:** Dirt-Samples and tidal-drum-machines (no licence), Hydrogen and LMMS kits (GPL), jRhodes3d (BY-NC), Sonatina (Sampling Plus).
+- **NSF-HiFiGAN** (openvpi; the mel recipe is in RESEARCH_hands) runs on CPU in about 35 s for the whole song, but it is **CC BY-NC-SA**. Use it only if the user confirms the video will never be monetised; by default keep the Kokoro → WORLD vocal.
+- **matchering** works (10 s) but needs a reference song the user owns, so it's optional.
+- **Install pitfalls:** tinysoundfont needs `pip install --no-deps`; pyworld needs `setuptools<81`; Kokoro needs `is_phonemes=True` (fp32 runs at RTF 0.47); madmom needs `tools/research/ears/madmom_patch_install.sh`.
+
 **Deliver**
 1. Write the new `audio/silicon_shield.mp3`, keeping v1 alongside.
 2. Re-mux with `ffmpeg -i silicon_shield.mp4 -i audio/silicon_shield.mp3 -map 0:v -map 1:a -c:v copy -c:a aac -b:a 192k -shortest -movflags +faststart` into a temp file, then replace `silicon_shield.mp4` (it must stay under 100 MB).
