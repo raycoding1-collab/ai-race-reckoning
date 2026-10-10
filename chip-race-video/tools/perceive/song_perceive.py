@@ -80,8 +80,8 @@ def jdump(obj, path, indent=None):
 
 
 def fmt_time(t):
-    t = max(0.0, float(t))
-    return f"{int(t // 60)}:{t % 60:04.1f}"
+    t = round(max(0.0, float(t)), 1)
+    return f"{int(t // 60)}:{t - 60 * int(t // 60):04.1f}"
 
 
 def resample(x, sr_from, sr_to):
@@ -412,7 +412,7 @@ def make_grid(bt, bp, dur):
                 bpm_range=[float(np.percentile(loc, 5)), float(np.percentile(loc, 95))], beat_inlier_frac=float(inl.mean()),
                 beat_resid_ms=float(1000 * resid[inl].std()), beat_resid_max_ms=float(1000 * np.abs(resid).max()),
                 beat_times=beat_t[sel], beat_bar=beat_bar[sel], beat_pos=pos[sel], bar_starts=bar_starts,
-                n_beats_detected=int(len(bt)))
+                n_beats_detected=int(len(bt)), detected_beats=bt, detected_pos=bp)
 
 
 # ============================================================================ 2. tempo / beats / downbeats / key
@@ -535,6 +535,25 @@ def chord_name(pc, q, flats=True):
     return (NOTE_NAMES if flats else PC_NAMES_SHARP)[pc] + ("m" if q == "min" else "")
 
 
+def check_downbeat_phase(raw, g, tol=0.15):
+    """Chord changes should land on bar lines. Returns (shift in beats, scores per candidate phase)."""
+    bpb = g["beats_per_bar"]
+    bt = np.asarray(g["beat_times"])
+    pos = np.asarray(g["beat_pos"])
+    ch = np.array([raw[i][1] for i in range(len(raw) - 1) if raw[i][2] != raw[i + 1][2] and "N" not in (raw[i][2], raw[i + 1][2])])
+    if len(ch) < 8 or bpb < 2:
+        return 0, None
+    scores = []
+    for sft in range(bpb):
+        starts = bt[((pos - sft) % bpb) == 0]
+        d = np.min(np.abs(ch[:, None] - starts[None, :]), axis=1)
+        scores.append(float(np.mean(d < tol)))
+    best = int(np.argmax(scores))
+    if best != 0 and scores[best] >= 0.45 and scores[best] >= 1.5 * scores[0]:
+        return best, scores
+    return 0, scores
+
+
 def stage_chords(C):
     r = C.cached("chords")
     if r:
@@ -552,6 +571,20 @@ def stage_chords(C):
         np.save(fp, feat)
     segs = CRFChordRecognitionProcessor()(feat)
     raw = [(float(a), float(b), str(l)) for a, b, l in segs]
+    g0 = C.need("rhythm")
+    sft, ph_scores = check_downbeat_phase(raw, g0)
+    phase_info = dict(scores=ph_scores, shift_beats=sft)
+    if sft:
+        bpb0 = g0["beats_per_bar"]
+        bp_new = ((np.asarray(g0["detected_pos"]) - 1 - sft) % bpb0) + 1
+        g2 = make_grid(g0["detected_beats"], bp_new, C.dur)
+        for k in ("bpm_librosa", "method", "first_downbeat"):
+            g2[k] = g0.get(k)
+        g2["first_downbeat"] = float(g2["bar_starts"][0])
+        g2["downbeat_shift_beats"] = int(sft)
+        C.R["rhythm"] = g2
+        C.save("rhythm", g2)
+        log(f"chords: chord changes say the bar line is {sft} beat(s) later than madmom's downbeat (scores {np.round(ph_scores, 2).tolist()}); grid shifted")
     G = Grid(C.need("rhythm"))
     bars = []
     for b in range(G.n_bars):
@@ -573,7 +606,7 @@ def stage_chords(C):
         half = (e - s) / 2
         split = (h1[0] != h2[0] and h1[1] >= 0.7 * half and h2[1] >= 0.7 * half)
         bars.append(dict(bar=b, label=top, share=topv / tot, split=bool(split), first=h1[0], second=h2[0]))
-    res = dict(source=src, raw=raw, bars=bars)
+    res = dict(source=src, raw=raw, bars=bars, downbeat_phase=phase_info)
     C.R["chords"] = res
     C.save("chords", res)
     log(f"chords: {len(raw)} segments, {sum(1 for x in bars if x['split'])} split bars")
@@ -868,7 +901,7 @@ def otsu_thr(vals, power=1.0, min_ratio=2.0, min_frac=0.02, floor_rel=0.06):
 
 
 # band (Hz), percentile across bins (robust to tonal onsets), frame lag of the flux, Otsu power, threshold multiplier
-DRUM_BANDS = {"K": (30.0, 140.0, 50, 3, 1.0, 1.0), "S": (150.0, 10000.0, 75, 2, 0.5, 0.6), "H": (7000.0, 16000.0, 75, 1, 0.5, 1.0)}
+DRUM_BANDS = {"K": (30.0, 140.0, 50, 3, 1.0, 1.0), "S": (200.0, 4000.0, 75, 2, 0.5, 1.0), "H": (7000.0, 16000.0, 75, 1, 0.5, 1.0)}
 
 
 def band_flux_curve(P, freqs, lo, hi, pct, dn, gamma=30.0):
@@ -918,11 +951,20 @@ def stage_drums(C):
     bar_rms = np.array([np.sqrt(np.mean(x[max(0, int(G.bar_span(b)[0] * SR)):max(1, int(G.bar_span(b)[1] * SR))] ** 2) + 1e-12)
                         for b in range(nb)])
     live = db(bar_rms ** 2) > db(np.percentile(bar_rms, 95) ** 2) - 45          # silent bars never contain hits
-    thr = {k: otsu_thr(act[k][live].ravel(), power=DRUM_BANDS[k][4]) * DRUM_BANDS[k][5] for k in act}
-    hits = {k: (act[k] > thr[k]) & live[:, None] for k in act}
-    if G.bpb == 4:      # a kick's broadband click looks like a clap: off the backbeat, a snare on a kick step is not trusted
-        bb = np.zeros(steps, bool)
+    thr = {k: otsu_thr(act[k][live].ravel(), power=DRUM_BANDS[k][4]) * DRUM_BANDS[k][5] for k in ("K", "H")}
+    hits = {k: (act[k] > thr[k]) & live[:, None] for k in ("K", "H")}
+    bb = np.zeros(steps, bool)
+    if G.bpb == 4:
         bb[[4, 12]] = True
+    # snare/clap evidence = mid-band flux minus the part explained by the hats (open hats are broadband and sit on every 8th)
+    sel = hits["K"] == False  # noqa: E712
+    sel = sel & hits["H"] & live[:, None] & ~bb[None, :]
+    alpha = float(np.median(act["S"][sel] / np.maximum(act["H"][sel], 1e-6))) if sel.sum() > 10 else 0.0
+    alpha = min(max(alpha, 0.0), 1.0)
+    act["S"] = np.maximum(0.0, act["S"] - alpha * act["H"])
+    thr["S"] = otsu_thr(act["S"][live].ravel(), power=DRUM_BANDS["S"][4]) * DRUM_BANDS["S"][5]
+    hits["S"] = (act["S"] > thr["S"]) & live[:, None]
+    if G.bpb == 4:      # a kick's broadband click looks like a clap: off the backbeat, a snare on a kick step is not trusted
         hits["S"] = hits["S"] & (~hits["K"] | bb[None, :])
     pats = []
     for b in range(nb):
@@ -967,7 +1009,7 @@ def stage_drums(C):
     for p in final:
         legend.setdefault(ids[p], dict(pattern=p, bars=0))["bars"] += 1
     times = {k: [float(tpk[k][b, si]) for b, si in zip(*np.where(hits[k]))] for k in hits}
-    res = dict(steps=steps, thresholds={k: (None if not np.isfinite(v) else float(v)) for k, v in thr.items()},
+    res = dict(steps=steps, hat_leak_alpha=alpha, thresholds={k: (None if not np.isfinite(v) else float(v)) for k, v in thr.items()},
                bars=[dict(bar=b, pattern=final[b], raw=pats[b], id=ids[final[b]], variant=bool(final[b] != pats[b]), live=bool(live[b]))
                      for b in range(nb)],
                legend=legend, times=times, density={k: float(hits[k][live].mean()) if live.any() else 0.0 for k in hits})
@@ -1913,8 +1955,10 @@ def stage_harmony(C):
             has_tonic = any(c == (k[0], "maj" if k[1] == "major" else "min") for c in cs)
             if dia_n >= 0.85 and dia_g <= 0.75 and has_tonic and sk["margin"] > 0.05:
                 k_use = k
-                changes.append(dict(section=sec["name"], start_bar=sec["start_bar"], key=key_label(k[0], k[1], uses_flats(*k)),
-                                    semitones=int((k[0] - gk[0]) % 12) if k[1] == gk[1] else None, margin=sk["margin"]))
+        if k_use != (sec_key_use[-1] if sec_key_use else gk):
+            changes.append(dict(section=sec["name"], start_bar=sec["start_bar"], key=key_label(k_use[0], k_use[1], uses_flats(*k_use)),
+                                semitones=int((k_use[0] - gk[0]) % 12) if k_use[1] == gk[1] else None,
+                                margin=(sk["margin"] if sk else 0.0)))
         sec_key_use.append(k_use)
     # ---- final per-bar chord table with spelling and roman numerals
     sec_of_bar = {}
@@ -2135,8 +2179,562 @@ def stage_sound(C):
     log("sound: " + " | ".join(f"{x['name']} {x['lufs']:.1f}LUFS" if x["lufs"] is not None else x["name"] for x in out))
 
 
+# ============================================================================ 9. outputs: song.json, LEAD_SHEET.md, SOUND.md, PNGs
+def fmt_beat(x, bpb):
+    """beat position (1-based, float) -> '2.5'; snapped to 16ths unless clearly off-grid (then 2 decimals)."""
+    q = round(x * 4) / 4.0
+    if abs(q - x) > 0.13:
+        q = round(x, 2)
+    s_ = f"{q:.2f}".rstrip("0").rstrip(".")
+    return s_
+
+
+def snap_pos(bar, beat, bpb):
+    """snap (bar, beat) to the 16th grid, rolling over into the next bar when needed."""
+    q = round(beat * 4) / 4.0
+    if abs(q - beat) > 0.13:
+        q = beat
+    if q >= bpb + 1 - 1e-6:
+        return bar + 1, 1.0
+    return bar, q
+
+
+def fmt_note(name, beat, dur_beats, bpb, force_dur=False):
+    b = fmt_beat(beat, bpb)
+    if dur_beats >= 1.4 or force_dur:
+        d = round(dur_beats * 2) / 2
+        d_s = f"{d:g}"
+        return f"{name}@{b}+{d_s}"
+    return f"{name}@{b}"
+
+
+def pad_note_cell(items, cap=14):
+    if len(items) > cap:
+        return " ".join(items[:cap]) + f" …(+{len(items) - cap})"
+    return " ".join(items)
+
+
+def mmss(t):
+    return fmt_time(t)
+
+
+def assemble(C):
+    """merge every stage into one per-bar table + section table."""
+    G = Grid(C.need("rhythm"))
+    st = C.need("structure")
+    hm = C.need("harmony")
+    mel = C.need("melody")
+    bs = C.need("bass")
+    dr = C.need("drums")
+    ly = C.need("lyrics")
+    bpb = G.bpb
+    nb = G.n_bars
+    sec_of = {}
+    for si, sec in enumerate(st["sections"]):
+        for b in range(sec["start_bar"], min(sec["end_bar"], nb)):
+            sec_of[b] = si
+    bars = []
+    for b in range(nb):
+        s0, s1 = G.bar_span(b)
+        h = hm["bars"][b]
+        sec = st["sections"][sec_of[b]] if b in sec_of else None
+        bars.append(dict(bar=b + 1, idx=b, start=float(s0), end=float(s1), section=sec["name"] if sec else None, letter=sec["letter"] if sec else None,
+                         chord=h["chord"], roman=h["roman"], chord_conf=h["conf"], chord_raw=h["raw"], chord_corrected=h["corrected"],
+                         half=h.get("half"), half_roman=h.get("half_roman"), lyric_words=[], melody=[], bass=[], drums=None))
+    pickup = dict(bar=0, idx=-1, start=0.0, end=float(G.bar_t[0]), section=None, letter=None, chord=None, roman=None, lyric_words=[], melody=[], bass=[], drums=None)
+    # lyrics
+    for ph in ly["phrases"]:
+        for w in ph["words"]:
+            b, beat = G.locate(w["start"])
+            b2, beat2 = snap_pos(b, beat, bpb)
+            tgt = bars[b2] if 0 <= b2 < nb else (pickup if b2 < 0 else None)
+            if tgt is not None:
+                tgt["lyric_words"].append(dict(w=w["w"], t=w["start"], beat=beat2))
+    # melody
+    for n in mel["notes"]:
+        if n.get("outlier"):
+            continue
+        b, beat = G.locate(n["t"])
+        b2, beat2 = snap_pos(b, beat, bpb)
+        beat_dur = n["dur"] / (60.0 / G.bpm)
+        tgt = bars[b2] if 0 <= b2 < nb else (pickup if b2 < 0 else None)
+        if tgt is not None:
+            tgt["melody"].append(dict(name=n["name"], midi=n["midi"], t=n["t"], dur=n["dur"], beat=beat2, beats=beat_dur, cents=n["cents"],
+                                      vib=bool(n.get("vib"))))
+    # bass: per-beat notes
+    for pb in bs["per_beat"]:
+        if 0 <= pb["bar"] < nb:
+            bars[pb["bar"]]["bass"].append(pb)
+    for b in range(nb):
+        d = dr["bars"][b]
+        bars[b]["drums"] = dict(id=d["id"], pattern=d["pattern"], variant=d.get("variant", False), live=d["live"])
+        bars[b]["bass_attacks"] = bs["attacks"][b]
+    # section table
+    secs = []
+    for si, sec in enumerate(st["sections"]):
+        lp = next((l for l in hm["loops"] if l["section"] == sec["name"]), None)
+        secs.append(dict(sec, chord_loop=lp))
+    return G, bars, pickup, secs
+
+
+def chord_cell(bar):
+    if bar["chord"] is None:
+        return "-"
+    if bar.get("half") and bar["half"][0] != bar["half"][1]:
+        return f"{bar['half'][0]}→{bar['half'][1]} ({bar['half_roman'][0]}→{bar['half_roman'][1]})"
+    c = bar["chord"]
+    return f"{c} ({bar['roman']})" if c != "N" else "N"
+
+
+def bass_cell(bar, bpb):
+    pb = bar["bass"]
+    if not pb:
+        return "-"
+    seq = []
+    for p in pb:
+        seq.append((p["name"], p["source"] == "chord-root", p["pos"]))
+    out, i = [], 0
+    while i < len(seq):
+        j = i
+        while j + 1 < len(seq) and seq[j + 1][0] == seq[i][0] and seq[j + 1][1] == seq[i][1]:
+            j += 1
+        nm = seq[i][0]
+        if nm == "-":
+            i = j + 1
+            continue
+        mark = "*" if seq[i][1] else ""
+        span = f"{seq[i][2]}" if i == j else f"{seq[i][2]}-{seq[j][2]}"
+        out.append(f"{nm}{mark}({span})")
+        i = j + 1
+    return " ".join(out) if out else "-"
+
+
+def lyric_cell(bar):
+    return " ".join(w["w"] for w in bar["lyric_words"]) if bar["lyric_words"] else ""
+
+
+def melody_cell(bar, bpb):
+    items = [fmt_note(n["name"], n["beat"], n["beats"], bpb) for n in bar["melody"]]
+    return pad_note_cell(items) if items else ""
+
+
+def pattern_stats(bars, secs):
+    """pattern id -> count and the sections it appears in."""
+    by = collections.OrderedDict()
+    for b in bars:
+        d = b["drums"]
+        e = by.setdefault(d["id"], dict(pattern=d["pattern"], bars=0, sections=collections.Counter()))
+        e["bars"] += 1
+        e["sections"][b["section"]] += 1
+    return by
+
+
+def energy_bar(v, lo, hi, width=18):
+    if v is None:
+        return ""
+    k = int(round((v - lo) / max(hi - lo, 1e-6) * width))
+    return "█" * max(1, k)
+
+
+def write_lead_sheet(C, G, bars, pickup, secs, path):
+    res = C.R
+    bpb = G.bpb
+    hm, mel, sd = res["harmony"], res["melody"], res["sound"]
+    rh = res["rhythm"]
+    L = []
+    L.append(f"# LEAD SHEET: {C.label}")
+    L.append("")
+    key = hm["key"]
+    kc = "; ".join(f"{c['key']} from bar {c['start_bar'] + 1} ({c['section']})" for c in hm["key_changes"])
+    L.append(f"- audio: `{C.audio}` ({C.dur:.1f} s, {fmt_time(C.dur)}), {G.n_bars} bars of {bpb}/4 (4/4 assumed when bpb=4), tempo **{rh['bpm']:.1f} BPM** "
+             f"({'steady' if rh['steady'] else 'varying, range %.0f-%.0f' % tuple(rh['bpm_range'])}), 1 bar = {rh['bar_len']:.3f} s, bar 1 starts at {G.bar_t[0]:.3f} s.")
+    L.append(f"- key: **{key['name']}** (relative {key['relative']}; runner-up {key['runner_up']}; evidence margin {key['margin']:.2f})" + (f"; key change: {kc}" if kc else "; no key change detected") + ".")
+    if mel["range"]:
+        r = mel["range"]
+        L.append(f"- sung melody: median {r['median']}, central 90% {r['p05']}-{r['p95']}, extremes {r['lowest']}-{r['highest']}; "
+                 f"vibrato on {100 * mel['vibrato']['share']:.0f}% of held notes" + (f" ({mel['vibrato']['rate_hz']:.1f} Hz, +/-{mel['vibrato']['depth_cents']:.0f} cents)" if mel['vibrato']['rate_hz'] else "") + ".")
+    L.append("")
+    L.append("How to read: `bar` is 1-based; `time` is the bar start (m:ss.s); `sec` = section letter + guessed role. `chord` = detected chord (roman numeral in the "
+             "current key). `melody` = sung notes as `Name@beat` (beat 1 = downbeat, .25 steps = 16ths, `+d` = held d beats); pitches are as sung (concert pitch). "
+             "`bass` = one note per beat as `Name(beats)`, `*` = inferred from the chord root because the low band was masked by the kick. "
+             "`drums` = pattern id, see legend (`~` = close variant of that pattern).")
+    L.append("")
+    L.append("## Structure")
+    L.append("")
+    L.append("| sec | role | bars | time | chords (loop) | vocals | LUFS |")
+    L.append("|---|---|---|---|---|---|---|")
+    lufs = {x["name"]: x["lufs"] for x in sd["sections"]}
+    for sec in secs:
+        lp = sec.get("chord_loop") or {}
+        loop = " ".join(lp.get("chords", [])[:8]) if lp else ""
+        rn = " ".join(lp.get("roman", [])[:8]) if lp else ""
+        rep = f" ×{(sec['end_bar'] - sec['start_bar']) // lp['period']}" if lp.get("period") and lp["period"] < sec["end_bar"] - sec["start_bar"] else ""
+        L.append(f"| {sec['letter']} | {sec['name']} | {sec['start_bar'] + 1}-{sec['end_bar']} | {mmss(max(0, sec['start']))}-{mmss(min(sec['end'], C.dur))} | "
+                 f"{loop}{rep} ({rn}) | {100 * sec['vocal']:.0f}% | {('%.1f' % lufs[sec['name']]) if lufs.get(sec['name']) is not None else ''} |")
+    L.append("")
+    L.append("## Bars")
+    L.append("")
+    L.append("| bar | time | sec | chord | lyric | melody | bass | drums |")
+    L.append("|---|---|---|---|---|---|---|---|")
+    rows = []
+    if pickup["lyric_words"] or pickup["melody"]:
+        rows.append((pickup, True))
+    for b in bars:
+        rows.append((b, False))
+    prev_sec = None
+    for b, is_pick in rows:
+        if is_pick:
+            L.append(f"| 0 (pickup) | {mmss(0)} | | | {lyric_cell(b)} | {melody_cell(b, bpb)} | | |")
+            continue
+        sec_label = ""
+        if b["section"] != prev_sec:
+            sec_label = f"**{b['letter']} {b['section']}**" if b["section"] else ""
+            prev_sec = b["section"]
+        else:
+            sec_label = b["letter"] or ""
+        d = b["drums"]
+        L.append(f"| {b['bar']} | {mmss(b['start'])} | {sec_label} | {chord_cell(b)} | {lyric_cell(b)} | {melody_cell(b, bpb)} | {bass_cell(b, bpb)} | "
+                 f"{d['id']}{'~' if d['variant'] else ''} |")
+    L.append("")
+    L.append("## Drum patterns (16 steps per bar; K kick, S snare/clap, H hat)")
+    L.append("")
+    L.append("| id | bars | pattern | where |")
+    L.append("|---|---|---|---|")
+    for pid, e in pattern_stats(bars, secs).items():
+        where = ", ".join(f"{k} ×{v}" for k, v in e["sections"].most_common(5))
+        pat = e["pattern"] if pid != "D0" else "(no drums)"
+        L.append(f"| {pid} | {e['bars']} | `{pat}` | {where} |")
+    L.append("")
+    L.append("## Lyrics with timing (ASR, Whisper %s on the vocal stem; word times follow the sung notes)" % res["lyrics"]["asr"])
+    L.append("")
+    for ph in res["lyrics"]["phrases"]:
+        if not ph["words"]:
+            if ph["kind"] == "vocalise":
+                b, beat = G.locate(ph["start"])
+                L.append(f"- [{mmss(ph['start'])}] bar {b + 1}.{fmt_beat(beat, bpb)}: (vocalise / unintelligible, {ph['end'] - ph['start']:.1f} s)")
+            continue
+        b, beat = G.locate(ph["start"])
+        L.append(f"- [{mmss(ph['start'])}-{mmss(ph['end'])}] bar {b + 1}.{fmt_beat(beat, bpb)}: {ph['text']}")
+    L.append("")
+    L.append("## Caveats")
+    for c in caveats(C):
+        L.append(f"- {c}")
+    with open(path, "w") as f:
+        f.write("\n".join(L) + "\n")
+
+
+def caveats(C):
+    out = []
+    rh = C.R["rhythm"]
+    out.append("Chords are major/minor triads only (madmom CNN+CRF); 7ths, sus and extensions are not distinguished. Bars flagged `corrected` were fixed by "
+               "loop-consensus voting (raw label kept in song.json).")
+    n_inf = sum(1 for p in C.R["bass"]["per_beat"] if p.get("source") == "chord-root")
+    n_all = sum(1 for p in C.R["bass"]["per_beat"] if p.get("midi") is not None)
+    out.append(f"Bass: pitch tracked on the instrumental low band; {n_inf}/{n_all} beats are inferred from the chord root (`*`) because a kick or sidechain hid the pitch. Octave of sub-bass is approximate.")
+    out.append("Melody: pyin on the separated vocal stem, so doubles/harmonies can be reported instead of (or beside) the lead; re-articulated repeated notes may merge; whispered or rapped passages have no reliable pitch.")
+    out.append("Lyrics: ASR output, not ground truth; sung, whispered, chanted ('oh oh') and heavily layered lines are the least reliable. Word times are anchored to detected note onsets.")
+    out.append("Drums: hits are detected from the percussive part of the instrumental; a snare/clap landing on a kick off the backbeat is suppressed, and ghost notes / open-vs-closed hats are not distinguished.")
+    if not rh["steady"]:
+        out.append("Tempo varies; bar lines follow the tracked beats and may drift in places.")
+    if rh["bpm"] < 80 or rh["bpm"] > 170:
+        out.append(f"Tempo {rh['bpm']:.0f} BPM may be a half- or double-time reading (librosa: {rh['bpm_librosa']:.0f}).")
+    return out
+
+
+PALETTE = ["#4C78A8", "#F58518", "#54A24B", "#E45756", "#72B7B2", "#B279A2", "#EECA3B", "#9D755D", "#FF9DA6", "#8C8C8C", "#2CA02C", "#17BECF"]
+
+
+def letter_color(L):
+    i = ord(L[0]) - ord("A") if L else 0
+    return PALETTE[i % len(PALETTE)]
+
+
+def top_prompts(x, group, k=3, by="clap_delta"):
+    d = x.get(by) or {}
+    items = [(v, key.split("/", 1)[1]) for key, v in d.items() if key.startswith(group + "/")]
+    items.sort(reverse=True)
+    return [(name, x["clap"][f"{group}/{name}"], v) for v, name in items[:k]]
+
+
+def describe_vs(x, p):
+    """short phrases comparing a section with the previous one."""
+    out = []
+    if x["lufs"] is not None and p and p["lufs"] is not None:
+        dl = x["lufs"] - p["lufs"]
+        if abs(dl) >= 1.5:
+            out.append(f"{dl:+.1f} LU {'louder' if dl > 0 else 'quieter'} than {p['name']}")
+    if p and x["centroid_hz"] and p["centroid_hz"]:
+        dc = x["centroid_hz"] - p["centroid_hz"]
+        if abs(dc) >= 500:
+            out.append(f"{'brighter' if dc > 0 else 'darker'} ({dc:+.0f} Hz centroid)")
+    if p and p["onset_density"] > 0:
+        r = x["onset_density"] / max(p["onset_density"], 1e-6)
+        if r >= 1.5 or r <= 0.67:
+            out.append(f"{'busier' if r > 1 else 'sparser'} (onsets/s {p['onset_density']:.1f} → {x['onset_density']:.1f})")
+    if p:
+        dw = x["stereo_width_db"] - p["stereo_width_db"]
+        if abs(dw) >= 3:
+            out.append(f"{'wider' if dw > 0 else 'narrower'} stereo ({dw:+.1f} dB side/mid)")
+    return out
+
+
+def width_word(w):
+    return "wide" if w > -6 else ("moderate" if w > -12 else "narrow / near-mono")
+
+
+def write_sound_md(C, G, bars, secs, path):
+    R = C.R
+    sd = R["sound"]
+    mel = R["melody"]
+    bs = R["bass"]
+    L = []
+    w = sd["whole"]
+    L.append(f"# SOUND & PRODUCTION: {C.label}")
+    L.append("")
+    L.append(f"- whole song: {C.dur:.1f} s, integrated loudness **{w['lufs']:.1f} LUFS**, true peak {w['true_peak_db']:.1f} dBTP, crest {w['crest_db']:.1f} dB; "
+             f"tempo {R['rhythm']['bpm']:.1f} BPM; key {R['harmony']['key']['name']}.")
+    L.append("")
+    L.append("## Energy arc (integrated LUFS per section)")
+    L.append("")
+    vals = [x["lufs"] for x in sd["sections"] if x["lufs"] is not None]
+    lo, hi = (min(vals), max(vals)) if vals else (-30, 0)
+    L.append("| sec | role | bars | time | LUFS | Δ | level |")
+    L.append("|---|---|---|---|---|---|---|")
+    prev = None
+    for x in sd["sections"]:
+        d = "" if prev is None or x["lufs"] is None or prev["lufs"] is None else f"{x['lufs'] - prev['lufs']:+.1f}"
+        sec = next(z for z in secs if z["name"] == x["name"])
+        L.append(f"| {x['letter']} | {x['name']} | {sec['start_bar'] + 1}-{sec['end_bar']} | {mmss(x['start'])}-{mmss(x['end'])} | "
+                 f"{('%.1f' % x['lufs']) if x['lufs'] is not None else '-'} | {d} | {energy_bar(x['lufs'], lo - 1, hi)} |")
+        prev = x
+    L.append("")
+    # global instrumentation (mean CLAP over sections, weighted by duration)
+    if sd["sections"] and "clap" in sd["sections"][0]:
+        keys = list(sd["sections"][0]["clap"].keys())
+        wts = np.array([max(x["end"] - x["start"], 1e-3) for x in sd["sections"]])
+        mean = {k: float(np.average([x["clap"][k] for x in sd["sections"]], weights=wts)) for k in keys}
+        L.append("## Instrumentation and style (CLAP zero-shot, cosine similarity; higher = more like the prompt; values are relative, not probabilities)")
+        L.append("")
+        for g, title in (("instrument", "instruments"), ("vocal", "voices"), ("style", "styles")):
+            items = sorted([(v, k.split('/', 1)[1]) for k, v in mean.items() if k.startswith(g + "/")], reverse=True)
+            L.append(f"- {title}, whole song: " + ", ".join(f"{n} {v:.2f}" for v, n in items[:5]) + "  |  weakest: " + ", ".join(f"{n} {v:.2f}" for v, n in items[-2:]))
+        tags = collections.Counter()
+        for x in sd["sections"]:
+            for lab, pr in x["ced_top5"]:
+                tags[lab] += pr
+        L.append("- AudioSet tags (CED, summed over sections): " + ", ".join(f"{k}" for k, _ in tags.most_common(8)))
+        L.append("")
+    # vocal layering
+    vb = mel["vocal_bars"]
+    sec_side = {}
+    act = [v["side_db"] for v in vb if v["side_db"] is not None and v["voc_db"] > -45]
+    base = float(np.percentile(act, 25)) if act else None
+    for sec in secs:
+        vals_ = [vb[b]["side_db"] for b in range(sec["start_bar"], min(sec["end_bar"], len(vb))) if vb[b]["side_db"] is not None and vb[b]["voc_db"] > -45]
+        sec_side[sec["name"]] = (float(np.median(vals_)) if vals_ else None, (float(np.mean([v > base + 2.0 for v in vals_])) if vals_ and base is not None else None))
+    L.append("## Per-section notes")
+    L.append("")
+    prevx = None
+    dr_by_sec = collections.defaultdict(list)
+    for b in bars:
+        dr_by_sec[b["section"]].append(b)
+    for x in sd["sections"]:
+        sec = next(z for z in secs if z["name"] == x["name"])
+        bl = dr_by_sec[x["name"]]
+        L.append(f"### {x['letter']} · {x['name']} · bars {sec['start_bar'] + 1}-{sec['end_bar']} · {mmss(x['start'])}-{mmss(x['end'])}")
+        diffs = describe_vs(x, prevx)
+        if diffs:
+            L.append(f"- change: " + "; ".join(diffs) + ".")
+        lv = f"{x['lufs']:.1f} LUFS" if x["lufs"] is not None else "(too short for LUFS)"
+        L.append(f"- level/tone: {lv}, peak {x['peak_db']:.1f} dB, crest {x['crest_db']:.1f} dB; "
+                 f"centroid {x['centroid_hz']:.0f} Hz (90% rolloff {x['rolloff90_hz']:.0f} Hz); bands " + " ".join(f"{k} {100 * v:.0f}%" for k, v in x["bands"].items()))
+        L.append(f"- stereo: side/mid {x['stereo_width_db']:.1f} dB ({width_word(x['stereo_width_db'])}), L/R correlation {x['lr_correlation']:.2f}; "
+                 f"onsets {x['onset_density']:.1f}/s")
+        ids = collections.Counter(b["drums"]["id"] for b in bl)
+        pats = {b["drums"]["id"]: b["drums"]["pattern"] for b in bl}
+        dr_txt = ", ".join(f"{k} ×{v}" for k, v in ids.most_common(4))
+        main_id = ids.most_common(1)[0][0] if ids else "D0"
+        L.append(f"- drums: {x['drum_hits_per_bar']:.1f} hits/bar; patterns {dr_txt}; main `{pats.get(main_id, '')}`")
+        att = collections.Counter(b["bass_attacks"] for b in bl)
+        pb = [p for b in bl for p in b["bass"] if p["midi"] is not None]
+        if pb:
+            reg = f"{midi_name(min(p['midi'] for p in pb))}-{midi_name(max(p['midi'] for p in pb))}"
+            inf = sum(1 for p in pb if p["source"] == "chord-root")
+            L.append(f"- bass: register {reg}; most common attack grid `{att.most_common(1)[0][0]}`; {inf}/{len(pb)} beats inferred from chord roots")
+        else:
+            L.append("- bass: none detected")
+        side = sec_side.get(x["name"])
+        if side and side[0] is not None:
+            L.append(f"- vocals: present in {100 * sec['vocal']:.0f}% of the section; vocal-stem side/mid {side[0]:.1f} dB, "
+                     f"{100 * side[1]:.0f}% of vocal bars wider than the lead-only baseline (doubles/harmonies)")
+        else:
+            L.append(f"- vocals: present in {100 * sec['vocal']:.0f}% of the section")
+        if "clap" in x:
+            inst = top_prompts(x, "instrument")
+            voc = top_prompts(x, "vocal", 2)
+            sty = top_prompts(x, "style", 2)
+            L.append("- CLAP (cosine, Δ vs song mean): instruments " + ", ".join(f"{n} {s_:.2f} ({d:+.2f})" for n, s_, d in inst)
+                     + "; voice " + ", ".join(f"{n} {s_:.2f} ({d:+.2f})" for n, s_, d in voc)
+                     + "; style " + ", ".join(f"{n} {s_:.2f} ({d:+.2f})" for n, s_, d in sty))
+            L.append("- CED tags: " + ", ".join(f"{a} {b:.2f}" for a, b in x["ced_top5"]))
+        prevx = x
+        L.append("")
+    L.append("## Vocal performance")
+    L.append("")
+    r = mel["range"]
+    if r:
+        L.append(f"- range: {r['lowest']}-{r['highest']} (central 90%: {r['p05']}-{r['p95']}, median {r['median']}, tessitura {r['tessitura'][0]}-{r['tessitura'][1]}); {r['n_notes']} notes kept, {r.get('n_outliers', 0)} flagged as leakage/outliers.")
+    v = mel["vibrato"]
+    L.append(f"- vibrato: {v['n_vibrato']} of {v['n_held']} held notes (≥0.4 s)" + (f", median rate {v['rate_hz']:.1f} Hz, depth ±{v['depth_cents']:.0f} cents" if v["rate_hz"] else "") + ".")
+    if base is not None:
+        flagged = [vb[i]["side_db"] > base + 2.0 for i in range(len(vb)) if vb[i]["side_db"] is not None and vb[i]["voc_db"] > -45]
+        L.append(f"- doubles/harmonies: lead-only baseline side/mid {base:.1f} dB; {100 * np.mean(flagged):.0f}% of vocal bars are >2 dB wider (layered/doubled).")
+    with open(path, "w") as f:
+        f.write("\n".join(L) + "\n")
+
+
+def plot_piano_roll(C, G, bars, secs, path):
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import Rectangle
+    mel = [n for n in C.R["melody"]["notes"] if not n.get("outlier")]
+    bass = [p for p in C.R["bass"]["per_beat"] if p["midi"] is not None]
+    beat_len = 60.0 / G.bpm
+    nb = G.n_bars
+    half = int(math.ceil(nb / 2 / 4) * 4)
+    ranges = [(0, min(half, nb)), (min(half, nb), nb)] if nb > 24 else [(0, nb)]
+    ranges = [r for r in ranges if r[1] > r[0]]
+    allm = [n["midi"] for n in mel] + [p["midi"] for p in bass]
+    ylo, yhi = (min(allm) - 2, max(allm) + 3) if allm else (24, 84)
+    fig, axes = plt.subplots(len(ranges), 1, figsize=(15.5, 4.6 * len(ranges) + 0.4), dpi=100, squeeze=False)
+    fig.subplots_adjust(left=0.045, right=0.995, top=0.975, bottom=0.05, hspace=0.22)
+    for ax, (b0, b1) in zip(axes[:, 0], ranges):
+        t0, t1 = G.bar_t[b0], G.bar_t[b1]
+        ax.set_xlim(t0, t1)
+        ax.set_ylim(ylo, yhi)
+        # section bands
+        for sec in secs:
+            a, z = max(sec["start_bar"], b0), min(sec["end_bar"], b1)
+            if z <= a:
+                continue
+            ax.add_patch(Rectangle((G.bar_t[a], ylo), G.bar_t[z] - G.bar_t[a], yhi - ylo, color=letter_color(sec["letter"]), alpha=0.10, lw=0))
+            ax.axvline(G.bar_t[a], color=letter_color(sec["letter"]), lw=1.6, alpha=0.9)
+            width_px = (G.bar_t[z] - G.bar_t[a]) / (t1 - t0) * 1470
+            full = f"{sec['letter']} {sec['name']}"
+            lab = full if width_px > 6.3 * len(full) + 6 else (f"{sec['letter']} {sec['label'].split(' ')[0][:6]}" if width_px > 6.3 * 8 else sec["letter"])
+            ax.text(G.bar_t[a] + 0.1, yhi - 0.6, lab, fontsize=8.5, va="top", ha="left", weight="bold", color=letter_color(sec["letter"]))
+        for b in range(b0, b1 + 1):
+            ax.axvline(G.bar_t[b], color="#888", lw=0.4, alpha=0.5)
+        for oc in range((ylo // 12 + 1) * 12, yhi, 12):
+            ax.axhline(oc, color="#888", lw=0.5, ls=":", alpha=0.6)
+        # notes
+        for p in bass:
+            if t0 <= p["t"] < t1:
+                ax.add_patch(Rectangle((p["t"], p["midi"] - 0.4), beat_len * 0.95, 0.8, color="#D95F02", alpha=0.45 if p["source"] == "chord-root" else 0.9, lw=0,
+                                       hatch="//" if p["source"] == "chord-root" else None))
+        for n in mel:
+            if t0 <= n["t"] < t1:
+                ax.add_patch(Rectangle((n["t"], n["midi"] - 0.4), max(n["dur"], 0.04), 0.8, color="#1B4F9C", lw=0, alpha=0.9))
+        # chord labels per bar
+        for b in range(b0, b1):
+            h = bars[b]
+            cx = G.bar_t[b] + (G.bar_t[b + 1] - G.bar_t[b]) / 2
+            ax.text(cx, yhi - 3.2, chord_cell(h).split(" (")[0], fontsize=7.2, ha="center", va="top", color="#222",
+                    rotation=0)
+            ax.text(cx, ylo + 0.4, str(b + 1), fontsize=6.5, ha="center", va="bottom", color="#555")
+        yt = list(range(int((ylo // 12 + 1) * 12), int(yhi), 12))
+        ax.set_yticks(yt)
+        ax.set_yticklabels([midi_name(y) for y in yt], fontsize=8)
+        ax.set_xticks([])
+        for sp_ in ("top", "right", "bottom"):
+            ax.spines[sp_].set_visible(False)
+    axes[0, 0].set_title(f"{C.label}: melody (blue), bass per beat (orange; hatched = inferred from chord root); chord per bar, bar numbers at bottom", fontsize=9.5, loc="left")
+    fig.savefig(path, dpi=100)
+    plt.close(fig)
+
+
+def plot_spectrogram(C, G, secs, path):
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    import librosa
+    y = C.mono("mix", 32000)
+    S = librosa.feature.melspectrogram(y=y, sr=32000, n_fft=2048, hop_length=512, n_mels=128, fmin=30, fmax=14000)
+    D = librosa.power_to_db(S, ref=np.max, top_db=80)
+    times = librosa.times_like(D, sr=32000, hop_length=512)
+    fig = plt.figure(figsize=(15.5, 5.6), dpi=100)
+    gs = fig.add_gridspec(3, 1, height_ratios=[0.55, 4.0, 0.9], hspace=0.06, left=0.045, right=0.995, top=0.925, bottom=0.07)
+    a0, a1, a2 = fig.add_subplot(gs[0]), fig.add_subplot(gs[1]), fig.add_subplot(gs[2])
+    for sec in secs:
+        s0, s1 = max(0, sec["start"]), min(sec["end"], C.dur)
+        a0.add_patch(plt.Rectangle((s0, 0), s1 - s0, 1, color=letter_color(sec["letter"]), alpha=0.85, lw=0))
+        full = f"{sec['letter']} {sec['name']}"
+        wpx = (s1 - s0) / C.dur * 1470
+        lab = full if wpx > 6.0 * len(full) + 6 else (sec["letter"] if wpx > 14 else "")
+        a0.text((s0 + s1) / 2, 0.5, lab, ha="center", va="center", fontsize=8, color="white", weight="bold")
+        for ax in (a1, a2):
+            ax.axvline(s0, color="white", lw=0.8, alpha=0.7)
+    a0.set_xlim(0, C.dur)
+    a0.set_ylim(0, 1)
+    a0.axis("off")
+    mel_f = librosa.mel_frequencies(n_mels=128, fmin=30, fmax=14000)
+    a1.pcolormesh(times, np.arange(128), D, cmap="magma", shading="auto", vmin=-80, vmax=0)
+    ticks = [100, 250, 500, 1000, 2000, 4000, 8000]
+    a1.set_yticks([int(np.argmin(np.abs(mel_f - f))) for f in ticks])
+    a1.set_yticklabels([f"{f / 1000:g}k" if f >= 1000 else str(f) for f in ticks], fontsize=8)
+    a1.set_xlim(0, C.dur)
+    a1.set_xticks([])
+    st = C.R["structure"]
+    barx = np.array([(G.bar_t[b] + G.bar_t[b + 1]) / 2 for b in range(G.n_bars)])
+    a2.step(barx, st["rms_db"], where="mid", color="#222", lw=1.2)
+    a2.fill_between(barx, st["rms_db"], min(st["rms_db"]) - 2, step="mid", color="#999", alpha=0.35)
+    a2.set_xlim(0, C.dur)
+    a2.set_ylabel("bar level dB", fontsize=7)
+    a2.tick_params(labelsize=7)
+    xt = [G.bar_t[b] for b in range(0, G.n_bars, 4)]
+    a2.set_xticks(xt)
+    a2.set_xticklabels([str(b + 1) for b in range(0, G.n_bars, 4)], fontsize=7)
+    a2.set_xlabel("bar number", fontsize=7, labelpad=1)
+    fig.text(0.045, 0.965, f"{C.label}: mel spectrogram (30 Hz-14 kHz), sections coloured; bar-level loudness below", fontsize=9.5, ha="left", va="center")
+    fig.savefig(path, dpi=100)
+    plt.close(fig)
+
+
+def stage_render(C):
+    t0 = time.time()
+    for st_ in ("rhythm", "chords", "melody", "drums", "bass", "lyrics", "structure", "harmony", "sound"):
+        C.need(st_)
+    G, bars, pickup, secs = assemble(C)
+    out = C.out
+    write_lead_sheet(C, G, bars, pickup, secs, os.path.join(out, "LEAD_SHEET.md"))
+    write_sound_md(C, G, bars, secs, os.path.join(out, "SOUND.md"))
+    plot_piano_roll(C, G, bars, secs, os.path.join(out, "piano_roll.png"))
+    plot_spectrogram(C, G, secs, os.path.join(out, "spectrogram.png"))
+    R = C.R
+    song = dict(
+        label=C.label, audio=C.audio, duration=C.dur, tool="song_perceive.py", asr_model=C.args.asr, separation_model=C.args.mdx,
+        tempo=dict(bpm=R["rhythm"]["bpm"], bpm_range=R["rhythm"]["bpm_range"], steady=R["rhythm"]["steady"], beats_per_bar=G.bpb,
+                   bar_seconds=R["rhythm"]["bar_len"], first_downbeat=float(G.bar_t[0]), n_bars=G.n_bars, method=R["rhythm"]["method"],
+                   bpm_librosa=R["rhythm"]["bpm_librosa"], beat_resid_ms=R["rhythm"]["beat_resid_ms"]),
+        beats=dict(times=G.beat_t, bar=G.beat_bar + 1, pos=G.beat_pos + 1, bar_starts=G.bar_t),
+        key=dict(R["harmony"]["key"], changes=R["harmony"]["key_changes"], by_section=R["harmony"]["section_keys"]),
+        sections=secs, bars=[dict(b) for b in ([pickup] if (pickup["lyric_words"] or pickup["melody"]) else []) + bars],
+        chords=dict(source=R["chords"]["source"], bars=R["harmony"]["bars"], loops=R["harmony"]["loops"], raw_segments=R["chords"]["raw"]),
+        lyrics=R["lyrics"], melody=R["melody"], bass=R["bass"], drums=R["drums"], sound=R["sound"],
+        structure=dict(cuts=R["structure"]["cuts"], novelty=R["structure"]["novelty"], vocal_presence=R["structure"]["vocal_presence"],
+                       rms_db=R["structure"]["rms_db"], letter_scores=R["structure"]["letter_scores"], chorus_letters=R["structure"]["chorus_letters"]),
+        caveats=caveats(C), runtime_s=round(time.time() - T0))
+    jdump(song, os.path.join(out, "song.json"))
+    jdump(dict(bpm=R["rhythm"]["bpm"], beats_per_bar=G.bpb, beats=[float(t) for t in G.beat_t if 0 <= t <= C.dur],
+               downbeats=[float(t) for t, p in zip(G.beat_t, G.beat_pos) if p == 0 and 0 <= t <= C.dur],
+               bar_starts=[float(t) for t in G.bar_t], note="beat grid of song_perceive.py (usable as video_perceive.py --beats)"),
+          os.path.join(out, "song_beats.json"))
+    log(f"render: wrote LEAD_SHEET.md SOUND.md song.json piano_roll.png spectrogram.png ({time.time() - t0:.0f}s)")
+
+
 # ============================================================================ main
-STAGE_ORDER = ["separate", "rhythm", "chords", "melody", "drums", "bass", "lyrics", "structure", "harmony", "sound"]
+STAGE_ORDER = ["separate", "rhythm", "chords", "melody", "drums", "bass", "lyrics", "structure", "harmony", "sound", "render"]
 
 
 def main():

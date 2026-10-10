@@ -1054,8 +1054,9 @@ def _change(zi, bounds):
 def _kf_pass(Z, shots, forced, skip, T, gap):
     """walk every shot in order; a frame becomes a keyframe when it differs from the previous keyframe by more than T
     (fraction of the picture that changed visibly, camera drift tolerated); forced frames (first / mid / last /
-    flash / transition) reset the reference"""
+    flash / transition) reset the reference.  Returns (keyframes {frame: kind}, change values {frame: c})"""
     kfs = dict(forced)
+    chg = {}
     for s in shots:
         cs, ce = s["clean"]
         ref = None
@@ -1066,10 +1067,12 @@ def _kf_pass(Z, shots, forced, skip, T, gap):
                 continue
             if skip[i] or i - last < gap:
                 continue
-            if _change(Z[i], ref) >= T:
+            c = _change(Z[i], ref)
+            if c >= T:
                 kfs[i] = "change"
+                chg[i] = c
                 ref, last = _ref_bounds(Z[i]), i
-    return kfs
+    return kfs, chg
 
 
 def select_keyframes(A, shots, flashes, softs, fps, target, gap=4, max_flash_kf=40):
@@ -1079,9 +1082,9 @@ def select_keyframes(A, shots, flashes, softs, fps, target, gap=4, max_flash_kf=
     for s in shots:
         cs, ce = s["clean"]
         L = ce - cs + 1
-        if L <= 6:
+        if L <= 8:                                   # <= 0.27 s: one frame says it all
             forced[(cs + ce) // 2] = "mid"
-        elif L <= 15:
+        elif L <= 20:
             forced[cs] = "first"
             forced[ce] = "last"
         else:
@@ -1098,12 +1101,17 @@ def select_keyframes(A, shots, flashes, softs, fps, target, gap=4, max_flash_kf=
         forced.setdefault(int(f["peak_frame"]), "flash")
     for t in sorted(softs, key=lambda t: -t["tv"])[:30]:
         forced.setdefault(int(t["mid"]), "transition")
-    # dedupe forced frames that are adjacent (<= 1 frame) to a higher-priority one
+    # dedupe forced frames that are adjacent (<= 1 frame) to a higher-priority one of the SAME shot (adjacent frames
+    # across a cut are different pictures and both stay, so every shot keeps at least one keyframe)
     prio = {"first": 0, "last": 1, "mid": 2, "flash": 3, "transition": 4, "change": 5}
-    fr = sorted(forced)
+    starts = np.array([s_["start"] for s_ in shots])
+
+    def shot_idx(f):
+        return int(np.searchsorted(starts, f, side="right")) - 1
+
     keep = {}
-    for f in fr:
-        near = [g for g in keep if abs(g - f) <= 1]
+    for f in sorted(forced):
+        near = [g for g in keep if abs(g - f) <= 1 and shot_idx(g) == shot_idx(f)]
         if near and all(prio[keep[g]] <= prio[forced[f]] for g in near):
             continue
         for g in near:
@@ -1113,23 +1121,27 @@ def select_keyframes(A, shots, flashes, softs, fps, target, gap=4, max_flash_kf=
     hi_T = 0.95
     # the change-driven keyframes get at least a quarter of the budget on top of the forced ones
     target = int(min(max(target, len(forced) + 0.25 * target), max(target, 350)))
-    kfs = _kf_pass(Z, shots, forced, skip, hi_T, gap)
-    best = (hi_T, kfs)
+    kfs, chg = _kf_pass(Z, shots, forced, skip, hi_T, gap)
+    best = (hi_T, kfs, chg)
     if len(kfs) < target:
         lo, hi = 0.01, hi_T
         for _ in range(9):
             T = math.sqrt(lo * hi)
-            kfs = _kf_pass(Z, shots, forced, skip, T, gap)
+            kfs, chg = _kf_pass(Z, shots, forced, skip, T, gap)
             cnt = len(kfs)
             if abs(cnt - target) < abs(len(best[1]) - target):
-                best = (T, kfs)
+                best = (T, kfs, chg)
             if cnt > target:
                 lo = T
             else:
                 hi = T
             if abs(cnt - target) <= max(3, 0.02 * target):
                 break
-    T, kfs = best
+    T, kfs, chg = best
+    cap = max(350, len(forced))
+    if len(kfs) > cap:                                  # forced frames are never dropped, the weakest changes go first
+        for f in sorted(chg, key=lambda q: chg[q])[:len(kfs) - cap]:
+            del kfs[f]
     return T, kfs
 
 
@@ -2007,6 +2019,10 @@ def main():
     # 5. keyframes
     target = args.kf_target or int(np.clip(round(2.0 * dur), 150, 350))
     kT, kd = select_keyframes(A, shots, flashes, softs, fps, target)
+    have = {shots[shot_of(f)]["id"] for f in kd}
+    for sh in shots:                                   # safety net: every shot gets at least one keyframe
+        if sh["id"] not in have:
+            kd[(sh["clean"][0] + sh["clean"][1]) // 2] = "mid"
     kfs = []
     for i, f in enumerate(sorted(kd)):
         t = f / fps
