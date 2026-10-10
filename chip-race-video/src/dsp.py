@@ -59,18 +59,27 @@ def sine(freq, n, phase0=0.0):
     return np.sin(2 * np.pi * (phase0 + np.cumsum(f) / SR))
 
 
-def lfsr_noise(n, rate_hz=22000, short=False, seed=1):
-    """NES-style 15-bit LFSR noise (short mode = metallic periodic noise)."""
-    reg = seed or 1
-    steps = int(n * rate_hz / SR) + 2
-    bits = np.empty(steps)
-    tap = 6 if short else 1
-    for i in range(steps):
+_LFSR_CACHE = {}
+
+
+def lfsr_sequence(short=False):
+    """One full period of the NES 15-bit LFSR (32767 steps long mode, 93 short)."""
+    if short in _LFSR_CACHE:
+        return _LFSR_CACHE[short]
+    reg, tap, out = 1, (6 if short else 1), []
+    for _ in range(93 if short else 32767):
         fb = (reg & 1) ^ ((reg >> tap) & 1)
         reg = (reg >> 1) | (fb << 14)
-        bits[i] = 1.0 if reg & 1 else -1.0
-    idx = (np.arange(n) * rate_hz / SR).astype(int)
-    return bits[idx]
+        out.append(1.0 if reg & 1 else -1.0)
+    _LFSR_CACHE[short] = np.array(out)
+    return _LFSR_CACHE[short]
+
+
+def lfsr_noise(n, rate_hz=22000, short=False, seed=1):
+    """NES-style 15-bit LFSR noise (short mode = metallic periodic noise)."""
+    seq = lfsr_sequence(short)
+    idx = ((np.arange(n) * rate_hz / SR).astype(np.int64) + seed * 977) % len(seq)
+    return seq[idx]
 
 
 _noise_rng = np.random.default_rng(7)
@@ -262,3 +271,143 @@ def place(buf, sig, t, gain=1.0):
         s = s[:, -a:]; a = 0
     n = min(s.shape[1], buf.shape[1] - a)
     buf[:, a:a + n] += gain * s[:, :n]
+
+
+# ================================================================ v4 additions
+# Mixing/mastering helpers: oversampled saturation, crossovers, M/S, meters.
+from scipy.signal import resample_poly, butter, sosfilt, sosfiltfilt
+
+
+def butter_sos(kind, f, order=2):
+    return butter(order, f, btype={"lp": "lowpass", "hp": "highpass"}[kind], fs=SR, output="sos")
+
+
+def bw(x, kind, f, order=2):
+    return sosfilt(butter_sos(kind, f, order), x, axis=-1)
+
+
+def lr4_split(x, f):
+    """Linkwitz-Riley 4th-order crossover: returns (low, high) that sum flat."""
+    lo = bw(bw(x, "lp", f), "lp", f)
+    hi = bw(bw(x, "hp", f), "hp", f)
+    return lo, hi
+
+
+def os_saturate(x, drive=2.0, asym=0.0, factor=4, mix=1.0):
+    """tanh waveshaper at `factor`x oversampling (unity small-signal gain).
+    asym > 0 adds even harmonics (tape-like asymmetric curve)."""
+    up = resample_poly(x, factor, 1, axis=-1)
+    slope = drive * (1 - np.tanh(asym) ** 2)
+    y = (np.tanh(drive * up + asym) - np.tanh(asym)) / slope
+    y = resample_poly(y, 1, factor, axis=-1)[..., : x.shape[-1]]
+    if asym:
+        y = filt(y, "hp", 12)  # remove the DC the asymmetry creates
+    return mix * y + (1 - mix) * x
+
+
+def ms(x):
+    return (x[0] + x[1]) / 2, (x[0] - x[1]) / 2
+
+
+def lr(m, s):
+    return np.stack([m + s, m - s])
+
+
+def mono_below(x, f=120.0):
+    """Make everything under f mono: high-pass the side channel (2nd order)."""
+    m, s = ms(x)
+    return lr(m, bw(s, "hp", f, 2))
+
+
+def haas(x, ms_delay=10.0, hp=300.0):
+    """Mono -> stereo widen: delayed, high-passed copy on the right only."""
+    d = int(ms_delay * SR / 1000)
+    wide = filt(np.concatenate([np.zeros(d), x[: len(x) - d]]), "hp", hp)
+    lowpart = filt(x, "lp", hp)
+    return np.stack([x, lowpart + wide])
+
+
+def pb(x, *plugins):
+    """Run a pedalboard chain on a mono/stereo float array."""
+    import pedalboard
+    y = pedalboard.Pedalboard(list(plugins))(np.ascontiguousarray(np.atleast_2d(x), dtype=np.float32), SR)
+    y = y.astype(np.float64)
+    return y if np.ndim(x) == 2 else y[0]
+
+
+def env_follow(x, attack=0.005, release=0.1):
+    """Peak envelope follower with separate attack/release (vectorised approx)."""
+    lvl = np.abs(np.atleast_2d(x)).max(0)
+    a_r = np.exp(-1 / (release * SR)); a_a = np.exp(-1 / (attack * SR))
+    rel = lfilter([1 - a_r], [1, -a_r], lvl)
+    att = lfilter([1 - a_a], [1, -a_a], lvl)
+    return np.maximum(att, rel)
+
+
+def smooth(x, sec):
+    from scipy.ndimage import uniform_filter1d
+    return uniform_filter1d(x, max(1, int(sec * SR)), axis=-1)
+
+
+def dyn_band_duck(x, key_env, f0=2450.0, q=0.9, depth_db=3.0):
+    """Dynamic EQ: dip a band (f0, q) by up to depth_db where key_env (0..1) is high."""
+    band = filt(x, "bp", f0, q)
+    k = (1 - 10 ** (-depth_db / 20)) * np.clip(key_env, 0, 1)
+    return x - k * band
+
+
+def true_peak_db(x, factor=4):
+    up = resample_poly(np.atleast_2d(x), factor, 1, axis=-1)
+    return 20 * np.log10(np.max(np.abs(up)) + 1e-12)
+
+
+def tp_limiter(x, ceiling_db=-1.0, lookahead=0.005, release=0.08, factor=4):
+    """Look-ahead limiter whose detector sees 4x-oversampled (true) peaks."""
+    from scipy.ndimage import minimum_filter1d, uniform_filter1d
+    ceil = 10 ** (ceiling_db / 20)
+    up = np.abs(resample_poly(x, factor, 1, axis=-1)).max(0)
+    n = x.shape[1]
+    peak = np.pad(up, (0, max(0, n * factor - len(up))))[: n * factor].reshape(n, factor).max(1)
+    need = np.minimum(1.0, ceil / (peak + 1e-12))
+    la = max(2, int(lookahead * SR))
+    g = minimum_filter1d(need, size=2 * la + 1)
+    g = uniform_filter1d(g, size=la)
+    inv = 1 - g
+    a_r = np.exp(-1 / (release * SR))
+    sm = lfilter([1 - a_r], [1, -a_r], inv)
+    a_r2 = np.exp(-1 / (release * 4 * SR))            # slower second stage: program-dependent release
+    sm2 = lfilter([1 - a_r2], [1, -a_r2], inv)
+    g = 1 - np.maximum.reduce([inv, sm * 0.995, sm2 * 0.7])
+    return x * g, g
+
+
+def tpdf_dither(x, bits=16, seed=0):
+    rng = np.random.default_rng(seed)
+    q = 1.0 / (2 ** (bits - 1))
+    d = (rng.uniform(-0.5, 0.5, x.shape) + rng.uniform(-0.5, 0.5, x.shape)) * q
+    return np.clip(np.round((x + d) / q) * q, -1, 1 - q)
+
+
+def k_weight(x):
+    import pyloudnorm as pyln
+    m = pyln.Meter(SR)
+    y = np.atleast_2d(x).T.copy()
+    for f in m._filters.values():
+        y = f.apply_filter(y)
+    return y.T
+
+
+def lufs_integrated(x):
+    import pyloudnorm as pyln
+    return pyln.Meter(SR).integrated_loudness(np.atleast_2d(x).T)
+
+
+def lufs_short_series(x, win=3.0, hop=0.5):
+    """BS.1770 short-term loudness (3 s window) every `hop` s; returns (times, lufs)."""
+    k = k_weight(x)
+    p = (k ** 2).sum(0)
+    c = np.concatenate([[0], np.cumsum(p)])
+    w, h = int(win * SR), int(hop * SR)
+    starts = np.arange(0, len(p) - w, h)
+    ms_ = (c[starts + w] - c[starts]) / w
+    return (starts + w / 2) / SR, -0.691 + 10 * np.log10(ms_ + 1e-12)
