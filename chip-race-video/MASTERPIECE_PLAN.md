@@ -48,3 +48,13 @@ Note the useful findings and sources in `docs/TECHNIQUES.md`.
 
 ## User feedback on v3
 The opening (intro wafer, then the tin droplets and the laser) is weaker than the rest. Make the opening the strongest part of the video: the first 10 seconds must hook. Give the intro, tin and laser scenes extra design attention, research and iteration. Use their own unique, striking techniques; don't fall back on a generic sphere-plus-glow. Benchmark them against the original's opener (the TikZ unicorn drawn by a spark into "I see sparks of AGI").
+
+## Music is top priority (user's explicit request)
+Make the best music possible; give it the same weight as the visuals.
+- Research first: how pros produce cinematic electropop, vocal production, sound design, arrangement for drama, mixing and mastering. Also check whether better open singing-synthesis tools are now reachable from the container (try PyPI and npm mirrors).
+- Upgrade the composition itself: stronger hook melody and countermelodies, chord movement, transitions, and a distinct identity per section, so it isn't only a better mix.
+- Iterate with objective checks:
+  - section loudness arc, reference tonal balance, stereo width, transient punch, pitch accuracy
+  - vocal intelligibility proxy: band envelopes of the vocal compared with the dry speech
+  - spectrogram review per section.
+- Get the music right before locking the visuals; the visuals sync to its final timeline.
