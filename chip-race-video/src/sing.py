@@ -21,7 +21,23 @@ VOWELS = tts.VOWELS | {"l", "r", "m", "n", "ng", "w", "y"}  # sonorants can carr
 SCALE = [song.NOTE_IDX[n] for n in ["F", "G", "Ab", "Bb", "C", "Db", "Eb"]]
 O = -12  # the voice sings an octave below the written (lead-synth) register
 # Performance map: 0 = whispered/intimate, 1 = full belt.
-INTENSITY = {0: 0.25, 1: 0.4, 2: 0.5, 3: 0.62, 4: 0.8, 5: 0.95, 6: 0.9, 7: 1.0, 8: 1.0, 9: 0.2}
+SECTION_INTENSITY = {  # (start, end) of each section's arc, 0 = whispered/intimate, 1 = full belt
+    "verse1": (0.25, 0.62), "pre1": (0.8, 0.8), "chorus1": (0.95, 1.0), "post1": (0.9, 0.9),
+    "verse2": (0.45, 0.68), "pre2": (0.82, 0.9), "chorus2": (1.0, 1.0), "post2": (0.95, 0.95),
+    "bridge": (0.3, 0.85), "build": (0.5, 0.6), "chorus3": (1.0, 1.0), "outro": (0.2, 0.15)}
+
+
+def _intensity():
+    out, tl = {}, song.timeline()
+    for name, a, b in song.SECTIONS:
+        idx = [l["index"] for l in tl if l["section"] == name]
+        lo, hi = SECTION_INTENSITY.get(name, (0.5, 0.5))
+        for k, i in enumerate(idx):
+            out[i] = lo + (hi - lo) * (k / max(1, len(idx) - 1))
+    return out
+
+
+INTENSITY = _intensity()
 
 
 def smooth(x):
@@ -68,7 +84,7 @@ def analyse(path):
 def syllable_plan(line, words_phones):
     syls = []
     for (disp, _tts, notes), wsyls in zip(line["words"], words_phones):
-        for (m, b, d), phones in zip(song.parse_notes(notes), wsyls):
+        for (m, b, d), phones in zip(song.parse_notes(notes, line.get("transpose", 0)), wsyls):
             nuc = next((k for k, p in enumerate(phones) if p[0] in tts.VOWELS), 0)
             last_v = max(k for k, p in enumerate(phones) if p[0] in tts.VOWELS or k == nuc)
             syls.append(dict(midi=m, T=line["bar"] * song.BAR + b * song.BEAT, D=d * song.BEAT, beat=b,
@@ -205,7 +221,7 @@ def breaths(total):
         x = lfilter(*butter(2, [900 / (sr / 2), 5200 / (sr / 2)], btype="band"), rng.standard_normal(n))
         x = x + 1.5 * lfilter(*butter(2, [1500 / (sr / 2), 2300 / (sr / 2)], btype="band"), x)
         u = np.linspace(0, 1, n)
-        g = 1.6 if l["scene"] == "wafer" else 0.25 + 0.75 * INTENSITY[i]
+        g = 1.6 if (l["hook"] and (i == 0 or not lines[i - 1]["hook"])) else 0.25 + 0.75 * INTENSITY[i]
         a0 = int((l["t"] - dur - 0.03) * sr)
         out[a0:a0 + n] += g * x * smooth(u / 0.75) * (1 - smooth((u - 0.88) / 0.12))
     write("breath", out)
@@ -232,7 +248,9 @@ def choir_note(vw, m, dur, rng, formant=1.0, attack=0.25, release=0.4, breathy=0
     return resample_poly(y, 441, 320)
 
 
-VOICING = {("F", "m"): [53, 56, 60], ("Db", ""): [53, 56, 61], ("Ab", ""): [51, 56, 60],
+VOICING = {("G", "m"): [55, 58, 62], ("Bb", ""): [53, 58, 62], ("F", ""): [53, 57, 60], ("C", "m"): [55, 60, 63],
+           ("D", ""): [54, 57, 62],
+           ("F", "m"): [53, 56, 60], ("Db", ""): [53, 56, 61], ("Ab", ""): [51, 56, 60],
            ("Eb", ""): [51, 55, 58], ("Bb", "m"): [53, 58, 61], ("C", ""): [52, 55, 60]}
 
 
@@ -245,22 +263,29 @@ def choir(total):
         a = int(t * sr); p = (np.clip(pan, -1, 1) + 1) * np.pi / 4; nn = min(len(y), out.shape[1] - a)
         out[0, a:a + nn] += g * np.cos(p) * y[:nn]; out[1, a:a + nn] += g * np.sin(p) * y[:nn]
 
-    plan = [(0, "oo", 0, 0.35), (1, "oo", 0, 0.45), (10, "aa", 0, 0.4), (11, "aa", 1, 0.6)]
-    plan += [(b, "aa", int(b >= 16), 0.75 if b < 16 else 0.95) for b in range(12, 20)]
-    plan += [(20, "oo", 0, 0.6), (21, "oo", 0, 0.4)]
+    PLAN = {"intro": ("oo", 0, 0.35), "verse1": None, "pre1": ("aa", 0, 0.55), "chorus1": ("aa", 0, 0.75),
+            "post1": ("aa", 1, 0.7), "verse2": ("oo", 0, 0.25), "pre2": ("aa", 1, 0.65), "chorus2": ("aa", 1, 0.85),
+            "post2": ("aa", 1, 0.8), "bridge": ("oo", 0, 0.55), "build": ("aa", 1, 0.6), "chorus3": ("aa", 1, 1.0),
+            "outro": ("oo", 0, 0.5)}
+    plan = []
+    for name, a0, b0 in song.SECTIONS:
+        if PLAN.get(name):
+            v, up, g = PLAN[name]
+            plan += [(bar, v, up, g * (0.8 + 0.2 * (bar - a0) / max(1, b0 - a0 - 1))) for bar in range(a0, b0)]
+    gaps = {gb for gb, _ in song.DROP_GAPS}
     for bar, v, up, g in plan:
         tones = VOICING[song.CHORDS[bar]]
         voices = [m - 12 for m in tones] + [tones[0]] + ([tones[1], tones[2]] if up else [])
-        dur = 3 * song.BEAT if bar == 11 else song.BAR * 1.15
+        dur = dict(song.DROP_GAPS)[bar] * song.BEAT if bar in gaps else song.BAR * 1.15
         for k, m in enumerate(voices):
             for dup in range(2):  # two singers per part
                 y = choir_note(vw[v], m, dur, rng, formant=rng.uniform(0.9, 1.08), attack=0.35 if bar < 12 else 0.12,
                                breathy=0.25 if v == "oo" else 0.12, bright=4 if bar >= 16 else 0)
                 add(y, bar * song.BAR + rng.uniform(0, 0.025), (k - len(voices) / 2) / len(voices) * 1.4 + (dup - 0.5) * 0.5, g)
-    for k, m in enumerate([41, 48, 53, 56, 60, 65, 68]):
+    for k, m in enumerate([43, 50, 55, 58, 62, 67, 70]):  # final G minor chord
         for dup in range(2):
             y = choir_note(vw["aa"], m, song.TAIL, rng, formant=rng.uniform(0.92, 1.06), attack=0.02, release=2.2, bright=3)
-            add(y, 22 * song.BAR, (k - 3) / 4 + (dup - 0.5) * 0.4, 0.9)
+            add(y, song.TOTAL_BARS * song.BAR, (k - 3) / 4 + (dup - 0.5) * 0.4, 0.9)
     write("choir", out)
 
 
@@ -268,16 +293,22 @@ if __name__ == "__main__":
     os.makedirs(os.path.join(ROOT, "build", "stems"), exist_ok=True)
     total = song.TOTAL_BARS * song.BAR + song.TAIL
     lines = list(range(len(song.LINES)))
-    hooks = [i for i, l in enumerate(song.LINES) if l.get("hook")]
+    tl = song.timeline()
+    hooks = [l["index"] for l in tl if l["hook"]]
+    chants = [l["index"] for l in tl if l["style"] == "chant"]
+    whispers = [l["index"] for l in tl if l["style"] == "whisper"]
+    sung = [l["index"] for l in tl if l["style"] != "whisper"]
+    verses = [l["index"] for l in tl if l["section"] in ("verse1", "verse2", "bridge")]
     dyn = {i: 0.55 + 0.45 * INTENSITY[i] for i in lines}
-    render_layer("lead", lines, total, gains=dyn)
-    render_layer("double", lines, total, gains=dyn, timing=0.014, vibrato=0.5, detune=7.0, breath=0.1)
-    render_layer("whisper", [0, 1, 2, 3, 4, 9], total, whisper=True, timing=0.006, formant=1.03)
-    render_layer("oct", hooks, total, transpose=0, vibrato=0.5, formant=1.06, breath=0.15)
+    render_layer("lead", sung, total, gains=dyn)
+    render_layer("double", sung, total, gains=dyn, timing=0.014, vibrato=0.5, detune=7.0, breath=0.1)
+    render_layer("whisper", verses + whispers, total, gains={i: (1.8 if i in whispers else 1.0) for i in lines},
+                 whisper=True, timing=0.006, formant=1.03)
+    render_layer("oct", hooks + chants, total, transpose=0, vibrato=0.5, formant=1.06, breath=0.15)
     render_layer("harm", hooks, total, harmony=2, vibrato=0.4, detune=-5.0, breath=0.15)
-    render_layer("harm_lo", hooks, total, harmony=-5, vibrato=0.3, breath=0.2)
+    render_layer("harm_lo", hooks + chants, total, harmony=-5, vibrato=0.3, breath=0.2)
     for g, f in enumerate([0.9, 0.95, 1.05, 1.1]):  # gang vocal: four more 'singers'
-        render_layer(f"gang{g}", hooks, total, formant=f, timing=(g - 1.5) * 0.011, detune=(g - 1.5) * 6,
+        render_layer(f"gang{g}", hooks + chants, total, formant=f, timing=(g - 1.5) * 0.011, detune=(g - 1.5) * 6,
                      vibrato=0.3, breath=0.2, inten=0.9)
     breaths(total)
     choir(total)
