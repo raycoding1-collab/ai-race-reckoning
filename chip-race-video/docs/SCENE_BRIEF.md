@@ -40,3 +40,9 @@ Rendering is CPU-only (SwiftShader) and shared by several agents: keep stills fe
 - **Karaoke:** each word appears or highlights exactly on its sung time, readable, and integrated graphically (not subtitles).
 - **Deterministic:** a pure function of `f.t` (seeded randomness only); performance under about 200 ms per frame on this CPU.
 - Final reply (15 lines or fewer): what each plate does (one line each), techniques used, known weaknesses, and the handoff positions you assumed.
+
+## Work in two stages (usage budget is limited)
+1. **Stage 1 (do it first, for all your plates):** a complete, working, good-looking version of every plate that typechecks and renders, with its karaoke, its key moves on the right times, and its handoffs. Render one sheet per plate to verify. Don't polish one plate while others don't exist yet.
+2. **Stage 2:** polish, in this priority order: the plate's signature move, motion energy, handoffs, then details. Do at most 2 review rounds per plate.
+
+The lead commits your files periodically. Keep the files compiling at all times (prefer small, safe edits).
