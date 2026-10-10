@@ -38,7 +38,6 @@ export default class Tons extends Scene {
     this.tTons = w[2]?.start ?? 20.6; this.tCut = w[3]?.start ?? 21.1; this.tOne = w[6]?.start ?? 22;
     // 40 containers: "180" (33) sweep left to right on 16ths before "tons"; the "t" (7) slams down on "tons"
     const cells: { c: number; r: number; g: number }[] = [];
-    'is'.length; // (layout: glyph columns at 0,4,8 and the t at 13)
     [['1', 0], ['8', 4], ['0', 8], ['t', 13]].forEach(([ch, c0], g) => {
       GLYPH[ch as string]!.forEach((row, r) => { for (let k = 0; k < 3; k++) if (row[k] === '1') cells.push({ c: (c0 as number) + k, r, g }); });
     });
@@ -78,8 +77,9 @@ export default class Tons extends Scene {
     c.beginPath(); c.moveTo(x - 10 * s, y + h / 2 - 7 * s); c.lineTo(x + 10 * s, y + h / 2 - 7 * s); c.stroke();
     if (hash(b.id, 3) < 0.4) {
       c.strokeStyle = rgba(tone, 0.22);
-      c.beginPath(); for (let d = -h; d < w; d += 9) { c.moveTo(x - w / 2 + Math.max(0, d), y - h / 2 + Math.max(0, -d)); c.lineTo(x - w / 2 + Math.min(w, d + h), y - h / 2 + Math.min(h, h - (d + h - Math.min(w, d + h)))); }
-      c.stroke();
+      c.save(); c.beginPath(); c.rect(x - w / 2, y - h / 2, w, h); c.clip(); c.beginPath();
+      for (let d = -h; d < w; d += 9) { c.moveTo(x - w / 2 + d, y - h / 2); c.lineTo(x - w / 2 + d + h, y + h / 2); }
+      c.stroke(); c.restore();
     }
     // landing flash
     if (land > 0.02) { c.globalAlpha = 0.85 * land; c.fillStyle = b.g === 3 ? rgba('ember') : rgba('bone'); c.fillRect(x - w / 2, y - h / 2, w, h); }
@@ -255,7 +255,7 @@ export default class Tons extends Scene {
     const tons = pulse(t, this.tTons, 0.12), cut = pulse(t, this.tCut, 0.1), one = pulse(t, this.tOne, 0.1);
     let hit = 0;
     for (const b of this.boxes) hit = Math.max(hit, 0.35 * pulse(t, b.td + 0.2, 0.05));
-    const amp = 2 + 26 * tons + 10 * cut + 6 * one + 7 * hit;
+    const amp = 2 + 18 * tons + 10 * cut + 6 * one + 7 * hit;
     const [sx, sy] = shakeVec(t, amp, 4);
     return { bloom: 0.45, bloomThreshold: 0.88, vignette: 0.4, grain: 0.04, shake: [sx, sy] as [number, number], zoom: 1 + 0.04 * tons + 0.01 * f.a.kick + 0.02 * cut, ca: 0.4 + 2.5 * tons + 1.5 * cut, flash: 0.3 * cut };
   }
