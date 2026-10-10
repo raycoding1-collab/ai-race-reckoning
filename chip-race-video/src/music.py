@@ -1160,11 +1160,12 @@ def match_eq(x, strength=0.7, limit=5.0, iters=3):
 
 
 def master(mix, target=-9.5, ceiling=-1.0):
-    from pedalboard import Compressor, PeakFilter, HighShelfFilter
+    from pedalboard import Compressor, PeakFilter, HighShelfFilter, LowShelfFilter
     log("master")
     x = bw(bw(mix, "hp", 25), "hp", 25)
     x = pb(x, PeakFilter(250, -1.5, 0.7), PeakFilter(3000, 1.0, 0.8), HighShelfFilter(10000, 1.5, 0.7))
     x = match_eq(x)
+    x = pb(x, LowShelfFilter(140, -2.5, 0.7), PeakFilter(3200, 1.0, 0.9))   # v2: less boom, more words
     x = x / (np.max(np.abs(x)) + 1e-9) * 0.5                # pre-dynamics gain staging (-6 dBFS peaks)
     # bass-band compression keeps the kick/sub consistent
     lo, hi = lr4_split(x, 150)
