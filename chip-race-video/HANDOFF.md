@@ -47,3 +47,4 @@ Sessions from `create_trigger` with `create_new_session_on_fire` get no repo pus
 
 ## Hand off when the conversation gets long (user's rule)
 Long sessions burn tokens. When your own context gets long (after a compaction, roughly 60–80 tool calls, or many images viewed), append progress to this file, commit and push, then start a fresh session with `mcp__claude-code-remote__create_session` (source_url https://github.com/raycoding1-collab/ai-race-reckoning, source_revision ccr-c467948d-jdmj79, outcome_branch ccr-c467948d-jdmj79) using the same prompt you were given, and stop. Repeat as often as the project needs.
+- 11:47 UTC: all 32 plates exist and render; full render running (30fps, samples 1, ~1.5h) -> build/silicon_shield_master.mp4. Next: encode preview <30MB, commit mp4 (<100MB), SendUserFile.
