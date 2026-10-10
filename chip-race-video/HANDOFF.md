@@ -2,7 +2,13 @@
 
 Goal: finish the full-song code-rendered music video. Branch `ccr-c467948d-jdmj79` (open PR: https://github.com/raycoding1-collab/ai-race-reckoning/pull/13; pushing to the branch updates it, so do not create another PR), project `chip-race-video/`. User-approved scope: MASTERPIECE_PLAN.md (do not re-read the whole plan unless needed).
 
-## PHASE 2 (current task): upgrade the song's sound
+## PHASE 3 (current task, 2026-10-10 19:10 UTC): perceive the reference exactly
+User feedback on v2: "the original material I showed you was more creative on most levels". They re-sent the reference video (the P(doom) music video, 720x1280, 156.8 s); it is in `build/reference/ref.mp4` + `ref.wav` (gitignored, do not commit; the original upload is /root/.claude/uploads/.../3a9205ad-Video-82615.mp4). They rejected sparse low-res stills and asked: make sure you see the EXACT animations and song. Plan:
+1. `tools/perceive/video_perceive.py`: every frame analysed (cuts, flashes, transitions, optical-flow camera moves, change-driven keyframes with burned-in time/bar labels, contact sheets <=1600 px, OCR text timeline, beat sync, palettes) -> `build/perceive/<label>/report.md`, `shots.json`, `sheets/`.
+2. `tools/perceive/song_perceive.py`: MDX-Net ONNX vocal split, beats/chords/key (madmom), structure, timed lyrics (Whisper), melody notes (pyin), bass, drum grids, CLAP/CED instrumentation -> `LEAD_SHEET.md`, `SOUND.md`, `song.json`. Validated against our song's ground truth.
+3. A vision pass (one sonnet agent) reads the sheets + reports and writes `docs/reference/ANIMATION_SCRIPT.md` and a creativity gap analysis vs ours; then propose the next step to the user.
+
+## PHASE 2 (done 2026-10-10 18:58 UTC): upgrade the song's sound
 Phase 1 is done: `chip-race-video/silicon_shield.mp4` (1080p30, 2:22, 92 MB) is finished and the user loves the animation. The user now wants the song to sound like music people want to replay. **User's choice (2026-10-10): upgrade the current song in place.** Keep the exact tempo, structure and lyric timing, so the new audio drops into the finished video with **no re-render**.
 
 **Hard constraints**
