@@ -356,6 +356,16 @@ def dyn_band_duck(x, key_env, f0=2450.0, q=0.9, depth_db=3.0):
     return x - k * band
 
 
+def transient(x, boost_db=4.0, fast=0.0008, slow=0.02, hold=0.03):
+    """Transient shaper: lift the attack (fast env above slow env) by up to boost_db."""
+    fe = env_follow(x, fast, hold)
+    se = env_follow(x, slow, hold)
+    r = np.clip(fe / (se + 1e-9), 1.0, 4.0)
+    g = np.minimum(r ** 0.8, 10 ** (boost_db / 20))
+    g = lfilter([1 - np.exp(-1 / (0.0005 * SR))], [1, -np.exp(-1 / (0.0005 * SR))], g)
+    return x * g
+
+
 def true_peak_db(x, factor=4):
     up = resample_poly(np.atleast_2d(x), factor, 1, axis=-1)
     return 20 * np.log10(np.max(np.abs(up)) + 1e-12)

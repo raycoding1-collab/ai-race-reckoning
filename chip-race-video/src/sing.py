@@ -129,6 +129,9 @@ def performance(segs, t, transpose, rng, inten, vibrato=1.0, detune=0.0, fall=Tr
         else:
             off, glide = -scoop_c, 0.06 + 0.05 * inten
         cents = off * (1 - smooth((tt + 0.03) / glide))
+        if off and prev is not None and abs(a - prev[1]) < 0.06:      # v2: small overshoot past the target
+            u = np.clip((tt + 0.03 - glide) / 0.09, 0, 1)
+            cents = cents - 0.12 * off * np.sin(np.pi * u) * (u < 1)
         if s["D"] > 0.4 and vibrato > 0:
             rate = 5.0 + 0.9 * smooth(tt / 1.2)
             ph = 2 * np.pi * np.cumsum(rate) * FP / 1000.0 + rng.uniform(0, 6.28)
@@ -141,7 +144,8 @@ def performance(segs, t, transpose, rng, inten, vibrato=1.0, detune=0.0, fall=Tr
             rel = smooth((tt - (D - 0.22)) / 0.22)
             cents = cents - (90 + 160 * (1 - inten)) * rel ** 2
             g *= 1 - 0.85 * rel
-        g *= smooth((tt + 0.06) / 0.05)
+        g *= smooth((t[idx] - a) / 0.012)
+        g *= np.where(tt < 0, 1.35, 1.0)                                  # v2: clearer onset consonants
         f0[idx] = 440.0 * 2 ** ((m - 69 + cents / 100.0) / 12)
         amp[idx] = g
         prev = (m, b)
@@ -209,7 +213,8 @@ def render_line(li, transpose=O, harmony=0, seed=0, timing=0.0, vibrato=1.0, det
     # timbre follows intensity: brighter, slightly raised formants when belting;
     # slow formant drift keeps held vowels alive
     drift = 1 + 0.012 * np.sin(2 * np.pi * 0.9 * t + rng.uniform(0, 6.28))
-    sp = warp_formants(sp, formant * (1 + 0.035 * inten) * drift)
+    hi = np.clip((12 * np.log2(np.maximum(np.nan_to_num(f0_t), 1) / 440.0) + 69 - 70) / 7, 0, 1.5)
+    sp = warp_formants(sp, formant * (1 + 0.035 * inten) * drift * (1 + 0.025 * hi))
     sp *= tilt_curve(sp.shape[1], sr, -5 + 11 * inten)[None, :]
     br = breath + 0.3 * (1 - inten)
     ap = np.clip(ap + br * (1 - ap) * np.linspace(0.2, 1, ap.shape[1]), 0, 0.999)

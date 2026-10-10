@@ -84,6 +84,21 @@ def kick_root(bar):
 KICKS = []          # (time, velocity) for the sidechain
 
 
+_SMP = {}
+
+
+def sample(name):
+    """CC0 one-shot from samples/ (onset-trimmed), resampled to SR."""
+    if name not in _SMP:
+        x, sr = sf.read(os.path.join(ROOT, "samples", f"{name}.flac"), dtype="float64")
+        x = x.mean(1) if x.ndim == 2 else x
+        if sr != SR:
+            from scipy.signal import resample_poly
+            x = resample_poly(x, SR, sr)
+        _SMP[name] = x
+    return _SMP[name]
+
+
 def drums():
     rng = np.random.default_rng(11)
 
@@ -92,6 +107,7 @@ def drums():
         if in_gap(x):
             return
         put("kick", Y.kick(kick_root(bar), long) * vel, x)
+        put("kick_top", sample("kick_top") * vel, x)
         KICKS.append((x, vel))
         ev("kick", x)
 
@@ -104,6 +120,7 @@ def drums():
             s = resample_rate(s, 2 ** (pitch / 12))
         if snare:
             put("snare", s * vel * 0.85, x)
+            put("snare_top", sample("snare_top") * vel, x)
         if clap:
             put("snare", Y.clap(int(rng.integers(0, 3))) * vel * 0.75, x)
         if gated:
@@ -829,7 +846,7 @@ def section_curve(values, smooth_s=0.25, default=0.0):
 
 def vocals():
     log("vocals")
-    lead = vchain(load_stem("lead"), presence=2.8, air=3.0)
+    lead = vchain(load_stem("lead"), presence=4.0, air=3.0)
     dbl = vchain(load_stem("double"), presence=1.0, air=0.0, hp=200)
     dbl = filt(dbl, "highshelf", 8000, 0.7, -3)
     octv = vchain(load_stem("oct"), presence=1.5, air=4.0, hp=200)
@@ -869,7 +886,7 @@ def vocals():
     dry += stereo(norm_to(smash, -28))
 
     # sends: plate on everything, dotted-quarter throws on line endings, cathedral at transitions
-    wet_auto = section_curve({"intro": 1.3, "verse": 0.8, "pre": 1.0, "chorus": 1.0, "post": 1.4, "bridge": 1.8,
+    wet_auto = section_curve({"intro": 1.3, "verse": 0.8, "pre": 1.0, "chorus": 0.75, "post": 1.05, "bridge": 1.8,
                               "build": 1.6, "outro": 1.8, "end": 2.0})
     duck = 1 - 0.5 * np.clip(env_follow(lead, 0.01, 0.15) / (np.percentile(np.abs(lead), 99.5) + 1e-9), 0, 1)
     plate_in = (dry.mean(0) - 0.6 * lead * 0) * wet_auto * duck
@@ -977,6 +994,12 @@ def mix_and_master():
 
     # ---- drums: per-element EQ, parallel compression, tape-ish saturation, room
     BUS["kick"] = filt(filt(filt(BUS["kick"], "hp", 30), "peak", 55, 1.0, 3), "peak", 3000, 1.0, 2)
+    if "kick_top" in BUS:      # v2: CC0 sampled click/body on top of the synth kick
+        BUS["kick"] += norm_to(filt(BUS["kick_top"], "hp", 900), active_db(BUS["kick"]) - 9)
+    if "snare_top" in BUS:     # v2: real snare crack under the synth snare + clap
+        BUS["snare"] += norm_to(filt(BUS["snare_top"], "hp", 180), active_db(BUS["snare"]) - 4)
+    BUS["kick"] = transient(BUS["kick"], 4.0)
+    BUS["snare"] = transient(BUS["snare"], 3.0)
     BUS["hats"] = filt(filt(filt(BUS["hats"], "hp", 400), "peak", 3000, 1.0, -2), "highshelf", 10000, 0.7, 2)
     BUS["chipperc"] = filt(filt(BUS["chipperc"], "hp", 300), "lp", 12000)
     gated = convolve(BUS["gated_send"].mean(0), reverb_ir(0.4, damp=7000, predelay=0.005, seed=40))
@@ -1003,26 +1026,29 @@ def mix_and_master():
     top = BUS["reese"] + BUS["fmbass"] + BUS["tri"]
     top = filt(top, "peak", 320, 1.0, -2)
     top = os_saturate(top, 1.5, mix=0.6)
+    top = dyn_band_duck(top, venv, 320, 0.8, 3.0)        # v2: clear the vocal's low-mids
     bass_bus = (sub + bw(top, "hp", 100)) * sc_bass + BUS["drone"] * sc_pad
 
     # ---- music: EQ, chorus/phaser on pads, vocal-keyed 1.5-4 kHz dip on pads/arps, sidechain
     pads = BUS["pad"]
     pads = pb(pads, HighpassFilter(200), PeakFilter(300, -3, 1.0), Chorus(0.3, 0.25, 6, 0, 0.35),
               Phaser(0.2, 0.4, 900, 0.2, 0.25))
-    wall = pb(BUS["wall"] + BUS["wall_hi"] + BUS["rise"], HighpassFilter(160), PeakFilter(300, -3, 1.0),
+    wall = pb(BUS["wall"] + BUS["wall_hi"] + BUS["rise"], HighpassFilter(200), PeakFilter(320, -4, 1.0),
               HighShelfFilter(8000, 2, 0.7))
     wall = filt(wall, "lp", 9500)
     wall = mono_below(wall, 300)
     arps = filt(filt(BUS["arp"] + BUS["pluck"], "hp", 150), "lp", 12000)
     chipl = filt(filt(BUS["chiplead"], "hp", 120), "lp", 12000)
     chipl = filt(chipl, "peak", 2500, 1.0, -1)
-    pads = dyn_band_duck(pads, venv, 2450, 0.9, 3.0)
-    wall = dyn_band_duck(wall, venv, 2450, 0.9, 3.0)
-    arps = dyn_band_duck(arps, venv, 2450, 0.9, 3.0)
-    chipl = dyn_band_duck(chipl, venv, 2500, 1.0, 2.0)
-    orch = filt(BUS["strings"] + BUS["brass"], "hp", 180)
+    # v2: vocal-keyed dynamic EQ, deeper presence dip plus a low-mid (200-500 Hz) carve
+    pads = dyn_band_duck(dyn_band_duck(pads, venv, 2450, 0.9, 4.5), venv, 330, 0.8, 4.0)
+    wall = dyn_band_duck(dyn_band_duck(wall, venv, 2450, 0.9, 4.5), venv, 330, 0.8, 4.0)
+    arps = dyn_band_duck(dyn_band_duck(arps, venv, 2450, 0.9, 4.0), venv, 330, 0.8, 3.0)
+    chipl = dyn_band_duck(chipl, venv, 2500, 1.0, 2.5)
+    orch = filt(BUS["strings"] + BUS["brass"], "hp", 220)
+    orch = dyn_band_duck(dyn_band_duck(orch, venv, 2450, 0.9, 4.0), venv, 330, 0.8, 4.0)
     bells = filt(BUS["bells"], "hp", 250)
-    counter = filt(BUS["counter"], "hp", 200)
+    counter = dyn_band_duck(filt(BUS["counter"], "hp", 200), venv, 2450, 0.9, 3.0)
     music = (pads + wall) * sc_pad + (arps + chipl + counter) * sc_lead + orch * sc_pad + bells
 
     # ---- echoes: dotted-8th ping-pong on chip and plucks, vocal throws
@@ -1080,7 +1106,7 @@ def mix_and_master():
     rev *= np.maximum(mute, 0.0)
 
     vgain = section_curve(VOX_ARC, 0.2, 1.0)
-    vox_bus = (vox["dry"] + vox["choir"]) * vgain
+    vox_bus = (vox["dry"] + vox["choir"]) * vgain * 10 ** (1.0 / 20)     # v2: lead +1 dB
     vox_bus = mono_below(vox_bus, 150)
     mix = band + rev + vox_bus + vthrow + BUS["gapfx"] + BUS["final"]
     mix = mono_below(mix, 120)
@@ -1130,7 +1156,7 @@ def match_eq(x, strength=0.7, limit=5.0, iters=3):
     return x
 
 
-def master(mix, target=-12.0, ceiling=-1.0):
+def master(mix, target=-9.5, ceiling=-1.0):
     from pedalboard import Compressor, PeakFilter, HighShelfFilter
     log("master")
     x = bw(bw(mix, "hp", 25), "hp", 25)
