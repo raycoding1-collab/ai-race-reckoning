@@ -1045,6 +1045,9 @@ def mix_and_master():
     wall = dyn_band_duck(dyn_band_duck(wall, venv, 2450, 0.9, 4.5), venv, 330, 0.8, 4.0)
     arps = dyn_band_duck(dyn_band_duck(arps, venv, 2450, 0.9, 4.0), venv, 330, 0.8, 3.0)
     chipl = dyn_band_duck(chipl, venv, 2500, 1.0, 2.5)
+    chipl = chipl * (1 - 0.45 * venv)          # v2: the unison chip double stops masking the words (~-5 dB)
+    pads = pads * (1 - 0.2 * venv)
+    wall = wall * (1 - 0.25 * venv)
     orch = filt(BUS["strings"] + BUS["brass"], "hp", 220)
     orch = dyn_band_duck(dyn_band_duck(orch, venv, 2450, 0.9, 4.0), venv, 330, 0.8, 4.0)
     bells = filt(BUS["bells"], "hp", 250)
@@ -1118,7 +1121,7 @@ def mix_and_master():
 ARC = {"intro": 0.9, "verse1": (0.62, 0.7), "pre1": (0.8, 0.9), "chorus": 1.0, "post": 0.94,
        "verse2": (0.7, 0.8), "pre2": (0.82, 0.95), "bridge": 0.7, "build": (0.8, 0.95), "chorus3": 1.05,
        "outro": (0.8, 0.6), "end": 1.0}
-VOX_ARC = {"verse": 0.9, "bridge": 0.95, "chorus": 1.0, "chorus3": 1.03, "outro": 1.0}
+VOX_ARC = {"verse": 0.9, "bridge": 0.95, "chorus": 1.2, "chorus3": 1.25, "post": 1.1, "build": 1.1, "outro": 1.0}
 
 
 # ================================================================ master

@@ -264,7 +264,11 @@ def breaths(total):
 
 
 def vowel(name):
-    sr, f0, sp, ap = analyse(os.path.join(ROOT, "build", "tts", f"vowel_{name}.wav"))
+    p = os.path.join(ROOT, "build", "tts", f"vowel_{name}.wav")
+    if not os.path.exists(p):                      # sustained choir vowel from Kokoro (slow speech)
+        import shutil, kokoro_src
+        shutil.copy(kokoro_src.synth({"ooh": "Ooooooh.", "ah": "Aaaaaah."}[name], speed=0.6), p)
+    sr, f0, sp, ap = analyse(p)
     a, b = int(0.22 / (FP / 1000)), int(0.38 / (FP / 1000))
     return sr, np.exp(np.mean(np.log(sp[a:b] + 1e-16), axis=0)), np.mean(ap[a:b], axis=0)
 
