@@ -131,3 +131,13 @@ export function drawTPP(c: CanvasRenderingContext2D, x: number, y: number, v: nu
   c.fillText(formatTPP(v), x, y + 40 * s);
   c.restore();
 }
+
+/** The lyric line(s) of a plate: our data tags each line with its storyboard scene id (e.g. 'tin', 'wafer2'). */
+export function lineByScene(lyrics: { lines: any[] }, id: string): any {
+  const l = lyrics.lines.find((x) => x.scene === id);
+  if (!l) throw new Error(`no lyric line for scene ${id}`);
+  return l;
+}
+export function linesByScene(lyrics: { lines: any[] }, prefix: string): any[] {
+  return lyrics.lines.filter((x) => typeof x.scene === 'string' && x.scene.startsWith(prefix));
+}

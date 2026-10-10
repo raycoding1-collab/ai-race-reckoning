@@ -23,6 +23,7 @@ def lyrics():
                           words=[dict(w=w["text"], start=round(w["notes"][0]["t"], 4), end=round(w["end"], 4), conf=1.0,
                                       syl=[[round(n["t"], 4), round(n["t"] + n["dur"], 4)] for n in w["notes"]],
                                       midi=[n["midi"] for n in w["notes"]]) for w in l["words"]]))
+    lines.sort(key=lambda l: l["start"])
     return dict(lines=lines, extras=[], notes="Generated from src/song.py; times are exact (the song is synthesized to them).")
 
 
