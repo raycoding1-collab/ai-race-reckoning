@@ -1,5 +1,6 @@
 // Shared motifs for Silicon Shield. The beam head and particles are adapted from mexicat/pdoom-video's
 // spark (MIT, see ../../LICENSE-engine-mexicat). The beam is our EUV light; see docs/STYLE_BIBLE.md.
+import { F, font } from '../engine/type';
 // Shared motifs used by several plates so they look identical everywhere:
 //  - the SPARK: orange point with white-hot core, glow, and sputtering particles
 //  - the MASK: the bland "assistant smile" (bone disc, two dots, one curve)
