@@ -44,3 +44,6 @@ Sessions from `create_trigger` with `create_new_session_on_fire` get no repo pus
 1. When near the limit and unfinished, update this file, commit and push.
 2. Call `send_later` (it fires into this same session, which keeps push access) with `delay_minutes` set to about 5 h 05 min after this session started. The message: "Usage window reset: start a fresh continuation session with mcp__claude-code-remote__create_session (source_url https://github.com/raycoding1-collab/ai-race-reckoning, source_revision ccr-c467948d-jdmj79, outcome_branch ccr-c467948d-jdmj79, same prompt as yours), then stop."
 - 2026-10-10 11:16 UTC (session 2 start): typecheck clean; cut-sheet renders. Missing: down1/post1/down3/shield/fab/outro (agents writing), tons/line are placeholders.
+
+## Hand off when the conversation gets long (user's rule)
+Long sessions burn tokens. When your own context gets long (after a compaction, roughly 60–80 tool calls, or many images viewed), append progress to this file, commit and push, then start a fresh session with `mcp__claude-code-remote__create_session` (source_url https://github.com/raycoding1-collab/ai-race-reckoning, source_revision ccr-c467948d-jdmj79, outcome_branch ccr-c467948d-jdmj79) using the same prompt you were given, and stop. Repeat as often as the project needs.
