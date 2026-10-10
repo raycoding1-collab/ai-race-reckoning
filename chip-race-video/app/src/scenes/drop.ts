@@ -604,7 +604,7 @@ export default class Drop extends Scene {
     const shx = (hash(fi, 3) - 0.5) * 2 * shakeAmp * e, shy = (hash(fi, 4) - 0.5) * 2 * shakeAmp * e;
     let fl = s < 0.14 ? flash * pulse(s, 0, 0.022) : 0;
     if (r < 0.2 && k === 'ev1') fl = Math.max(fl, r < 0.12 ? 1.35 * pulse(r, 0, 0.03) : 0); // land from the white flash
-    const inv = invertFrames && s < 2 / 60 + 1e-4 && k !== 'ev1' ? 1 : 0;
+    const inv = invertFrames && s < 2 / 60 + 1e-4 && !/^(ev|we)/.test(k) ? 1 : 0; // no inverted flash on the amber EVERY/WEAPON slams (it reads as blue)
     post.shake = [shx, shy];
     post.flash = fl;
     post.invert = inv;

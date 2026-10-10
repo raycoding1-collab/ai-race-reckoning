@@ -203,7 +203,7 @@ export default class LaserScene extends Scene {
     if (t >= tm) {
       const pop = 1 + 0.12 * pulse(t, tm, 0.06);
       x.save(); x.translate(104, 640); x.scale(pop, pop);
-      x.font = font(F.archivo(125, 900), 300); x.fillStyle = rgba('bone', 1);
+      x.font = font(F.archivo(125, 900), 300); x.fillStyle = rgba('bone', 1 - 0.82 * prog(t, BT(30) - 0.1, BT(30) + 0.15));
       x.fillText('LASER,', 0, 0);
       x.restore();
     }
