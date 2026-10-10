@@ -45,3 +45,6 @@ Research online whenever it would improve any part, not only in Phase 2. When a 
 - standout Claude-made videos and their prompts.
 
 Note the useful findings and sources in `docs/TECHNIQUES.md`.
+
+## User feedback on v3
+The opening (intro wafer, then the tin droplets and the laser) is weaker than the rest. Make the opening the strongest part of the video: the first 10 seconds must hook. Give the intro, tin and laser scenes extra design attention, research and iteration. Use their own unique, striking techniques; don't fall back on a generic sphere-plus-glow. Benchmark them against the original's opener (the TikZ unicorn drawn by a spark into "I see sparks of AGI").
