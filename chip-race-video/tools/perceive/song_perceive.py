@@ -1954,8 +1954,189 @@ def stage_harmony(C):
         f"{res['n_corrected']} bars corrected by loop consensus")
 
 
+# ============================================================================ 8. sound + production per section
+CLAP_PROMPTS = collections.OrderedDict([
+    ("instrument", [
+        ("piano", "a piano"), ("acoustic guitar", "an acoustic guitar"), ("electric guitar", "an electric guitar"),
+        ("strings", "a string section"), ("choir", "a choir singing"), ("brass", "brass instruments"),
+        ("synth lead", "a synthesizer lead melody"), ("synth pad", "a warm synth pad"), ("808 bass", "an 808 sub bass"),
+        ("chiptune", "chiptune video game music"), ("drum machine", "an electronic drum machine beat"), ("live drums", "a live acoustic drum kit")]),
+    ("vocal", [
+        ("female singer", "a female singer"), ("male singer", "a male singer"), ("rap", "rapping"), ("spoken word", "spoken word"),
+        ("robotic voice", "a robotic voice"), ("vocoder", "a vocoder voice"), ("whisper", "a whispered voice"),
+        ("backing vocals", "layered backing vocal harmonies")]),
+    ("style", [
+        ("EDM drop", "an EDM drop"), ("trap", "trap music"), ("rock", "rock music"), ("orchestral", "orchestral music"),
+        ("lo-fi", "lo-fi music"), ("musical theatre", "musical theatre"), ("comedic", "comedic music"), ("pop", "pop music"),
+        ("cinematic", "dark cinematic music")]),
+])
+
+
+class Clap:
+    def __init__(self):
+        import onnxruntime as ort
+        from tokenizers import Tokenizer, models, pre_tokenizers
+        d = os.path.join(MODELS, "clap")
+        so = ort.SessionOptions()
+        so.intra_op_num_threads = 4
+        P = ["CPUExecutionProvider"]
+        self.a = ort.InferenceSession(f"{d}/CLAP_audio_LAION-Audio-630K_with_fusion.onnx", so, providers=P)
+        self.t = ort.InferenceSession(f"{d}/CLAP_text_text_branch_RobertaModel_roberta-base.onnx", so, providers=P)
+        self.p = ort.InferenceSession(f"{d}/CLAP_text_projection_LAION-Audio-630K_with_fusion.onnx", so, providers=P)
+        v = json.load(open(f"{d}/vocab.json"))
+        mg = [tuple(l.split()) for l in open(f"{d}/merges.txt", encoding="utf8").read().split("\n")[1:] if l.strip()]
+        self.tok = Tokenizer(models.BPE(v, mg))
+        self.tok.pre_tokenizer = pre_tokenizers.ByteLevel(add_prefix_space=False)
+
+    def text(self, prompts):
+        enc = [[0] + self.tok.encode(t).ids[:75] + [2] for t in prompts]
+        ids = np.array([e + [1] * (77 - len(e)) for e in enc], dtype=np.int64)
+        o = self.t.run(None, {"input_ids": ids, "attention_mask": (ids != 1).astype(np.int64)})
+        T = self.p.run(None, {"x": o[1]})[0]
+        return T / np.linalg.norm(T, axis=1, keepdims=True)
+
+    def audio(self, seg48):
+        import librosa
+        n = 480000
+        if len(seg48) < n:
+            seg48 = np.tile(seg48, int(np.ceil(n / max(1, len(seg48)))))
+        seg48 = seg48[:n]
+        seg48 = (np.clip(seg48, -1, 1) * 32767).astype(np.int16).astype(np.float32) / 32767.0
+        m = librosa.feature.melspectrogram(y=seg48, sr=48000, n_fft=1024, hop_length=480, win_length=1024, center=True, pad_mode="reflect",
+                                           power=2.0, n_mels=64, norm=None, htk=True, fmin=50, fmax=14000)
+        m = (10.0 * np.log10(np.maximum(m, 1e-10))).T.astype(np.float32)
+        e = self.a.run(None, {"longer": np.array([[True]]), "mel_fusion": np.stack([m] * 4, 0)[None]})[0][0]
+        return e / np.linalg.norm(e)
+
+
+class Ced:
+    def __init__(self):
+        import sherpa_onnx
+        d = os.path.join(MODELS, "sherpa-onnx-ced-mini-audio-tagging-2024-04-19")
+        self.labels = [r["display_name"] for r in csv.DictReader(open(f"{d}/class_labels_indices.csv"))]
+        self.tg = sherpa_onnx.AudioTagging(sherpa_onnx.AudioTaggingConfig(
+            model=sherpa_onnx.AudioTaggingModelConfig(ced=f"{d}/model.int8.onnx", num_threads=4, provider="cpu"),
+            labels=f"{d}/class_labels_indices.csv", top_k=527))
+
+    def probs(self, seg16):
+        n = 160000
+        if len(seg16) < n:
+            seg16 = np.tile(seg16, int(np.ceil(n / max(1, len(seg16)))))
+        st = self.tg.create_stream()
+        st.accept_waveform(16000, seg16[:n].astype(np.float32))
+        pr = np.zeros(len(self.labels))
+        for e in self.tg.compute(st):
+            pr[e.index] = e.prob
+        return pr
+
+
+def section_windows(a, b, w=10.0, hop=5.0, max_n=3):
+    """start times of up to max_n windows of w seconds inside [a, b] (one tiled window if the section is shorter than w)."""
+    if b - a <= w:
+        return [a]
+    n = min(max_n, int(np.ceil((b - a - w) / hop)) + 1)
+    return list(np.linspace(a, b - w, n)) if n > 1 else [a]
+
+
+def stage_sound(C):
+    r = C.cached("sound")
+    if r:
+        C.R["sound"] = r
+        log("sound: cached")
+        return
+    import librosa
+    import pyloudnorm as pyln
+    G = Grid(C.need("rhythm"))
+    st = C.need("structure")
+    dr = C.need("drums")
+    mix = C.mix
+    mono22 = C.mono("mix", 22050)
+    meter = pyln.Meter(SR)
+    secs = st["sections"]
+    out = []
+    onset_t = librosa.onset.onset_detect(y=mono22, sr=22050, hop_length=512, units="time")
+    S = np.abs(librosa.stft(mono22, n_fft=2048, hop_length=512))
+    cent = librosa.feature.spectral_centroid(S=S, sr=22050)[0]
+    rolloff = librosa.feature.spectral_rolloff(S=S, sr=22050, roll_percent=0.9)[0]
+    tfr = librosa.times_like(cent, sr=22050, hop_length=512)
+    bands = [("sub", 20, 60), ("bass", 60, 250), ("low-mid", 250, 500), ("mid", 500, 2000), ("hi-mid", 2000, 4000), ("presence", 4000, 8000), ("air", 8000, 20000)]
+    for sec in secs:
+        a, b = max(0.0, sec["start"]), min(sec["end"], C.dur)
+        seg = mix[:, int(a * SR):int(b * SR)]
+        d = max(b - a, 1e-6)
+        lufs = None
+        if seg.shape[1] >= int(0.45 * SR):
+            try:
+                v = meter.integrated_loudness(seg.T)
+                lufs = float(v) if np.isfinite(v) else None
+            except Exception:
+                lufs = None
+        pk = float(np.abs(seg).max())
+        rms = float(np.sqrt(np.mean(seg ** 2)))
+        mid, side = (seg[0] + seg[1]) / 2, (seg[0] - seg[1]) / 2
+        width_db = float(db(np.mean(side ** 2)) - db(np.mean(mid ** 2)))
+        corr = float(np.corrcoef(seg[0], seg[1])[0, 1]) if seg.shape[1] > 100 and seg[0].std() > 1e-9 and seg[1].std() > 1e-9 else 1.0
+        m = (tfr >= a) & (tfr < b)
+        f, pxx = ss.welch(mid, SR, nperseg=8192)
+        tot = pxx.sum() + 1e-18
+        shares = {n: float(pxx[(f >= lo) & (f < hi)].sum() / tot) for n, lo, hi in bands}
+        nb_ = max(1, sec["end_bar"] - sec["start_bar"])
+        hits = sum(1 for k in dr["times"] for t_ in dr["times"][k] if a <= t_ < b)
+        out.append(dict(name=sec["name"], letter=sec["letter"], start=a, end=b, bars=nb_, lufs=lufs, peak_db=float(db(pk ** 2)),
+                        rms_db=float(db(rms ** 2)), crest_db=float(db(pk ** 2) - db(rms ** 2)),
+                        centroid_hz=float(np.mean(cent[m])) if m.any() else None, rolloff90_hz=float(np.mean(rolloff[m])) if m.any() else None,
+                        onset_density=float(np.sum((onset_t >= a) & (onset_t < b)) / d), drum_hits_per_bar=hits / nb_,
+                        stereo_width_db=width_db, lr_correlation=corr, bands=shares))
+    # ---- CLAP / CED
+    if not C.args.no_clap:
+        mono48 = C.mono("mix", 48000)
+        mono16 = C.mono("mix", 16000)
+        cp = C.cpath("clap_ced_sections.json")
+        sig = [(round(x["start"], 2), round(x["end"], 2)) for x in out]
+        cached = json.load(open(cp)) if (os.path.exists(cp) and "clap" not in C.args.force_set) else None
+        if cached and cached.get("sig") == sig:
+            clap_sc, ced_top = np.array(cached["clap"]), cached["ced"]
+        else:
+            clap = Clap()
+            flat = [(g, k, txt) for g, items in CLAP_PROMPTS.items() for k, txt in items]
+            T = clap.text([t for _, _, t in flat])
+            ced = Ced()
+            clap_sc, ced_top = [], []
+            for x in out:
+                wins = section_windows(x["start"], x["end"])
+                embs, prs = [], []
+                for w0 in wins:
+                    a0, a1 = int(w0 * 48000), int(min(w0 + 10.0, x["end"]) * 48000)
+                    embs.append(clap.audio(mono48[a0:a1]))
+                    b0, b1 = int(w0 * 16000), int(min(w0 + 10.0, x["end"]) * 16000)
+                    prs.append(ced.probs(mono16[b0:b1]))
+                e = np.mean(embs, 0)
+                e /= np.linalg.norm(e)
+                clap_sc.append((T @ e).tolist())
+                pr = np.mean(prs, 0)
+                top = np.argsort(-pr)[:5]
+                ced_top.append([[ced.labels[i], float(pr[i])] for i in top])
+                log(f"clap/ced {x['name']}")
+            clap_sc = np.array(clap_sc)
+            json.dump(dict(sig=sig, clap=clap_sc.tolist(), ced=ced_top), open(cp, "w"))
+        flat = [(g, k) for g, items in CLAP_PROMPTS.items() for k, _ in items]
+        mean = clap_sc.mean(0)
+        for x, row, tags in zip(out, clap_sc, ced_top):
+            x["clap"] = {f"{g}/{k}": float(v) for (g, k), v in zip(flat, row)}
+            x["clap_delta"] = {f"{g}/{k}": float(v - m_) for (g, k), v, m_ in zip(flat, row, mean)}
+            x["ced_top5"] = tags
+    # ---- whole-song numbers
+    seg = mix
+    whole = dict(lufs=float(meter.integrated_loudness(seg.T)), true_peak_db=float(db(np.abs(ss.resample_poly(seg, 4, 1, axis=1)).max() ** 2)),
+                 crest_db=float(db(np.abs(seg).max() ** 2) - db(np.mean(seg ** 2))), duration=C.dur)
+    res = dict(sections=out, whole=whole)
+    C.R["sound"] = res
+    C.save("sound", res)
+    log("sound: " + " | ".join(f"{x['name']} {x['lufs']:.1f}LUFS" if x["lufs"] is not None else x["name"] for x in out))
+
+
 # ============================================================================ main
-STAGE_ORDER = ["separate", "rhythm", "chords", "melody", "drums", "bass", "lyrics", "structure", "harmony"]
+STAGE_ORDER = ["separate", "rhythm", "chords", "melody", "drums", "bass", "lyrics", "structure", "harmony", "sound"]
 
 
 def main():
