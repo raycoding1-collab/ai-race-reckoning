@@ -1,0 +1,57 @@
+# RESEARCH_hands: CPU-only upgrade options for the 142 s / 128 BPM / F-minor song
+Measured 2026-10-10 in this container (4 cores, no GPU, Python 3.13, Ubuntu 24.04). TESTED = ran here; REACH = URL answered 200/206 but not run; BLOCKED = host denied. Scripts and outputs: `/tmp/claude-0/-home-user-ai-race-reckoning/34377828-749a-5abe-987a-51d5ff6afcf9/scratchpad/hands/{scripts,test}` (audition `test/mix`, `test/nsf`). Nobody listened to these files, so every "better" claim is UNVERIFIED; only numbers are measured.
+
+## 0. Network facts (changes vs TECHNIQUES_music.md l.13)
+- NEW: `git clone --depth 1 https://github.com/<o>/<r>.git` works (also `--filter=blob:none --sparse`): 1 s for small repos, 1.4 GB Salamander in 32 s. GitHub API, zips and codeload stay 403.
+- NEW: archive.ubuntu.com + security.ubuntu.com (any .deb in the pool), conda.anaconda.org + repo.anaconda.com, registry.npmjs.org tarballs, bitbucket.org. storage.googleapis.com answers 400 at root (bucket files UNTESTED).
+- BLOCKED (CONNECT denied by org policy, not retried): huggingface.co, hf-mirror.com, cdn-lfs/xethub, modelscope.cn, ibm.ent.box.com, openaipublic.azureedge.net, archive.org, freesound.org, freepats.zenvoid.org, ftp.osuosl.org, deb.debian.org, download.pytorch.org, jsdelivr, unpkg, zenodo, openslr, gitlab, codeberg.
+- Corrections: Kokoro fp32 runs at RTF 0.47 on 4 cores (int8 0.63; "27 s per 1 s" not reproduced). `espeakng-loader 0.2.4` aborts on a CI "phontab" path: call `create(..., is_phonemes=True)` with misaki IPA. `pyworld` has no cp313 wheel (sdist builds with gcc) and imports `pkg_resources`: `pip install "setuptools<81"`. PyPI `torch` 2.14.1 pulls CUDA-13 packages: use micromamba (row 17).
+
+## 1. Ranked table
+| # | Tool / asset | Improves | Install / URL that worked | Licence | CPU cost (measured) | Status |
+|---|---|---|---|---|---|---|
+| 1 | pedalboard 0.9.26 | EQ, comp, sat, chorus, delay, reverb, IR convolution, VST3 host, Rubber Band | `pip install pedalboard` | GPL-3.0 (tool only) | 6 stem chains + master, 18 s: 0.4+0.25 s; 142 s master chain 0.82 s | TESTED |
+| 2 | pyloudnorm 0.2.0 | LUFS metering and match | `pip install pyloudnorm` | MIT | 1.2 s per 142 s. Song now -12.3 LUFS, -2.1 dBFS peak | TESTED |
+| 3 | Sonic Pi samples (206 named: 15 kicks, 21 hats, snares, pads, impacts) | real CC0 drums, FX, pads | `git clone --depth 1 --filter=blob:none --sparse https://github.com/sonic-pi-net/sonic-pi.git; git sparse-checkout set etc/samples` (34 MB) or raw `.../sonic-pi/dev/etc/samples/bd_haus.flac` | CC0 (README) | negligible | TESTED |
+| 4 | tinysoundfont 0.3.7 (SF2/SF3) | sampled GM instruments | `pip install --no-deps tinysoundfont` (no cp313 wheel; builds with gcc; pyaudio dep fails) | MIT | 6 stems x 15 s: 0.35 s; 110-430x realtime | TESTED |
+| 5 | GeneralUser GS 2.0.3 (32 MB) | small GM bank: 89 Warm Pad, 52 Choir, 94 Halo, kit 25 808/909 | `https://raw.githubusercontent.com/mrbumpy409/GeneralUser-GS/main/GeneralUser-GS.sf2` | custom, free for commercial music; sample-origin caveat | load 0.07 s, +94 MB | TESTED |
+| 6 | MuseScore_General (SF3 86 MB), FluidR3_GM (SF2 148 MB), FluidR3Mono (SF3 24 MB) | best GM strings/choir/piano | `http://archive.ubuntu.com/ubuntu/pool/universe/m/musescore-general-soundfont/musescore-general-soundfont_0.2.1-1_all.deb`; `.../universe/f/fluid-soundfont/fluid-soundfont-gm_3.1-5.3_all.deb`; raw `musescore/MuseScore/v3.6.2/share/sound/FluidR3Mono_GM.sf3` (`dpkg-deb -x`) | MIT (MSG parts CC0/PD) | MSG load 7 s +700 MB (FluidSynth 2.2 s); FluidR3 0.4 s | TESTED |
+| 7 | pysfizz 0.1.3 (+ `sfizz_render` CLI inside, `chmod +x`) | SFZ sampler | `pip install pysfizz` | BSD-2 | 15 s MIDI: 0.27 s (VSCO cello), 1.1 s (Salamander), 5.3 s (Cosmonaut) | TESTED |
+| 8 | Salamander Grand Piano v3 (715 MB samples) | real piano | `git clone --depth 1 https://github.com/sfzinstruments/SalamanderGrandPiano.git` | CC-BY 3.0 (credit Alexander Holm) | see row 7 | TESTED |
+| 9 | VSCO-2-CE `SFZ` branch (strings, harp, glock, marimba, bells, timpani, organ; no choir) | orchestral layers | raw `.../sgossner/VSCO-2-CE/SFZ/CelloEnsSusVib.sfz` + wavs (72.6 MB in 2 s) | CC0 | row 7 | TESTED |
+| 10 | Karoryfer sets `sfzinstruments/karoryfer.*`: caveman-cosmonaut, string-cyborgs, big-little-bass, meatbass, black-and-blue-basses, unruly/swirly/big-rusty drums; Osiris_Piano, virtuosity_drums | synth-like pads, basses, drum kits | `git clone --depth 1 https://github.com/sfzinstruments/<name>.git` | CC0 | Cosmonaut, Blackheart, big-little-bass render OK; cyborgs `zinc_*` render silent | TESTED (3), REACH (rest) |
+| 11 | VCSL (4231 wav: Steinway B, Kawai, harps, vibes, wine glasses, timpani, pipe organ, TX81Z FM EP) | raw multisamples; no SFZ in repo | `git clone --depth 1 --filter=blob:none https://github.com/sgossner/VCSL.git` | CC0 | n/a | REACH |
+| 12 | 808/909: `@fluid-music/tr-808` 0.0.2, `tr-909` 0.0.4 | classic kits | `https://registry.npmjs.org/@fluid-music/tr-808/-/tr-808-0.0.2.tgz` | 808: ISC pkg, samples "no restrictions" (informal); 909: "free, no distribution for profit" | n/a | TESTED download, licence grey |
+| 13 | Dragonfly Hall/Plate/Room VST3 | better reverb | `.../pool/universe/d/dragonfly-reverb/dragonfly-reverb-vst3_3.2.10-3build1_amd64.deb`; `pedalboard.load_plugin(".../DragonflyHallReverb.vst3")` | GPL-3+ | 18 s stereo: 0.09-0.39 s | TESTED |
+| 14 | DawDreamer 0.9.0 + Faust (zita_rev1, dattorro, jpverb, greyhole, limiter_lad, moogLadder synth) | pro reverbs, analog-modelled poly synth | `pip install dawdreamer` | GPL-3.0 | zita 18 s: 0.04 s (RT60 1.8 s at t60m=2); synth RTF 0.016 | TESTED |
+| 15 | pyroomacoustics RIR -> `pedalboard.Convolution` | convolution reverb with no IR download | `pip install pyroomacoustics` | MIT | 6.2 s hall RIR: 6.3 s once; apply 0.28 s | TESTED |
+| 16 | matchering 2.0.6 | match tone and loudness to a reference you supply | `pip install matchering` | GPL-3.0 | 142 s target + 72 s ref: 10.5 s wall (used stand-in ref) | TESTED |
+| 17 | NSF-HiFiGAN PC 2025.02 ONNX (see section 2) | neural vocal re-synthesis | `https://github.com/openvpi/vocoders/releases/download/pc-nsf-hifigan-44.1k-hop512-128bin-2025.02/pc_nsf_hifigan_44.1k_hop512_128bin_2025.02.oudep` (zip, 52.8 MB) | CC BY-NC-SA 4.0 | 60.8 s audio: 15 s wall, 56 CPU-s, 1.6 GB RSS | TESTED |
+| 18 | Kokoro-82M (kokoro-onnx 0.6.1) | natural TTS source for WORLD | `pip install kokoro-onnx`; model `github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.onnx` (326 MB) | Apache-2.0 | 1.47 s speech in 0.69 s wall | TESTED |
+| 19 | micromamba -> CPU torch 2.14.1 + fluidsynth 2.6.1 | PyTorch models, FluidSynth CLI | `github.com/mamba-org/micromamba-releases/releases/download/2.0.5-0/micromamba-linux-64`; `micromamba create -p env -c conda-forge --override-channels python=3.13 'pytorch=*=cpu*' fluidsynth` | BSD/mixed | 39 s, 1.9 GB | TESTED |
+| 20 | pyfluidsynth 1.4.0 + libfluidsynth3 2.3.4 | full FluidSynth via Python | no PyPI wheel bundles it; extract `.../universe/f/fluidsynth/libfluidsynth3_2.3.4-1build3_amd64.deb` + libinstpatch + libpipewire, `LD_LIBRARY_PATH`, shim `ctypes.util.find_library` | MIT / LGPL | 116-261x realtime | TESTED (`apt-get install` itself not run) |
+| 21 | midirenderer 0.1.3 | one-call MIDI->WAV (48 kHz fixed) | `pip install midirenderer`; `render_wave_from(sf_bytes, midi_bytes)` | MIT | 16 s in 0.17 s | TESTED |
+| 22 | RVC, so-vits-svc, Seed-VC weights | voice conversion | weights only on huggingface/IBM Box/Azure | n/a | n/a | BLOCKED |
+| 23 | DDSP-SVC release weights, RMVPE, HuBERT-Soft | SVC pieces | `github.com/yxlllc/DDSP-SVC/releases/download/5.0/model_0.pt`, `.../4.0/opencpop+kiritan.zip` (219 MB), `yxlllc/RMVPE/releases/download/230917/rmvpe.zip`, `bshall/hubert/releases/download/v0.1/hubert-soft-0d54a1f4.pt` | demo voices from Opencpop/Kiritan (non-commercial) | n/a | REACH, not usable |
+| 24 | Sonatina SO; Dirt-Samples; tidal-drum-machines; Hydrogen kits; LMMS samples; jRhodes3d | - | Sonatina not on GitHub; others reachable | Sampling Plus 1.0 / no licence file / GPL / GPL-2+ / samples CC BY-NC | n/a | AVOID |
+
+## 2. NSF-HiFiGAN details (all verified)
+- The plain `.zip` holds only `model.ckpt` (torch); the `.oudep` is a zip with the ONNX plus `vocoder.yaml`. 2022 ONNX: `nsf-hifigan-v1/nsf_hifigan_onnx_20221211.zip`. Every release is CC BY-NC-SA 4.0 (NOTICE must travel with it): do not use for a monetised release.
+- ONNX I/O: `mel` [1,T,128] float32, `f0` [1,T] Hz (0 = unvoiced) -> `waveform` [1,T*512]. Range: shift f0 up to +-12 st vs the mel's own pitch, E2-D#7.
+- Mel recipe (from openvpi/DiffSinger `nvSTFT.py`, confirmed by copy-synthesis error 0.44 ln): sr 44100; `librosa.filters.mel(sr, n_fft=2048, n_mels=128, fmin=40, fmax=16000)` (Slaney); reflect-pad 768 each side, Hann 2048, hop 512, `center=False`, magnitude not power; `ln(clip(x, 1e-5))`. Frame i is centred on sample 512i+256. The 2022 v1 ONNX needs log10 instead (error 0.478 vs 3.13 with ln).
+- On 4.35 s of Kokoro speech retuned to F-minor notes: f0 error median +2.4 c (RMS 16.5 c) vs WORLD -0.2 c (14.3 c); HNR 16.2 dB (mel of WORLD output) / 13.8 dB (speech mel + shifted f0) vs WORLD 14.0; energy above 8 kHz 0.57% vs WORLD 2.73%; spectral flatness 0.006 vs 0.058. Threads: 1/2/4 = RTF 0.81/0.45/0.33; 142 s estimate ~35 s wall (chunk into ~10 s pieces for RAM).
+- Rubber Band retune (`pedalboard.time_stretch`, per-sample semitone array, formants kept): RTF 0.10 but f0 RMS error 190 c in my test, so WORLD or NSF stay the pitch-exact options.
+
+## 3. Pitfalls found
+- `pedalboard.Limiter` is the JUCE limiter: it adds makeup gain, hard-clips at 0 dBFS, threshold is not a ceiling. A numpy lookahead limiter run at 4x oversampling gave -0.7 dBTP; the sample-peak version left +0.9 dBTP. The Python release loop took ~10 s per 15 s, so use numba. Faust `limiter_lad_stereo` held its ceiling only with 20 ms lookahead (5 ms overshot +1.3 dB).
+- Faust `ve.moogLadder` wants a normalised 0-1 frequency (Hz gives NaN). Check each SFZ preset for silence. `tinysoundfont` reloads the bank per Synth: load once, change programs between stems.
+
+## 4. Recommended upgrade kit (priority order)
+1. Drums: layer Sonic Pi CC0 kick/snare/clap/hats (+ Karoryfer or Virtuosity CC0 SFZ kits), drum-bus comp + saturation, kick-triggered sidechain duck on bass and pads (numpy envelope, already prototyped).
+2. Mix bus: pedalboard chains per stem, Dragonfly Plate/Hall or Faust zita_rev1 on sends, 4x-oversampled lookahead limiter to -1 dBTP, pyloudnorm to the target (-14 LUFS streaming, about -11 for punch).
+3. Sampled instruments: Salamander v3 or Osiris piano, VSCO-2-CE strings/harp/bells, Karoryfer basses and synth-like pads via `sfizz_render`/pysfizz; GeneralUser GS or MuseScore_General choir/pads via tinysoundfont for the rest. Keep the credit line for Salamander (CC-BY).
+4. Vocal: Kokoro (RTF 0.47) -> WORLD retune -> optional NSF-HiFiGAN PC pass only if the release is non-commercial (credit OpenVPI, CC BY-NC-SA); otherwise double-track, pitch-shifted harmonies, de-ess, plate reverb and delay throws in pedalboard.
+5. Final: matchering against a reference track you choose (GPL tool, 10 s), then re-check LUFS and true peak.
+
+## 5. Not done (UNTESTED)
+Listening comparison; `apt-get install`; Osiris, Virtuosity, e-piano and VCSL renders; pyo and cyfaust (cp313 wheels download only); simple_hifigan (MIT, 22 kHz, no f0, torch); storage.googleapis.com buckets.
