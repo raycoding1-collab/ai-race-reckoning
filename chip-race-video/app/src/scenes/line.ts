@@ -104,7 +104,7 @@ export default class Line extends Scene {
       c.restore();
     }
     // ---- halftone world: dots split about the line, grow denser and grainier with the zoom
-    const sand = smoothstep(2, 9, Z);
+    const sand = smoothstep(1.8, 5, Z);
     const nearL = (Z > 3);
     const pitchPx = PITCH * Z;
     const gseed = Math.floor(s * 18);
@@ -123,18 +123,23 @@ export default class Line extends Scene {
       // dots near the pen sparkle
       const r = 0.5 * PITCH * Math.sqrt(dens) * 1.12 * grow * Z;
       if (r < 0.2) continue;
-      if (sand < 0.1 || r < 4) {
-        c.fillStyle = INK; c.beginPath(); c.arc(px, py, r, 0, Math.PI * 2); c.fill();
-      } else {
-        // sand: each dot is a heap of irregular grains in umber / amber / ash / bone tones
-        const n = Math.min(380, Math.floor(10 + r * 1.6));
+      // continuous morph: the ink disc dissolves into a heap of grains as the camera pushes in
+      const m = smoothstep(1.8, 5, Z);
+      if (m < 0.98) {
+        c.globalAlpha = 1 - m; c.fillStyle = INK; c.beginPath(); c.arc(px, py, r * (1 - 0.15 * m), 0, Math.PI * 2); c.fill(); c.globalAlpha = 1;
+      }
+      if (m > 0.02) {
+        const n = Math.min(520, Math.max(3, Math.floor(m * (6 + r * r * 0.06 + r * 2.2))));
+        const spread = 1 + 0.35 * m;
         for (let k = 0; k < n; k++) {
-          const a = hash(d.h * 997, k, 1) * Math.PI * 2, rr = Math.sqrt(hash(d.h * 997, k, 2)) * r * 1.05;
-          const gs = 1.5 + hash(d.h * 997, k, 3) * (2 + r * 0.035);
+          const a = hash(d.h * 997, k, 1) * Math.PI * 2, rr = Math.sqrt(hash(d.h * 997, k, 2)) * r * spread;
+          const gs = (1.5 + hash(d.h * 997, k, 3) * (3 + r * 0.05)) * (0.5 + 0.5 * m) * (1 + 0.6 * m);
           const q = hash(d.h * 997, k, 4);
+          c.globalAlpha = Math.min(1, m * 1.6);
           c.fillStyle = q < 0.3 ? '#7A3A06' : q < 0.55 ? '#B0731E' : q < 0.75 ? '#9C978F' : q < 0.9 ? '#FFD27A' : INK;
           c.fillRect(px + Math.cos(a) * rr, py + Math.sin(a) * rr, gs, gs * (0.6 + hash(k, d.h, 5)));
         }
+        c.globalAlpha = 1;
       }
     }
     void nearL; void gseed;
