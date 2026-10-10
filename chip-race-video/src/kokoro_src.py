@@ -147,84 +147,110 @@ def dtw(A, B, band=0.25):
     return pi, pj, D[n, m] / (n + m), C
 
 
-def _voicing(x, sr):
+def voicing(x, sr):
+    """Frame voicing that does not bridge voiceless consonants the way
+    Harvest's f0 does: harvest f0 > 0 AND low-band (100-1000 Hz) D4C
+    aperiodicity < 0.5 AND low/high band energy ratio > 5 dB AND not silence.
+    Calibrated on Festival's labelled renders: vowels 0.98-1.0 voiced,
+    voiceless consonants 0.17-0.26 (mostly label-edge frames), silence < 0.1."""
     import pyworld as pw
     f0, t = pw.harvest(x, sr, frame_period=FRAME * 1000, f0_floor=70, f0_ceil=600)
-    return f0, t
+    sp = pw.cheaptrick(x, f0, t, sr); ap = pw.d4c(x, f0, t, sr)
+    return t, f0, voiced_from(f0, sp, ap, sr)
+
+
+def voiced_from(f0, sp, ap, sr):
+    fb = np.linspace(0, sr / 2, sp.shape[1])
+    apl = ap[:, (fb > 100) & (fb < 1000)].mean(1)
+    lr = 10 * np.log10(sp[:, (fb > 80) & (fb < 1000)].sum(1) / (sp[:, fb >= 2500].sum(1) + 1e-20) + 1e-20)
+    e = 10 * np.log10(sp.sum(1) + 1e-20)
+    v = (f0 > 0) & (apl < 0.5) & (lr > 5) & (e > e.max() - 50)
+    # debounce: drop voiced runs < 3 frames, fill unvoiced gaps < 2 frames
+    v = v.copy()
+    for val, mn in ((True, 3), (False, 2)):
+        k = 0
+        while k < len(v):
+            j = k
+            while j < len(v) and v[j] == v[k]:
+                j += 1
+            if v[k] == val and j - k < mn and k > 0 and j < len(v):
+                v[k:j] = not val
+            k = j
+    return v
+
+
+def onsets(t, v):
+    return t[1:][v[1:] & ~v[:-1]]
 
 
 def _trim_bounds(energy, thr_db=35):
-    e = energy / np.log(10) * 10  # natural log -> dB-ish
+    e = energy / np.log(10) * 10  # natural log -> dB
     on = np.where(e > e.max() - thr_db)[0]
     return on[0], on[-1]
 
 
-def align(fest_base, kpath):
+def _map_from_path(pi, pj, xf_dur, xk_dur):
+    ui = np.unique(pi)
+    mj = np.array([pj[pi == u].mean() for u in ui])
+    tf_u = np.concatenate([[0.0], ui * FRAME, [xf_dur]])
+    tk_u = np.maximum.accumulate(np.concatenate([[0.0], mj * FRAME, [xk_dur]]))
+    return lambda tt: float(np.interp(tt, tf_u, tk_u))
+
+
+def align(fest_base, kpath, method="dtw"):
     """Map Festival phone times (tts.parse) onto the Kokoro take.
     Returns (words_phones in Kokoro time, report dict)."""
     xf, srf = sf.read(fest_base + ".wav"); xk, srk = sf.read(kpath)
     xf = xf.astype(np.float64); xk = xk.astype(np.float64)
     Ff, ef = features(xf, srf); Fk, ek = features(xk, srk)
-    # align only the speech region (leading/trailing silence matched separately)
     af, bf = _trim_bounds(ef); ak, bk = _trim_bounds(ek)
-    pi, pj, cost, C = dtw(Ff[af:bf + 1], Fk[ak:bk + 1])
-    pi += af; pj += ak
-    tf = pi * FRAME; tk = pj * FRAME
-    # monotone map Festival time -> Kokoro time (average j for each i)
-    ui = np.unique(pi)
-    mj = np.array([pj[pi == u].mean() for u in ui])
-    tf_u, tk_u = ui * FRAME, mj * FRAME
-    tf_u = np.concatenate([[0.0], tf_u, [len(xf) / srf]])
-    tk_u = np.concatenate([[0.0], tk_u, [len(xk) / srk]])
-    tk_u = np.maximum.accumulate(tk_u)
-
-    def fmap(t):
-        return float(np.interp(t, tf_u, tk_u))
-
+    tk_, f0k, vk = voicing(xk, srk)
+    tf_, f0f, vf = voicing(xf, srf)
+    # voicing as an extra feature dimension pulls voiced/voiceless edges together
+    def add_v(F, v):
+        v = np.interp(np.arange(len(F)), np.arange(len(v)), v.astype(float))
+        return np.hstack([F, 2.0 * (v[:, None] - 0.5)])
+    Ffv, Fkv = add_v(Ff, vf), add_v(Fk, vk)
+    if method == "dtw":
+        pi, pj, cost, _ = dtw(Ffv[af:bf + 1], Fkv[ak:bk + 1])
+        pi += af; pj += ak
+    else:  # linear baseline: stretch the speech region uniformly
+        pi = np.arange(af, bf + 1); pj = ak + (pi - af) * (bk - ak) / max(1, bf - af); cost = np.nan
+    fmap = _map_from_path(pi, pj, len(xf) / srf, len(xk) / srk)
     words = tts.parse(fest_base)
-    f0k, tvk = _voicing(xk, srk)
-    voiced = f0k > 0
-    # voicing onsets in Kokoro
-    on_k = tvk[1:][voiced[1:] & ~voiced[:-1]]
-    out = []
-    for w in words:
-        ow = []
-        for syl in w:
-            ow.append([(ph, fmap(a), fmap(b)) for ph, a, b in syl])
-        out.append(ow)
-    # snap: a vowel/sonorant-nucleus start that follows an unvoiced consonant
-    # should coincide with a voicing onset; move it (and the previous phone's
-    # end) to the nearest voicing onset within 40 ms
-    flat = [(wi, si, pi_) for wi, w in enumerate(out) for si, s in enumerate(w) for pi_ in range(len(s))]
+    out = [[[(ph, fmap(a), fmap(b)) for ph, a, b in syl] for syl in w] for w in words]
+    on_k = onsets(tk_, vk)
+    # snap each vowel onset that follows a voiceless consonant to the nearest
+    # Kokoro voicing onset within 40 ms (moving the consonant's end with it)
+    flat = [(wi, si, k) for wi, w in enumerate(out) for si, s in enumerate(w) for k in range(len(s))]
+    pre = validate(out, tk_, vk)
     snapped = 0
     for n, (wi, si, k) in enumerate(flat):
         ph, a, b = out[wi][si][k]
-        if ph not in tts.VOWELS or n == 0:
+        if ph not in tts.VOWELS or n == 0 or not len(on_k):
             continue
         pw_, ps_, pk_ = flat[n - 1]
         prev = out[pw_][ps_][pk_]
         if prev[0] not in UNVOICED:
             continue
-        if len(on_k) == 0:
-            continue
         near = on_k[np.argmin(np.abs(on_k - a))]
         if abs(near - a) < 0.04 and prev[1] + 0.01 < near < b - 0.02:
-            out[wi][si][k] = (ph, near, b)
-            out[pw_][ps_][pk_] = (prev[0], prev[1], near)
+            out[wi][si][k] = (ph, float(near), b)
+            out[pw_][ps_][pk_] = (prev[0], prev[1], float(near))
             snapped += 1
-    rep = validate(out, f0k, tvk)
-    rep.update(cost=cost, snapped=snapped, n_onsets=len(on_k))
+    rep = validate(out, tk_, vk)
+    rep.update(cost=float(cost), snapped=snapped, onset_err_pre_snap_ms=pre["onset_err_ms"],
+               vowel_voiced_pre=pre["vowel_voiced"])
     return out, rep
 
 
 UNVOICED = set("p t k f th s sh hh ch".split())
 
 
-def validate(words, f0, t):
-    """Fraction of mapped vowel time that is voiced in Kokoro, and the median
-    distance from each post-unvoiced vowel onset to the nearest voicing onset."""
-    voiced = f0 > 0
-    on_k = t[1:][voiced[1:] & ~voiced[:-1]]
+def validate(words, t, voiced):
+    """Fraction of mapped vowel time that Kokoro voices, and the median
+    distance from each post-voiceless vowel onset to the nearest voicing onset."""
+    on_k = onsets(t, voiced)
     vt, vv, errs, durs = 0, 0, [], []
     flat = [p for w in words for s in w for p in s]
     for n, (ph, a, b) in enumerate(flat):
@@ -233,12 +259,13 @@ def validate(words, f0, t):
             vt += sel.sum(); vv += voiced[sel].sum(); durs.append(b - a)
             if n > 0 and flat[n - 1][0] in UNVOICED and len(on_k):
                 errs.append(np.min(np.abs(on_k - a)))
-    return dict(vowel_voiced=vv / max(1, vt), onset_err_ms=1000 * float(np.median(errs)) if errs else 0.0,
+    return dict(vowel_voiced=float(vv / max(1, vt)), onset_err_ms=1000 * float(np.median(errs)) if errs else 0.0,
+                onset_err_max_ms=1000 * float(np.max(errs)) if errs else 0.0,
                 n_onset=len(errs), min_vowel_ms=1000 * min(durs) if durs else 0.0)
 
 
 def ok(rep):
-    return rep["vowel_voiced"] >= 0.8 and rep["onset_err_ms"] <= 25 and rep["min_vowel_ms"] >= 12
+    return rep["vowel_voiced"] >= 0.85 and rep["onset_err_ms"] <= 20 and rep["onset_err_max_ms"] <= 60 and rep["min_vowel_ms"] >= 15
 
 
 _aligned = {}

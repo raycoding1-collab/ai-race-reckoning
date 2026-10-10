@@ -1,13 +1,12 @@
-"""v2 cinematic layer: orchestral-ish synth voices, picture-synced sound
-design and time effects (tape stop, stutter). Used by music.py."""
+"""Cinematic layer: orchestral-ish synth voices (bells, brass, strings, taiko,
+clang), picture-synced sound design keyed to song.timeline() words, and
+time effects (tape stop, stutter). Used by music.py."""
 import numpy as np
 import song
 from dsp import *  # noqa
 
 B, BAR = song.BEAT, song.BAR
 WORDS = {(l["scene"], i): w for l in song.timeline() for i, w in enumerate(l["words"])}
-VO = {("F", "m"): [53, 56, 60], ("Db", ""): [53, 56, 61], ("Ab", ""): [51, 56, 60],
-      ("Eb", ""): [51, 55, 58], ("Bb", "m"): [53, 58, 61], ("C", ""): [52, 55, 60]}
 
 
 def bt(bar, beat=0.0):
@@ -83,69 +82,150 @@ def drone(dur, root=29):
     return x * np.minimum(1, t / 1.2)
 
 
-def build_layer(N):
-    """Everything the v2 arrangement adds, as named stereo buses."""
-    orch, sfx, perc = np.zeros((2, N)), np.zeros((2, N)), np.zeros((2, N))
-    # --- intro: drone + bell motif foreshadowing the hook (C Ab F = "weapon now")
-    place(orch, stereo(filt(drone(bt(2) + 0.4), "hp", 45) * 0.16), 0)
-    for k, (m, b) in enumerate([(84, 0), (80, 1), (77, 2), (84, 4), (80, 5), (85, 6)]):
-        place(orch, stereo(fm_bell(m, 2.5) * 0.16, 0.5 * (-1) ** k), bt(0, b))
-    # --- verse: string ostinato in the second half
-    for bar in range(6, 10):
-        tones = VO[song.CHORDS[bar]]
-        for s in range(16):
-            m = tones[[0, 1, 2, 1][s % 4]] + 12
-            place(orch, stereo(string_hit(m, B / 4 * 1.5) * (0.05 + 0.02 * (s % 4 == 0)), 0.3 * (-1) ** s), bt(bar, s / 4))
-    # --- build: taiko roll + string tremolo crescendo, cut for the gap
-    cut = bt(11, 3)
-    hits = [bt(10, i / 2) for i in range(8)] + [bt(11, i / 4) for i in range(12)]
-    for i, h in enumerate(hits):
-        if h < cut:
-            place(perc, stereo(taiko(0.25 + 0.4 * i / len(hits), 64 + (i % 2) * 14), 0.4 * (-1) ** i), h)
-    for bar in (10, 11):
-        tones = VO[song.CHORDS[bar]]
-        for s in range(32):
-            h = bt(bar, s / 8)
-            if h < cut:
-                v = 0.03 + 0.07 * ((bar - 10) * 32 + s) / 64
-                place(orch, stereo(string_hit(tones[s % 3] + 12, B / 8 * 1.3, 3800) * v, 0.5 * (-1) ** s), h)
-    # --- chorus: taiko + brass stabs on chord changes; strings in the 2nd half
-    for bar in range(12, 20):
-        tones = VO[song.CHORDS[bar]]
-        if (bar - 12) % 2 == 0:
-            place(perc, stereo(taiko(0.9, 60)), bt(bar))
-            place(perc, stereo(taiko(0.5, 80), 0.3), bt(bar, 2.5))
-        for m in tones + [tones[0] - 12]:
-            place(orch, stereo(brass(m, B * 1.2) * 0.07), bt(bar))
-        if bar in (15, 19):  # pickup stab into the next phrase
-            for m in tones:
-                place(orch, stereo(brass(m + 12, B * 0.4) * 0.05), bt(bar, 3.5))
-        if bar >= 16:
-            for s in range(16):
-                m = tones[[0, 2, 1, 2][s % 4]] + 24
-                place(orch, stereo(string_hit(m, B / 4 * 1.4, 4200) * 0.045, 0.45 * (-1) ** s), bt(bar, s / 4))
-    # --- tag: drone + bells answering the vocal
-    place(orch, stereo(filt(drone(2 * BAR, 29), "hp", 45) * 0.14), bt(20))
-    for k, (m, b) in enumerate([(84, 0), (80, 0.5), (77, 1), (72, 4), (68, 4.5), (65, 5)]):
-        place(orch, stereo(fm_bell(m, 3.0) * 0.14, 0.6 * (-1) ** k), bt(20, b))
-    # --- final orchestral hit
-    for m in [41, 53, 60, 65, 68, 72]:
-        place(orch, stereo(brass(m, 2.5) * 0.08), bt(22))
-    place(perc, stereo(taiko(1.2, 55)), bt(22)); place(perc, stereo(taiko(0.8, 70), -0.4), bt(22) + 0.02)
-    # --- picture-synced sound design
-    place(sfx, stereo(zap(0.5)), WORDS[("laser", 3)]["t"])                        # main laser pulse
-    for s in range(32):                                                           # droplet hits (tin scene)
-        place(sfx, stereo(zap(0.05, 0.08), 0.6), bt(2, s / 4))
-    place(sfx, stereo(whoosh(0.6) * 0.25), WORDS[("tons", 2)]["t"] - 0.6)
-    place(sfx, stereo(clang(0.55)), WORDS[("tons", 2)]["t"])                      # 180-ton slam
-    place(sfx, stereo(stamp(0.6), 0.3), WORDS[("tons", 6)]["t"])                  # SOLD OUT
-    a, b = WORDS[("line", 2)]["t"], WORDS[("line", 4)]["t"] + 0.4
-    place(sfx, stereo(scratch(b - a) * 0.12, -0.2), a)                            # marker line
-    place(sfx, stereo(stamp(0.5), 0.4), WORDS[("line", 4)]["t"] + 0.2)            # RESTRICTED
-    for i in (0, 1, 4):                                                           # slam words
-        place(sfx, stereo(stamp(0.35)), WORDS[("wafer", i)]["t"]); place(sfx, stereo(whoosh(0.15) * 0.1), WORDS[("wafer", i)]["t"] - 0.15)
-    place(sfx, stereo(whoosh(0.4, up=False) * 0.3), WORDS[("down", 4)]["t"] + 0.5)  # DOWN flip
-    return orch, sfx, perc
+# ---------------------------------------------------------------- v4 voices
+def bell(m, dur=3.0, bright=1.0, pan=0.0):
+    """Stereo FM bell: two slightly detuned 3.5:1 FM pairs plus a 'tine' partial."""
+    n = int(dur * SR); t = np.arange(n) / SR; f = hz(m)
+    out = []
+    for det in (0.9985, 1.0015):
+        mod = 3.0 * bright * np.exp(-t / 0.5) * np.sin(2 * np.pi * f * det * 3.5 * t)
+        y = np.sin(2 * np.pi * f * det * t + mod) * np.exp(-t / (dur / 3.2))
+        y += 0.25 * np.sin(2 * np.pi * f * det * 2.0 * t) * np.exp(-t / 0.35)
+        out.append(y * np.minimum(1, t / 0.0015))
+    y = np.stack(out)
+    p = (pan + 1) * np.pi / 4
+    return y * np.array([[np.cos(p) * 1.41], [np.sin(p) * 1.41]]) * 0.5
+
+
+def string_trem(m, dur, bright=3000):
+    """String tremolo as one note: 3 detuned saws with 32nd-note amplitude tremolo."""
+    n = int(dur * SR); t = np.arange(n) / SR
+    x = sum(saw(hz(m) * d * (1 + 0.002 * np.sin(2 * np.pi * 5.3 * t + k)), n, phase0=k * 0.3)
+            for k, d in enumerate((0.996, 1.0, 1.005)))
+    trem = 0.6 + 0.4 * np.abs(np.sin(np.pi * t / (B / 8)))
+    return filt(x, "lp", bright) * trem * np.minimum(1, t / 0.05) * np.minimum(1, (dur - t) / 0.05 + 1e-3)
+
+
+def glass_crack(vel=1.0):
+    n = int(1.6 * SR); t = np.arange(n) / SR
+    rng = np.random.default_rng(41)
+    x = np.zeros(n)
+    for k in range(9):                           # splinters: short resonant pings
+        a = int(rng.uniform(0, 0.12) * SR)
+        f0 = rng.uniform(2500, 9000)
+        y = np.sin(2 * np.pi * f0 * t[: n - a]) * np.exp(-t[: n - a] / rng.uniform(0.05, 0.3))
+        x[a:] += y * rng.uniform(0.2, 0.6)
+    x += filt(noise(n), "hp", 3000) * np.exp(-t / 0.03) * 1.2
+    x += sine(hz(40) * (1 + np.exp(-t / 0.03)), n) * np.exp(-t / 0.2) * 0.8
+    return vel * x * 0.5
+
+
+def power_down(vel=1.0, dur=1.4):
+    n = int(dur * SR); t = np.arange(n) / SR
+    f = 120 * np.exp(-t / (dur / 2.5)) + 25
+    x = saw(f, n) + 0.5 * saw(f * 2.01, n)
+    x = sweep(x, "lp", 300 + 2500 * np.exp(-t / 0.3), q=2.0)
+    return vel * x * np.exp(-t / (dur / 2)) * 0.5
+
+
+def chip_jingle(vel=1.0, notes=(84, 88, 91, 96)):
+    """Key-pickup jingle on a 50% pulse (classic console item-get)."""
+    out = np.zeros(int((len(notes) * 0.07 + 0.35) * SR))
+    for k, m in enumerate(notes):
+        n = int(0.3 * SR); tt = np.arange(n) / SR
+        y = pulse(hz(m), n, 0.5) * np.exp(-tt / 0.08)
+        a = int(k * 0.07 * SR); out[a:a + n] += y[: len(out) - a]
+    return vel * out * 0.4
+
+
+def sand_trickle(dur, vel=1.0, seed=5):
+    """Granular hiss of falling sand: dense tiny high clicks."""
+    n = int(dur * SR); rng = np.random.default_rng(seed)
+    x = np.zeros(n)
+    idx = rng.integers(0, n, int(dur * 900))
+    x[idx] = rng.uniform(-1, 1, len(idx))
+    x = filt(filt(x, "hp", 3500), "lp", 11000)
+    p = np.linspace(0, 1, n)
+    return vel * x * np.sin(np.pi * p) ** 0.8 * 2.0
+
+
+def orch_hit(tones, root):
+    """Final orchestral hit: brass chord, string stab, taiko pair, clang, sub boom (stereo)."""
+    dur = 5.0
+    n = int(dur * SR); t = np.arange(n) / SR
+    out = np.zeros((2, n))
+    for k, m in enumerate(tones):
+        y = brass(m, dur) * 0.22
+        out += stereo(y, 0.5 * np.sin(k * 1.7))
+        out += stereo(string_hit(m + 12, dur, 3600) * 0.18, -0.5 * np.sin(k * 1.3))
+    padn = lambda y: np.pad(y, (0, max(0, n - len(y))))[:n]
+    out += stereo(padn(taiko(1.2, 55)), 0)
+    out += stereo(padn(taiko(0.8, 70)), -0.4) * 0.8
+    out += stereo(padn(clang(0.6)), 0.2)
+    boom_ = sine(hz(root) * (1 + 1.8 * np.exp(-t / 0.06)), n) * np.exp(-t / 1.3) * 0.9
+    out += stereo(boom_)
+    return out
+
+
+def sfx_layer(N, ev, in_gap):
+    """Picture-synced sound design keyed to song.timeline() words. Returns a stereo bus.
+    `ev(kind, t, name)` logs each placed effect for build/events.json."""
+    out = np.zeros((2, N))
+
+    def w(scene, i):
+        return WORDS.get((scene, i))
+
+    def put(sig, t0, name, gain=1.0, pan=0.0):
+        if t0 is None or t0 < 0:
+            return
+        place(out, stereo(sig, pan) if sig.ndim == 1 else sig, t0, gain)
+        ev("sfx", t0, name)
+
+    # tin: molten droplets (soft chip plinks, falling pitch) across the line
+    if w("tin", 2):
+        t0 = w("tin", 0)["t"]
+        r = np.random.default_rng(3)
+        for s in range(14):
+            m = 96 - s % 5 * 2
+            n = int(0.09 * SR); tt = np.arange(n) / SR
+            y = pulse(hz(m) * (1 - 0.35 * tt / 0.09), n, 0.25) * np.exp(-tt / 0.025)
+            put(y, t0 + s * B / 2 + r.uniform(0, 0.03), "droplet", 0.05, 0.6 * (-1) ** s)
+    if w("laser", 3):
+        put(zap(1.0), w("laser", 3)["t"], "laser", 0.35)
+        put(whoosh(0.9) * 0.8, w("laser", 7)["t"], "sun_flare", 0.12, 0.3)
+    if w("tons", 2):
+        put(whoosh(0.6), w("tons", 2)["t"] - 0.6, "whoosh", 0.18)
+        put(clang(1.0), w("tons", 2)["t"], "slam", 0.42)
+    if w("tons", 6):
+        put(stamp(1.0), w("tons", 6)["t"], "sold_out", 0.42, 0.3)
+    if w("line", 2) and w("line", 4):
+        a, b = w("line", 2)["t"], w("line", 4)["t"] + 0.4
+        put(scratch(b - a), a, "marker", 0.11, -0.2)
+        put(stamp(1.0), w("line", 4)["t"] + 0.2, "restricted", 0.36, 0.4)
+    for n_ in (1, 2, 3):
+        for i in (0, 1, 4):
+            ww = w(f"wafer{n_}", i)
+            if ww:
+                put(stamp(1.0), ww["t"], "slam_word", 0.2 + 0.05 * n_)
+                put(whoosh(0.15), ww["t"] - 0.15, "whoosh", 0.08)
+        ww = w(f"down{n_}", 4)
+        if ww:
+            put(whoosh(0.5, up=False), ww["t"] + 0.5, "down_flip", 0.2)
+    if w("hbm", 3):                                           # memory dies stacking up
+        for k in range(4):
+            n = int(0.25 * SR); tt = np.arange(n) / SR
+            y = sine(hz(48 + 5 * k) * (1 + np.exp(-tt / 0.01)), n) * np.exp(-tt / 0.06)
+            y += filt(noise(n), "bp", 2400 + 600 * k, 1.5) * np.exp(-tt / 0.012) * 0.6
+            put(y, w("hbm", 3)["t"] + k * B / 4, "stack", 0.16)
+    if w("key", 6):
+        put(chip_jingle(1.0), w("key", 6)["end"] - 0.05, "key_get", 0.22, 0.2)
+    if w("crack", 4):
+        put(glass_crack(1.0), w("crack", 4)["t"], "crack", 0.3, -0.2)
+    if w("crack", 9):
+        put(power_down(1.0), w("crack", 9)["t"], "lights_out", 0.22)
+    if w("outro2", 1):
+        put(stamp(1.0), w("outro2", 1)["t"] + 0.1, "restricted", 0.3, -0.3)
+    return out
 
 
 def tape_stop(x, end_t, dur=0.28):
