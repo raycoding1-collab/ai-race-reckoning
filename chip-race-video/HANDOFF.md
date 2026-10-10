@@ -1,6 +1,6 @@
 # HANDOFF: Silicon Shield (read this first; everything you need is here)
 
-Goal: finish the full-song code-rendered music video. Branch `ccr-c467948d-jdmj79`, project `chip-race-video/`. User-approved scope: MASTERPIECE_PLAN.md (do not re-read the whole plan unless needed).
+Goal: finish the full-song code-rendered music video. Branch `ccr-c467948d-jdmj79` (open PR: https://github.com/raycoding1-collab/ai-race-reckoning/pull/13; pushing to the branch updates it, so do not create another PR), project `chip-race-video/`. User-approved scope: MASTERPIECE_PLAN.md (do not re-read the whole plan unless needed).
 
 ## Done (don't redo)
 - **Song, final:** `audio/silicon_shield.mp3` (142.25 s, 128 BPM, F minor, key lift to G minor at chorus 3). Exact lyric and event timings are in `data/lyrics.json`, `data/audio.json` and `data/events.json`. Don't regenerate audio (Kokoro models aren't in git).
