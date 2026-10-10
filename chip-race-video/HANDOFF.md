@@ -1,0 +1,121 @@
+# HANDOFF: Silicon Shield (read this first; everything you need is here)
+
+Goal: finish the full-song code-rendered music video. Branch `ccr-c467948d-jdmj79` (open PR: https://github.com/raycoding1-collab/ai-race-reckoning/pull/13; pushing to the branch updates it, so do not create another PR), project `chip-race-video/`. User-approved scope: MASTERPIECE_PLAN.md (do not re-read the whole plan unless needed).
+
+## PHASE 3 (current task, 2026-10-10 19:10 UTC): perceive the reference exactly
+User feedback on v2: "the original material I showed you was more creative on most levels". They re-sent the reference video (the P(doom) music video, 720x1280, 156.8 s); it is in `build/reference/ref.mp4` + `ref.wav` (gitignored, do not commit; the original upload is /root/.claude/uploads/.../3a9205ad-Video-82615.mp4). They rejected sparse low-res stills and asked: make sure you see the EXACT animations and song. Plan:
+1. `tools/perceive/video_perceive.py`: every frame analysed (cuts, flashes, transitions, optical-flow camera moves, change-driven keyframes with burned-in time/bar labels, contact sheets <=1600 px, OCR text timeline, beat sync, palettes) -> `build/perceive/<label>/report.md`, `shots.json`, `sheets/`.
+2. `tools/perceive/song_perceive.py`: MDX-Net ONNX vocal split, beats/chords/key (madmom), structure, timed lyrics (Whisper), melody notes (pyin), bass, drum grids, CLAP/CED instrumentation -> `LEAD_SHEET.md`, `SOUND.md`, `song.json`. Validated against our song's ground truth.
+3. A vision pass (one sonnet agent) reads the sheets + reports and writes `docs/reference/ANIMATION_SCRIPT.md` and a creativity gap analysis vs ours; then propose the next step to the user.
+
+**Status 2026-10-10 19:27 UTC:** stopped at 94% of the usage window. The two kit agents were interrupted; any files in `tools/perceive/` are partial and unverified (reuse or rewrite). A `send_later` continuation (trig_01Witvage2nxvYNyNe14sxTC) fires at 21:11 UTC into THIS same session: the user asked to finish Phase 3 in this chat because it has their uploaded video. No new session unless the container lost the upload.
+- **User decision (19:30 UTC): finish it fully; Claude decides.** After perceiving the reference, improve our video and song without asking first (re-render and song rewrite allowed), then deliver a preview. Spread the work over as many 5-hour windows as needed: near a limit, update this file, commit, push and `send_later` the next wake into this same session.
+- **The reference video is not in git** (a third-party video; never commit or publish it). A fresh container won't have it. First clone github.com/mexicat/pdoom-video and github.com/JohnHeibel/PDoomVideo (both MIT): the exact animations are their scene code (`docs/breakdown/` already breaks down mexicat's scenes), and their engines can render any frame; look there for the song audio too. Compare one frame to work out which version the upload is (vertical 720x1280, 156.8 s, maybe a phone recording of a 16:9 video). If you need the exact upload, ask the user to re-upload it.
+- Video kit: `pip install opencv-python-headless rapidocr-onnxruntime`. Analyse every frame at ~160 px; change-driven keyframes labelled with time, shot and bar; sheets at most 1600 px wide (vertical: 6 columns of 260 px, 2 rows); OCR text timeline; beat offsets for cuts, flashes and punches.
+- Song kit (no torch): MDX-Net ONNX `Kim_Vocal_2.onnx` from github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/ (n_fft 7680, hop 1024, dim_f 3072, dim_t 256) via numpy STFT + onnxruntime; madmom via `tools/research/ears/madmom_patch_install.sh build/madmom pip`; Whisper via `tools/listen/listen.py` helpers; pyin melody. Validate it on our song first (data/lyrics.json notes, song.CHORDS, BPM 128, O = -12 octave offset).
+
+## PHASE 2 (done 2026-10-10 18:58 UTC): upgrade the song's sound
+Phase 1 is done: `chip-race-video/silicon_shield.mp4` (1080p30, 2:22, 92 MB) is finished and the user loves the animation. The user now wants the song to sound like music people want to replay. **User's choice (2026-10-10): upgrade the current song in place.** Keep the exact tempo, structure and lyric timing, so the new audio drops into the finished video with **no re-render**.
+
+**Hard constraints**
+- `src/song.py` is the single source of truth (BPM 128, SECTIONS, lyrics with a note per syllable). Don't change any timing: every word and syllable onset, section boundary, gap, tape stop and impact stays put. Keep the drum hits (kick, snare, crash, impact) at the same times, because the rendered visuals pulse on them; how they *sound* may change. After a rebuild, `data/lyrics.json` and `data/events.json` must be unchanged (`git diff --stat data/`); `audio.json` may change.
+- Length stays 142.25 s. Key: F minor, lifting to G minor at chorus 3. Keep the melody notes (they are in lyrics.json); harmonies and new layers are fine.
+- The video is not re-rendered: the last step re-muxes the new audio with `-c:v copy`.
+
+**Pipeline** (README): `pip install numpy scipy soundfile pyworld`, then `python3 src/tts.py && python3 src/sing.py && python3 src/music.py && python3 src/export_timeline.py`. Vocal stems (`audio/*.wav`) and the Kokoro models are not in git. Get the models from GitHub release assets (Hugging Face is blocked); see `docs/TECHNIQUES_music.md` §1 (kokoro-onnx `model-files-v1.0`). Code: `music.py` (arrangement and mix), `synths.py`, `dsp.py` (buses, compressor, limiter, vocoder, sidechain, master chain), `cinema.py` (FX), `sing.py` (TTS → WORLD retime/re-pitch, doubles, gang), `score.py`, `chip.py`. First copy the current mix to `audio/silicon_shield_v1.mp3` and commit it, for A/B.
+
+**What to improve, in priority order.** The recipes are already researched in `docs/TECHNIQUES_music.md` §1–4; don't re-research.
+1. **Vocal realism** (§1, "WORLD improvements"): delayed vibrato, overshoot, portamento, scoops and fall-offs, formant tracking on high notes, breathiness, consonant handling, doubles with per-word offsets, a chorus gang, and the vocal chain. A deliberate "synthetic diva" or vocoder sheen on the chorus hooks suits the silicon theme.
+2. **Hook and contrast** (§2): the chorus and the "weapon now, oh-oh-oh" post-chorus must be the most memorable part. Add an 8-bit lead doubling the vocal hook, a counter-melody, a thin pre-chorus into a full chorus, and fills and ear candy at section changes, without moving any hit.
+3. **Drums and bass**: punchier kick and snare (layering, transient shaping), and a bass sidechained to the kick with saturation so it survives phone speakers.
+4. **Mix and master** (§4): balance, EQ, glue compression, reverb and delay sends, stereo width with a mono-safe low end. Target about -9 to -10 LUFS integrated, with true peak at or below -1 dBTP.
+
+**Judging (you can't hear audio):** measure in code. Check integrated LUFS and true peak; per-section loudness (choruses at least 3 LU above verses); spectral balance against a pop-style tilt; vocal f0 against the melody (cents error); stem RMS balance; clipping; and kick onsets against events.json. Use at most 3 downscaled spectrogram images. The user is the ears: send them the MP3 and ask for feedback.
+
+**Research results (2026-10-10; use these, don't re-research).** Details are in `docs/RESEARCH_ears.md` (measuring) and `docs/RESEARCH_hands.md` (improving); the working test scripts are in `tools/research/` (fix their paths first, see its README).
+- **Network, beyond §1 of TECHNIQUES:** these work: `git clone` from github.com, archive.ubuntu.com debs, conda-forge via micromamba (CPU torch), npm, and storage.googleapis.com (ailia-models ONNX exports of CLAP, PANNs, Demucs, Crepe, YAMNet, VGGish). Still blocked: Hugging Face, essentia.upf.edu, dl.fbaipublicfiles.com, the Azure CDN, zenodo and alphacephei. That rules out Audiobox Aesthetics, SongEval, Essentia TF models, MERT, RVC, so-vits-svc and Seed-VC.
+- **Listening kit (all tested):**
+  - sherpa-onnx Whisper base.en: word error rate (WER) per lyric line, about 12 s of CPU per 20 s of audio.
+  - LAION-CLAP ONNX: prompt scores such as "female pop singer" vs "robotic voice" and "muddy mix".
+  - CED or PANNs: AudioSet tags (watch "Singing").
+  - pyloudnorm, librosa, essentia, madmom: loudness, key, tempo and the bar grid.
+- **Baseline diagnosis of v1:**
+  - Choruses score WER ~0.28, and the line "Nobody's slowing the silicon down" scores 0.6-1.0. Every engine misses "weapon" and "slowing".
+  - CLAP's singer-minus-robotic gap drops to ~0 in chorus 2/3 and the bridge, while its "muddy" score rises from 0.27 to 0.40.
+  - Band-passing to 1-7 kHz lifts the "Female singing" tag from 0.00 to 0.10.
+  - All of this points to **low-mid masking of the vocal**. Fixes: carve 200-500 Hz out of the pads, bass and chords under the vocal (sidechain or dynamic EQ keyed by the vocal), add vocal presence, and sharpen the consonants of "weapon" and "slowing".
+- **Targets for v2:**
+  - WER at most 0.2 on chorus lines, and no line above 0.4.
+  - Singer-minus-robotic gap above 0 in every chorus; "muddy" at most 0.27; a higher "Singing" tag.
+  - -9 to -10 LUFS, at most -1 dBTP.
+  - Re-run the kit after each change and keep a v1/v2 table in `docs/`.
+- **Upgrade kit (tested; licences safe for commercial use).** Sampled rendering is fast, about 1 s of CPU per 15 s of music.
+  - CC0 Sonic Pi drum samples, with sidechain.
+  - pedalboard, with the Dragonfly reverb VST3 or Faust zita_rev1.
+  - A 4x-oversampled lookahead limiter at -1 dBTP (`pedalboard.Limiter` is not a brickwall).
+  - Sampled piano, strings, choir and pads via sfizz or tinysoundfont: VSCO-2-CE, VCSL and Karoryfer (CC0); FluidR3 and MuseScore General (MIT); Salamander piano v3 (CC-BY: credit it).
+- **Avoid:** Dirt-Samples and tidal-drum-machines (no licence), Hydrogen and LMMS kits (GPL), jRhodes3d (BY-NC), Sonatina (Sampling Plus).
+- **NSF-HiFiGAN** (openvpi; the mel recipe is in RESEARCH_hands) runs on CPU in about 35 s for the whole song, but it is **CC BY-NC-SA**. Use it only if the user confirms the video will never be monetised; by default keep the Kokoro → WORLD vocal.
+- **matchering** works (10 s) but needs a reference song the user owns, so it's optional.
+- **Install pitfalls:** tinysoundfont needs `pip install --no-deps`; pyworld needs `setuptools<81`; Kokoro needs `is_phonemes=True` (fp32 runs at RTF 0.47); madmom needs `tools/research/ears/madmom_patch_install.sh`.
+
+**Deliver**
+1. Write the new `audio/silicon_shield.mp3`, keeping v1 alongside.
+2. Re-mux with `ffmpeg -i silicon_shield.mp4 -i audio/silicon_shield.mp3 -map 0:v -map 1:a -c:v copy -c:a aac -b:a 192k -shortest -movflags +faststart` into a temp file, then replace `silicon_shield.mp4` (it must stay under 100 MB).
+3. Make a preview from the 1080p file: 720p, two-pass, about 1450k video plus 128k audio, under 30 MB, in `build/` (gitignored).
+4. SendUserFile the new MP3 and the preview MP4. Tell the user what changed and ask them to listen. Commit, push, schedule nothing.
+
+**Lessons from Phase 1:** tracked background Bash jobs are killed after 2 h. Detached (`setsid nohup`) processes die when the container is reclaimed, which happened while the session sat idle. Keep long jobs under 2 h as tracked background jobs, and make them resumable. ffmpeg is `/usr/bin/ffmpeg`; the machine has 4 CPU cores and no GPU. The user is in UTC+2, so give times in their time zone.
+
+## Done (don't redo)
+- **Song, final:** `audio/silicon_shield.mp3` (142.25 s, 128 BPM, F minor, key lift to G minor at chorus 3). Exact lyric and event timings are in `data/lyrics.json`, `data/audio.json` and `data/events.json`. Don't regenerate audio (Kokoro models aren't in git).
+- **Engine:** `app/` (a fork of the MIT mexicat/pdoom-video engine). Timeline: `app/src/timeline.ts` (32 plates). Shared motifs: `app/src/scenes/_motifs.ts` (beam, TPP meter, lineByScene).
+- **Design docs:** `docs/STYLE_BIBLE.md`, `docs/STORYBOARD.md` (one row per plate) and `docs/SCENE_BRIEF.md` (rules and render commands).
+- **Scenes written (about 10k lines; quality unverified):** sand, tin, laser, machine, tons, line, drop (×3), node1, grid1, grid2, grid3, node2, node3, down2, post2, hbm, smuggle, island, key, atom, dream, crack, whoscrown, hold, plus helper files. Unverified means they may not compile or render.
+
+## Remaining (PHASE 1, all done 2026-10-10)
+1. Setup on a fresh container:
+   ```
+   cd chip-race-video/app && bun install || (npm i -g bun@1.2.23 && bun install)
+   pip install opencv-python-headless
+   ```
+   Chrome is at `/opt/pw-browsers/chromium-1194/chrome-linux/chrome` (render.ts already uses the SwiftShader flags).
+2. Typecheck: `bunx tsc --noEmit -p tsconfig.json`. Fix compile errors cheaply.
+3. **Missing modules:** `down1`, `post1`, `shield`, `fab`, `down3`, `outro` (STORYBOARD rows). Note `shield-grid.ts` and `outro-doc.ts` helpers exist.
+4. Render one cut-sheet of the whole timeline (`bun scripts/render.ts sheet --from 0 --to 142 --n 48 --cols 8 --out ../build/all.png`, then downscale it to 1600 px before you Read it) and fix crashes and blank plates.
+5. Polish only the weakest 3–4 plates. Priority: the opening (sand, tin, laser) and the drops.
+6. Final render, encode, deliver:
+   ```
+   CHROME_PATH=... bun scripts/render.ts video --samples 4 --workers 2 --out ../silicon_shield.mp4
+   ```
+   - Try `--fps 30` if render.ts supports it; check `render.ts --help` first.
+   - Then encode a preview under 30 MB with ffmpeg and send it with SendUserFile.
+   - Commit (the MP4 must stay under 100 MB) and push.
+
+## Token rules (the user hit the 5-hour limit twice; follow these strictly)
+- **Agents:** at most one or two sub-agents at a time, never more. Use `model: "sonnet"` for scene coding, `"haiku"` for mechanical tasks (fixing type errors, renames), and the main session for decisions only.
+- **Briefs:** give sub-agents short briefs with exact file paths. Don't let them read the reference repo or the breakdown docs unless it's essential.
+- **Images:** downscale them before Read (contact sheets ≤1600 px wide, few stills). Image tokens are the biggest cost.
+- **Logs:** filter command output (`| tail`, `| grep error`).
+- **Commits:** commit and push after every finished step (run `git add -A chip-race-video` first).
+- **Before the window ends:** if the work is unfinished when you notice you're near the limit (or after about 4 hours), write progress into this file, commit, and schedule the next fresh session with the `create_trigger` tool (`create_new_session_on_fire: true`, `run_once_at` about 5 h 5 min after this session started), using the same prompt as this one. If the video is finished and delivered, schedule nothing.
+- Never buy or use extra usage credits; only use the plan's 5-hour windows.
+
+## Progress log (append here)
+- 2026-10-10 10:30 UTC: scenes partially written by 5 agents before the limit. Next: steps 1–6 above.
+
+## How to continue after a window (this overrides the create_trigger instruction above)
+Sessions from `create_trigger` with `create_new_session_on_fire` get no repo push access (403). Instead:
+1. When near the limit and unfinished, update this file, commit and push.
+2. Call `send_later` (it fires into this same session, which keeps push access) with `delay_minutes` set to about 5 h 05 min after this session started. The message: "Usage window reset: start a fresh continuation session with mcp__claude-code-remote__create_session (source_url https://github.com/raycoding1-collab/ai-race-reckoning, source_revision ccr-c467948d-jdmj79, outcome_branch ccr-c467948d-jdmj79, same prompt as yours), then stop."
+- 2026-10-10 11:16 UTC (session 2 start): typecheck clean; cut-sheet renders. Missing: down1/post1/down3/shield/fab/outro (agents writing), tons/line are placeholders.
+
+## Hand off when the conversation gets long (user's rule)
+Long sessions burn tokens. When your own context gets long (after a compaction, roughly 60–80 tool calls, or many images viewed), append progress to this file, commit and push, then start a fresh session with `mcp__claude-code-remote__create_session` (source_url https://github.com/raycoding1-collab/ai-race-reckoning, source_revision ccr-c467948d-jdmj79, outcome_branch ccr-c467948d-jdmj79) using the same prompt you were given, and stop. Repeat as often as the project needs.
+- 11:47 UTC: all 32 plates exist and render; full render running (30fps, samples 1, ~1.5h) -> build/silicon_shield_master.mp4. Next: encode preview <30MB, commit mp4 (<100MB), SendUserFile.
+- 14:01 UTC: the full render was killed at its 2 h background-tool limit (frame 3180/4268), and the MP4 can't be recovered (no moov). Now rendering two detached segments (setsid nohup, --noaudio): build/seg1.mp4 (0–106 s) and build/seg2.mp4 (106 s–end); logs are build/seg1.log and build/seg2.log. When both finish: `ffmpeg -f concat` them, mux audio/silicon_shield.mp3 (-shortest), encode a commit copy (<100 MB) and a preview (<30 MB), commit, push, SendUserFile. Never run long renders as tool background jobs (2 h cap); use setsid nohup.
+- 14:41 UTC: the container restarted at 14:25 and killed the detached renders. Now using `render_chunks.sh` (resumable 6 s chunks into build/chunks/cNN.mp4, skips finished ones), run as a tracked background Bash job (timeout 7200000) and re-launched when it stops. When all 24 chunks are done: concat them (ffmpeg concat demuxer, -c copy), mux audio/silicon_shield.mp3 (-shortest), make the commit copy (<100 MB) and preview (<30 MB), commit, push, SendUserFile.
+- 15:20 UTC: fixed the laser 220,000/LASER overlap and the blue invert flash on the amber drop slams. Chunks c02 and c04 were rendered before the fix: delete them and re-run render_chunks.sh once the rest are done.
+- 17:20 UTC: DONE. All 24 chunks rendered; build/master.mp4 (1.1 GB, local only). Committed chip-race-video/silicon_shield.mp4 (1080p30, 92 MB); the 720p preview (28 MB) was sent to the user. Nothing scheduled.
+- 2026-10-10 18:40 UTC (Phase 2 session): setup notes: pyworld needs `pip install --ignore-installed setuptools==80.9.0` then `pip install --no-build-isolation pyworld`; `apt-get install espeak-ng festival festvox-us-slt-hts`; Kokoro models into build/kokoro/models; run `python3 src/kokoro_src.py` BEFORE sing.py (else it silently falls back to Festival). v2 code: music.py (CC0 sample tops on kick/snare from samples/, transient shaper, vocal-keyed 330 Hz + 2.45 kHz dynamic EQ on pads/wall/arps/orch/bass top, lead presence +1.2 dB, lead bus +1 dB, shorter chorus verb, master -9.5 LUFS), sing.py (overshoot, onset consonants kept and +2.6 dB, formant lift on high notes). Listening kit being built in tools/listen/.
+- 2026-10-10 18:57 UTC: Phase 2 v2 DELIVERED. audio/silicon_shield.mp3 = v2 (v1 kept as silicon_shield_v1.mp3), re-muxed into silicon_shield.mp4 with -c:v copy, preview build/silicon_shield_v2_preview.mp4 sent. Results in docs/SOUND_AB.md (WER 0.53 -> 0.41, muddy 0.197 -> 0.163, -9.5 LUFS, -1.2 dBTP). Waiting for the user's listening feedback. Open items if they want more: post-chorus "weapon now, oh-oh-oh" is unclear even on the solo vocal (TTS), CLAP singer-vs-robotic gap still < 0 outside the choruses, bridge/outro got louder relative to the choruses. Nothing scheduled.
