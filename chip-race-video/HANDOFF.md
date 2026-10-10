@@ -2,13 +2,39 @@
 
 Goal: finish the full-song code-rendered music video. Branch `ccr-c467948d-jdmj79` (open PR: https://github.com/raycoding1-collab/ai-race-reckoning/pull/13; pushing to the branch updates it, so do not create another PR), project `chip-race-video/`. User-approved scope: MASTERPIECE_PLAN.md (do not re-read the whole plan unless needed).
 
+## PHASE 2 (current task): upgrade the song's sound
+Phase 1 is done: `chip-race-video/silicon_shield.mp4` (1080p30, 2:22, 92 MB) is finished and the user loves the animation. The user now wants the song to sound like music people want to replay. **User's choice (2026-10-10): upgrade the current song in place.** Keep the exact tempo, structure and lyric timing, so the new audio drops into the finished video with **no re-render**.
+
+**Hard constraints**
+- `src/song.py` is the single source of truth (BPM 128, SECTIONS, lyrics with a note per syllable). Don't change any timing: every word and syllable onset, section boundary, gap, tape stop and impact stays put. Keep the drum hits (kick, snare, crash, impact) at the same times, because the rendered visuals pulse on them; how they *sound* may change. After a rebuild, `data/lyrics.json` and `data/events.json` must be unchanged (`git diff --stat data/`); `audio.json` may change.
+- Length stays 142.25 s. Key: F minor, lifting to G minor at chorus 3. Keep the melody notes (they are in lyrics.json); harmonies and new layers are fine.
+- The video is not re-rendered: the last step re-muxes the new audio with `-c:v copy`.
+
+**Pipeline** (README): `pip install numpy scipy soundfile pyworld`, then `python3 src/tts.py && python3 src/sing.py && python3 src/music.py && python3 src/export_timeline.py`. Vocal stems (`audio/*.wav`) and the Kokoro models are not in git. Get the models from GitHub release assets (Hugging Face is blocked); see `docs/TECHNIQUES_music.md` §1 (kokoro-onnx `model-files-v1.0`). Code: `music.py` (arrangement and mix), `synths.py`, `dsp.py` (buses, compressor, limiter, vocoder, sidechain, master chain), `cinema.py` (FX), `sing.py` (TTS → WORLD retime/re-pitch, doubles, gang), `score.py`, `chip.py`. First copy the current mix to `audio/silicon_shield_v1.mp3` and commit it, for A/B.
+
+**What to improve, in priority order.** The recipes are already researched in `docs/TECHNIQUES_music.md` §1–4; don't re-research.
+1. **Vocal realism** (§1, "WORLD improvements"): delayed vibrato, overshoot, portamento, scoops and fall-offs, formant tracking on high notes, breathiness, consonant handling, doubles with per-word offsets, a chorus gang, and the vocal chain. A deliberate "synthetic diva" or vocoder sheen on the chorus hooks suits the silicon theme.
+2. **Hook and contrast** (§2): the chorus and the "weapon now, oh-oh-oh" post-chorus must be the most memorable part. Add an 8-bit lead doubling the vocal hook, a counter-melody, a thin pre-chorus into a full chorus, and fills and ear candy at section changes, without moving any hit.
+3. **Drums and bass**: punchier kick and snare (layering, transient shaping), and a bass sidechained to the kick with saturation so it survives phone speakers.
+4. **Mix and master** (§4): balance, EQ, glue compression, reverb and delay sends, stereo width with a mono-safe low end. Target about -9 to -10 LUFS integrated, with true peak at or below -1 dBTP.
+
+**Judging (you can't hear audio):** measure in code. Check integrated LUFS and true peak; per-section loudness (choruses at least 3 LU above verses); spectral balance against a pop-style tilt; vocal f0 against the melody (cents error); stem RMS balance; clipping; and kick onsets against events.json. Use at most 3 downscaled spectrogram images. The user is the ears: send them the MP3 and ask for feedback.
+
+**Deliver**
+1. Write the new `audio/silicon_shield.mp3`, keeping v1 alongside.
+2. Re-mux with `ffmpeg -i silicon_shield.mp4 -i audio/silicon_shield.mp3 -map 0:v -map 1:a -c:v copy -c:a aac -b:a 192k -shortest -movflags +faststart` into a temp file, then replace `silicon_shield.mp4` (it must stay under 100 MB).
+3. Make a preview from the 1080p file: 720p, two-pass, about 1450k video plus 128k audio, under 30 MB, in `build/` (gitignored).
+4. SendUserFile the new MP3 and the preview MP4. Tell the user what changed and ask them to listen. Commit, push, schedule nothing.
+
+**Lessons from Phase 1:** tracked background Bash jobs are killed after 2 h. Detached (`setsid nohup`) processes die when the container is reclaimed, which happened while the session sat idle. Keep long jobs under 2 h as tracked background jobs, and make them resumable. ffmpeg is `/usr/bin/ffmpeg`; the machine has 4 CPU cores and no GPU. The user is in UTC+2, so give times in their time zone.
+
 ## Done (don't redo)
 - **Song, final:** `audio/silicon_shield.mp3` (142.25 s, 128 BPM, F minor, key lift to G minor at chorus 3). Exact lyric and event timings are in `data/lyrics.json`, `data/audio.json` and `data/events.json`. Don't regenerate audio (Kokoro models aren't in git).
 - **Engine:** `app/` (a fork of the MIT mexicat/pdoom-video engine). Timeline: `app/src/timeline.ts` (32 plates). Shared motifs: `app/src/scenes/_motifs.ts` (beam, TPP meter, lineByScene).
 - **Design docs:** `docs/STYLE_BIBLE.md`, `docs/STORYBOARD.md` (one row per plate) and `docs/SCENE_BRIEF.md` (rules and render commands).
 - **Scenes written (about 10k lines; quality unverified):** sand, tin, laser, machine, tons, line, drop (×3), node1, grid1, grid2, grid3, node2, node3, down2, post2, hbm, smuggle, island, key, atom, dream, crack, whoscrown, hold, plus helper files. Unverified means they may not compile or render.
 
-## Remaining
+## Remaining (PHASE 1, all done 2026-10-10)
 1. Setup on a fresh container:
    ```
    cd chip-race-video/app && bun install || (npm i -g bun@1.2.23 && bun install)
