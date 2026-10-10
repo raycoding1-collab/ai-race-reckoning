@@ -11,7 +11,7 @@ import { lineByScene } from './_motifs';
 import { CARD, drawDoc, drawGrain, G, STATUS, STATUS_C, type DocTimes } from './outro-doc';
 import type { Word } from '../engine/lyrics';
 
-const T0 = 131.25, T_NOW = 133.12, T_STAMP = 136.875, T_PULL = 138.0, T_DIVE = 139.3, T_DIVE_END = 141.5, T_FADE = 141.7, END = 142.25;
+const T0 = 131.25, T_NOW = 133.12, T_STAMP = 138.75, T_PULL = 139.55, T_DIVE = 140.25, T_DIVE_END = 141.75, T_FADE = 141.85, END = 142.25;
 const W = 1920, H = 1080;
 const INK = (a: number) => `rgba(10,10,11,${a})`;
 const typedN = (s: string, t: number, t0: number, cps = 38) => { const n = Math.floor((t - t0) * cps); return n <= 0 ? '' : s.slice(0, n); };
