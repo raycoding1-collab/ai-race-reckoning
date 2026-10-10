@@ -148,13 +148,39 @@ def performance(segs, t, transpose, rng, inten, vibrato=1.0, detune=0.0, fall=Tr
     return f0, amp
 
 
+def _to44k(y, sr):
+    from math import gcd
+    g = gcd(44100, int(sr))
+    return resample_poly(y, 44100 // g, int(sr) // g)
+
+
+USE_KOKORO = os.environ.get("SING_SOURCE", "kokoro") == "kokoro"
+_ksrc = {"ok": 0, "fallback": 0}
+
+
+def source_for(li, voice=None):
+    """(wav path, words_phones) for line li: the aligned Kokoro take when it validates, else Festival."""
+    base = os.path.join(ROOT, "build", "tts", f"line{li:02d}")
+    if USE_KOKORO:
+        try:
+            import kokoro_src
+            r = kokoro_src.aligned(li, voice or kokoro_src.VOICE)
+            if r is not None:
+                _ksrc["ok"] += 1
+                return r[0], r[1]
+        except Exception as e:  # missing model/cache: fall back
+            print("kokoro fallback", li, e)
+    _ksrc["fallback"] += 1
+    return base + ".wav", tts.parse(base)
+
+
 def render_line(li, transpose=O, harmony=0, seed=0, timing=0.0, vibrato=1.0, detune=0.0,
-                formant=1.0, breath=0.0, whisper=False, inten=None, fall=True):
+                formant=1.0, breath=0.0, whisper=False, inten=None, fall=True, voice=None):
     line = song.LINES[li]
     inten = INTENSITY[li] if inten is None else inten
-    base = os.path.join(ROOT, "build", "tts", f"line{li:02d}")
-    sr, f0s, sps, aps = analyse(base + ".wav")
-    syls = syllable_plan(line, tts.parse(base))
+    wav, words_ph = source_for(li, voice)
+    sr, f0s, sps, aps = analyse(wav)
+    syls = syllable_plan(line, words_ph)
     for s in syls:
         if harmony:
             s["midi"] = diatonic(s["midi"], harmony)
@@ -174,7 +200,12 @@ def render_line(li, transpose=O, harmony=0, seed=0, timing=0.0, vibrato=1.0, det
     sp = sps[i0] * (1 - fr) + sps[i1] * fr
     ap = aps[i0] * (1 - fr) + aps[i1] * fr
     active = ~np.isnan(src_t)
-    f0 = np.where(active & ((f0s[i0] > 0) | (f0s[i1] > 0)), np.nan_to_num(f0_t), 0.0)
+    # vowel nuclei (note start -> coda) are always voiced: Kokoro sometimes devoices part of a vowel
+    nucleus = np.zeros_like(active)
+    for sg in segs:
+        nucleus |= (t >= sg["kt"][1]) & (t < sg["kt"][2])
+    f0 = np.where(active & ((f0s[i0] > 0) | (f0s[i1] > 0) | nucleus), np.nan_to_num(f0_t), 0.0)
+    ap = np.where(nucleus[:, None], np.minimum(ap, 0.6), ap)
     # timbre follows intensity: brighter, slightly raised formants when belting;
     # slow formant drift keeps held vowels alive
     drift = 1 + 0.012 * np.sin(2 * np.pi * 0.9 * t + rng.uniform(0, 6.28))
@@ -190,7 +221,7 @@ def render_line(li, transpose=O, harmony=0, seed=0, timing=0.0, vibrato=1.0, det
     env = np.repeat(active.astype(float), int(sr * FP / 1000.0))[: len(y)]
     k = int(0.006 * sr)
     env = np.convolve(env, np.ones(k) / k, mode="same")
-    return t0, resample_poly(y[: len(env)] * env, 441, 320)
+    return t0, _to44k(y[: len(env)] * env, sr)
 
 
 def write(name, x):
@@ -245,7 +276,7 @@ def choir_note(vw, m, dur, rng, formant=1.0, attack=0.25, release=0.4, breathy=0
     sp *= (env ** 2)[:, None]
     ap = np.tile(np.clip(ap0 + breathy * (1 - ap0) * np.linspace(0.2, 1, len(ap0)), 0, 0.999), (n, 1))
     y = pw.synthesize(np.ascontiguousarray(f0), np.ascontiguousarray(sp + 1e-16), np.ascontiguousarray(ap), sr, frame_period=FP)
-    return resample_poly(y, 441, 320)
+    return _to44k(y, sr)
 
 
 VOICING = {("G", "m"): [55, 58, 62], ("Bb", ""): [53, 58, 62], ("F", ""): [53, 57, 60], ("C", "m"): [55, 60, 63],
@@ -301,7 +332,7 @@ if __name__ == "__main__":
     verses = [l["index"] for l in tl if l["section"] in ("verse1", "verse2", "bridge")]
     dyn = {i: 0.55 + 0.45 * INTENSITY[i] for i in lines}
     render_layer("lead", sung, total, gains=dyn)
-    render_layer("double", sung, total, gains=dyn, timing=0.014, vibrato=0.5, detune=7.0, breath=0.1)
+    render_layer("double", sung, total, gains=dyn, timing=0.014, vibrato=0.5, detune=7.0, breath=0.1, voice="af_bella")
     render_layer("whisper", verses + whispers, total, gains={i: (1.8 if i in whispers else 1.0) for i in lines},
                  whisper=True, timing=0.006, formant=1.03)
     render_layer("oct", hooks + chants, total, transpose=0, vibrato=0.5, formant=1.06, breath=0.15)
@@ -312,4 +343,4 @@ if __name__ == "__main__":
                      vibrato=0.3, breath=0.2, inten=0.9)
     breaths(total)
     choir(total)
-    print("vocal stems written")
+    print("vocal stems written; kokoro lines", _ksrc)

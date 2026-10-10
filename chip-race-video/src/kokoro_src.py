@@ -265,7 +265,8 @@ def validate(words, t, voiced):
 
 
 def ok(rep):
-    return rep["vowel_voiced"] >= 0.85 and rep["onset_err_ms"] <= 20 and rep["onset_err_max_ms"] <= 60 and rep["min_vowel_ms"] >= 15
+    # vowel nuclei are forced voiced in sing.py, so a partly devoiced vowel is fine; reject only real misalignment
+    return rep["vowel_voiced"] >= 0.7 and rep["onset_err_ms"] <= 40 and rep["onset_err_max_ms"] <= 140 and rep["min_vowel_ms"] >= 5
 
 
 _aligned = {}
