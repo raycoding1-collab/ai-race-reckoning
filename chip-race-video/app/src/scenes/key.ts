@@ -484,6 +484,7 @@ export default class Key extends Scene {
     lb.render(renderer, out);
     comp.draw(renderer, tx.upload(), out);
     const paperK = 1 - smoothstep(0.1, 0.4, lt);
-    return { paper: paperK > 0.5 ? 1 : 0, bloom: 0.5, bloomThreshold: 1.0, halation: 0.12, vignette: 0.3, ca: 1.0 + 3.5 * shake, zoom: 1 + 0.03 * shake + 0.02 * pulse(t, turnT, 0.1), shake: [Math.sin(t * 150) * 5 * shake, Math.cos(t * 170) * 6 * shake] as [number, number] };
+    // (the cut-away lock swaps for the exterior and dial on the first frame of the turn: that frame popped +25 luma; exposure dips on it)
+    return { exposure: t >= turnT && t < turnT + 0.045 ? 0.68 : 1, paper: paperK > 0.5 ? 1 : 0, bloom: 0.5, bloomThreshold: 1.0, halation: 0.12, vignette: 0.3, ca: 1.0 + 3.5 * shake, zoom: 1 + 0.03 * shake + 0.02 * pulse(t, turnT, 0.1), shake: [Math.sin(t * 150) * 5 * shake, Math.cos(t * 170) * 6 * shake] as [number, number] };
   }
 }

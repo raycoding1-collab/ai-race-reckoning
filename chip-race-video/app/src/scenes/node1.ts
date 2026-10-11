@@ -14,8 +14,18 @@ import { Lyrics } from '../engine/lyrics';
 import { lineByScene } from './_motifs';
 import { DIE_DIVE_GLSL, DIE_PITCH, DIE_ZOOM_END } from './drop-lattice';
 import { crownCells, CELL_PX } from './node1-crown';
+import { lumaLock } from './_lumalock';
 
 const NOOCC = false;
+
+/**
+ * Edit diet, luma lock. The dolly through the gate (31.2-31.9 s) and the crane up (31.9-33.3 s) draw thousands of 1-px hatch lines past
+ * a fast camera: the frame's mean luma alternated 25 <-> 55 from one frame to the next (dark and bright flashes of 1-2 frames). LUMA_LOCK
+ * holds one exposure multiplier per frame (30 fps, from frame 936 = 31.2 s), see _lumalock.ts. Re-measure it if the dolly, the crane or the hatch changes.
+ */
+const LUMA_LOCK: number[] = [
+  0.89, 0.96, 0.96, 0.96, 0.94, 0.91, 0.91, 0.93, 1.41, 3.00, 1.61, 2.80, 0.68, 0.86, 0.94, 1.02, 1.00, 1.00, 0.97, 0.91, 0.86, 0.77, 0.75, 0.70, 1.61, 1.50, 1.46, 1.36, 1.34, 1.21, 1.11, 1.25, 1.36, 1.46, 1.28, 1.26, 1.12, 0.95, 0.58, 0.52, 0.74, 1.26, 1.56, 1.67, 1.29, 0.94, 0.74, 0.72, 0.77, 0.81, 0.87, 0.91, 0.97, 1.03, 1.03, 0.97, 1.03, 1.03, 0.97, 1.19,
+];
 const BEAT = 60 / 128;
 const FOV = 28;
 const TANH = Math.tan((FOV * Math.PI) / 360);
@@ -266,14 +276,13 @@ export default class Node1 extends Scene {
 
     const lay = this.layer, c = lay.ctx;
     lay.clear();
-    let shakeAmp = 0, ca = 1.0, hit = 0, camY = -9;
+    let shakeAmp = 0, ca = 1.0, hit = 0;
     let numIdx = -1;
     for (let i = 0; i < 4; i++) if (r >= n[i]!) numIdx = i;
     const inNum = !dive && r < tHold;
 
     if (!dive) {
       const cam = this.camAt(r);
-      camY = cam.pos[1];
       this.cam.position.set(...cam.pos);
       this.cam.up.set(...cam.up).normalize();
       this.cam.lookAt(cam.tgt[0], cam.tgt[1], cam.tgt[2]);
@@ -321,7 +330,7 @@ export default class Node1 extends Scene {
       const k = ease.outExpo(clamp(s / 0.16));
       let size = 880, ox = 130, oy = 0, al = 1;
       if (i === 3) {
-        const sh = ease.outExpo(clamp((r - tHold) / 0.3));
+        const sh = ease.outCubic(clamp((r - tHold) / 0.7)); // (edit diet: the "2" shrinks over 0.7 s with the dolly, not 0.3 s outExpo: a 5-frame dissolve)
         size = lerp(880, 250, sh); ox = lerp(130, 96, sh); oy = lerp(0, -330, sh);
         al = 1 - smoothstep(tHold + 0.15, tHold + 0.5, r) * 0.0;
       }
@@ -372,9 +381,8 @@ export default class Node1 extends Scene {
       shake: [(hash(fi, 1) - 0.5) * 2 * shakeAmp, (hash(fi, 2) - 0.5) * 2 * shakeAmp],
       ca: ca + 0.3, bloom: 0.4 + 0.2 * hit, bloomThreshold: 1.0, bloomKnee: 0.4, halation: 0.2, vignette: 0.35,
       zoom: 1 + 0.018 * hit, grain: 0.055 + 0.04 * hit,
-      // the dolly flies THROUGH the section plane at y = 0 (the big hatched plane leaves the frame and the tunnel behind it is dark): the
-      // frame used to fall to ~40% luma for 2 frames, a dark flash; exposure rides up while the camera crosses the plane
-      exposure: 1 + 0.95 * smoothstep(-0.9, -0.3, camY) * (1 - smoothstep(0.8, 1.3, camY)) * (!dive && r < tCrown ? 1 : 0),
+      // luma lock (see LUMA_LOCK): flattens the aliasing flicker of the dolly through the gate and of the crane
+      exposure: lumaLock(LUMA_LOCK, 936, f.t),
     };
   }
 

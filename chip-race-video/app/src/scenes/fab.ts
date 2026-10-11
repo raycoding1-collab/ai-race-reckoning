@@ -152,6 +152,8 @@ export default class Fab extends Scene {
       shake: [Math.sin(t * 190) * sh, Math.cos(t * 170) * sh] as [number, number],
       zoom: 1 + 0.01 * kick + 0.05 * cross, ca: 0.9 + 1.4 * x / 3 + 5 * cross + 4 * smoothstep(T_STOP, T_BLACK, t),
       grain: 0.055 + 0.05 * cross, fade: ease.inQuad(prog(t, 70.6, T_BLACK)),
+      // the panes lighting up while the camera pushes in used to ramp the frame 37 -> 65 luma in 0.6 s (an 11-frame dissolve): the early frames start brighter
+      exposure: 1 + 0.45 * (1 - smoothstep(68.0, 68.9, t)),
     };
   }
 

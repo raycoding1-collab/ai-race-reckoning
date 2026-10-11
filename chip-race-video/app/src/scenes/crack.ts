@@ -140,14 +140,15 @@ export default class CrackScene extends Scene {
     const cs = { x: 960, y: lerp(540, CS_END_Y, pb) };
     const g = gapAt(t);
     const xs = crackXSamples(t);
-    const fade = 1 - ease.inCubic(prog(t, 104.06, 104.7));
+    // (edit diet: "the lights go out" is a power cut, 3 frames after the last wave, not a 0.64 s fade: a cut, not an 11-frame dissolve)
+    const fade = 1 - ease.inCubic(prog(t, 104.2, 104.3));
     const Ron = onR(t), Rdead = deadR(t);
 
     const u = this.pass.u;
     u.uCs!.value.set(cs.x, cs.y);
     u.uS!.value = s; u.uG!.value = g; u.uRon!.value = Ron; u.uRdead!.value = Rdead; u.uFade!.value = fade;
     u.uRrev!.value = WR * 1.2 * ease.outExpo(prog(t, 101.3, 102.05));
-    u.uBg!.value = lerp(0.9, 0.18, ease.outCubic(prog(t, 101.3, 102.2))) * (1 - ease.inCubic(prog(t, 103.9, 104.5)));
+    u.uBg!.value = lerp(0.9, 0.18, ease.outCubic(prog(t, 101.3, 102.2))) * (1 - ease.inCubic(prog(t, 104.2, 104.3)));
     u.uRim!.value = ease.outCubic(prog(t, 101.5, 102.2));
     u.uT!.value = t;
     (u.uCx!.value as number[]).splice(0, 24, ...xs);
@@ -156,7 +157,7 @@ export default class CrackScene extends Scene {
     // ---- lines: the crack with its leak, tip sparks, the lone survivor
     const lb = this.lb; lb.clear();
     const flick = 0.78 + 0.22 * hash(frameIdx(t), 5);
-    const live = 1 - smoothstep(104.0, 104.35, t);
+    const live = 1 - smoothstep(104.2, 104.3, t);
     const edges = (path0: V2[], width: number, I: number, a: number, shift: boolean) => {
       const path = clipDisc(path0);
       for (let i = 1; i < path.length; i++) {
@@ -167,7 +168,7 @@ export default class CrackScene extends Scene {
     };
     const Lm = mainLen(t);
     if (Lm <= 0.5) { const o = this.scr(O_W, t, s, cs, 0, null); sparkHead(lb, o.x, o.y, t, 0.5, 0.8); }
-    const dim = (1 - smoothstep(104.0, 104.4, t)) * (1 - 0.0);
+    const dim = (1 - smoothstep(104.2, 104.3, t)) * (1 - 0.0);
     if (Lm > 0.5) {
       const mp = clipDisc(upTo(MAIN, Lm));
       if (g < 1) {
@@ -240,7 +241,7 @@ export default class CrackScene extends Scene {
     c.fillStyle = rgba('signal', 0.95); c.fillRect(96, 133, 200 * (load / 1.2), 4);
     // the plane label at the first kink
     const k1 = MAIN.pts[2]!;
-    const lab = ease.outCubic(prog(t, T_CRACK + 0.25, T_CRACK + 0.55)) * (1 - smoothstep(103.9, 104.2, t));
+    const lab = ease.outCubic(prog(t, T_CRACK + 0.25, T_CRACK + 0.55)) * (1 - smoothstep(104.1, 104.25, t));
     if (lab > 0.01 && g > 1) {
       const q = this.scr(k1, t, s, cs, 0, null);
       c.globalAlpha = lab;

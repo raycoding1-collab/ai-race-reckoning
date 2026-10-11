@@ -13,6 +13,10 @@ import { F, font, layout } from '../engine/type';
 import { clamp, ease, keys, lerp, prog, pulse, hash, frameIdx, type Key } from '../engine/util';
 import { lineByScene } from './_motifs';
 import { BT, H_TIN_LASER, H_LASER_MACHINE, karaoke, mono, odometer, wordP } from './sand-kit';
+import { lumaLock } from './_lumalock';
+
+/** luma lock 14.50-14.97 s (frame 435 on): the posterised ring bands sweeping in made a 6-frame +30 luma bump, read as a flash at 14.73 */
+const LASER_LOCK = [0.99, 1.00, 1.00, 0.97, 0.86, 0.70, 0.52, 0.46, 0.55, 0.67, 0.79, 0.91, 0.99, 1.00, 1.00];
 
 const RINGS = H_LASER_MACHINE.radii;
 
@@ -95,7 +99,7 @@ export default class LaserScene extends Scene {
     this.camK = [
       [0, 0], [hot, 0], [w[4].syl[1][0], 180, ease.outExpo], [w[5].start, 300, ease.outExpo], [w[6].start, 430, ease.outExpo],
       [sun, 540 - yS + 20, ease.outExpo], [BT(30) - 0.02, 540 - yS + 50, ease.linear], [BT(30) + 0.3, 400 - yTop, ease.outExpo],
-      [BT(31), 410 - yTop, ease.linear], [BT(31) + 0.36, 0, ease.inOutExpo],
+      [BT(31), 410 - yTop, ease.linear], [BT(31) + 0.36, 0, ease.inOutCubic], // (edit diet: the whip back onto the plasma eases in a cubic, not an inOutExpo: no 1-frame luma jump at 14.73)
     ];
   }
 
@@ -104,7 +108,7 @@ export default class LaserScene extends Scene {
     const t = f.t, w = this.line.words, tm = this.tm;
     const u = this.bg.u;
     const tilt = keys(t, this.camK);
-    const back = ease.inOutExpo(prog(t, BT(31), BT(31) + 0.36));
+    const back = ease.inOutCubic(prog(t, BT(31), BT(31) + 0.36));
     const P = [lerp(0, H_TIN_LASER.x, back), lerp(0, H_TIN_LASER.y, back)];
     const Q = [lerp(0, H_LASER_MACHINE.x, back), lerp(tilt, H_LASER_MACHINE.y, back)];
     (u.uP!.value as THREE.Vector2).set(P[0]!, P[1]!);
@@ -222,6 +226,7 @@ export default class LaserScene extends Scene {
     return {
       bloom: 0.55, bloomThreshold: 0.95, vignette: 0.4, grain: 0.06, halation: 0.35,
       flash: 0.5 * pulse(t, tm, 0.04), // (the laser pulse is the plate's one flash; the sun tick is a punch)
+      exposure: lumaLock(LASER_LOCK, 435, t),
       shake: [16 * hitL * (hash(frameIdx(t), 1) - 0.5) + 8 * pulse(t, BT(30), 0.05) * (hash(frameIdx(t), 3) - 0.5), 16 * hitL * (hash(frameIdx(t), 2) - 0.5)],
       zoom: 1 + 0.04 * hitL + 0.02 * pulse(t, BT(30), 0.08) + 0.012 * pulse(t, w[0].start, 0.08),
       ca: 1 + 6 * hitL,

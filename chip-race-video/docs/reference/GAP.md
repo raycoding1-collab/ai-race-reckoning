@@ -271,7 +271,7 @@ Each: concept, hero model with hand-built detail, lyric to geometry (word times 
 | key | 60-63.75 | Keep the model; re-render brass as bone with amber pins; tags to 18 px; SE-grade |
 | down2 | 82.5-86.25 | Remove duplicate gauge (comes from W5 C2 as a bus-bar); shorten the dashboard shake |
 | post2 | 86.25-93.75 | Keep LED board; add a wave that travels across and a power-down by columns; SE-grade for glow |
-| atom | 93.75-97.5 | Enlarge the border to 40% of frame; count `474 / 79,000,000,000,000,000,000` atoms (one grain, to be fact-checked); remove the out-blur |
+| atom | 93.75-97.5 | Enlarge the border to 40% of frame; count `474 / 9,900,000,000,000,000,000` atoms (one grain; fact-checked: 79e18 is 1 mm³ of quartz, the sand plate's grain is ⌀ 0.62 mm = 0.125 mm³ = 9.9e18); remove the out-blur |
 | down3 | 127.5-131.25 | Replace the wall of charts with a powers-of-ten zoom-out (one decade per beat, transistor to die to wafer to fab to field to map), ending on the traveller |
 
 ### 4.5 Merges and cuts
@@ -331,7 +331,7 @@ A single quartz grain (the opening's grain, the stowaway) rides through the film
 | 56.25 | island | `UNIT 0001  LANDED  NO LICENCE` |
 | 63.75 | shield | `UNIT 0001  POURED THROUGH DIE 112` |
 | 67.5 | fab rail | `UNIT 0001  SLOT 25  SLEEPING 0` |
-| 93.75 | atom | `ATOMS COUNTED 474 / 79,000,000,000,000,000,000` |
+| 93.75 | atom | `ATOMS COUNTED 474 / 9,900,000,000,000,000,000` (live counter / the ⌀ 0.62 mm grain's atoms; was 79e18, which is 1 mm³) |
 | 101.25 | crack | `UNIT 0001  KILLER DEFECT  DIE 112` (the crack nucleates at it) |
 | 131.25 | outro | `UNIT 0001  RETURN TO SENDER` |
 

@@ -333,7 +333,8 @@ export default class Grid1 extends Scene {
     const sh = 7 * pulse(r, 0, 0.06) + 4 * kick * smoothstep(0.5, 1, r);
     return {
       shake: [(hash(fi, 1) - 0.5) * 2 * sh, (hash(fi, 2) - 0.5) * 2 * sh],
-      flash: 0.0, ca: 1.0 + 1.5 * pulse(r, 0, 0.08), bloom: 0.6, bloomThreshold: 0.95, bloomKnee: 0.4, halation: 0.3, vignette: 0.4,
+      // the first frames (node1's lit cells re-lit as town lights) came in at 87 luma against node1's last frame at 57: exposure eases up
+      exposure: 0.65 + 0.35 * smoothstep(0, 0.3, r), ca: 1.0 + 1.5 * pulse(r, 0, 0.08), bloom: 0.6, bloomThreshold: 0.95, bloomKnee: 0.4, halation: 0.3, vignette: 0.4,
       zoom: 1 + 0.012 * kick * smoothstep(0.4, 1, r),
     };
   }

@@ -67,7 +67,8 @@ void main() {
   float sx = 1.0;
   float shown = icon;
   if (changedNow > 0.5 && lit < 0.5) {
-    if (ph < 0.5) { shown = prevIcon; sx = cos(ph * 3.14159); } else { shown = icon; sx = cos((1.0 - ph) * 3.14159); }
+    // (edit diet: the flap only closes to 40% width, not to a sliver: the mosaic's luma dipped 13 levels on every beat flip, a 2-frame dark flash)
+    if (ph < 0.5) { shown = prevIcon; sx = mix(1.0, cos(ph * 3.14159), 0.6); } else { shown = icon; sx = mix(1.0, cos((1.0 - ph) * 3.14159), 0.6); }
   }
   // once the crown has lit, the crown tiles freeze on a fixed icon; the rest slow down (dim)
   float afterCrown = smoothstep(uLight0 - 0.05, uLight0 + 0.4, uT);
