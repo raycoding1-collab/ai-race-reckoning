@@ -6,9 +6,9 @@ Goal: finish the full-song code-rendered music video. Branch `ccr-c467948d-jdmj7
 Inputs (done in Phase 3): `docs/reference/ANIMATION_SCRIPT.md` (reference, all 84 shots), `docs/reference/GAP.md` (our 32 plates vs the reference, the SEM look spec, the ranked hero worlds W1-W13, the UNIT 0001 gag, the edit budget). Kits: `tools/perceive/{video,song}_perceive.py` (outputs in build/perceive/{ref,ours}/).
 Decisions: SEM-micrograph "SE-look" for every plate (GAP.md section 3); keep the song timing and v2 audio; rebuild hero worlds as true-3D raymarched SDF in the SE look; render cost must stay bounded (measure s/frame on SwiftShader).
 Order (tick when done, commit after each):
-- [ ] A. Foundation: `engine/glsl/sem.ts` (SDF lib, SE shading, raster grain, data strip) + `semGrade` global re-grade of existing plates; look test stills.
+- [x] A. Foundation (done 15:55 UTC; W7 shield built; polish later: thinner etched lyric type, less overlap with the sand): `engine/glsl/sem.ts` (SDF lib, SE shading, raster grain, data strip) + `semGrade` global re-grade of existing plates; look test stills.
 - [ ] B. Edit diet (flashes <= 8, dissolves <= 4, bursts only in the 3 drops) + UNIT 0001 gag overlay.
-- [ ] C. Hero worlds in GAP.md rank order: W7 shield, W11 chamber, W12 stub (loop ending), W10 wire, W6 tower, W4 nanosheet, W8 fab rail, W9 die city, W1 wafer, W2 shot, W5 cornfield, W3 machine. At most 2 sonnet agents at a time.
+- [ ] C. Hero worlds (brief template: docs/HERO_BRIEF.md) in GAP.md rank order (W7 done; W11 in progress): W7 shield, W11 chamber, W12 stub (loop ending), W10 wire, W6 tower, W4 nanosheet, W8 fab rail, W9 die city, W1 wafer, W2 shot, W5 cornfield, W3 machine. At most 2 sonnet agents at a time.
 - [ ] D. Full re-render (render_chunks.sh, resumable, tracked jobs < 2 h), mux v2 audio, 1080p commit copy < 100 MB, 720p preview < 30 MB, SendUserFile with before/after.
 Window rule (learned 2026-10-10): schedule the safety-net `send_later` (~305 min) at the START of each window, not near the end.
 
