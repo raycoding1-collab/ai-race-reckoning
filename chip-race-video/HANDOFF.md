@@ -2,7 +2,17 @@
 
 Goal: finish the full-song code-rendered music video. Branch `ccr-c467948d-jdmj79` (open PR: https://github.com/raycoding1-collab/ai-race-reckoning/pull/13; pushing to the branch updates it, so do not create another PR), project `chip-race-video/`. User-approved scope: MASTERPIECE_PLAN.md (do not re-read the whole plan unless needed).
 
-## PHASE 3 (current task, 2026-10-10 19:10 UTC): perceive the reference exactly
+## PHASE 4 (current task, from 2026-10-11 14:30 UTC): SE-look redesign (user: finish fully, Claude decides, max quality, token-efficient, as many 5-hour windows as needed)
+Inputs (done in Phase 3): `docs/reference/ANIMATION_SCRIPT.md` (reference, all 84 shots), `docs/reference/GAP.md` (our 32 plates vs the reference, the SEM look spec, the ranked hero worlds W1-W13, the UNIT 0001 gag, the edit budget). Kits: `tools/perceive/{video,song}_perceive.py` (outputs in build/perceive/{ref,ours}/).
+Decisions: SEM-micrograph "SE-look" for every plate (GAP.md section 3); keep the song timing and v2 audio; rebuild hero worlds as true-3D raymarched SDF in the SE look; render cost must stay bounded (measure s/frame on SwiftShader).
+Order (tick when done, commit after each):
+- [ ] A. Foundation: `engine/glsl/sem.ts` (SDF lib, SE shading, raster grain, data strip) + `semGrade` global re-grade of existing plates; look test stills.
+- [ ] B. Edit diet (flashes <= 8, dissolves <= 4, bursts only in the 3 drops) + UNIT 0001 gag overlay.
+- [ ] C. Hero worlds in GAP.md rank order: W7 shield, W11 chamber, W12 stub (loop ending), W10 wire, W6 tower, W4 nanosheet, W8 fab rail, W9 die city, W1 wafer, W2 shot, W5 cornfield, W3 machine. At most 2 sonnet agents at a time.
+- [ ] D. Full re-render (render_chunks.sh, resumable, tracked jobs < 2 h), mux v2 audio, 1080p commit copy < 100 MB, 720p preview < 30 MB, SendUserFile with before/after.
+Window rule (learned 2026-10-10): schedule the safety-net `send_later` (~305 min) at the START of each window, not near the end.
+
+## PHASE 3 (done 2026-10-11 14:30 UTC): perceive the reference exactly
 User feedback on v2: "the original material I showed you was more creative on most levels". They re-sent the reference video (the P(doom) music video, 720x1280, 156.8 s); it is in `build/reference/ref.mp4` + `ref.wav` (gitignored, do not commit; the original upload is /root/.claude/uploads/.../3a9205ad-Video-82615.mp4). They rejected sparse low-res stills and asked: make sure you see the EXACT animations and song. Plan:
 1. `tools/perceive/video_perceive.py`: every frame analysed (cuts, flashes, transitions, optical-flow camera moves, change-driven keyframes with burned-in time/bar labels, contact sheets <=1600 px, OCR text timeline, beat sync, palettes) -> `build/perceive/<label>/report.md`, `shots.json`, `sheets/`.
 2. `tools/perceive/song_perceive.py`: MDX-Net ONNX vocal split, beats/chords/key (madmom), structure, timed lyrics (Whisper), melody notes (pyin), bass, drum grids, CLAP/CED instrumentation -> `LEAD_SHEET.md`, `SOUND.md`, `song.json`. Validated against our song's ground truth.
