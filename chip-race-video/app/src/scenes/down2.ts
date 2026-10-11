@@ -40,7 +40,7 @@ export default class Down2 extends Scene {
     const [sx, sy] = shakeVec(t, rumble * (t < T_STUT0 ? 1 : 0.3), 4);
     return {
       bloom: 0.7 + 0.5 * down, bloomThreshold: 0.82, shake: [sx, sy] as [number, number], zoom: 1 + 0.012 * f.a.kick + 0.05 * down,
-      ca: 0.7 + 3.5 * down + 1.2 * ease.inQuad(prog(t, 83.5, T_DOWN)), flash: 0.25 * down, vignette: 0.45,
+      ca: 0.7 + 3.5 * down + 1.2 * ease.inQuad(prog(t, 83.5, T_DOWN)), grain: 0.055 + 0.05 * down, vignette: 0.45,
     };
   }
 }

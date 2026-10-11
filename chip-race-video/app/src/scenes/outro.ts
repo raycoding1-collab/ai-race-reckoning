@@ -75,7 +75,7 @@ export default class Outro extends Scene {
     return {
       paper: paper > 0.5 ? 1 : 0, bloom: 0.35 + 0.3 * k2, bloomThreshold: 0.85, vignette: 0.5, halation: 0.05,
       shake: [Math.sin(t * 210) * sh, Math.cos(t * 190) * sh] as [number, number],
-      zoom: 1 + 0.025 * hit, ca: 0.6 + 4 * hit + 1.5 * k2, flash: 0.07 * hit,
+      zoom: 1 + 0.025 * hit, ca: 0.6 + 4 * hit + 1.5 * k2, grain: 0.055 + 0.04 * hit,
       fade: ease.inQuad(prog(t, T_FADE, END)),
     };
   }

@@ -6,6 +6,7 @@ import { rgba } from './palette';
 import { F, font } from './type';
 import type { Lyrics } from './lyrics';
 import { clamp, ease, hash, lerp, noise1, prog, smoothstep } from './util';
+import { drawGag } from './gag';
 
 export interface Caption { start: number; end: number; fig: string; text: string }
 
@@ -81,6 +82,10 @@ export interface HudState {
   paper: number;
   pdoomOverride?: string; // e.g. 'NaN'
   corruption?: number; // 0..1 glitch the readout
+  /** Draw the UNIT 0001 running gag (engine/gag.ts) — on unless the HUD is switched off for thumbnails. It ignores `opacity`: the plates that hide the HUD furniture (post.hud = 0) still carry the grain. */
+  gag?: boolean;
+  /** Beat phase 0..1 (for the grain's glint). */
+  beatPhase?: number;
 }
 
 export class Hud {
@@ -92,12 +97,15 @@ export class Hud {
     const L = this.layer;
     L.clear();
     const c = L.ctx;
-    if (st.opacity <= 0.001) return L.upload();
-    c.globalAlpha = st.opacity;
     this.ink = st.paper > 0.5;
-    if (st.frame > 0.001) this.cropMarks(c, st.frame);
-    if (st.readout > 0.001) { c.save(); c.globalAlpha *= st.readout; this.readout(c, t, st); c.restore(); }
-    this.caption(c, t);
+    if (st.opacity > 0.001) {
+      c.globalAlpha = st.opacity;
+      if (st.frame > 0.001) this.cropMarks(c, st.frame);
+      if (st.readout > 0.001) { c.save(); c.globalAlpha *= st.readout; this.readout(c, t, st); c.restore(); }
+      this.caption(c, t);
+    }
+    // UNIT 0001: the running gag rides every plate, above all of it (its own table and placement: gag.ts)
+    if (st.gag !== false) { c.globalAlpha = 1; drawGag(c, t, st.beatPhase ?? 0); }
     return L.upload();
   }
 

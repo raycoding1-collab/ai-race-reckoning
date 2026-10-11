@@ -221,7 +221,7 @@ export default class LaserScene extends Scene {
     const hitL = pulse(t, tm, 0.08);
     return {
       bloom: 0.55, bloomThreshold: 0.95, vignette: 0.4, grain: 0.06, halation: 0.35,
-      flash: 0.5 * pulse(t, tm, 0.04) + 0.08 * pulse(t, BT(30), 0.05),
+      flash: 0.5 * pulse(t, tm, 0.04), // (the laser pulse is the plate's one flash; the sun tick is a punch)
       shake: [16 * hitL * (hash(frameIdx(t), 1) - 0.5) + 8 * pulse(t, BT(30), 0.05) * (hash(frameIdx(t), 3) - 0.5), 16 * hitL * (hash(frameIdx(t), 2) - 0.5)],
       zoom: 1 + 0.04 * hitL + 0.02 * pulse(t, BT(30), 0.08) + 0.012 * pulse(t, w[0].start, 0.08),
       ca: 1 + 6 * hitL,

@@ -67,10 +67,10 @@ export default class Fab extends Scene {
         if (inShield(px, py) && Math.hypot(px - WAFER.cx, py - WAFER.cy) < WAFER.R - 10) { lit = true; wash = Math.exp(-(tau - T0) / 0.5); }
         else {
           const dist = Math.hypot(px - 960, py - 420);
-          const tl = T0 + 0.12 + 1.15 * clamp(dist / 1150) + hash(ci, cj, 1) * 0.45;
+          const tl = T0 + 0.12 + 1.9 * clamp(dist / 1150) + hash(ci, cj, 1) * 0.6; // (edit diet: the panes light over 2.5 s instead of 1.6 s: a reveal, not a 13-frame dissolve)
           const dead = hash(ci, cj, 3) < 0.1;
           lit = t >= tl && (!dead || Math.sin(t * 23 + hash(ci, cj, 4) * 40) > 0.6);
-          wash = lit ? Math.exp(-(t - tl) / 0.14) : 0;
+          wash = lit ? 0.6 * Math.exp(-(t - tl) / 0.14) : 0;
         }
         if (!lit) continue;
         const sx = FX + S * (px - dx / 2 + 1.5 - FX), sy = FY + S * (py - dy / 2 + 1.5 - FY);
@@ -151,7 +151,7 @@ export default class Fab extends Scene {
       bloom: 0.8 + 0.6 * cross, bloomThreshold: 0.78, halation: 0.18, vignette: 0.45 + 0.3 * smoothstep(70.2, T_BLACK, t),
       shake: [Math.sin(t * 190) * sh, Math.cos(t * 170) * sh] as [number, number],
       zoom: 1 + 0.01 * kick + 0.05 * cross, ca: 0.9 + 1.4 * x / 3 + 5 * cross + 4 * smoothstep(T_STOP, T_BLACK, t),
-      flash: 0.35 * cross, fade: ease.inQuad(prog(t, 70.6, T_BLACK)),
+      grain: 0.055 + 0.05 * cross, fade: ease.inQuad(prog(t, 70.6, T_BLACK)),
     };
   }
 

@@ -263,7 +263,8 @@ export default class CrackScene extends Scene {
     for (const tw of WAVE_T) wv = Math.max(wv, pulse(t, tw, 0.06));
     return {
       bloom: 0.7 + 0.5 * hit, bloomThreshold: 0.8, vignette: 0.45, ca: 0.4 + 2.5 * hit + 0.8 * wv,
-      flash: 0.10 * hit + 0.04 * wv,
+      flash: 0.55 * pulse(t, T_CRACK, 0.02), // the one designed flash of the bridge: the crack lands (KILLER DEFECT); the waves only punch
+      grain: 0.055 + 0.04 * wv,
       shake: [(hash(frameIdx(t), 1) - 0.5) * 22 * hit, (hash(frameIdx(t), 2) - 0.5) * 22 * hit],
     };
   }

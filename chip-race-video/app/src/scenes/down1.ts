@@ -231,7 +231,7 @@ export default class Down1 extends Scene {
     const [sx, sy2] = shakeVec(t, 2 + 14 * down + 4 * f.a.kick, 3);
     return {
       bloom: 0.55 + 0.6 * down + 0.4 * fin, bloomThreshold: 0.8, shake: [sx, sy2] as [number, number],
-      zoom: 1 + 0.012 * f.a.kick + 0.05 * down, ca: 0.5 + 3 * down, flash: 0.2 * down, vignette: 0.4,
+      zoom: 1 + 0.012 * f.a.kick + 0.05 * down, ca: 0.5 + 3 * down, grain: 0.055 + 0.05 * down, vignette: 0.4, // (the "down" hit: punch + rim + re-noise, no flash)
     };
   }
 }

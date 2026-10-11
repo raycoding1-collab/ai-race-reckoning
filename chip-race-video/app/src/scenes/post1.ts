@@ -52,7 +52,7 @@ export default class Post1 extends Scene {
     const [sx, sy] = shakeVec(t, 1.5 * f.a.kick + 10 * glitch * hash(frameIdx(t), 4), 5);
     return {
       bloom: 0.8 + 0.5 * off, bloomThreshold: 0.72, bloomRadius: 0.7, shake: [sx, sy] as [number, number], zoom: 1 + 0.008 * f.a.kick,
-      ca: 0.9 + 4 * glitch, flash: 0.15 * pulse(t, T0, 0.06) + 0.15 * pulse(t, T_LVL, 0.06), vignette: 0.5,
+      ca: 0.9 + 4 * glitch, grain: 0.055 + 0.05 * pulse(t, T0, 0.06) + 0.05 * pulse(t, T_LVL, 0.06), vignette: 0.5,
     };
   }
 
@@ -148,22 +148,15 @@ export default class Post1 extends Scene {
       ox += widths[i]! + (first ? 12 : 14);
     }
     // game over, level 2, glitch
-    if (t >= T_OVER && t < T_NOISE) {
+    if (t >= T_OVER && t < T_LVL) { // (GAME OVER now holds to the level card: the 0.15 s noise interlude was a third shot in 0.7 s)
       const f2 = frameIdx(t);
       r(0, 0, 320, 180, K.blk);
       const s1 = 'GAME OVER';
       const jit = hash(f2, 7) > 0.8 ? Math.round((hash(f2, 8) - 0.5) * 8) : 0;
-      text(s1, 160 - tw(s1, 6) / 2 + jit, 62, 6, hash(f2, 2) > 0.85 ? K.wht : K.red, K.dgy);
+      text(s1, 160 - tw(s1, 6) / 2 + jit, 62, 6, K.red, K.dgy); // (the white flicker of the title is gone: edit diet)
       const s2 = 'CONTINUE?  ' + String(9 - Math.min(9, Math.floor((t - T_OVER) / 0.06))).padStart(2, '0');
       text(s2, 160 - tw(s2, 2) / 2, 124, 2, K.wht);
       text('TPP ' + formatTPP(score), 160 - tw('TPP ' + formatTPP(score), 2) / 2, 144, 2, K.amb);
-    }
-    if (t >= T_NOISE && t < T_LVL) {
-      const f2 = frameIdx(t);
-      for (let y = 0; y < 180; y += 3) for (let x = 0; x < 320; x += 4) {
-        const h = hash(x, y, f2);
-        if (h > 0.55) r(x, y, 4, 3, h > 0.9 ? K.wht : h > 0.75 ? K.amb : K.dgy);
-      }
     }
     if (lvl2) {
       // cover the running game with the level card for the first moment
@@ -179,7 +172,7 @@ export default class Post1 extends Scene {
       if (t > T_LVL + 0.3) text(s2, 160 - tw(s2, 2) / 2, 128, 2, K.wht);
       const s3 = 'PRESS START';
       if (Math.floor(t * 4) % 2 === 0 && t > T_LVL + 0.4) text(s3, 160 - tw(s3, 2) / 2, 152, 2, K.gry);
-      c.globalAlpha = 1 - k; r(0, 0, 320, 180, K.wht); c.globalAlpha = 1;
+      void k; // (no white fade-in of the level card: a hard cut)
     }
     void kick; void clamp; void lerp;
   }
@@ -219,7 +212,7 @@ export default class Post1 extends Scene {
     c.save();
     c.beginPath(); c.rect(960 - visW / 2, 540 - visH / 2, visW, visH); c.clip();
     // slices
-    const g = prog(t, T_GLITCH, T_OVER, ease.inQuad) * (t < T_NOISE ? 1 : 0) + (t >= T_NOISE && t < T_LVL + 0.2 ? 1 : 0) * 0.8;
+    const g = prog(t, T_GLITCH, T_OVER, ease.inQuad) * (t < T_LVL ? 1 : 0) + (t >= T_LVL && t < T_LVL + 0.2 ? 0.5 : 0);
     const bands = g > 0 ? 36 : 1;
     const bh = 1080 / bands;
     for (let i = 0; i < bands; i++) {

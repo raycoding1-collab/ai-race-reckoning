@@ -203,7 +203,7 @@ export default class AtomScene extends Scene {
     const bump = pulse(lt, 0, 0.1);
     return {
       bloom: 0.55, bloomThreshold: 0.8, vignette: 0.4, ca: 0.4,
-      flash: 0.05 * bump, zoom: 1 + 0.004 * placedPulse(lt),
+      grain: 0.055 + 0.035 * bump, zoom: 1 + 0.004 * placedPulse(lt), // (the opening beat re-noises the grain instead of flashing)
     };
   }
 

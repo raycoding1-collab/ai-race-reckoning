@@ -18,7 +18,7 @@ export const PLATES: [string, string, number, number, Record<string, unknown>?][
   ['drop1', 'drop', 14, 16, { n: 1 }], ['node1', 'node1', 16, 18], ['grid1', 'grid1', 18, 20], ['down1', 'down1', 20, 22],
   ['post1', 'post1', 22, 26],
   ['hbm', 'hbm', 26, 28], ['smuggle', 'smuggle', 28, 30], ['island', 'island', 30, 32], ['key', 'key', 32, 34],
-  ['shield', 'shield', 34, 36], ['fab', 'fab', 36, 38],
+  ['shield', 'w7-shield', 34, 36], ['fab', 'fab', 36, 38],
   ['drop2', 'drop', 38, 40, { n: 2 }], ['node2', 'node2', 40, 42], ['grid2', 'grid2', 42, 44], ['down2', 'down2', 44, 46],
   ['post2', 'post2', 46, 50],
   ['atom', 'atom', 50, 52], ['dream', 'dream', 52, 54], ['crack', 'crack', 54, 56], ['whoscrown', 'whoscrown', 56, 58],

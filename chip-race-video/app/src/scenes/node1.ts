@@ -123,11 +123,15 @@ export default class Node1 extends Scene {
     const faces: { n: V3; axis: 'x' | 'y' | 'z' }[] = [
       { n: [0, 0, 1], axis: 'z' }, { n: [0, 0, -1], axis: 'z' }, { n: [-1, 0, 0], axis: 'x' }, { n: [1, 0, 0], axis: 'x' }, { n: [0, -1, 0], axis: 'y' }, { n: [0, 1, 0], axis: 'y' },
     ];
+    // (edit diet: when the dolly flies through the gate the camera is INSIDE its box and every wall used to be back-face culled: the frame
+    // dropped to half its luma for 2 frames, a dark flash. Inside a box we now hatch its inner walls, lit from the other side.)
+    const inside = cp.x > x0 && cp.x < x1 && cp.y > y0 && cp.y < y1 && cp.z > z0 && cp.z < z1;
+    const sg = inside ? -1 : 1;
     for (const fc of faces) {
       const n = fc.n;
       const cx = n[0] > 0 ? x1 : n[0] < 0 ? x0 : (x0 + x1) / 2, cy = n[1] > 0 ? y1 : n[1] < 0 ? y0 : (y0 + y1) / 2, cz = n[2] > 0 ? z1 : n[2] < 0 ? z0 : (z0 + z1) / 2;
-      if ((cp.x - cx) * n[0] + (cp.y - cy) * n[1] + (cp.z - cz) * n[2] <= 0) continue;
-      const d = Math.max(0.0, n[0] * LIGHT.x + n[1] * LIGHT.y + n[2] * LIGHT.z);
+      if (!inside && (cp.x - cx) * n[0] + (cp.y - cy) * n[1] + (cp.z - cz) * n[2] <= 0) continue;
+      const d = Math.max(0.0, sg * (n[0] * LIGHT.x + n[1] * LIGHT.y + n[2] * LIGHT.z)) + (inside ? 0.25 : 0);
       const lit = 0.18 + 0.82 * d + (rim ? 0.25 : 0);
       const wpx = (0.7 + 2.0 * lit) * gain;
       const col = lin(b.kind === 'sheet' ? LIN.ember : LIN.signal, 0.25 + 1.05 * lit);
@@ -208,10 +212,25 @@ export default class Node1 extends Scene {
     const tHold = this.words[2].start - this.T0, tCrown = this.words[4].start - this.T0;
     const L = (a: V3, b: V3, u: number): V3 => [lerp(a[0], b[0], u), lerp(a[1], b[1], u), lerp(a[2], b[2], u)];
     const U: V3 = [0, 0, 1];
-    if (r < t5) return { pos: L([3.4, -4.8, 4.6], [3.0, -4.3, 4.2], (r - t7) / (t5 - t7)), tgt: [0, 0, 0.9], up: U, cut: false };
-    if (r < t3) return { pos: L([-7, -1.5, 1.9], [-6.2, -1.2, 1.9], (r - t5) / (t3 - t5)), tgt: [0, 0, 1.0], up: U, cut: false };
-    if (r < t2) return { pos: L([0.3, -5.4, 1.25], [0.1, -4.2, 1.15], (r - t3) / (t2 - t3)), tgt: [0, 0, 1.0], up: U, cut: true };
-    if (r < tHold) return { pos: L([0.55, -2.6, 1.05], [0.12, -1.55, 0.84], ease.outCubic((r - t2) / (tHold - t2))), tgt: [0, 0, 0.84], up: U, cut: true };
+    // The four numeral poses used to be four hard camera cuts 0.23 s apart (a burst). Now the camera glides: each pose
+    // drifts for the first third of its numeral, then eases into the next one, so the move is one continuous orbit.
+    type P = { a: V3; b: V3; tgt: V3; cut: boolean; t0: number; t1: number };
+    const seg: P[] = [
+      { a: [3.4, -4.8, 4.6], b: [3.0, -4.3, 4.2], tgt: [0, 0, 0.9], cut: false, t0: t7, t1: t5 },
+      { a: [-7, -1.5, 1.9], b: [-6.2, -1.2, 1.9], tgt: [0, 0, 1.0], cut: false, t0: t5, t1: t3 },
+      { a: [0.3, -5.4, 1.25], b: [0.1, -4.2, 1.15], tgt: [0, 0, 1.0], cut: true, t0: t3, t1: t2 },
+      { a: [0.55, -2.6, 1.05], b: [0.12, -1.55, 0.84], tgt: [0, 0, 0.84], cut: true, t0: t2, t1: tHold },
+    ];
+    if (r < tHold) {
+      let j = 0; while (j < 3 && r >= seg[j + 1]!.t0) j++;
+      const sg = seg[j]!, nx = seg[j + 1];
+      const u = clamp((r - sg.t0) / (sg.t1 - sg.t0));
+      const e = j === 3 ? ease.outCubic(u) : u;
+      const base = L(sg.a, sg.b, e);
+      if (!nx) return { pos: base, tgt: sg.tgt, up: U, cut: sg.cut };
+      const w = ease.inOutCubic(smoothstep(0.34, 1.0, u));
+      return { pos: L(base, nx.a, w), tgt: L(sg.tgt, nx.tgt, w), up: U, cut: w > 0.5 ? nx.cut : sg.cut };
+    }
     if (r < tCrown) {
       const u = ease.inOutCubic(clamp((r - tHold) / (tCrown - tHold)));
       const y = lerp(-1.55, 1.9, u);
@@ -220,7 +239,7 @@ export default class Node1 extends Scene {
     // crane up: log-distance rise while the view rotates down to a top-down plan
     const T = 3.28 - tCrown;
     const u = clamp((r - tCrown) / T);
-    const kz = ease.inOutQuart(u);
+    const kz = ease.inOutCubic(u); // (edit diet: was inOutQuart; the middle of the crane no longer ramps the frame's luma by +25 in one frame)
     const z = Math.exp(lerp(Math.log(0.82), Math.log(135.6), kz));
     const ky = smoothstep(0.4, 0.9, u);
     const y = lerp(1.9, 0, ky);
@@ -247,13 +266,14 @@ export default class Node1 extends Scene {
 
     const lay = this.layer, c = lay.ctx;
     lay.clear();
-    let shakeAmp = 0, flash = 0, ca = 1.0;
+    let shakeAmp = 0, ca = 1.0, hit = 0, camY = -9;
     let numIdx = -1;
     for (let i = 0; i < 4; i++) if (r >= n[i]!) numIdx = i;
     const inNum = !dive && r < tHold;
 
     if (!dive) {
       const cam = this.camAt(r);
+      camY = cam.pos[1];
       this.cam.position.set(...cam.pos);
       this.cam.up.set(...cam.up).normalize();
       this.cam.lookAt(cam.tgt[0], cam.tgt[1], cam.tgt[2]);
@@ -291,38 +311,46 @@ export default class Node1 extends Scene {
       comp.draw(renderer, this.rt.texture, out, { mode: 'add', offset: [off, 0], premult: false });
     }
 
-    // ---- numerals: 7 5 3 2 slam on the syllables of "nanometers"
+    // ---- numerals: 7 5 3 2 on the syllables of "nanometers". Edit diet: they used to slam in (a pop, an inversion, a flash, 4 shots
+    // in 0.9 s); now they roll like a counter drum: the old numeral leaves upward as the next rises from below, inside the numeral window.
     if (!dive && r < tHold + 0.5) {
       const labs = ['7', '5', '3', '2'];
       const i = Math.max(0, numIdx);
       const s = r - n[i]!;
       const fam = F.archivo(100, 900);
-      let k = ease.outExpo(clamp(s / 0.16));
+      const k = ease.outExpo(clamp(s / 0.16));
       let size = 880, ox = 130, oy = 0, al = 1;
       if (i === 3) {
         const sh = ease.outExpo(clamp((r - tHold) / 0.3));
         size = lerp(880, 250, sh); ox = lerp(130, 96, sh); oy = lerp(0, -330, sh);
         al = 1 - smoothstep(tHold + 0.15, tHold + 0.5, r) * 0.0;
       }
-      const sc = 1 + 0.28 * (1 - k);
       c.save();
-      c.globalAlpha = al;
       c.font = font(fam, size);
       c.textBaseline = 'alphabetic';
-      const m = c.measureText(labs[i]!);
       const capH = c.measureText('H').actualBoundingBoxAscent;
-      const bx = ox, by = H / 2 + capH / 2 + oy;
-      c.translate(bx + m.width / 2, by - capH / 2); c.scale(sc, sc); c.translate(-(bx + m.width / 2), -(by - capH / 2));
-      c.fillStyle = HEX.bone;
-      c.fillText(labs[i]!, bx, by);
+      const by = H / 2 + capH / 2 + oy;
+      // the numeral window (the drum): everything outside it is clipped while rolling
+      if (i > 0 && k < 0.999) { c.beginPath(); c.rect(0, by - capH - 40, 1500, capH + 90); c.clip(); }
+      const roll = capH * 1.2;
+      const num = (lab: string, dy: number, a: number) => {
+        c.globalAlpha = al * a;
+        c.fillStyle = HEX.bone;
+        c.fillText(lab, ox, by + dy);
+      };
+      if (i > 0 && k < 0.999) num(labs[i - 1]!, -k * roll, 1 - k);
+      num(labs[i]!, (1 - k) * (i > 0 ? roll : 0), i > 0 ? k : 1);
       // nm superscript
+      const m = c.measureText(labs[i]!);
+      c.globalAlpha = al;
       c.font = font(F.mono(600), size * 0.17); c.fillStyle = HEX.signal;
-      c.fillText('nm', bx + m.width + size * 0.03, by - capH + size * 0.12);
+      c.fillText('nm', ox + m.width + size * 0.03, by - capH + size * 0.12);
       c.restore();
       if (r >= n[0]! && r < tHold) {
-        shakeAmp = 16 * pulse(s, 0, 0.06);
-        flash = s < 0.1 ? 0.28 * pulse(s, 0, 0.015) : 0;
-        ca = 1.2 + 3 * pulse(s, 0, 0.08);
+        // the numeral's hit: a small shake and CA, a camera punch (the zoom in the post return below); no flash, no inversion
+        shakeAmp = 6 * pulse(s, 0, 0.06);
+        ca = 1.2 + 2 * pulse(s, 0, 0.08);
+        hit = pulse(s, 0, 0.07);
       }
     }
     this.karaoke(c, r);
@@ -342,8 +370,11 @@ export default class Node1 extends Scene {
     const fi = frameIdx(f.t);
     return {
       shake: [(hash(fi, 1) - 0.5) * 2 * shakeAmp, (hash(fi, 2) - 0.5) * 2 * shakeAmp],
-      flash, ca: ca + 0.3, bloom: 0.4, bloomThreshold: 1.0, bloomKnee: 0.4, halation: 0.2, vignette: 0.35, hud: 0,
-      invert: !dive && numIdx >= 0 && r < tHold && r - n[numIdx]! < 2 / 60 + 1e-4 ? 1 : 0,
+      ca: ca + 0.3, bloom: 0.4 + 0.2 * hit, bloomThreshold: 1.0, bloomKnee: 0.4, halation: 0.2, vignette: 0.35,
+      zoom: 1 + 0.018 * hit, grain: 0.055 + 0.04 * hit,
+      // the dolly flies THROUGH the section plane at y = 0 (the big hatched plane leaves the frame and the tunnel behind it is dark): the
+      // frame used to fall to ~40% luma for 2 frames, a dark flash; exposure rides up while the camera crosses the plane
+      exposure: 1 + 0.95 * smoothstep(-0.9, -0.3, camY) * (1 - smoothstep(0.8, 1.3, camY)) * (!dive && r < tCrown ? 1 : 0),
     };
   }
 
@@ -362,7 +393,7 @@ export default class Node1 extends Scene {
   /** the array: fins and gates of the whole die at distance, and the lit crown cells */
   private farField(lb: LineBatch, r: number, ppu: number, vis: number, tCrown: number) {
     const tEnd = 3.28;
-    const fade = 1 - smoothstep(tEnd, tEnd + 0.4, r) * 0.9; // lattice lines drop away at the end: only the lit lights remain
+    const fade = 1 - smoothstep(tEnd - 0.9, tEnd, r) * 0.9; // lattice lines drop away over the last second of the crane (edit diet: was a 0.4 s fade after it, a 26-frame dissolve): only the lit lights remain
     const fin = lin(LIN.signal, 0.55 * vis * fade);
     const gate = lin(LIN.blood, 1.0 * vis * fade);
     const gw = Math.max(1, 1.8 * ppu);

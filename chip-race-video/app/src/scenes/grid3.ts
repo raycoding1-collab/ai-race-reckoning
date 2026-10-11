@@ -125,14 +125,14 @@ export default class Grid3 extends Scene {
     for (const x of [560, 1360]) { const L: { x: number; y: number }[] = []; for (let y = -2200; y <= 190; y += 190) L.push({ x, y }); this.pylons.push(L); }
     this.shots = [
       { t: 0, x: 960, y: 540, s: 1.0, r: 0, tilt: 0 },
-      { t: 123.8, x: 960, y: 560, s: 1.3, r: 0, tilt: 0.42, snap: 0.45 },
-      { t: 124.219, x: 900, y: 820, s: 1.9, r: -0.07, tilt: 0.55, snap: 0.11 },
-      { t: 124.6875, x: 1280, y: 540, s: 1.5, r: 0.11, tilt: 0.42, snap: 0.11 },
-      { t: 125.156, x: 700, y: 470, s: 2.2, r: -0.15, tilt: 0.5, snap: 0.1 },
-      { t: 125.625, x: 960, y: 700, s: 1.15, r: 0.0, tilt: 0.32, snap: 0.09 },
-      { t: 126.094, x: 960, y: 520, s: 1.75, r: 0.07, tilt: 0.45, snap: 0.1 },
-      { t: 126.5625, x: 1120, y: 470, s: 2.6, r: -0.11, tilt: 0.55, snap: 0.1 },
-      { t: 127.03, x: 960, y: 540, s: 3.4, r: 0.04, tilt: 0.3, snap: 0.2 },
+      { t: 123.8, x: 960, y: 560, s: 1.3, r: 0, tilt: 0.42, snap: 0.4 },
+      { t: 124.219, x: 900, y: 820, s: 1.9, r: -0.07, tilt: 0.55, snap: 0.4 },
+      { t: 124.6875, x: 1280, y: 540, s: 1.5, r: 0.11, tilt: 0.42, snap: 0.4 },
+      { t: 125.156, x: 700, y: 470, s: 2.2, r: -0.15, tilt: 0.5, snap: 0.4 },
+      { t: 125.625, x: 960, y: 700, s: 1.15, r: 0.0, tilt: 0.32, snap: 0.4 },
+      { t: 126.094, x: 960, y: 520, s: 1.75, r: 0.07, tilt: 0.45, snap: 0.4 },
+      { t: 126.5625, x: 1120, y: 470, s: 2.6, r: -0.11, tilt: 0.55, snap: 0.4 },
+      { t: 127.03, x: 960, y: 540, s: 3.4, r: 0.04, tilt: 0.3, snap: 0.4 },
     ];
   }
 
@@ -227,7 +227,7 @@ export default class Grid3 extends Scene {
     return {
       bloom: (0.9 + 0.9 * over + 0.6 * town) * (1 - flat) + 0.55 * flat, bloomThreshold: 0.8 + 0.05 * flat, halation: (0.25 + 0.9 * over) * (1 - flat) + 0.25 * flat,
       exposure: 1 + 0.3 * over * (1 - flat), shake: [sx * (1 - flat), sy * (1 - flat)] as [number, number], zoom: 1 + 0.03 * kick + 0.06 * town,
-      ca: (1 + 3 * town + 2.5 * over) * (1 - flat) + 1.2 * flat, flash: 0.3 * pulse(t, T0 + 0.03, 0.05) + 0.3 * town, vignette: 0.35,
+      ca: (1 + 3 * town + 2.5 * over) * (1 - flat) + 1.2 * flat, grain: 0.055 + 0.05 * pulse(t, T0 + 0.03, 0.05) + 0.03 * town, vignette: 0.35, // (no flashes: the town lights and the hit are punch, rim and grain)
     };
   }
 

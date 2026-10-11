@@ -397,7 +397,8 @@ export default class Key extends Scene {
     renderer.render(this.three, this.cam);
 
     // ---- composite: paper / iris / ink studio
-    const irisR = keys(lt, [[0, 0], [0.12, 176, ease.outQuad], [0.47, 2400, ease.inCubic], [0.48, 4000]]);
+    // (edit diet: the iris used to take 0.35 s to cross the frame, a 5-frame dissolve; now it snaps open in 3 frames: one hard cut on the beat)
+    const irisR = keys(lt, [[0, 0], [0.12, 176, ease.outQuad], [0.2, 2400, ease.inCubic], [0.21, 4000]]);
     const exitStart = END - 0.55, exitU = clamp((t - exitStart) / 0.45);
     const fu = this.final.u;
     fu.scene!.value = this.sceneRT.texture;

@@ -82,7 +82,7 @@ export default class Tons extends Scene {
       c.stroke(); c.restore();
     }
     // landing flash
-    if (land > 0.02) { c.globalAlpha = 0.85 * land; c.fillStyle = b.g === 3 ? rgba('ember') : rgba('bone'); c.fillRect(x - w / 2, y - h / 2, w, h); }
+    if (land > 0.02) { c.globalAlpha = 0.45 * land; c.fillStyle = b.g === 3 ? rgba('ember') : rgba('bone'); c.fillRect(x - w / 2, y - h / 2, w, h); }
     c.restore();
   }
 

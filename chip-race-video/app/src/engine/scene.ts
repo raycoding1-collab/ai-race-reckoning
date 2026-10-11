@@ -71,6 +71,11 @@ export abstract class Scene {
   /** If true, this scene composites `f.under` itself during its incoming transition. */
   handlesTransition = false;
   /**
+   * SE-look retrofit strength for this plate (engine/se.ts semGrade, applied by Post): 1 = full (default), 0 = off.
+   * Hero worlds that shade themselves with semShade set 0 (or return `se: 0` in their PostOverrides, see sePost()).
+   */
+  seGrade = 1;
+  /**
    * The scene's own render targets (with a depth buffer) that adaptive per-tile refinement may mask like
    * `out`: once a tile has converged, later sub-frames skip shading it there too. Only for a target whose
    * texels are read back at their own screen position, or at most a few px off it (`margin: 1` widens the

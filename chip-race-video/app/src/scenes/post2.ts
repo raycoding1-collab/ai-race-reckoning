@@ -60,7 +60,7 @@ export default class Post2 extends Scene {
     const [sx, sy] = shakeVec(t, 6 * kick + 18 * imp, 7);
     return {
       bloom: 0.95, bloomThreshold: 0.78, bloomRadius: 0.8, halation: 0.3, zoom: 1 + 0.012 * kick + 0.04 * imp, shake: [sx, sy] as [number, number],
-      ca: 0.7 + 2.5 * imp, flash: 0.1 * imp + 0.1 * pulse(t, T0, 0.05), vignette: 0.4,
+      ca: 0.7 + 2.5 * imp, grain: 0.055 + 0.04 * imp + 0.04 * pulse(t, T0, 0.05), vignette: 0.4,
     };
   }
 
@@ -68,7 +68,7 @@ export default class Post2 extends Scene {
   drawBoard(t: number, kick: number) {
     const w = this.wall;
     w.clear();
-    const gain = (0.85 + 0.3 * kick) * (1 - 0.5 * prog(t, 92.7, KILL0 + 0.1));
+    const gain = (0.85 + 0.3 * kick) * (1 - 0.5 * prog(t, KILL0 - 0.05, KILL0 + 0.05)); // (edit diet: the board's power cut is one hard cut on the beat, not a 0.75 s LED-by-LED dissolve)
     // marquee border: chasing lights around the perimeter
     const per = 2 * (GW + GH) - 4;
     for (let n = 0; n < per; n++) {
@@ -99,7 +99,7 @@ export default class Post2 extends Scene {
     if (t > KILL0 - 0.35) {
       for (let j = 0; j < GH; j++) for (let i = 0; i < GW; i++) {
         const surv = isSurvivor(i, j);
-        const kt = KILL0 + hash(i, j, 3) * (T1 - 0.15 - KILL0);
+        const kt = KILL0 + hash(i, j, 3) * 0.06;
         if (surv) {
           const k = prog(t, KILL0 + 0.15, T1 - 0.2);
           w.set(i, j, AMB[0] * (0.9 + 0.2 * Math.sin(t * 5 + i)) * (0.6 + 0.8 * k), AMB[1] * (0.6 + 0.8 * k), AMB[2]);
@@ -170,7 +170,8 @@ export default class Post2 extends Scene {
           } else if (lit && d < R - 2.2) {
             const pat = ((x + y) & 1) === 0 ? 0.5 : 0.28;
             const sparkle = hash(frameIdx(t) * 0.2, x, y) > 0.93 ? 1.0 : 0;
-            w.put(x, y, AMB[0], AMB[1], AMB[2], (pat * (0.7 + 0.5 * heat) + sparkle * 0.6) * gain);
+            // (edit diet: the lit lamp's fill is a glow, not a flash: a third of the old fill; the rings carry the hit)
+            w.put(x, y, AMB[0], AMB[1], AMB[2], (0.4 * pat * (0.7 + 0.3 * heat) + sparkle * 0.35) * gain);
           }
         }
         if (lit) {

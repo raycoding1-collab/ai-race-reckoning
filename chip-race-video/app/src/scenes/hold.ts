@@ -166,14 +166,14 @@ export default class HoldScene extends Scene {
 
     // ---- post
     const A = AMP(tau);
-    const flash = smoothstep(T_END - 0.07, T_END - 0.005, t) * 1.6 + 0.3 * pulse(t, T_SNAP, 0.05);
+    const flash = smoothstep(T_END - 0.07, T_END - 0.005, t) * 1.6; // (only the white flash into the drop; the snap itself is a punch and a re-noise)
     const inhale = smoothstep(T_SNAP + 0.25, T_END - 0.15, t);
     const tremble = (!snapped ? 1 : 0) * (t < T_STOP ? 1 : 0.0);
     return {
       bloom: 0.8 + 0.4 * u, bloomThreshold: 0.8, vignette: 0.42 + 0.45 * inhale, ca: 0.4 + 0.8 * u + 3 * gl,
       zoom: 1 + 0.035 * u + 0.012 * kickB + 0.02 * pulse(t, T_V, 0.1),
       shake: [noise1(t * 60, 4) * 0.07 * A * tremble * u, noise1(t * 57, 9) * 0.05 * A * tremble * u],
-      flash, grain: 0.06 + 0.04 * gl,
+      flash, grain: 0.06 + 0.04 * gl + 0.05 * pulse(t, T_SNAP, 0.05),
     };
   }
 

@@ -50,8 +50,9 @@ export default class DreamScene extends Scene {
 
   /** Camera target and spherical pose at local time lt. */
   private pose(lt: number, T: number) {
-    const tilt = ease.inOutCubic(prog(lt, 0.2, 1.75));
-    const back = ease.inOutCubic(prog(lt, T - 0.85, T - 0.1));
+    // (edit diet: the tilt, the morph and the flattening are each stretched ~30%: slow camera moves, not 5-10 frame dissolves)
+    const tilt = ease.inOutCubic(prog(lt, 0.2, 2.0));
+    const back = ease.inOutCubic(prog(lt, T - 0.3, T - 0.2));
     const k = tilt * (1 - back);
     const pitch = lerp(89.6, 27, k) * Math.PI / 180;
     const D = lerp(D_TOP, 21, k);
@@ -73,8 +74,8 @@ export default class DreamScene extends Scene {
     this.cam.lookAt(target);
     this.cam.updateMatrixWorld(); this.cam.updateProjectionMatrix();
 
-    const morph = ease.inOutCubic(prog(lt, 0.1, 1.5));
-    const flat = ease.inOutCubic(prog(lt, T - 0.85, T - 0.25));
+    const morph = ease.inOutCubic(prog(lt, 0.1, 2.0));
+    const flat = ease.inOutCubic(prog(lt, T - 0.3, T - 0.2)); // (the landscape flattens in 3 frames on the beat before crack opens: a cut, not a 14-frame dissolve)
     const u = this.mat.uniforms;
     u.uT!.value = t;
     u.uMorph!.value = morph;

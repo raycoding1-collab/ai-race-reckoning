@@ -2,6 +2,7 @@
 // film grain, vignette, fades/flash. Operates on the composited HDR (linear) frame.
 import * as THREE from 'three';
 import { FSPass, makeRT, W, H, SCALE } from './gl';
+import { SEGrade } from './se';
 
 /** The tone shoulder (linear HDR -> 0..1 linear), shared with the engine's sampling error estimate. */
 export const SHOULDER_GLSL = /* glsl */ `
@@ -35,6 +36,17 @@ export interface PostParams {
   shake: [number, number]; // frame offset in px
   zoom: number; // frame zoom (1 = none), for punch-ins on hits
   invert: number; // 0..1 invert (ink <-> bone), applied before grain
+  /**
+   * SE-look retrofit (engine/se.ts semGrade) strength 0..1, applied to the scene's finished plate before bloom:
+   * 1 = full (the default for every plate), 0 = off (hero worlds that already shade themselves with semShade).
+   */
+  se: number;
+  /** 0..1 camera/scene motion for the SE raster grain: noisy while moving, clean on holds (default: moving). */
+  seMotion: number;
+  /** Kick pulse for the SE grain (the engine fills it from the audio analysis). */
+  seKick: number;
+  /** Gain of the amber element-map mask in the retrofit (0 drops amber too). */
+  seAmber: number;
   /** Replace the HUD P(doom) digits (e.g. 'NaN'). */
   pdoomText?: string;
   /** 0..1 glitch the HUD readout. */
@@ -60,6 +72,10 @@ export const DEFAULT_POST: PostParams = {
   shake: [0, 0],
   zoom: 1,
   invert: 0,
+  se: 1,
+  seMotion: 0.6,
+  seKick: 0,
+  seAmber: 1,
 };
 
 const MIPS = 7;
@@ -69,6 +85,8 @@ export class Post {
   private down: FSPass;
   private up: FSPass;
   private final: FSPass;
+  private grade = new SEGrade();
+  private gradedRT = makeRT(W, H, { depthBuffer: false });
   private mips: THREE.WebGLRenderTarget[] = [];
   private ups: THREE.WebGLRenderTarget[] = [];
 
@@ -172,11 +190,18 @@ ${SCALE === 1 ? `        float g1 = hash12(gl_FragCoord.xy + fract(time * 13.37)
 
   /** Apply the chain: src (HDR linear) -> out (sRGB 8-bit target or screen). */
   render(renderer: THREE.WebGLRenderer, src: THREE.Texture, hud: THREE.Texture, out: THREE.WebGLRenderTarget | null, p: PostParams, time: number) {
+    // SE-look retrofit: the finished plate becomes ink/graphite/ash/bone + amber mask + scan grain (bloom sees the graded plate)
+    const se = Math.max(0, Math.min(1, p.se ?? 0));
+    if (se > 0.001) {
+      this.grade.render(renderer, src, this.gradedRT, { strength: se, frame: Math.round(time * 60), motion: p.seMotion ?? 0.6, kick: p.seKick ?? 0, amber: p.seAmber ?? 1 });
+      src = this.gradedRT.texture;
+    }
     // bloom pyramid
     this.prefilter.u.src!.value = src;
     (this.prefilter.u.texel!.value as THREE.Vector2).set(1 / W, 1 / H);
-    this.prefilter.u.threshold!.value = p.bloomThreshold;
-    this.prefilter.u.knee!.value = p.bloomKnee;
+    // graded plates: amber-only bloom (bone never blooms), no film halation, the SE scan grain replaces film grain
+    this.prefilter.u.threshold!.value = p.bloomThreshold + (1.0 - p.bloomThreshold) * se;
+    this.prefilter.u.knee!.value = p.bloomKnee + (0.08 - p.bloomKnee) * se;
     this.prefilter.render(renderer, this.mips[0]!);
     for (let i = 1; i < MIPS; i++) {
       const s = this.mips[i - 1]!;
@@ -202,10 +227,11 @@ ${SCALE === 1 ? `        float g1 = hash12(gl_FragCoord.xy + fract(time * 13.37)
     f.hudTex!.value = hud;
     f.exposure!.value = p.exposure;
     f.bloom!.value = p.bloom / 3; // pyramid sums ~MIPS levels; normalize
-    f.halation!.value = p.halation;
-    f.ca!.value = p.ca;
-    f.grain!.value = p.grain;
-    f.vignette!.value = p.vignette;
+    f.halation!.value = p.halation * (1 - se);
+    // SE plates are monochrome: chromatic aberration only on hits (the part of ca above its ~1.6 px baseline)
+    f.ca!.value = p.ca * (1 - se) + Math.max(0, p.ca - 1.6) * se;
+    f.grain!.value = p.grain * (1 - 0.8 * se);
+    f.vignette!.value = p.vignette * (1 - se);
     f.hud!.value = p.hud;
     f.fade!.value = p.fade;
     f.flash!.value = p.flash;

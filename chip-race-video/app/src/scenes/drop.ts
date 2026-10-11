@@ -498,14 +498,14 @@ export default class Drop extends Scene {
       const stack = n === 2 ? stack2(BONE, UMB) : n === 3 ? this.echo(r, s, [AMB, BONE, UMB, AMB, BONE, UMB], fg) : [];
       this.word(c, 'EVERY', { fill: fg, sc, rot: n === 3 ? -0.015 : 0, stack, lines: n === 1 ? INK : undefined });
       this.furniture(c, '01', 'EVERY', fg);
-      shakeAmp = [10, 16, 26][n - 1]!; flash = 0.3;
+      shakeAmp = [10, 16, 26][n - 1]!;
     } else if (k === 'ev2') {
       const m = this.M.EVERY!;
       const sc = slamAmt(0.12);
       const stack = n === 2 ? stack2(BONE, UMB, 22) : n === 3 ? this.echo(r, s, [BONE, AMB, UMB, BONE], fg) : [];
       this.word(c, 'EVERY', { fill: fg, sc, z: 2.05, fx: m.width * 0.68, stack, rot: n === 3 ? 0.03 : 0 });
       this.furniture(c, '01', 'EVERY · 2', fg, 0.6);
-      shakeAmp = [14, 22, 34][n - 1]!; flash = 0.2;
+      shakeAmp = [14, 22, 34][n - 1]!;
     } else if (k === 'wa1' || k === 'wa2') {
       const second = k === 'wa2';
       const sc = slamAmt(second ? 0.1 : 0.17);
@@ -514,7 +514,7 @@ export default class Drop extends Scene {
       this.word(c, 'WAFER', { fill: fg, sc, z: second ? 1.0 : 1.0, stack, cy: CY + (second ? 20 : 0) });
       if (n === 3 && second) this.shrapnel(c, r, true, fg);
       this.furniture(c, '02', second ? 'WAFER · 2' : 'WAFER', isPaper ? INK : BONE, 0.7);
-      shakeAmp = [8, 14, 24][n - 1]!; flash = 0.25;
+      shakeAmp = [8, 14, 24][n - 1]!;
     } else if (k === 'is' || k === 'a') {
       const key = k === 'is' ? 'is' : 'a';
       const sc = this.slam(s, 0.06, 0.12);
@@ -535,7 +535,7 @@ export default class Drop extends Scene {
       bb.seg2(-60, hy, hx, hy, 2.2, [LIN.signal[0] * 2, LIN.signal[1] * 2, LIN.signal[2] * 2], 1);
       beamParticles(bb, r, (tt: number) => { const q = (tt - this.shots.find((x) => x.k === 'is')!.t0) / (this.shots.find((x) => x.k === 'a')!.t1 - this.shots.find((x) => x.k === 'is')!.t0); return q < 0 || q > 1 ? null : { x: lerp(-60, W + 60, ease.inOutCubic(clamp(q))), y: hy }; }, { rate: 180, life: 0.35, speed: 320, gravity: 700, intensity: 0.8, seed: 5 });
       beamHead(bb, hx, hy, r, 1.2, 1);
-      shakeAmp = k === 'is' ? 4 : 7; flash = 0.1;
+      shakeAmp = k === 'is' ? 4 : 7;
     } else if (k === 'we1' || k === 'we2') {
       const second = k === 'we2';
       const m = this.M.WEAPON!;
@@ -545,7 +545,7 @@ export default class Drop extends Scene {
       this.word(c, 'WEAPON', { fill: fg, sc, rot: second ? 0.05 : -0.04, z: second ? 2.2 : 1, fx: m.width * 0.78, stack });
       if (n === 3) this.shrapnel(c, r, true, fg);
       this.furniture(c, '05', second ? 'WEAPON · 2' : 'WEAPON', fg, 0.7);
-      shakeAmp = [26, 36, 50][n - 1]! * (second ? 1.2 : 1); flash = second ? 0.3 : 0.55; ca = 3.2;
+      shakeAmp = [26, 36, 50][n - 1]! * (second ? 1.2 : 1); ca = 3.2;
     } else if (k === 'now') {
       if (n === 3) {
         this.shrapnel(c, r, false, fg);
@@ -581,7 +581,6 @@ export default class Drop extends Scene {
       const cross = this.tpp[1] >= TPP_THRESHOLD && this.tpp[0] < TPP_THRESHOLD;
       shakeAmp = pulse(s, 0.12, 0.05) * 22 + pulse(s, 0.0, 0.05) * 18 + (cross ? 0 : 0);
       if (!isFinite(this.tpp[1])) shakeAmp = 22 + pulse(s, 0.5, 0.06) * 60;
-      flash = Math.max(0.35 * pulse(s, 0, 0.05), (!isFinite(this.tpp[1]) ? 0.8 * pulse(s, 0.5, 0.05) : 0.45 * pulse(s, 0.12, 0.05)));
       ca = 2.5 + 3 * pulse(s, 0.12, 0.08);
       invertFrames = false;
     } else if (k === 'end') {
@@ -604,19 +603,21 @@ export default class Drop extends Scene {
     const shx = (hash(fi, 3) - 0.5) * 2 * shakeAmp * e, shy = (hash(fi, 4) - 0.5) * 2 * shakeAmp * e;
     let fl = s < 0.14 ? flash * pulse(s, 0, 0.022) : 0;
     if (r < 0.2 && k === 'ev1') fl = Math.max(fl, r < 0.12 ? 1.35 * pulse(r, 0, 0.03) : 0); // land from the white flash
-    const inv = invertFrames && s < 2 / 60 + 1e-4 && !/^(ev|we)/.test(k) ? 1 : 0; // no inverted flash on the amber EVERY/WEAPON slams (it reads as blue)
+    // edit diet: the two-frame inversion is kept only for the NOW slam (the drop's one flash after the landing); every other slam punches (shake, CA, zoom, rim, grain)
+    const inv = invertFrames && s < 2 / 60 + 1e-4 && k === 'now' ? 1 : 0;
     post.shake = [shx, shy];
     post.flash = fl;
     post.invert = inv;
     post.ca = ca * (0.5 + 0.5 * e) + 0.6;
     post.zoom = zoom * (1 + 0.025 * e);
-    post.bloom = isPaper ? 0.25 : 0.6;
+    post.bloom = (isPaper ? 0.25 : 0.6) + 0.22 * e; // rim brighten on the hit
+    post.grain = 0.055 + 0.05 * e; // grain re-noise on the hit
     post.bloomThreshold = bloomT;
     post.bloomKnee = 0.3;
     post.halation = 0.18;
     post.vignette = isPaper ? 0.15 : 0.3;
     post.paper = isPaper ? 1 : 0;
-    post.hud = 0.0;
+    // (post.hud stays 1: the HUD layer holds only the UNIT 0001 gag here; the plate has no crop marks, readout or caption)
     return post;
   }
 

@@ -511,7 +511,8 @@ export class Engine {
       outTex = this.avgRT.texture;
     }
     this.lastSamples = n;
-    const hudTex = this.hud.draw(t, { opacity: this.hudOff ? 0 : post.hud, frame: post.frame, readout: post.pdoom, paper: post.paper, pdoomOverride: post.pdoomText, corruption: post.hudCorruption });
+    const hudTex = this.hud.draw(t, { opacity: this.hudOff ? 0 : post.hud, frame: post.frame, readout: post.pdoom, paper: post.paper, pdoomOverride: post.pdoomText, corruption: post.hudCorruption, gag: !this.hudOff, beatPhase: this.audio.beatAt(t) % 1 });
+    post.seKick = this.audio.hit('kick', t, 0.06); // SE raster grain re-noises on each kick
     this.post.render(r, outTex, hudTex, this.finalRT, post, t);
     this.lastPost = post;
     if (toScreen) {
@@ -587,7 +588,7 @@ export class Engine {
         clearRT(r, rt, [0.25, 0.0, 0.0]);
       }
       rec.lastT = t;
-      post = { ...post, ...(e.post ?? {}), ...(ov ?? {}) };
+      post = { ...post, se: s.seGrade, ...(e.post ?? {}), ...(ov ?? {}) };
       if (idx > 0 && !s.handlesTransition && under) {
         // default: crossfade from the previous scene over the overlap
         this.xfade.u.a!.value = under;

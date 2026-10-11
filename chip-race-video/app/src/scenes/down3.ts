@@ -144,7 +144,7 @@ export default class Down3 extends Scene {
     const [sx, sy] = shakeVec(t, 2 + 6 * ease.inQuad(prog(t, T0, T_DOWN)) + 16 * down + 4 * f.a.kick, 6);
     return {
       bloom: 0.7 + 0.6 * down, bloomThreshold: 0.8, shake: [sx, sy] as [number, number],
-      zoom: 1 + 0.012 * f.a.kick + 0.05 * down, ca: 0.6 + 3.5 * down + 2 * tilt, flash: 0.25 * down, vignette: 0.45,
+      zoom: 1 + 0.012 * f.a.kick + 0.05 * down, ca: 0.6 + 3.5 * down + 2 * tilt, grain: 0.055 + 0.05 * down, vignette: 0.45,
     };
   }
 }

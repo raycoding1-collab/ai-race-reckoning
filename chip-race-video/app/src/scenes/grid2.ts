@@ -119,7 +119,7 @@ export default class Grid2 extends Scene {
 
     return {
       bloom: 0.75 + 0.5 * slamHit, bloomThreshold: 0.82, zoom: 1 + 0.012 * kick + 0.03 * slamHit, ca: 0.6 + 2.2 * slamHit,
-      shake: [sx * 0.5, sy * 0.5] as [number, number], flash: 0.1 * pulse(t, SLAM.feed[4]!, 0.05) + 0.14 * pulse(t, 78.75, 0.05),
+      shake: [sx * 0.5, sy * 0.5] as [number, number], grain: 0.055 + 0.05 * (pulse(t, SLAM.feed[4]!, 0.05) + pulse(t, 78.75, 0.05)), // (hits re-noise the grain: no flash)
     };
   }
 

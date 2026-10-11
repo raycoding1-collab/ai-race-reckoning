@@ -1,7 +1,8 @@
 // `tin` (bars 4-6, 7.5-11.25 s): Edgerton stroboscope photography.
-// A black vacuum chamber. A capillary nozzle fires molten tin droplets; a strobe on every 16th freezes
-// the stream and each exposure stays on the "film" as a fading ghost, so every droplet drags a trail of
-// frozen copies (the stream steps down per flash). The droplets are rendered liquid metal (analytic
+// A black vacuum chamber. A capillary nozzle fires molten tin droplets; a strobe on every beat freezes
+// the stream (it moves ~2 droplet spacings per beat, so each flash re-exposes nearly the same lattice) and
+// each exposure stays on the "film" as a fading ghost. (Edit diet: the strobe used to fire on every 16th,
+// a 15-shot burst; now the last flash is the laser pre-pulse.) The droplets are rendered liquid metal (analytic
 // spheres reflecting the strobe softbox and the amber bay light). The lyric is the high-speed camera's
 // slate: FIFTY THOUSAND clacks the counter up one syllable at a time to 50,000 and locks; "tin drops every
 // second" is chalked by the beam. A timing diagram (strobe / droplet / laser) scrolls under the column.
@@ -18,15 +19,16 @@ import { lineByScene } from './_motifs';
 import { BT, H_SAND_TIN, H_TIN_LASER, beamHead, beamParticles, karaoke, mono, odometer, wordP } from './sand-kit';
 
 const T0 = 7.5;
-const DT = BT(0.25); // one 16th: the strobe period
+const DT = BT(1); // one beat: the strobe period (edit diet: a quarter-note strobe freezes the stream; the old 16th strobe was a 15-cut burst)
 const S = 210; // droplet spacing (px)
 const XS = H_SAND_TIN.x;
 const R = H_SAND_TIN.r;
-const K_PP = 29; // the 29th flash is the laser pre-pulse
-const T_PP = T0 + K_PP * DT;
+const T_PP = T0 + 29 * BT(0.25); // the laser pre-pulse (unchanged: 10.89 s)
+/** the strobe's flashes: one per beat from T0, then the pre-pulse as the last one */
+const FLASHES: number[] = [...Array.from({ length: 7 }, (_, k) => T0 + k * DT), T_PP];
 const Y_PP = 560; // the pre-pulsed droplet's y
 // stream: y_i(t) = Y0 + V (t - T0) + i S ; droplet i=3 sits at H_SAND_TIN.y at T0, and one lands at Y_PP at T_PP
-const V = (Y_PP - H_SAND_TIN.y + 14 * S) / (T_PP - T0); // ~S/2 per flash: ghosts interleave
+const V = (Y_PP - H_SAND_TIN.y + 14 * S) / (T_PP - T0); // ~2 S per beat: each flash re-exposes the (nearly) same lattice: the stream looks frozen
 const Y0 = H_SAND_TIN.y - 3 * S;
 const NG = 7; // ghosts kept on the film
 
@@ -68,16 +70,16 @@ void main() {
   vec3 col = C_INK;
   // chamber: viewport rings and a faint wall gradient lit by the strobe
   float rr = length(w - vec2(960.0, 540.0));
-  col += C_GRAPHITE * 0.05 * (0.4 + 2.5 * uAmb) * smoothstep(1500.0, 300.0, rr);
+  col += C_GRAPHITE * 0.05 * (0.4 + 1.1 * uAmb) * smoothstep(1500.0, 300.0, rr);
   float ring = pxLine(abs(rr - 1010.0) * uCam.x, 0.5, 1.4) + pxLine(abs(rr - 1030.0) * uCam.x, 0.4, 1.2) * 0.6;
-  col += C_ASH * ring * (0.18 + 0.6 * uAmb);
+  col += C_ASH * ring * (0.18 + 0.25 * uAmb);
   // nozzle: a tapered capillary, engraved as a cylinder (vertical lines that thicken toward the edges)
   float ny = w.y; float hw = mix(34.0, 9.0, sat(ny / 112.0));
   if (ny < 112.0 && abs(w.x - uX) < hw) {
     float u = (w.x - uX) / hw;
     float lit = sat(0.25 + 0.75 * (1.0 - abs(u + 0.35)));
     float ln = hatchD(u * 7.0, 0.15 + 0.55 * (1.0 - lit), fwidth(u * 7.0));
-    col = C_INK2 + C_BONE * 0.55 * (1.0 - ln) * lit * (0.5 + 0.8 * uAmb);
+    col = C_INK2 + C_BONE * 0.55 * (1.0 - ln) * lit * (0.5 + 0.35 * uAmb);
     col += C_BONE * pxLine((hw - abs(w.x - uX)) * uCam.x, 0.5, 1.4) * 0.8;
   }
   // the droplets: every ghost exposure, summed like film
@@ -147,12 +149,12 @@ export default class TinScene extends Scene {
     const { renderer, comp } = this.ctx;
     const t = f.t;
     const u = this.bg.u;
-    const kNow = Math.min(K_PP, Math.floor((t - T0) / DT + 1e-6));
+    let kNow = -1; for (let i = 0; i < FLASHES.length; i++) if (t >= FLASHES[i]! - 1e-6) kNow = i;
     const ph = u.uPhase!.value as number[], ex = u.uExpo!.value as number[];
     for (let g = 0; g < NG; g++) {
       const k = kNow - g;
       if (k < 0) { ex[g] = 0; continue; }
-      const tk = T0 + k * DT;
+      const tk = FLASHES[k]!;
       ph[g] = Y0 + V * (tk - T0);
       // film: the newest exposure is full; older ones fade with age (and after the pre-pulse, all fade but the pancake)
       const age = t - tk;
@@ -163,7 +165,7 @@ export default class TinScene extends Scene {
     (u.uCam!.value as THREE.Vector4).set(c.s, c.P[0], c.P[1], 0);
     (u.uQ!.value as THREE.Vector2).set(c.Q[0], c.Q[1]);
     u.uHot!.value = 1 - prog(t, T0, T0 + 0.7, ease.outQuad);
-    const amb = pulse(t, T0 + kNow * DT, 0.035);
+    const amb = kNow < 0 ? 0 : pulse(t, FLASHES[kNow]!, 0.035);
     u.uAmb!.value = amb;
     u.uPan!.value = ease.outExpo(prog(t, T_PP + 0.02, T_PP + 0.3));
     u.uPP!.value = pulse(t, T_PP, 0.05) * (t >= T_PP ? 1 : 0);
@@ -182,8 +184,9 @@ export default class TinScene extends Scene {
 
     const down = Math.max(pulse(t, T0, 0.09), pulse(t, BT(20), 0.09));
     return {
-      bloom: 0.7, bloomThreshold: 1.15, vignette: 0.45, grain: 0.05,
-      zoom: 1 + 0.03 * down + 0.004 * amb, flash: 0.02 * amb + 0.08 * u.uPP!.value,
+      bloomThreshold: 1.15, vignette: 0.45,
+      // (the pre-pulse used to flash the frame: now a punch-in, a rim brighten and a grain re-noise)
+      zoom: 1 + 0.03 * down + 0.004 * amb + 0.012 * u.uPP!.value, bloom: 0.7 + 0.25 * u.uPP!.value, grain: 0.05 + 0.04 * u.uPP!.value,
       shake: [0, 6 * pulse(t, T0, 0.06)],
     };
   }
@@ -203,9 +206,10 @@ export default class TinScene extends Scene {
       const pts: { x: number; y: number }[] = [{ x: x0, y: yb }];
       const t0 = t - (XS - x0) / pxs, t1 = t + (x1 - XS) / pxs;
       const n0 = Math.ceil((t0 - r.phase) / r.period), n1 = Math.floor((t1 - r.phase) / r.period);
-      for (let n = Math.max(n0, ri === 2 ? 0 : -999); n <= Math.min(n1, ri === 2 ? 0 : 999); n++) {
-        const ta = r.phase + n * r.period;
-        if (ri === 0 && ta > T_PP + 1e-3) break;
+      // (the strobe row shows the real flashes: a beat apart, then the pre-pulse; the other rows are periodic)
+      const nStart = ri === 0 ? 0 : Math.max(n0, ri === 2 ? 0 : -999), nEnd = ri === 0 ? FLASHES.length - 1 : Math.min(n1, ri === 2 ? 0 : 999);
+      for (let n = nStart; n <= nEnd; n++) {
+        const ta = ri === 0 ? FLASHES[n]! : r.phase + n * r.period;
         if (ta < 7.0) continue;
         const xa = X(ta), xb = X(ta + r.width);
         if (xb < x0 || xa > x1) continue;
@@ -222,7 +226,7 @@ export default class TinScene extends Scene {
     });
     // the now-cursor through the stream
     L.seg2(XS, y0 - 40, XS, y0 + 2 * gap + 10, 1, [LIN.signal[0] * 1.2, LIN.signal[1] * 1.2, LIN.signal[2] * 1.2], a);
-    const nFl = Math.max(0, Math.min(K_PP + 1, Math.floor((t - T0) / DT) + 1));
+    let nFl = 0; for (const tf of FLASHES) if (t >= tf - 1e-6) nFl++;
     mono(x, `FLASH ${String(nFl).padStart(3, '0')} · Δt ${(DT * 1000).toFixed(1)} ms (song) · 20 µs (real)`, XS + 12, y0 + 2 * gap + 26, 13, rgba('bone', 0.55 * a), 500);
   }
 
@@ -236,7 +240,7 @@ export default class TinScene extends Scene {
     x.fillRect(X0, 112, X1 - X0, 1.2);
     x.fillRect(X0, 160, X1 - X0, 1.2);
     mono(x, 'SCENE 02 · Sn DROPLET GENERATOR', X0, 145, 16, rgba('bone', 0.85), 600, 'left', 1.5);
-    mono(x, 'STROBE 1/16 · ROLL 7A', X1, 145, 16, rgba('bone', 0.5), 500, 'right', 1.5);
+    mono(x, 'STROBE 1/4 · ROLL 7A', X1, 145, 16, rgba('bone', 0.5), 500, 'right', 1.5);
     // FIFTY THOUSAND, per word
     const fam = F.archivo(75, 900);
     let xx = X0;

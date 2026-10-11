@@ -139,13 +139,13 @@ export default class Node3 extends Scene {
     this.kicks = this.ctx.audio.events('kick', 119.9, 123.8).map((e) => e[0]);
     this.shots = [
       { t: 0, x: 1900, y: 260, s: 2.8, r: -0.3, tilt: 0.62 },
-      { t: 120.469, x: 620, y: 820, s: 2.1, r: 0.22, tilt: 0.55, snap: 0.11 },
-      { t: 120.9375, x: 1320, y: 540, s: 1.7, r: -0.12, tilt: 0.42, snap: 0.11 },
-      { t: 121.406, x: 760, y: 470, s: 1.35, r: 0.09, tilt: 0.28, snap: 0.11 },
-      { t: 121.875, x: 960, y: 560, s: 1.12, r: -0.03, tilt: 0.14, snap: 0.1 },
-      { t: 122.34, x: 960, y: 540, s: 1.04, r: 0.0, tilt: 0.04, snap: 0.14 },
-      { t: 122.81, x: 960, y: 540, s: 1.08, r: 0.0, tilt: 0.0, snap: 0.12 },
-      { t: 123.28, x: 960, y: 540, s: 1.0, r: 0.0, tilt: 0.0, snap: 0.2 },
+      { t: 120.469, x: 620, y: 820, s: 2.1, r: 0.22, tilt: 0.55, snap: 0.4 },
+      { t: 120.9375, x: 1320, y: 540, s: 1.7, r: -0.12, tilt: 0.42, snap: 0.4 },
+      { t: 121.406, x: 760, y: 470, s: 1.35, r: 0.09, tilt: 0.28, snap: 0.4 },
+      { t: 121.875, x: 960, y: 560, s: 1.12, r: -0.03, tilt: 0.14, snap: 0.4 },
+      { t: 122.34, x: 960, y: 540, s: 1.04, r: 0.0, tilt: 0.04, snap: 0.4 },
+      { t: 122.81, x: 960, y: 540, s: 1.08, r: 0.0, tilt: 0.0, snap: 0.4 },
+      { t: 123.28, x: 960, y: 540, s: 1.0, r: 0.0, tilt: 0.0, snap: 0.4 },
     ];
   }
 
@@ -193,7 +193,7 @@ export default class Node3 extends Scene {
     const [sx, sy] = shakeVec(t, 10 * kick * (1 - settleK) + 26 * crownHit + 20 * a0, 11);
     return {
       bloom: 0.85 + 0.6 * crownHit, bloomThreshold: 0.8, shake: [sx, sy] as [number, number], zoom: 1 + 0.02 * kick + 0.06 * crownHit,
-      ca: 1.0 + 4 * crownHit + 3 * a0, flash: 0.55 * a0 + 0.3 * crownHit, vignette: 0.4,
+      ca: 1.0 + 4 * crownHit + 3 * a0, grain: 0.055 + 0.06 * a0 + 0.03 * crownHit, vignette: 0.4,
     };
   }
 }

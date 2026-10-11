@@ -178,7 +178,7 @@ export default class Grid1 extends Scene {
     const B = this.base, G = this.glow;
     const beatK = r / BEAT, beatPh = beatK - Math.floor(beatK);
     const kick = Math.pow(1 - beatPh, 3);
-    const endK = smoothstep(3.28, 3.62, r); // the world falls away
+    const endK = smoothstep(3.28, 3.36, r); // the world falls away (edit diet: in 2-3 frames on the beat, a cut to the racing line, instead of a 0.34 s dissolve)
 
     // ---- the first 0.3 s: node1's lit cells (same world), shrinking to town lights
     const shrink = smoothstep(0.0, 0.32, r);
@@ -333,7 +333,7 @@ export default class Grid1 extends Scene {
     const sh = 7 * pulse(r, 0, 0.06) + 4 * kick * smoothstep(0.5, 1, r);
     return {
       shake: [(hash(fi, 1) - 0.5) * 2 * sh, (hash(fi, 2) - 0.5) * 2 * sh],
-      flash: 0.0, ca: 1.0 + 1.5 * pulse(r, 0, 0.08), bloom: 0.6, bloomThreshold: 0.95, bloomKnee: 0.4, halation: 0.3, vignette: 0.4, hud: 0,
+      flash: 0.0, ca: 1.0 + 1.5 * pulse(r, 0, 0.08), bloom: 0.6, bloomThreshold: 0.95, bloomKnee: 0.4, halation: 0.3, vignette: 0.4,
       zoom: 1 + 0.012 * kick * smoothstep(0.4, 1, r),
     };
   }

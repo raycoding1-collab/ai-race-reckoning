@@ -119,3 +119,15 @@ export function deadR(t: number): number {
   return r;
 }
 export const onR = (t: number) => 1500 * ease.outCubic(prog(t, 101.34, 102.55));
+
+/**
+ * Screen position (px) of the nucleation notch O_W at song time t: the plate's camera (the slow push-in, then the
+ * pull-back onto whoscrown's star at starY). Pure, so the UNIT 0001 gag can pin its marker to the grain the crack grows from.
+ */
+export function nucleusPx(t: number, starY = 190): V2 {
+  const S_END = 0.71, csEndY = starY + WR * S_END;
+  const pb = ease.inOutCubic(prog(t, 102.95, 103.8));
+  const push = 0.05 * ease.inQuad(prog(t, 101.3, T_CRACK));
+  const s = (1 + (S_END - 1) * pb) * (1 + push);
+  return { x: 960 + O_W.x * s, y: 540 + (csEndY - 540) * pb + O_W.y * s };
+}

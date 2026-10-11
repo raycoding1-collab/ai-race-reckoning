@@ -59,18 +59,18 @@ export default class Node2 extends Scene {
     const sy = (pr: number) => pr; void sy;
     this.shots = [
       { t: 0, x: 0, y: 0, s: 1250 },
-      { t: 75.469, x: -0.14, y: -0.12, s: 2700, r: 0.0, snap: 0.12 },
-      { t: 75.9375, x: 0.18, y: 0.2, s: 4600, r: 0.14, snap: 0.12 },
-      { t: 76.17, x: tg.x - 0.06, y: tg.y - 0.04, s: 9500, r: -0.06, snap: 0.16 },
-      { t: 76.406, x: tg.x, y: tg.y, s: 16000, r: 0.0, snap: 0.12 },
-      { t: 76.875, x: tg.x + 0.004, y: tg.y + 0.002, s: 30000, r: 0.0, snap: 0.14 },
+      { t: 75.469, x: -0.14, y: -0.12, s: 2700, r: 0.0, snap: 0.4 },
+      { t: 75.9375, x: 0.18, y: 0.2, s: 4600, r: 0.14, snap: 0.23 },
+      { t: 76.17, x: tg.x - 0.06, y: tg.y - 0.04, s: 9500, r: -0.06, snap: 0.23 },
+      { t: 76.406, x: tg.x, y: tg.y, s: 16000, r: 0.0, snap: 0.4 },
+      { t: 76.875, x: tg.x + 0.004, y: tg.y + 0.002, s: 30000, r: 0.0, snap: 0.4 },
     ];
   }
 
   /** wafer zoom for the first 0.4 s: log zoom from the whole disc to a single die */
   cam(t: number) {
     const b = camAt(this.shots, t);
-    const z = ease.outExpo(clamp((t - T0) / 0.42));
+    const z = ease.inOutQuad(clamp((t - T0) / 0.469)); // (edit diet: an eased dive that lands on the first pose at 75.469 instead of an outExpo snap in the first 3 frames)
     let s = Math.exp(lerp(Math.log(56), Math.log(1250), z));
     if (t >= 75.469) s = b.s * (1 + 0.04 * clamp((t - 75.469) / 1.4)); // slow push inside shots
     if (t >= 76.875) s = b.s * (1 + 0.1 * clamp((t - 76.875) / 1.4));
@@ -158,7 +158,7 @@ export default class Node2 extends Scene {
     const crownHit = pulse(t, 76.875, 0.12);
     const [sx, sy2] = shakeVec(t, 14 * crownHit + 6 * kick * (t > 75.4 ? 1 : 0), 3);
     return {
-      bloom: 0.8 + 0.5 * crownHit, bloomThreshold: 0.8, flash: 0.3 * crownHit + 0.18 * pulse(t, T0, 0.05), shake: [sx, sy2] as [number, number],
+      bloom: 0.8 + 0.5 * crownHit, bloomThreshold: 0.8, grain: 0.055 + 0.04 * crownHit + 0.04 * pulse(t, T0, 0.05), shake: [sx, sy2] as [number, number],
       zoom: 1 + 0.03 * kick + 0.05 * crownHit, ca: 0.8 + 3.0 * crownHit, vignette: 0.45,
     };
   }

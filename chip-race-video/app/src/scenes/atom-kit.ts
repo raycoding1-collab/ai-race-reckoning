@@ -165,3 +165,14 @@ float hTex(vec2 px) { // px in logical px, y down from the top
 }`;
 
 export { lerp };
+
+/** Atoms the tally has counted `lt` s into the atom plate (one lattice row per 0.125 s, 32 sites per row): the counter's value. */
+export function atomsCounted(lt: number, dtRow = 0.125): number {
+  let n = 0;
+  for (let j = 0; j < LAT.rows; j++) {
+    const f0 = lt / dtRow - j;
+    if (f0 <= 0) break;
+    n += Math.min(LAT.cols, Math.floor(Math.min(1, f0) * LAT.cols + 0.5));
+  }
+  return n;
+}

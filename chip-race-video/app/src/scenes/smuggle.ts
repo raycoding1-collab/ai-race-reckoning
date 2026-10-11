@@ -331,7 +331,7 @@ export default class Smuggle extends Scene {
     this.xray.u.t!.value = t;
     this.xray.u.beltS!.value = s;
     this.xray.u.edgeHot!.value = 1 - smoothstep(0.0, 0.35, lt) + 0.5 * pulse(t, flagT, 0.12);
-    this.xray.u.flash!.value = 0.22 * pulse(t, flagT, 0.035);
+    this.xray.u.flash!.value = 0; // (edit diet: the flag no longer flashes the frame: it punches in, see the post return)
     this.xray.u.fade!.value = 1 - smoothstep(0.0, 1, zoomU * 1.0) * (zoomU > 0.55 ? 1 : 0.0) - 0;
     this.xray.u.hotBag!.value = 1;
     ((this.xray.u.info!.value as THREE.Vector4[])[1]!).z = flagU;
@@ -428,6 +428,6 @@ export default class Smuggle extends Scene {
     c.restore();
     comp.draw(renderer, tx.upload(), out);
     // flag flash across the frame
-    return { bloom: 0.5, bloomThreshold: 1.0, zoom: 1 + 0.025 * pulse(t, flagT, 0.1) + 0.02 * pulse(t, flipT, 0.1), ca: 1.2 + 3 * pulse(t, flagT, 0.08), shake: [0, 0] as [number, number] };
+    return { bloom: 0.5 + 0.25 * pulse(t, flagT, 0.06), bloomThreshold: 1.0, grain: 0.055 + 0.05 * pulse(t, flagT, 0.05), zoom: 1 + 0.03 * pulse(t, flagT, 0.1) + 0.02 * pulse(t, flipT, 0.1), ca: 1.2 + 3 * pulse(t, flagT, 0.08), shake: [0, 0] as [number, number] };
   }
 }

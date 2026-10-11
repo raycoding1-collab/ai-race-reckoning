@@ -152,7 +152,7 @@ export default class SandScene extends Scene {
         cand[bi]!.used = true;
         const L0 = letter + gi;
         const lt = li === 0 ? BT(8) + gi * BT(0.25) : BT(10) + gi * BT(0.25);
-        this.tAtoms.push({ gx, gy, su: cand[bi]!.su, sv: cand[bi]!.sv, t0: lt + hash(gx, gy) * 0.05, t1: BT(12) + 0.04 + hash(gy, gx, 2) * 0.3, letter: L0 });
+        this.tAtoms.push({ gx, gy, su: cand[bi]!.su, sv: cand[bi]!.sv, t0: lt + hash(gx, gy) * 0.05, t1: BT(12) + 0.02 + hash(gy, gx, 2) * 0.04, letter: L0 });
       }
       letter += lay.glyphs.length;
     });
@@ -235,11 +235,12 @@ export default class SandScene extends Scene {
     for (const k of [4, 5, 6, 7, 8]) { const a = prog(t, BT(k), BT(k) + 0.3); if (a > 0 && a < 1) rk = ease.outCubic(a) * 1.2 - 0.1; }
     u.uReink!.value = rk;
     u.uFar!.value = 1 - prog(this.Z(t), Math.log10(0.9), Math.log10(0.4));
-    const titleOn = prog(t, BT(8), BT(8) + 0.2) * (1 - prog(t, BT(12), BT(12) + 0.45));
+    const titleOn = prog(t, BT(8), BT(8) + 0.2) * (1 - prog(t, BT(12), BT(12) + 0.1));
     u.uLatDim!.value = titleOn;
     const tIg = BT(15);
-    u.uIgnite!.value = ease.outExpo(prog(t, tIg, tIg + 0.1));
-    u.uFade!.value = ease.inOutQuad(prog(t, tIg + 0.12, BT(16) - 0.06));
+    // (edit diet: the ignition ramps over 0.22 s instead of popping in 3 frames, so the plate's exit is one glow-then-fade, not two cuts)
+    u.uIgnite!.value = ease.inOutQuad(prog(t, tIg, tIg + 0.22));
+    u.uFade!.value = ease.inOutQuad(prog(t, tIg + 0.1, BT(16) - 0.06));
     u.uTime!.value = t;
     this.bg.render(renderer, out);
 
@@ -260,8 +261,9 @@ export default class SandScene extends Scene {
     for (const k of [4, 5, 6, 7, 8, 12, 13, 14]) punch = Math.max(punch, 0.014 * pulse(t, BT(k), 0.08));
     punch = Math.max(punch, 0.02 * pulse(t, tIg, 0.09));
     return {
-      bloom: 0.62, bloomThreshold: 0.9, vignette: 0.4, grain: 0.05, halation: 0.2,
-      zoom: 1 + punch, flash: 0.05 * pulse(t, 0.0, 0.06) + 0.06 * pulse(t, tIg, 0.05),
+      // (edit diet: the ignition and the first raster line no longer flash the frame: a rim brighten and a grain re-noise)
+      bloom: 0.62 + 0.2 * pulse(t, tIg, 0.08), bloomThreshold: 0.9, vignette: 0.4, grain: 0.05 + 0.04 * pulse(t, tIg, 0.08), halation: 0.2,
+      zoom: 1 + punch,
       ca: 1 + 3 * pulse(t, tIg, 0.08),
     };
   }
@@ -275,7 +277,7 @@ export default class SandScene extends Scene {
       const s = this.project(c, add(mul(this.T0, a.su * 1e-6), mul(this.B0, a.sv * 1e-6)));
       if (!s) { kk[i] = 0; continue; }
       const kin = ease.outBack(clamp((t - a.t0) / 0.15), 1.3);
-      const kout = ease.inOutCubic(clamp((t - a.t1) / 0.32));
+      const kout = ease.inOutCubic(clamp((t - a.t1) / 0.08)); // (edit diet: the title snaps out on the beat, 3 frames, instead of a 0.66 s dissolve)
       const k = t < a.t0 ? 0 : kin * (1 - kout);
       pos[i * 2] = lerp(s[0], a.gx, k); pos[i * 2 + 1] = lerp(s[1], a.gy, k);
       kk[i] = t < a.t0 ? 0 : clamp(1 - kout);
@@ -285,7 +287,7 @@ export default class SandScene extends Scene {
     for (const [i, j] of this.bonds) {
       const k = Math.min(kk[i]!, kk[j]!);
       if (k < 0.05) continue;
-      const settled = Math.min(clamp((t - this.tAtoms[i]!.t0 - 0.12) / 0.1), clamp((t - this.tAtoms[j]!.t0 - 0.12) / 0.1)) * (1 - clamp((t - Math.min(this.tAtoms[i]!.t1, this.tAtoms[j]!.t1)) / 0.12));
+      const settled = Math.min(clamp((t - this.tAtoms[i]!.t0 - 0.12) / 0.1), clamp((t - this.tAtoms[j]!.t0 - 0.12) / 0.1)) * (1 - clamp((t - Math.min(this.tAtoms[i]!.t1, this.tAtoms[j]!.t1)) / 0.06));
       if (settled <= 0) continue;
       const hh = Math.max(hot[i]!, hot[j]!);
       const col: [number, number, number] = [lerp(LIN.ash[0], LIN.signal[0] * 1.4, hh), lerp(LIN.ash[1], LIN.signal[1] * 1.4, hh), lerp(LIN.ash[2], LIN.signal[2] * 1.4, hh)];
