@@ -138,15 +138,21 @@ class Ctx:
     def dur(self):
         return self.mix.shape[1] / SR
 
+    def _stems(self):
+        if not (os.path.exists(os.path.join(self.out, "vocals.wav")) and os.path.exists(os.path.join(self.out, "instrumental.wav"))):
+            stage_separate(self)
+
     @property
     def voc(self):
         if self._voc is None:
+            self._stems()
             self._voc = load_audio(os.path.join(self.out, "vocals.wav"))
         return self._voc
 
     @property
     def ins(self):
         if self._ins is None:
+            self._stems()
             self._ins = load_audio(os.path.join(self.out, "instrumental.wav"))
         return self._ins
 
@@ -267,8 +273,8 @@ def stage_separate(C):
             log(f"separate: chunk {i}/{n}")
     v = mdx_separate(C.mix, C.args.mdx, progress=prog)
     ins = C.mix - v
-    sf.write(vp, v.T, SR, subtype="PCM_16")
-    sf.write(ip, ins.T, SR, subtype="PCM_16")
+    sf.write(vp, np.clip(v, -1.0, 1.0).T, SR, subtype="PCM_16")
+    sf.write(ip, np.clip(ins, -1.0, 1.0).T, SR, subtype="PCM_16")
     C._voc, C._ins = v, ins.astype(np.float32)
 
 
@@ -969,7 +975,10 @@ def stage_drums(C):
     pats = []
     for b in range(nb):
         k = "".join("K" if v else "." for v in hits["K"][b])
-        sn = "".join("S" if v else "." for v in hits["S"][b])
+        # a run of 8th-note hits with no kick and no hats is a plucked / ticking pulse rather than a snare: mark it 'p'
+        pulse = (not hits["K"][b].any()) and (not hits["H"][b].any()) and hits["S"][b].sum() >= max(4, steps // 3) \
+            and all(i % 2 == 0 for i in np.where(hits["S"][b])[0])
+        sn = "".join(("p" if pulse else "S") if v else "." for v in hits["S"][b])
         h = "".join("H" if v else "." for v in hits["H"][b])
         pats.append(f"{k} | {sn} | {h}")
     # pattern ids: merge rare near-duplicates into the nearest frequent pattern
@@ -1502,10 +1511,10 @@ def zs(x, axis=0):
     return (x - x.mean(axis=axis, keepdims=True)) / np.where(sd < 1e-9, 1.0, sd)
 
 
-def build_bar_matrix(F, vocal, drums_density):
+def build_bar_matrix(F, vocal, drums_density, w_chroma=1.0):
     ch = np.sqrt(F["chroma"] / (F["chroma"].sum(1, keepdims=True) + 1e-9))
     parts = [
-        (zs(ch), 1.0 / math.sqrt(12)),
+        (zs(ch), w_chroma / math.sqrt(12)),
         (zs(F["mel"]), 1.2 / math.sqrt(40)),
         (zs(F["rms"])[:, None], 0.9),
         (zs(F["onset"])[:, None], 0.5),
@@ -1543,10 +1552,17 @@ def novelty_curve(S, half=4):
     return nov
 
 
-def dp_segments(nov, n, lam=0.30, minlen=2):
-    """boundaries maximising novelty minus a per-segment penalty with a preference for 2/4/8/16-bar sections."""
+def dp_segments(nov, n, lam=0.55, minlen=2, phase_bonus=(0.10, 0.04)):
+    """boundaries maximising novelty minus a per-segment penalty with a preference for 2/4/8/16-bar sections whose boundaries
+    sit on the song's own 4-bar phrase grid (the phase is the one that carries most novelty)."""
     prior = {1: -1.2, 2: -0.05, 3: -0.5, 4: 0.12, 5: -0.5, 6: -0.15, 7: -0.45, 8: 0.2, 9: -0.5, 10: -0.35, 12: -0.1, 16: 0.0}
     nv = nov / (np.percentile(nov[1:-1], 95) + 1e-9) if n > 3 else nov
+    nv = nv.copy()
+    if n > 12 and phase_bonus:
+        idx = np.arange(1, n)
+        ph = int(np.argmax([np.sum(nv[idx[(idx % 4) == k]] ** 2) for k in range(4)]))
+        nv[idx[(idx % 4) == ph]] += phase_bonus[0]
+        nv[idx[((idx - ph) % 2) == 0]] += phase_bonus[1]
     best = np.full(n + 1, -1e9)
     prev = np.zeros(n + 1, int)
     best[0] = 0.0
@@ -1682,26 +1698,22 @@ def label_sections(C, G, segs, letters, vocal, rms, dens):
                 labels[j] = "post-chorus"
             else:
                 labels[j] = "outro"
-    # bridge: the first new-material vocal section between the second chorus and the last chorus
+    # bridge / breakdown: new-material vocal sections after at least two choruses and before the last chorus
+    # (a short section leading straight into a chorus is a pre-chorus / build instead)
     seen_letters = set()
-    for j in range(n):
-        if labels[j] is None:
-            pass
-        if labels[j] in (None,) and j > 0:
-            pass
     n_ch_before = 0
     for j in range(n):
         if labels[j] == "chorus":
             n_ch_before += 1
             continue
-        if labels[j] is None and last_chorus is not None and j < last_chorus and n_ch_before >= max(1, len(ch_idx) - 1) \
-                and info[j]["V"] >= 0.35 and info[j]["n"] >= 4 and info[j]["L"] not in seen_letters and "bridge" not in labels \
-                and labels[j + 1 if j + 1 < n else j] != "chorus":
+        nxt = labels[j + 1] if j + 1 < n else None
+        short_lead_in = nxt == "chorus" and info[j]["n"] <= 0.75 * chorus_len
+        cont = j > 0 and labels[j - 1] == "bridge"
+        if (labels[j] is None and last_chorus is not None and j < last_chorus and n_ch_before >= min(2, max(1, len(ch_idx) - 1))
+                and info[j]["V"] >= 0.35 and info[j]["n"] >= 4 and not short_lead_in
+                and (info[j]["L"] not in seen_letters) and ("bridge" not in labels or cont)):
             labels[j] = "bridge"
-        if labels[j] is None or labels[j] in ("bridge",):
-            pass
-        # letters already used by an earlier unlabeled-or-verse section are not new material
-        if info[j]["V"] >= 0.35 and labels[j] != "chorus":
+        if info[j]["V"] >= 0.35:
             seen_letters.add(info[j]["L"])
     for x in info:
         i = x["i"]
@@ -1752,9 +1764,10 @@ def stage_structure(C):
     vocal = vocal_presence_per_bar(C, G)
     dr = C.need("drums")
     dens = np.array([sum(ch != "." for ch in b["pattern"] if ch in "KSH") / 16.0 for b in dr["bars"]])
-    X = build_bar_matrix(F, vocal, dens)
-    S = ssm_of(X, ctx=1)
-    n2, n3 = novelty_curve(S, 2), novelty_curve(S, 3)
+    # boundaries come from texture / energy / vocal changes (chords alone change inside a loop); similarity uses the full feature set
+    Sseg = ssm_of(build_bar_matrix(F, vocal, dens, w_chroma=C.args.seg_chroma), ctx=1)
+    S = ssm_of(build_bar_matrix(F, vocal, dens, w_chroma=1.0), ctx=1)
+    n2, n3 = novelty_curve(Sseg, 2), novelty_curve(Sseg, 3)
     nov = n2 / (np.percentile(n2[1:-1], 95) + 1e-9) / 2 + n3 / (np.percentile(n3[1:-1], 95) + 1e-9) / 2
     cuts = [int(c) for c in dp_segments(nov, nb, lam=C.args.seg_lambda)]
     segs = [(a, b) for a, b in zip(cuts[:-1], cuts[1:])]
@@ -1878,6 +1891,73 @@ def consensus_chords(bars, sections):
     return out, loops
 
 
+def global_loops(table, tonic_name=None, rn_global=None, max_loops=3):
+    """Most repeated chord cycles over the whole song: run-length encode the bar chords, count repeated windows of 2-4 chords
+    (same chords AND same durations), merge rotations of the same cycle and drop windows contained in a longer accepted cycle."""
+    runs = []
+    for t in table:
+        if t["chord"] == "N":
+            runs.append(None)
+            continue
+        if runs and runs[-1] is not None and runs[-1]["chord"] == t["chord"]:
+            runs[-1]["bars"] += 1
+        else:
+            runs.append(dict(chord=t["chord"], roman=t["roman"], bars=1, start=t["bar"]))
+    roman_of = {r["chord"]: r["roman"] for r in runs if r}
+    accepted = []          # list of dict(cycle=[(chord, bars)], count, starts)
+    for k in (4, 3, 2):
+        occ = collections.defaultdict(list)
+        for i in range(len(runs) - k + 1):
+            w = runs[i:i + k]
+            if any(r is None for r in w):
+                continue
+            occ[tuple((r["chord"], r["bars"]) for r in w)].append((i, w[0]["start"]))
+        fam = {}
+        for key, lst in occ.items():
+            keep, last_end = [], -1
+            for idx, st_ in lst:                             # non-overlapping occurrences of this rotation
+                if idx >= last_end:
+                    keep.append((idx, st_))
+                    last_end = idx + k
+            if len(keep) < 2 or len({c for c, _ in key}) < 2:
+                continue
+            canon = min(tuple(key[j:] + key[:j]) for j in range(k))
+            f = fam.setdefault(canon, dict(rot={}, count=0))
+            f["rot"][key] = keep
+        for canon, f in fam.items():
+            cyc = list(canon) * 2
+            if any(all(tuple(cyc[j + m] for m in range(len(a["cycle"]))) == tuple(a["cycle"]) or True for j in range(0)) for a in accepted):
+                pass
+            # contained in an accepted longer cycle?
+            contained = False
+            for a in accepted:
+                ac = list(a["canon"]) * 2
+                for j in range(len(a["canon"])):
+                    if tuple(ac[j:j + k]) in {tuple(canon[m:] + canon[:m]) for m in range(k)} and len(a["canon"]) > k:
+                        contained = True
+            if contained:
+                continue
+            best_rot = max(f["rot"], key=lambda r: (len(f["rot"][r]), (tonic_name is not None and r[0][0] == tonic_name), -f["rot"][r][0][1]))
+            count = sum(len(v) for v in f["rot"].values()) // 1
+            cnt_best = len(f["rot"][best_rot])
+            cov = cnt_best * sum(b for _, b in best_rot)
+            accepted.append(dict(canon=canon, cycle=list(best_rot), count=cnt_best, starts=[st_ for _, st_ in f["rot"][best_rot]], cov=cov))
+    accepted.sort(key=lambda a: -a["cov"])
+    out, covered = [], set()
+    for a in accepted:
+        if len(out) >= max_loops:
+            break
+        span = sum(b for _, b in a["cycle"])
+        bars_ = {b for st_ in a["starts"] for b in range(st_, st_ + span)}
+        if out and (a["count"] < 3 or len(bars_ & covered) >= 0.6 * len(bars_)):
+            continue
+        covered |= bars_
+        out.append(dict(chords=[c for c, _ in a["cycle"]], bars_each=[b for _, b in a["cycle"]], count=a["count"], bars_covered=a["cov"],
+                        first_bars=[st_ + 1 for st_ in a["starts"][:8]], roman=[rn_global(c) for c, _ in a["cycle"]] if rn_global else
+                        [roman_of.get(c, "?") for c, _ in a["cycle"]]))
+    return out
+
+
 def stage_harmony(C):
     r = C.cached("harmony")
     if r:
@@ -1990,7 +2070,12 @@ def stage_harmony(C):
             loop_table.append(dict(section=sec["name"], letter=sec["letter"], bars=[sec["start_bar"], sec["end_bar"]], period=None,
                                    chords=[t["chord"] for t in table[sec["start_bar"]:sec["end_bar"]]],
                                    roman=[t["roman"] for t in table[sec["start_bar"]:sec["end_bar"]]], agreement=None))
-    res = dict(key=key_g, key_changes=changes, bars=table, loops=loop_table, n_corrected=int(sum(1 for t in table if t["corrected"])),
+    def rn_global(name):
+        pq = parse_chord(re.sub(r"^([A-G][b#]?)(m?)$", lambda m: m.group(1) + (":min" if m.group(2) else ":maj"), name))
+        return roman(pq[0], pq[1], gk[0], gk[1]) if pq else "?"
+
+    res = dict(key=key_g, key_changes=changes, bars=table, loops=loop_table,
+               global_loops=global_loops(table, tonic_name=chord_name(gk[0], "min" if gk[1] == "minor" else "maj", flats), rn_global=rn_global), n_corrected=int(sum(1 for t in table if t["corrected"])),
                section_keys=[dict(section=sec["name"], key=key_label(k[0], k[1], uses_flats(*k))) for sec, k in zip(st["sections"], sec_key_use)])
     C.R["harmony"] = res
     C.save("harmony", res)
@@ -2353,6 +2438,9 @@ def write_lead_sheet(C, G, bars, pickup, secs, path):
         r = mel["range"]
         L.append(f"- sung melody: median {r['median']}, central 90% {r['p05']}-{r['p95']}, extremes {r['lowest']}-{r['highest']}; "
                  f"vibrato on {100 * mel['vibrato']['share']:.0f}% of held notes" + (f" ({mel['vibrato']['rate_hz']:.1f} Hz, +/-{mel['vibrato']['depth_cents']:.0f} cents)" if mel['vibrato']['rate_hz'] else "") + ".")
+    for gl in hm.get("global_loops", []):
+        L.append(f"- chord loop: {' | '.join(gl['chords'])} ({' '.join(gl['roman'])}), {'/'.join(str(b) for b in gl['bars_each'])} bar(s) per chord, "
+                 f"{gl['count']} times (from bars {', '.join(str(b) for b in gl['first_bars'])}{', ...' if gl['count'] > len(gl['first_bars']) else ''}).")
     L.append("")
     L.append("How to read: `bar` is 1-based; `time` is the bar start (m:ss.s); `sec` = section letter + guessed role. `chord` = detected chord (roman numeral in the "
              "current key). `melody` = sung notes as `Name@beat` (beat 1 = downbeat, .25 steps = 16ths, `+d` = held d beats); pitches are as sung (concert pitch). "
@@ -2396,7 +2484,7 @@ def write_lead_sheet(C, G, bars, pickup, secs, path):
         L.append(f"| {b['bar']} | {mmss(b['start'])} | {sec_label} | {chord_cell(b)} | {lyric_cell(b)} | {melody_cell(b, bpb)} | {bass_cell(b, bpb)} | "
                  f"{d['id']}{'~' if d['variant'] else ''} |")
     L.append("")
-    L.append("## Drum patterns (16 steps per bar; K kick, S snare/clap, H hat)")
+    L.append("## Drum patterns (16 steps per bar; K kick, S snare/clap, H hat, p = plucked/ticking 8th-note pulse that is not a drum)")
     L.append("")
     L.append("| id | bars | pattern | where |")
     L.append("|---|---|---|---|")
@@ -2524,14 +2612,15 @@ def write_sound_md(C, G, bars, secs, path):
                 tags[lab] += pr
         L.append("- AudioSet tags (CED, summed over sections): " + ", ".join(f"{k}" for k, _ in tags.most_common(8)))
         L.append("")
-    # vocal layering
+    # vocal layering: side/mid energy of the vocal stem per bar (a centred solo lead is narrow; doubles/harmonies/stereo FX widen it)
     vb = mel["vocal_bars"]
-    sec_side = {}
     act = [v["side_db"] for v in vb if v["side_db"] is not None and v["voc_db"] > -45]
-    base = float(np.percentile(act, 25)) if act else None
+    med_all = float(np.median(act)) if act else None
+    sec_side = {}
     for sec in secs:
         vals_ = [vb[b]["side_db"] for b in range(sec["start_bar"], min(sec["end_bar"], len(vb))) if vb[b]["side_db"] is not None and vb[b]["voc_db"] > -45]
-        sec_side[sec["name"]] = (float(np.median(vals_)) if vals_ else None, (float(np.mean([v > base + 2.0 for v in vals_])) if vals_ and base is not None else None))
+        sec_side[sec["name"]] = (float(np.median(vals_)) if vals_ else None, (float(np.mean([v > -12.0 for v in vals_])) if vals_ else None))
+    base = med_all
     L.append("## Per-section notes")
     L.append("")
     prevx = None
@@ -2565,8 +2654,9 @@ def write_sound_md(C, G, bars, secs, path):
             L.append("- bass: none detected")
         side = sec_side.get(x["name"])
         if side and side[0] is not None:
-            L.append(f"- vocals: present in {100 * sec['vocal']:.0f}% of the section; vocal-stem side/mid {side[0]:.1f} dB, "
-                     f"{100 * side[1]:.0f}% of vocal bars wider than the lead-only baseline (doubles/harmonies)")
+            rel = side[0] - med_all
+            tag = "wider than typical (more doubles / harmonies / stereo FX)" if rel >= 1.5 else ("narrower than typical (more solo / centred)" if rel <= -1.5 else "typical width")
+            L.append(f"- vocals: present in {100 * sec['vocal']:.0f}% of the section; vocal-stem side/mid {side[0]:.1f} dB ({rel:+.1f} vs the song's median): {tag}")
         else:
             L.append(f"- vocals: present in {100 * sec['vocal']:.0f}% of the section")
         if "clap" in x:
@@ -2586,9 +2676,12 @@ def write_sound_md(C, G, bars, secs, path):
         L.append(f"- range: {r['lowest']}-{r['highest']} (central 90%: {r['p05']}-{r['p95']}, median {r['median']}, tessitura {r['tessitura'][0]}-{r['tessitura'][1]}); {r['n_notes']} notes kept, {r.get('n_outliers', 0)} flagged as leakage/outliers.")
     v = mel["vibrato"]
     L.append(f"- vibrato: {v['n_vibrato']} of {v['n_held']} held notes (≥0.4 s)" + (f", median rate {v['rate_hz']:.1f} Hz, depth ±{v['depth_cents']:.0f} cents" if v["rate_hz"] else "") + ".")
-    if base is not None:
-        flagged = [vb[i]["side_db"] > base + 2.0 for i in range(len(vb)) if vb[i]["side_db"] is not None and vb[i]["voc_db"] > -45]
-        L.append(f"- doubles/harmonies: lead-only baseline side/mid {base:.1f} dB; {100 * np.mean(flagged):.0f}% of vocal bars are >2 dB wider (layered/doubled).")
+    if act:
+        wide = [sec_side[x["name"]] for x in sd["sections"] if sec_side.get(x["name"]) and sec_side[x["name"]][0] is not None]
+        order = sorted(((sec_side[x["name"]][0], x["name"]) for x in sd["sections"] if sec_side.get(x["name"]) and sec_side[x["name"]][0] is not None), reverse=True)
+        L.append(f"- doubles/harmonies (side/mid of the vocal stem; centred solo lead is lowest, doubles/harmonies/stereo FX raise it): song median {med_all:.1f} dB, "
+                 f"{100 * np.mean([a > -12.0 for a in act]):.0f}% of vocal bars are wider than -12 dB; widest sections: "
+                 + ", ".join(f"{n} ({v:.1f})" for v, n in order[:3]) + "; narrowest: " + ", ".join(f"{n} ({v:.1f})" for v, n in order[-2:]) + ".")
     with open(path, "w") as f:
         f.write("\n".join(L) + "\n")
 
@@ -2748,8 +2841,9 @@ def main():
     ap.add_argument("--force", default="")
     ap.add_argument("--only", default="")
     ap.add_argument("--no-clap", action="store_true")
-    ap.add_argument("--seg-lambda", type=float, default=0.45)
+    ap.add_argument("--seg-lambda", type=float, default=0.55)
     ap.add_argument("--seg-thr", type=float, default=0.55)
+    ap.add_argument("--seg-chroma", type=float, default=0.30)
     ap.add_argument("--min-note", type=float, default=0.06)
     ap.add_argument("--chord-src", default="instrumental", choices=["instrumental", "mix"])
     args = ap.parse_args()
