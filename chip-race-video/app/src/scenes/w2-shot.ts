@@ -45,13 +45,15 @@ const T_PB0 = 13.9, T_PB1 = 14.85;                  // the pull-back
 const RINGS = H_LASER_MACHINE.radii.map((r) => r / PPM_W3);
 const f1 = (x: number) => x.toFixed(4);
 const HERO0 = { x: H_SAND_TIN.x, y: H_SAND_TIN.y }; // sand's atom
-const HERO1 = { x: 1110, y: 500 };                  // the old laser plate's target
+const HERO1 = { x: 1250, y: 500 };
+const LANE_X = 420;                                 // the droplets' own lane (left third)
+const laneX = (t: number) => lerp(HERO0.x, LANE_X, ease.inOutCubic(prog(t, 7.6, 8.4)));                  // the old laser plate's target
 const T_PRE = 11.25, T_MAIN = 11.953;
 const AZ_SIDE = 62, EL_SIDE = 14;
 
 // ------------------------------------------------------------------------------------------------ GLSL
 const WORLD = /* glsl */ `
-uniform float uS, uT, uHot, uHeat, uM1, uM2, uM3, uAlive, uRp, uPlAmb, uTurb, uZone, uPenK, uPenR, uDropK, uRip, uDropOn, uFar;
+uniform float uVol, uS, uT, uHot, uHeat, uM1, uM2, uM3, uAlive, uRp, uPlAmb, uTurb, uZone, uPenK, uPenR, uDropK, uRip, uDropOn, uFar;
 uniform float uPres[8];
 uniform vec3 uOff;
 uniform vec4 uB1, uB2, uSun;
@@ -70,8 +72,8 @@ float ripple(vec3 q, float ph) {
   float L = max(length(q), 1.0e-3);
   vec3 n = q / L;
   float th = acos(clamp(n.y, -1.0, 1.0)), a = atan(n.z, n.x);
-  return 0.030 * sin(6.0 * a + 2.4 * uT + ph) * (1.0 - n.y * n.y) + 0.016 * sin(9.0 * th - 4.1 * uT + 1.7 * ph)
-       + 0.007 * sin(17.0 * a + 11.0 * th + 6.0 * uT + ph);
+  return 0.011 * sin(6.0 * a + 2.4 * uT + ph) * (1.0 - n.y * n.y) + 0.006 * sin(9.0 * th - 4.1 * uT + 1.7 * ph)
+       + 0.002 * sin(17.0 * a + 11.0 * th + 6.0 * uT + ph);
 }
 float sdDrop(vec3 q, float R, float ph) { return length(q) - R * (1.0 + uRip * ripple(q, ph)); }
 
@@ -174,7 +176,7 @@ vec2 mapU(vec3 p) {
   if (uRp > 0.5) {
     vec3 n = p / max(length(p), 1.0e-3);
     float tb = sin(3.7 * n.x + uT * 6.0) * sin(3.1 * n.y - uT * 5.0) * sin(3.3 * n.z + uT * 7.0);
-    float dp = length(p) - uRp * (1.0 + 0.05 * tb * uTurb);
+    float dp = length(p) - uRp * (1.0 + 0.02 * tb * uTurb);
     if (dp < res.x) res = vec2(dp, 7.0);
   }
   if (uFar > 0.5) {
@@ -200,13 +202,13 @@ float matZ(float id, vec3 p, vec3 n) {
   if (id > 19.5 && id < 20.5) return 1.3;
   if (id > 8.5 && id < 9.5) return 0.80;
   if (id > 7.5 && id < 8.5) return 0.95;
-  if (id > 6.5 && id < 7.5) return 1.35;
+  if (id > 6.5 && id < 7.5) { float fc = -dot(n, uCamFwd); return mix(1.35, mix(0.40, 1.30, smoothstep(0.0, 0.85, fc)), uVol); }
   return seMatZ(id);
 }
 float matAmber(float id, vec3 pw, vec3 n) {
   vec3 p = (pw - uOff) / uS;
   if (id > 5.5 && id < 6.5) return 0.99;
-  if (id > 6.5 && id < 7.5) return clamp(uPlAmb * (0.84 + 0.16 * sin(p.x * 0.31 / max(uRp * 0.02, 0.1) + uT * 9.0)), 0.0, 0.99);
+  if (id > 6.5 && id < 7.5) { float fc = -dot(n, uCamFwd); float cor = 0.85 * uVol * pow(clamp(1.0 - fc, 0.0, 1.0), 1.4); return clamp(max(uPlAmb * (0.84 + 0.16 * sin(p.x * 0.31 / max(uRp * 0.02, 0.1) + uT * 9.0)), cor), 0.0, 0.99); }
   if (id > 8.5 && id < 9.5) {
     float facing = -dot(n, uCamFwd);
     float core = 1.0 - 0.88 * smoothstep(0.50, 0.93, facing);
@@ -263,7 +265,7 @@ function camS(t: number): CamS {
   const ppm = Math.exp(lerp(Math.log(baseP(Math.min(t, T_PB0))), Math.log(PPM_E), e));
   return {
     az: AZ_SIDE * sw * (1 - e), el: EL_SIDE * sw * (1 - e), ppm, e,
-    dx: lerp(HERO0.x - 960, HERO1.x - 960, pan) * (1 - e), dy: lerp(540 - HERO0.y, 540 - HERO1.y, pan) * (1 - e), tz: -12 * UM * e,
+    dx: lerp(laneX(t) - 960, HERO1.x - 960, pan) * (1 - e), dy: lerp(540 - HERO0.y, 540 - HERO1.y, pan) * (1 - e), tz: -12 * UM * e,
   };
 }
 /** the camera in micro coordinates (world = um, origin at the plasma focus) */
@@ -297,7 +299,7 @@ export default class W2Shot extends Scene {
   tinL: any; laserL: any;
   st!: StrokeText;
   chalkTimes: [number, number][] = [];
-  chalkX = 862; chalkY = 800;
+  chalkX = 902; chalkY = 800;
   uni!: Record<string, THREE.IUniform>;
   private pres = new Array(8).fill(1) as number[];
 
@@ -314,7 +316,7 @@ export default class W2Shot extends Scene {
     });
     const v = (x: number) => ({ value: x });
     this.uni = {
-      uS: v(1), uT: v(7.5), uHot: v(1), uHeat: v(0), uM1: v(0), uM2: v(0), uM3: v(0), uAlive: v(1), uRp: v(0), uPlAmb: v(0), uTurb: v(1), uZone: v(0),
+      uS: v(1), uT: v(7.5), uHot: v(1), uHeat: v(0), uM1: v(0), uM2: v(0), uM3: v(0), uAlive: v(1), uRp: v(0), uPlAmb: v(0), uVol: v(1), uTurb: v(1), uZone: v(0),
       uPenK: v(0), uPenR: v(0.37 * UM), uDropK: v(1), uRip: v(1), uDropOn: v(1), uFar: v(0), uPres: { value: this.pres },
       uOff: { value: new THREE.Vector3() },
       uB1: { value: new THREE.Vector4(0, 0, 0.5, 0) }, uB2: { value: new THREE.Vector4(0, 0, 3, 0) }, uSun: { value: new THREE.Vector4(0, 0, 0, 0) },
@@ -339,9 +341,10 @@ export default class W2Shot extends Scene {
     u.uM3!.value = prog(t, 11.62, 11.95);
     u.uAlive!.value = t < T_MAIN ? 1 : Math.max(0.02, 1 - ease.outQuad(prog(t, T_MAIN, 12.12)));
     u.uRip!.value = 1 + 2.5 * pulse(t, T_PRE, 0.1) * (t >= T_PRE ? 1 : 0);
-    u.uDropK!.value = 1 - smoothstep(T_PRE, 11.6, t);
+    u.uDropK!.value = 1 - smoothstep(T_PRE, 11.4, t);
     u.uRp!.value = rpAt(t);
     u.uPlAmb!.value = 0.97 * (1 - smoothstep(12.66, 13.59, t));
+    u.uVol!.value = 1 - smoothstep(13.9, 14.2, t);
     u.uTurb!.value = 1 - smoothstep(13.7, 14.2, t);
     u.uZone!.value = smoothstep(14.0, 14.7, t);
     u.uPenK!.value = smoothstep(14.55, 14.85, t);
@@ -396,7 +399,7 @@ export default class W2Shot extends Scene {
   }
 
   private drawHud(x: CanvasRenderingContext2D, L: LineBatch, cm: SECam, cs: CamS, t: number) {
-    const fade = 1 - smoothstep(14.4, 14.85, t);
+    const fade = 1 - smoothstep(13.95, 14.2, t);
     if (fade <= 0.001) return;
     const bone = (a: number) => rgba('bone', a * fade);
     const amber = (a: number) => rgba('signal', a * fade);
@@ -408,10 +411,10 @@ export default class W2Shot extends Scene {
     mono(x, 'SLOW-MOTION  1 : 5,859   ·   1 / 16 NOTE (117 ms)  =  20 µs  (REAL)', 112, 1004, 14, bone(0.55 * smoothstep(7.8, 8.1, t)), 500, 'left', 1.5);
 
     // ---- bars 4-5: the slate (right) and the hero's tag / spacing (left)
-    const ui = (1 - smoothstep(T_PRE, T_PRE + 0.1, t)) * fade;
+    const ui = (1 - smoothstep(11.08, 11.23, t)) * fade;
     if (ui > 0.001) {
       x.globalAlpha = ui;
-      const w = this.tinL.words, X0 = 860, X1 = 1808;
+      const w = this.tinL.words, X0 = 900, X1 = 1808;
       x.fillStyle = rgba('bone', 0.35); x.fillRect(X0, 112, X1 - X0, 1.2); x.fillRect(X0, 160, X1 - X0, 1.2);
       mono(x, 'SCENE 02 · Sn DROPLET GENERATOR', X0, 145, 16, rgba('bone', 0.85), 600, 'left', 1.5);
       mono(x, 'STROBE 1/4 · ROLL 7A', X1, 145, 16, rgba('bone', 0.5), 500, 'right', 1.5);
@@ -439,18 +442,18 @@ export default class W2Shot extends Scene {
       // the sweep bar: at this speed one second lasts 1 h 38 min
       const sp = prog(t, 9.6094, 11.0156);
       if (sp > 0) {
-        x.fillStyle = rgba('bone', 0.3); x.fillRect(862, 904, X1 - 862, 1.2);
-        x.fillStyle = rgba('signal', 1); x.fillRect(862, 902.5, (X1 - 862) * sp, 3);
-        mono(x, 'AT THIS SPEED, ONE SECOND LASTS 1 H 38 MIN', 862, 936, 15, rgba('bone', 0.75), 500, 'left', 1.5);
+        x.fillStyle = rgba('bone', 0.3); x.fillRect(902, 904, X1 - 902, 1.2);
+        x.fillStyle = rgba('signal', 1); x.fillRect(902, 902.5, (X1 - 902) * sp, 3);
+        mono(x, 'AT THIS SPEED, ONE SECOND LASTS 1 H 38 MIN', 902, 936, 15, rgba('bone', 0.75), 500, 'left', 1.5);
       }
       // "tin": the hero is tagged; "drops": the spacing is dimensioned
       const R = R_D * cs.ppm;
       const tg = smoothstep(8.44, 8.6, t);
       if (tg > 0) {
         x.strokeStyle = rgba('bone', 0.6 * tg); x.lineWidth = 1.2;
-        x.beginPath(); x.moveTo(hero.x - R * 0.72, hero.y - R * 0.72); x.lineTo(hero.x - R * 1.1 - 30, hero.y - R * 1.1 - 30); x.lineTo(330, hero.y - R * 1.1 - 30); x.stroke();
-        mono(x, 'Sn DROPLET', 330, hero.y - R * 1.1 - 40, 16, rgba('bone', 0.95 * tg), 600, 'left', 1.5);
-        mono(x, '⌀ 27 µm', 330, hero.y - R * 1.1 - 18, 14, rgba('bone', 0.6 * tg), 500, 'left', 1.5);
+        x.beginPath(); x.moveTo(hero.x - R * 0.72, hero.y - R * 0.72); x.lineTo(hero.x - R * 1.1 - 30, hero.y - R * 1.1 - 30); x.lineTo(150, hero.y - R * 1.1 - 30); x.stroke();
+        mono(x, 'Sn DROPLET', 150, hero.y - R * 1.1 - 40, 16, rgba('bone', 0.95 * tg), 600, 'left', 1.5);
+        mono(x, '⌀ 27 µm', 150, hero.y - R * 1.1 - 18, 14, rgba('bone', 0.6 * tg), 500, 'left', 1.5);
       }
       const dk = smoothstep(8.91, 9.1, t);
       if (dk > 0) {
@@ -468,19 +471,19 @@ export default class W2Shot extends Scene {
 
     // ---- bars 6-7: the laser plate's layout
     const lw = this.laserL.words;
-    if (t >= T_PRE - 0.3) {
-      const la = (1 - smoothstep(14.3, 14.75, t)) * fade;
+    if (t >= T_PRE - 0.05) {
+      const la = (1 - smoothstep(13.95, 14.2, t)) * fade;
       x.globalAlpha = la;
       let lx = 112;
       for (const i of [0, 1, 2]) {
         const wi = layout(lw[i].w.toUpperCase(), lyr, 128).width, x0 = lx; lx += wi + 40;
-        if (t < lw[i].start - 0.3) continue;
+        if (t < lw[i].start - 0.05) continue;
         outlineWord(x, lw[i].w.toUpperCase(), x0, 300, lyr, 128, wordP(lw[i], t), rgba('bone', 1), rgba('bone', 0.28));
       }
       if (t >= T_MAIN) {
         const pop = 1 + 0.10 * pulse(t, T_MAIN, 0.06);
         x.save(); x.translate(104, 660); x.scale(pop, pop);
-        outlineWord(x, 'LASER,', 0, 0, F.archivo(125, 900), 250, 1, rgba('bone', 1 - 0.5 * prog(t, 13.0, 14.0)), rgba('bone', 0.3), 1.8);
+        outlineWord(x, 'LASER,', 0, 0, F.archivo(125, 900), 190, 1, rgba('bone', 1 - 0.5 * prog(t, 13.0, 14.0)), rgba('bone', 0.3), 1.8);
         x.restore();
       }
       if (t >= lw[4].start - 0.05) {
@@ -509,19 +512,19 @@ export default class W2Shot extends Scene {
         mono(x, 'ONCE TO IGNITE.', 1150, 742, 15, rgba('signal', ja), 600, 'left', 1.5);
       }
       // 220,000 C: the readout spools while the exposure falls
-      const ra = smoothstep(lw[4].start, lw[4].start + 0.15, t) * (1 - smoothstep(14.3, 14.75, t)) * fade;
+      const ra = smoothstep(lw[4].start, lw[4].start + 0.15, t) * (1 - smoothstep(13.95, 14.2, t)) * fade;
       if (ra > 0.01) {
         const v = Math.round(220000 * ease.outCubic(prog(t, lw[4].start, 13.6)));
         const s = `${v.toLocaleString('en-US')} °C`;
         x.globalAlpha = ra;
         const pop = 1 + 0.05 * pulse(t, 13.6, 0.08) * (t >= 13.6 ? 1 : 0);
-        x.save(); x.translate(1790, 210); x.scale(pop, pop); x.textAlign = 'right';
+        x.save(); x.translate(1790, 170); x.scale(pop, pop); x.textAlign = 'right';
         x.font = font(F.archivo(100, 900), 88); x.lineWidth = 1.8; x.strokeStyle = t >= 13.6 ? rgba('ember', 1) : rgba('bone', 0.95); x.strokeText(s, 0, 0);
         x.restore();
         const kx = smoothstep(13.6, 13.75, t);
         if (kx > 0) {
-          x.textAlign = 'right'; x.font = font(F.archivo(125, 900), 72); x.lineWidth = 1.6; x.strokeStyle = rgba('bone', kx); x.strokeText('×40', 1790, 300);
-          mono(x, 'Sn PLASMA · ~40× THE SUN’S SURFACE', 1790, 332, 15, rgba('bone', 0.65 * kx), 500, 'right', 1);
+          x.textAlign = 'right'; x.font = font(F.archivo(125, 900), 72); x.lineWidth = 1.6; x.strokeStyle = rgba('bone', kx); x.strokeText('×40', 1790, 255);
+          mono(x, 'Sn PLASMA · ~40× THE SUN’S SURFACE', 1790, 285, 15, rgba('bone', 0.65 * kx), 500, 'right', 1);
         }
         x.textAlign = 'left';
       }
