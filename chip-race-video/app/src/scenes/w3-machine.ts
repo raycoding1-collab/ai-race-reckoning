@@ -14,11 +14,11 @@
 //   - a reflective reticle (patterned face down) on a scanning carriage with rails; the wafer stage (granite base, rails,
 //     table scanning under a fixed slit, chuck, 300 mm wafer with notch and die grid, interferometer bars).
 //   - the hall in section: perforated raised floor (6.25 u pitch holes, 25 u tile seams), back and side walls with panel
-//     grooves, steel columns, an FFU ceiling grid, a roof deck with a hatch (coaming), parapet, HVAC boxes and stacks.
+//     grooves, an FFU ceiling grid, a roof deck with a hatch (coaming), parapet, HVAC boxes and stacks.
 //   - two faceless 1.8 m figures (one on the floor by the stage, one on the roof by the hatch) with a dimension caliper.
 //  Lyric to geometry: "One" 15.00 beam enters (collector zones amber); "Dutch" 15.23 / "machine," 15.47 mirrors 2-3 (push-in
 //  on the cutaway edge of M3), M4 15.70, M5 15.94, M6-M11 16.07-16.34, wafer 16.41 (slit lights, LIGHT REMAINING: 2%);
-//  "and the" 16.41/16.64 the camera rises through the hatch (THE OTHER 98% IS HEAT), pitches over and looks down; "whole
+//  "and the" 16.41/16.64 the camera rises through the hatch looking down at the machine it leaves (THE OTHER 98% IS HEAT), then clears the roof and cranes out; "whole
 //  world's waiting" 16.88-17.34 crane-out one decade per word; the map, the queue lines and the cable are the old `machine`
 //  code verbatim (ink dots, ember queue lines, ORDERS IN QUEUE).
 //  in : laser's last frame: concentric amber zones with a bone disc, centre (960,540), rings at 70..470 px.
@@ -45,7 +45,7 @@ const f1 = (x: number) => x.toFixed(4);
 const TAN_Y = Math.tan((28 * Math.PI) / 360);
 const ROOF_Y = 229, HATCH: V3 = [322, 0, 130];
 const WAF: V3 = [320, -62, 130], RET: V3 = [205, 160, 150];
-const FIG_IN: V3 = [415, -130, 185], FIG_ROOF: V3 = [385, ROOF_Y, 170];
+const FIG_IN: V3 = [415, -130, 185], FIG_ROOF: V3 = [346, ROOF_Y, 72];
 
 // mirror dishes: centre (= hit point except M1), radius
 const MC: V3[] = [[0, 100, 0], [62, 138, 72], [126, 104, 100], [108, 150, 158], [170, 122, 176], [250, 118, 120], [222, 80, 150], [276, 56, 112], [240, 20, 150], [300, 0, 110], [270, -34, 140]];
@@ -74,7 +74,7 @@ const MIR: MirrorGeo[] = MC.map((c, i) => {
   let n: V3;
   if (i === 0) n = [0, 0, 1];
   else n = nrm(sub(nrm(sub(BP[pi + 1]!, BP[pi]!)), nrm(sub(BP[pi]!, BP[pi - 1]!))));
-  const w: V3 = [0.35, 0.2, 1];
+  const w: V3 = [0.5, 0.25, 0.85];
   let eb = sub(w, mul(n, dot(w, n)));
   if (Math.hypot(...eb) < 0.2) eb = sub([1, 0, 0], mul(n, n[0]));
   eb = nrm(eb);
@@ -117,11 +117,11 @@ function orbitAt(t: number): { cam: SECam; ppm: number } {
   let tgt = lerp3(MC[0]!, hs, wA);
   let az = wA * (26 - 38 * prog(t, 15.2, T_EXIT));
   const el = wA * (13 + 7 * prog(t, 15.7, T_EXIT));
-  let ppm = Math.exp(lerp(Math.log(PPM0), Math.log(6.4 + 2.2 * prog(t, 15.9, T_EXIT)), wA));
+  let ppm = Math.exp(lerp(Math.log(PPM0), Math.log(9.0 + 2.5 * prog(t, 15.9, T_EXIT)), wA));
   // push-in on the cutaway edge of M3 (Mo/Si bilayers)
   const g = MIR[2]!;
   const slot = add(MC[2]!, mul(g.a, 0.78 * g.R));
-  const pb = Math.exp(-Math.pow((t - 15.50) / 0.13, 2));
+  const pb = Math.exp(-Math.pow((t - 15.60) / 0.12, 2));
   tgt = lerp3(tgt, slot, pb);
   ppm *= 1 + 7.2 * pb;
   az += 14 * pb;
@@ -138,9 +138,9 @@ function camAt(t: number): { cam: SECam; ppm: number } {
   const p0 = Math.asin(o.fwd[1]), y0 = Math.atan2(o.fwd[0], -o.fwd[2]);
   const kx = ease.inOutCubic(prog(t, T_EXIT, 16.50));
   const pos: V3 = [lerp(o.pos[0], HATCH[0], kx), 0, lerp(o.pos[2], HATCH[2], kx)];
-  pos[1] = keys(t, [[T_EXIT, o.pos[1]], [16.60, 215, ease.linear], [16.70, 270, ease.linear], [16.84, yTop(16.84), ease.inOutCubic], [99, 0, ease.linear]]);
+  pos[1] = keys(t, [[T_EXIT, o.pos[1]], [16.58, 215, ease.linear], [16.66, 270, ease.linear], [16.84, yTop(16.84), ease.inOutCubic], [99, 0, ease.linear]]);
   if (t > 16.84) pos[1] = yTop(t);
-  const pitch = keys(t, [[T_EXIT, p0], [16.58, Math.PI / 2, ease.inOutCubic], [16.62, Math.PI / 2, ease.linear], [16.84, -Math.PI / 2, ease.inOutCubic]]);
+  const pitch = keys(t, [[T_EXIT, p0], [16.58, -Math.PI / 2, ease.inOutCubic]]);
   const yaw = lerp(y0, 0, ease.inOutCubic(prog(t, T_EXIT, 16.55)));
   const ppm = Math.pow(10, lgSAt(t)) * U_M;
   const dist = Math.max(60, pos[1] - ROOF_Y);
@@ -163,8 +163,8 @@ const vec3 RETP = vec3(${f1(RET[0])}, ${f1(RET[1])}, ${f1(RET[2])});
 const vec3 FIGI = vec3(${f1(FIG_IN[0])}, ${f1(FIG_IN[1])}, ${f1(FIG_IN[2])});
 const vec3 FIGR = vec3(${f1(FIG_ROOF[0])}, ${f1(FIG_ROOF[1])}, ${f1(FIG_ROOF[2])});
 const float RR[6] = float[6](${RINGS.map(f1).join(', ')});
-#define SE_SHADOW 0.5
-#define SE_STEPS 84
+#define SE_STEPS 56
+#define SE_EPS 0.8
 #define SE_SHADOW_STEPS 6
 
 float segD(vec3 p, vec3 a, vec3 b, float r) { vec3 pa = p - a, ba = b - a; float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0); return length(pa - ba * h) - r; }
@@ -225,7 +225,7 @@ vec2 figD(vec3 q) {
 }
 
 vec2 hallD(vec3 p) {
-  vec2 res = vec2(p.y + 130.0, 3.0);
+  vec2 res = vec2(p.y + 130.0, 2.0);
   if (p.y < -123.0) {
     vec2 f = seRep2(p.xz, vec2(6.25));
     float hole = max(length(f) - 1.15, -(p.y + 131.6));
@@ -242,14 +242,7 @@ vec2 hallD(vec3 p) {
   float dR = bx(p, vec3(544.0, 42.5, 115.0), vec3(4.0, 172.5, 265.0), 0.2);
   if (p.x > 535.0 && dR < 3.0) dR = max(dR, -max(abs(seRep(p.z, 40.0)) - 0.32, p.x - 540.8));
   float dW = min(dB, min(dL, dR));
-  if (dW < res.x) res = vec2(dW, 3.0);
-  // steel columns behind the machine
-  float cx = clamp(floor(p.x / 200.0 + 0.5), 0.0, 2.0) * 200.0;
-  vec3 cq = p - vec3(cx, 42.5, -118.0);
-  if (abs(cq.z) < 20.0 && abs(cq.x) < 20.0) {
-    float dc = min(bx(cq, vec3(0.0, 0.0, 7.0), vec3(8.0, 172.0, 1.2), 0.2), min(bx(cq, vec3(0.0, 0.0, -7.0), vec3(8.0, 172.0, 1.2), 0.2), bx(cq, vec3(0.0), vec3(1.2, 172.0, 7.0), 0.2)));
-    if (dc < res.x) res = vec2(dc, 1.0);
-  } else res.x = min(res.x, max(length(vec2(cq.x, cq.z)) - 20.0, 0.0) + 0.0);
+  if (dW < res.x) res = vec2(dW, 2.0);
   // ceiling / roof deck with the hatch
   if (p.y > 190.0) {
     vec3 rq = p - vec3(200.0, 222.0, 115.0);
@@ -268,13 +261,13 @@ vec2 hallD(vec3 p) {
     dh2 = max(dh2, -(max(abs(p.x - ${f1(HATCH[0])}) - 28.0, abs(p.z - ${f1(HATCH[2])}) - 28.0)));
     float d2 = max(abs(rq.x) - 348.0, abs(rq.z) - 265.0);
     float dPar = max(abs(d2 + 3.0) - 3.0, abs(p.y - 235.0) - 6.0);
-    float dHv = min(bx(p, vec3(200.0, 240.0, 60.0), vec3(26.0, 9.0, 18.0), 0.6), min(bx(p, vec3(430.0, 240.0, 250.0), vec3(34.0, 9.0, 20.0), 0.6), bx(p, vec3(60.0, 238.0, 250.0), vec3(24.0, 7.0, 16.0), 0.6)));
+    float dHv = min(bx(p, vec3(262.0, 240.0, 30.0), vec3(22.0, 9.0, 16.0), 0.6), min(bx(p, vec3(392.0, 240.0, -30.0), vec3(26.0, 9.0, 18.0), 0.6), min(bx(p, vec3(290.0, 238.0, -100.0), vec3(24.0, 7.0, 14.0), 0.6), bx(p, vec3(60.0, 238.0, 250.0), vec3(24.0, 7.0, 16.0), 0.6))));
     float sk = clamp(floor((p.x - 20.0) / 70.0 + 0.5), 0.0, 4.0);
     vec3 sq = vec3(p.x - 20.0 - 70.0 * sk, p.y - 240.0, p.z - 20.0);
     float dSt = max(length(vec2(sq.x, sq.z)) - 6.0, abs(sq.y) - 11.0);
     float dg = min(min(dh2, dPar), min(dHv, dSt));
     dS = min(dS, dg);
-    if (dS < res.x) res = vec2(dS, 3.0);
+    if (dS < res.x) res = vec2(dS, p.y > 224.0 ? 3.0 : 2.0);
   } else {
     res.x = min(res.x, 190.0 - p.y + 25.0 * 0.0);
   }
@@ -461,7 +454,7 @@ export default class W3Machine extends Scene {
       uBT: { value: BT_.slice() },
       uBG: { value: this.arrBG },
     };
-    this.shade = new SEShade({ mapGLSL: WORLD, shadeGLSL: SHADE, uniforms: this.uni, cavL: 1.2 });
+    this.shade = new SEShade({ mapGLSL: WORLD, shadeGLSL: SHADE, uniforms: this.uni, cavL: 1.2, scale: 0.4 });
     for (let lat = -58; lat <= 82; lat += 0.5) for (let lon = -179.75; lon <= 179.75; lon += 0.5) if (isLand(lon, lat)) this.land.push([lon, lat]);
     const tq0 = w[6].start + 0.12;
     this.queues = WANTS.map(([name, lon, lat], i) => {
@@ -497,7 +490,7 @@ export default class W3Machine extends Scene {
     const a = camAt(t - 1 / 30).cam, b = camAt(t + 1 / 30).cam;
     const sp = (Math.hypot(b.pos[0] - a.pos[0], b.pos[1] - a.pos[1], b.pos[2] - a.pos[2]) * 30) / Math.max(120, cam.dist * 1.2)
       + Math.hypot(b.fwd[0] - a.fwd[0], b.fwd[1] - a.fwd[1], b.fwd[2] - a.fwd[2]) * 30 / 0.5;
-    const motion = clamp(0.2 + sp, 0, 1);
+    const motion = clamp(0.2 + sp, 0, 0.75);
     const sdfA = t < 16.84 ? 1 : smoothstep(0.0, 1.1, lgS) ;
     if (sdfA > 0.001) {
       this.shade.render(renderer, out, cam, { frame: frameIdx(t), motion, kick, reveal: 2, rim: 0.95, focus: Math.max(60, cam.dist) * 0.9, hazeL: 700, zHaze: 0.32 });
@@ -587,12 +580,12 @@ export default class W3Machine extends Scene {
       const age = t - t0 - n / 70;
       const k = n < s.length ? 1 : Math.exp(-Math.max(age, 0) / 0.30);
       const col = `rgb(${Math.round(lerp(238, 255, k))},${Math.round(lerp(233, 164, k))},${Math.round(lerp(223, 27, k))})`;
-      c.save(); c.globalAlpha = 1 - smoothstep(16.86, 16.98, t);
-      mn(txt, W - 116, Y, size, col, 'right', 3);
+      c.save(); c.globalAlpha = 1 - smoothstep(16.78, 16.88, t);
+      mn(txt, 1330, Y, size, col, 'left', 3);
       c.restore();
     };
-    writ('LIGHT REMAINING: 2%', 16.43, 904, 22);
-    writ('THE OTHER 98% IS HEAT', 16.66, 940, 22);
+    writ('LIGHT REMAINING: 2%', 16.43, 900, 26);
+    writ('THE OTHER 98% IS HEAT', 16.66, 940, 26);
   }
 
   private drawLyric(x: CanvasRenderingContext2D, t: number, w: any, nPass: number, outK: number) {
@@ -609,7 +602,7 @@ export default class W3Machine extends Scene {
       let X = 116;
       for (const i of [0, 1, 2]) {
         if (t < w[i].start - 0.0) break;
-        X += karaoke(x, w[i].w.toUpperCase(), X, 968, fam, 74, wordP(w[i], t), col(i, dim), `rgba(94,91,87,${0.8 * dim})`, 5) + 34;
+        X += karaoke(x, w[i].w.toUpperCase(), X, 968, fam, 74, wordP(w[i], t), col(i, dim), `rgba(120,116,110,${0.9 * dim + 0.1})`, 5) + 34;
       }
       x.restore();
     }
