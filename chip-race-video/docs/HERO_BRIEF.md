@@ -7,3 +7,9 @@ Use the shared foundation: app/src/engine/se.ts (header usage notes: SDF lib, ha
 Constraints: <= 4 s/frame at 1080p on SwiftShader (CHROME_PATH=/opt/pw-browsers/chromium-1194/chrome-linux/chrome; `bun scripts/render.ts --help` from app/); amber #FFA41B is the only hue; no captions (the lyric lives in the scene, as thin etched/e-beam-written type, not chunky extrusions); `bunx tsc --noEmit -p tsconfig.json` clean.
 Verify with stills at 4-5 times (include first and last frame), tiled into one <= 1600 px montage; view at most 8 images. Iterate until hand-built and premium.
 Final reply (under 25 lines): files, s/frame, what the stills show, hand-off check, open issues.
+
+## Lean rules (token budget, adopted 2026-10-16)
+- Write each file in one or two large writes, not many small edits; at most ~40 tool calls in total.
+- At most 3 render rounds; iterate on 960x540 stills; one montage (<= 1600 px wide) per round.
+- Check numbers before pixels: typecheck, s/frame and hand-off overlap scores need no images.
+- Builder is not the judge: the main session reviews one final montage; don't self-review beyond the 3 rounds.
