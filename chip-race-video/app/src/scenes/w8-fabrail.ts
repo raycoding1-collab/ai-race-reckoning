@@ -74,9 +74,9 @@ const RK: number[][] = [
   [68.0, -3.6, 2.2, 24, -1.0, 0.8, -2],
   [68.94, -3.7, 2.6, 23, -0.5, 0.2, -3],
   [69.38, -3.4, 6.0, 20, 0.3, -0.8, -2.5],
-  [69.64, -3.5, 6.5, 34, 1.0, 3.0, -21],
-  [69.9, -3.5, 6.0, 36, 1.0, 3.0, -23],
-  [70.4, -3.5, 6.0, 36, 1.0, 3.0, -23],
+  [69.64, -4.0, 11.0, 28, 0.5, 3.0, -12],
+  [69.9, -4.5, 15.0, 34, 0.5, 3.5, -10],
+  [70.4, -4.5, 15.0, 34, 0.5, 3.5, -10],
 ];
 function hermite(K: number[][], col: number, t: number): number {
   if (t <= K[0]![0]!) return K[0]![col]!;
@@ -460,46 +460,30 @@ export default class W8FabRail extends Scene {
       const fl = pulse(tau, T_SLEEP, 0.18);
       c.save(); c.globalAlpha = ha;
       c.strokeStyle = `rgba(238,233,223,${0.5 + 0.3 * fl})`; c.lineWidth = 1.2;
-      c.strokeRect(70, 62, 470, 62);
+      c.strokeRect(70, 62, 250, 62);
       mono('OHT CONTROLLER  FAB 3  BAY 7', 86, 84, 12, 'rgba(156,151,143,0.95)', 500, 1.5);
       mono('PODS 4,117', 86, 112, 24, 'rgba(238,233,223,0.97)', 600, 1.5);
-      mono('SLEEPING', 270, 112, 24, 'rgba(238,233,223,0.97)', 600, 1.5);
-      mono('0', 424, 112, 24, `rgba(255,164,27,${0.9 + 0.1 * fl})`, 700, 1.5);
       c.restore();
     }
-    // ---- the lyric as thin written type hanging in the aisle (written where the camera was looking when the word began;
-    //      an amber write-head sweeps each word on, then it cools to bone)
-    for (let i = 0; i < this.words.length; i++) {
-      const w = this.words[i]!;
-      const age = tau - w.start, dur = w.end - w.start;
-      if (age < -0.02 || age > dur + 0.35) continue;
-      const c0 = camAt(Math.min(w.start, 69.9));
-      const ab = [0, 1, 0.6, -0.3, 0.4, -0.5, 0.2][i % 7]!;
-      const wp: [number, number, number] = [
-        c0.pos[0] + c0.fwd[0] * 24 + c0.right[0] * (-3.2 + ab * 1.2) + c0.up[0] * (1.8 + ab),
-        c0.pos[1] + c0.fwd[1] * 24 + c0.right[1] * (-3.2 + ab * 1.2) + c0.up[1] * (1.8 + ab),
-        c0.pos[2] + c0.fwd[2] * 24 + c0.right[2] * (-3.2 + ab * 1.2) + c0.up[2] * (1.8 + ab),
-      ];
-      const P = seProject(cam, wp);
-      if (P.z <= 1) continue;
-      const size = clamp(1.0 * sePpm(cam, P.z), 12, 46);
-      const txt = w.w.toUpperCase();
-      const fade = smoothstep(0, 0.06, age) * (1 - smoothstep(dur + 0.05, dur + 0.35, age));
-      const sweep = clamp(age / 0.16);
-      c.save();
-      c.globalAlpha = fade;
-      c.font = font(F.mono(400), size); (c as any).letterSpacing = `${size * 0.28}px`;
-      const wd = c.measureText(txt).width;
-      c.beginPath(); c.rect(P.x - wd / 2 - 4, P.y - size * 1.2, (wd + 8) * sweep, size * 1.6); c.clip();
-      const cool = smoothstep(0.16, 0.6, age);
-      c.textAlign = 'left'; c.textBaseline = 'alphabetic';
-      c.fillStyle = `rgba(${Math.round(lerp(255, 238, cool))},${Math.round(lerp(164, 233, cool))},${Math.round(lerp(27, 223, cool))},${lerp(0.98, 0.85, cool)})`;
-      c.fillText(txt, P.x - wd / 2, P.y);
-      c.restore();
-      if (sweep < 1) {
-        c.save(); c.globalAlpha = fade; c.fillStyle = 'rgba(255,164,27,0.95)';
-        c.fillRect(P.x - wd / 2 - 4 + (wd + 8) * sweep, P.y - size * 1.0, 2, size * 1.2); c.restore();
+    // ---- the lyric: one thin written line, bottom left, in clear space; an amber write-head sweeps each word on and it cools to bone
+    {
+      const la = 1 - smoothstep(70.1, 70.35, t);
+      const size = 24, gap = size * 0.9;
+      c.save(); c.font = font(F.mono(400), size); (c as any).letterSpacing = `${size * 0.22}px`; c.textBaseline = 'alphabetic'; c.textAlign = 'left';
+      let x = 72;
+      for (const w of this.words) {
+        const txt = w.w.toUpperCase(), wd = c.measureText(txt).width, age = tau - w.start;
+        if (age > 0 && la > 0) {
+          const sweep = clamp(age / 0.16), cool = smoothstep(0.16, 0.6, age);
+          c.save(); c.globalAlpha = la;
+          c.beginPath(); c.rect(x - 2, 930, (wd + 6) * sweep, 50); c.clip();
+          c.fillStyle = `rgba(${Math.round(lerp(255, 238, cool))},${Math.round(lerp(164, 233, cool))},${Math.round(lerp(27, 223, cool))},${lerp(0.98, 0.85, cool)})`;
+          c.fillText(txt, x, 962); c.restore();
+          if (sweep < 1) { c.save(); c.globalAlpha = la; c.fillStyle = 'rgba(255,164,27,0.95)'; c.fillRect(x - 2 + (wd + 6) * sweep, 942, 2, 26); c.restore(); }
+        }
+        x += wd + gap;
       }
+      c.restore();
     }
     // ---- the shift clock on the sign (seven segments, affine-fitted to the light box face)
     const sa = smoothstep(69.4, 69.7, tau);
