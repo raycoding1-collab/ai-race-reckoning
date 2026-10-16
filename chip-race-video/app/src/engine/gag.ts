@@ -86,7 +86,7 @@ export const GAG: Gag[] = [
     stages: [S(101.25, st('SUSPECT  DIE 112')), S(101.9, st('KILLER DEFECT  DIE 112'), { hot: true })],
   },
   { id: 'whoscrown', t0: 105, t1: 108.75, at: [84, 138], size: 16, level: 0.8, stages: [S(105, st('WITNESS  NO COMMENT'))] },
-  { id: 'hold', t0: 108.75, t1: 116.25, at: [1484, 998], size: 16, level: 0.8, stages: [S(108.75, st('UNDER TENSION  HOLDING'))] },
+  { id: 'hold', t0: 108.75, t1: 115.5, at: [1484, 998], size: 16, level: 0.8, stages: [S(108.75, st('UNDER TENSION  HOLDING'))] },
   { id: 'drop3', t0: 116.25, t1: 120, at: [1464, 998], size: 16, level: 0.85, stages: [S(116.25, st('RECLASSIFIED: SHRAPNEL'))] },
   { id: 'node3', t0: 120, t1: 123.75, at: [84, 56], size: 16, level: 0.85, stages: [S(120, st('PRESENT IN EVERY TILE'))] },
   { id: 'grid3', t0: 123.75, t1: 127.5, at: [84, 838], size: 16, level: 0.9, stages: [S(123.75, st('CAUSE OF OUTAGE: PENDING'))] },

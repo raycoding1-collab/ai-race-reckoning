@@ -154,7 +154,7 @@ const float WPI = 3.14159265, NF = 56.0, RC = 1450.0;
 const vec3 BALLP = vec3(${f1(BALL[0])}, ${f1(BALL[1])}, 0.0);
 #define SE_SHADOW 0.5
 #define SE_STEPS 90
-#define SE_SHADOW_STEPS 6
+#define SE_SHADOW_STEPS 4
 #define SE_EPS 0.6
 
 float outBack(float x) { x = clamp(x, 0.0, 1.0) - 1.0; return 1.0 + 2.2 * x * x * x + 1.2 * x * x; }
@@ -174,8 +174,9 @@ vec2 crownD(vec3 p0) {
   float a = atan(p.z, p.x) - uTh;
   float cell = floor(a / stp + 0.5);
   vec2 res = vec2(1.0e5, 0.0);
-  for (int k = -1; k <= 1; k++) {              // own cell and both neighbours (the peaks step by fin, so a neighbour can be nearer)
-    float ck = cell + float(k);
+  float sg = (a - cell * stp) >= 0.0 ? 1.0 : -1.0;
+  for (int k = 0; k <= 1; k++) {               // own cell and the nearer neighbour (the peaks step by fin, so a neighbour can be nearer)
+    float ck = cell + float(k) * sg;
     float la = a - ck * stp;
     float xr = rr * cos(la), xt = rr * sin(la);
     float idx = mod(ck, NF);
@@ -183,9 +184,10 @@ vec2 crownD(vec3 p0) {
     float h = finH(idx) * uK * grow;
     if (h > 1.5) {
       float rd = min(6.0, h * 0.4);
-      res = seUnion(res, vec2(seRoundBox(vec3(xr - RC, p.y - h * 0.5, xt), vec3(14.0, h * 0.5, 58.0), rd), SE_SILICON));
+      res = seUnion(res, vec2(seRoundBox(vec3(xr - RC, p.y - h * 0.5, xt), vec3(18.0, h * 0.5, 58.0), rd), SE_SILICON));
     }
   }
+  res.x *= 0.6;                                // conservative inside the bound: tangent rays along the fin row must not overstep thin fins
   float gg = smoothstep(106.0, 106.7, uT) * uK;
   if (gg > 0.02) {
     for (int g = 0; g < 2; g++) {
