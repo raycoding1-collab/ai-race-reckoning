@@ -157,7 +157,7 @@ float plantD(vec3 p) {
   }
   return min(min(dS, dl * 0.85), dcell + 0.03);
 }
-float canopyH(vec2 p, float dcam) { float k = 1.0 - 0.9 * smoothstep(50.0, 160.0, dcam); return 2.15 + k * (0.22 * cos(6.2832 * (p.y / 0.9 - 0.5)) + 0.08 * cos(6.2832 * (p.x / 0.9 - 0.5))); }
+float canopyH(vec2 p, float dcam) { float k = 1.0 - smoothstep(35.0, 110.0, dcam); return 2.15 + k * (0.22 * cos(6.2832 * (p.y / 0.9 - 0.5)) + 0.08 * cos(6.2832 * (p.x / 0.9 - 0.5))); }
 float cornD(vec3 p, float dcam) {
   if (p.y > 2.7) return p.y - 2.65;
   float dC = (p.y - canopyH(p.xz, dcam)) * 0.7;
@@ -403,7 +403,7 @@ bool seBounds(vec3 ro, vec3 rd, out float t0, out float t1) {
 float matZ(float id, vec3 p, vec3 n) {
   if (id < 6.5) {
     float Z = seMatZ(id);
-    if (id < 0.5) Z *= 0.6 + 0.4 * hash12(floor(p.xz / 0.9));
+    if (id < 0.5) { float fr = smoothstep(30.0, 110.0, length(p - uCamPos)); Z *= mix(0.6 + 0.4 * hash12(floor(p.xz / 0.9)), 0.5, fr); }
     return Z;
   }
   return id < 7.5 ? 1.0 : id < 8.5 ? 0.75 : id < 9.5 ? 0.45 : id < 10.5 ? 0.42 : 0.3;
@@ -448,7 +448,7 @@ float matAmber(float id, vec3 p, vec3 n) {
     float a = 0.0;
     vec2 cv = vec2((p.x + 80.0) / 160.0, (p.z - 34.0) / 60.0 * 0.75);
     if (cv.x > 0.0 && cv.x < 1.0 && cv.y > 0.0 && cv.y < 0.75) {
-      float ridge = 0.5 + 0.5 * cos(6.2832 * (p.z / 0.9 - 0.5));
+      float ridge = mix(0.5 + 0.5 * cos(6.2832 * (p.z / 0.9 - 0.5)), 0.6, smoothstep(30.0, 110.0, length(p - uCamPos)));
       a = 0.97 * txtAt(cv) * (0.4 + 0.6 * ridge) * smoothstep(0.1, 0.9, p.y / 2.4 + 0.25);
     }
     if (uStorm > 0.01) a = max(a, clamp(arcRim(p) * 0.9, 0.0, 0.8) * smoothstep(0.2, 2.0, p.y));
