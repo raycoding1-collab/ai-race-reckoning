@@ -13,7 +13,7 @@ const scene = (name: string) => () => {
 
 /** [id, module, startBar, endBar, params?] — the end of the last entry is the song's end. */
 export const PLATES: [string, string, number, number, Record<string, unknown>?][] = [
-  ['sand', 'sand', 0, 4], ['tin', 'tin', 4, 6], ['laser', 'laser', 6, 8], ['machine', 'w3-machine', 8, 10],
+  ['sand', 'sand', 0, 4], ['tin', 'w2-shot', 4, 6], ['laser', 'w2-shot', 6, 8], ['machine', 'w3-machine', 8, 10],
   ['tons', 'tons', 10, 12], ['line', 'line', 12, 14],
   ['drop1', 'w1-wafer', 14, 16, { n: 1 }], ['node1', 'w4-nanosheet', 16, 18], ['grid1', 'grid1', 18, 20], ['down1', 'down1', 20, 22],
   ['post1', 'w11-chamber', 22, 26],

@@ -45,13 +45,13 @@ const BEAT = 60 / 128;
 
 // pixel-font mask "WAFER" for the dies (rows 5..9, cols 2..22); the centre die (12, 10) is never part of it
 const GLYPH: Record<string, string[]> = {
-  W: ['X...X', 'X...X', 'X.X.X', 'X.X.X', 'XX.XX'],
+  W: ['X.X', 'X.X', 'XXX', 'XXX', 'X.X'],
   A: ['.X.', 'X.X', 'XXX', 'X.X', 'X.X'],
   F: ['XXX', 'X..', 'XX.', 'X..', 'X..'],
   E: ['XXX', 'X..', 'XX.', 'X..', 'XXX'],
   R: ['XX.', 'X.X', 'XX.', 'X.X', 'X.X'],
 };
-const WORD_ROW0 = 5, WORD_COL0 = 2;
+const WORD_ROW0 = 6, WORD_COL0 = 3;
 const LBL = { cw: 2400, ch: 176, X0: 168, X1: 190, ZL: 300 };   // label canvas: 300 mm along z (bottom to top) x 22 mm
 const WORDS = ['EVERY', 'WAFER', 'IS', 'A', 'WEAPON', 'NOW'];
 
@@ -474,6 +474,7 @@ export default class W1Wafer extends Drop {
   override async init() {
     await super.init();
     const n = this.n;
+    if (n === 2) (this as any).ghostNow = () => {};   // no grey NOW ghost behind the inverted odometer
     const D = dies();
     // ---- per-die data: present, letter sink time, hash
     const arr = new Float32Array(COLS * ROWS * 4);
@@ -483,7 +484,7 @@ export default class W1Wafer extends Drop {
       const g = GLYPH[ch]!;
       const base = li < 2 ? 0.47 : 0.703;
       for (let y = 0; y < 5; y++) for (let x = 0; x < g[0]!.length; x++) {
-        if (g[y]![x] === 'X') sink.set((WORD_ROW0 + y) * COLS + (col + x), base + 0.035 * y + 0.012 * x + 0.02 * li);
+        if (g[y]![x] === 'X') sink.set((n === 1 ? 2 * ROWC - (WORD_ROW0 + y) : WORD_ROW0 + y) * COLS + (n === 1 ? 2 * COLC - (col + x) : col + x), base + 0.035 * y + 0.012 * x + 0.02 * li);
       }
       col += g[0]!.length + 1; li++;
     }
