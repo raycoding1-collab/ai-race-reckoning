@@ -115,7 +115,7 @@ export const WAVE_R = [170, 350, 520, 700, 1400];
 /** front radius of the blackout (world px from O_W) at time t, and the radius the lights have switched on to */
 export function deadR(t: number): number {
   let r = -100;
-  for (let i = 0; i < 5; i++) r = Math.max(r, WAVE_R[i]! * ease.outCubic(prog(t, WAVE_T[i]!, WAVE_T[i]! + 0.22)) - (t < WAVE_T[i]! ? 1000 : 0));
+  for (let i = 0; i < 5; i++) r = Math.max(r, WAVE_R[i]! * ease.outCubic(prog(t, WAVE_T[i]!, WAVE_T[i]! + (i === 4 ? 0.07 : 0.22))) - (t < WAVE_T[i]! ? 1000 : 0)); // (edit diet: the last wave, the one that kills every light, takes 2 frames: a power cut, not a 16-frame dissolve)
   return r;
 }
 export const onR = (t: number) => 1500 * ease.outCubic(prog(t, 101.34, 102.55));
