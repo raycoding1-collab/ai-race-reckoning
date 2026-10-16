@@ -54,8 +54,8 @@ const CAMK: number[][] = [
   [49.72, 9.0, 31, 8.8, -28, 40, 0],
   [50.20, 9.0, 31, 8.0, -27, 47, 0],
   [50.86, 10, 31, 7.4, -26, 52, 0],
-  [51.45, 13, 34, 4.8, -58, 56, 0],
-  [51.95, 38, 22, 5.8, -22, 84, 0],
+  [51.45, 13, 34, 6.3, -40, 56, 0],
+  [51.95, 38, 22, 6.6, -18, 84, 0],
   [52.30, 80, 3, 8.6, 0, TOPY, 4.0],
   [52.50, 90, 0, FIN_PPM, 0, TOPY, FIN_TZ],
   [52.70, 90, 0, FIN_PPM, 0, TOPY, FIN_TZ],
@@ -231,7 +231,7 @@ float matZ(float id, vec3 p, vec3 n) {
     float onX = step(abs(p.x - uCutX), 0.22) * step(0.9, n.x) * step(uCutZ - 0.4, p.z);
     return mix(0.50, 0.15, max(onZ, onX) * inS * uCutOn);        // the cut faces are dark silicon: the copper stands out
   }
-  return id < 2.5 ? seMatZ(id) : id < 8.5 ? 0.60 : id < 9.5 ? 1.15 : 0.70;
+  return id < 2.5 ? seMatZ(id) : id < 8.5 ? 0.60 : id < 9.5 ? 1.15 : 0.40;
 }
 float matAmber(float id, vec3 p, vec3 n) {
   float kk = clamp(floor((p.y - YC1) / PT + 0.5), 0.0, 11.0);
@@ -413,9 +413,9 @@ void main() {
     // the lease sign
     const sa = smoothstep(51.1, 51.35, t) * (1 - smoothstep(51.95, 52.15, t));
     if (sa > 0.01) {
-      const tip = proj(-20, yc(7), 21), x0 = tip.x - 520, y0 = tip.y - 150;
+      const tip = proj(-20, yc(7), 21), x0 = 110, y0 = 200;
       c.globalAlpha = sa;
-      c.beginPath(); c.moveTo(tip.x, tip.y); c.lineTo(x0 + 330, y0 + 30); c.lineTo(x0 - 6, y0 + 30); c.stroke();
+      c.beginPath(); c.moveTo(tip.x, tip.y); c.lineTo(x0 + 300, y0 + 30); c.lineTo(x0 + 290, y0 + 30); c.stroke();
       c.fillStyle = 'rgba(238,233,223,0.9)'; c.beginPath(); c.arc(tip.x, tip.y, 2.6, 0, TAU); c.fill();
       mono('FULLY LEASED', x0, y0, 22, 'rgba(238,233,223,0.95)', 600, 'left', 5);
       mono('THROUGH 2026', x0, y0 + 26, 22, 'rgba(238,233,223,0.95)', 600, 'left', 5);
