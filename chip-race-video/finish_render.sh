@@ -17,8 +17,8 @@ $FF -i build/silicon_shield_v3.mp4 -vf scale=-2:720 -c:v libx264 -preset medium 
     -c:a aac -b:a 128k -movflags +faststart build/silicon_shield_v3_preview.mp4
 cp build/silicon_shield_v3.mp4 silicon_shield.mp4
 git add silicon_shield.mp4
-git commit -qm "Silicon Shield v3: SE-look redesign (W7 shield, W11 chamber, global SEM grade), v2 song" \
+git commit -qm "Silicon Shield v3: SE-look redesign, 12 hero worlds (W1-W12), global SEM grade, v2 song" \
   -m "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
-Claude-Session: https://claude.ai/code/session_013UyGxSPvaWbUom419vDHJw"
+Claude-Session: https://claude.ai/code/session_01PfozsYEzzYiNUkGLw7tVg6"
 for i in 1 2 3 4; do git push -q origin ccr-c467948d-jdmj79 && break; sleep $((2**i)); done
 ls -la silicon_shield.mp4 build/silicon_shield_v3_preview.mp4; echo FINISHED $(date -u +%H:%M)
