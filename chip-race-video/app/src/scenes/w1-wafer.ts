@@ -114,8 +114,8 @@ vec2 waferLayer(vec3 p, float wx) {
       float sx = PIT.x * 0.5 - abs(q0.x), sz = PIT.y * 0.5 - abs(q0.y);
       int nx = f0.x > 0.0 ? c0.x + 1 : c0.x, nz = f0.y > 0.0 ? c0.y + 1 : c0.y;
       float dH = 1.0e3, dV = 1.0e3;
-      if (false && kerfOpen(uCut.x + float(nz) * uCut.y, uCut.y * 0.8, wx)) dH = sz - 0.45;
-      if (false && kerfOpen(uCut.z + float(nx) * uCut.w, uCut.w * 0.8, wx)) dV = sx - 0.45;
+      if (kerfOpen(uCut.x + float(nz) * uCut.y, uCut.y * 0.8, wx)) dH = sz - 0.45;
+      if (uCut.z < 1000.0 && kerfOpen(uCut.z + float(nx) * uCut.w, uCut.w * 0.8, wx)) dV = sx - 0.45;
       dS = smax(dS, -min(dH, dV), 0.08);
     }
     res = vec2(dS, SE_SILICON);
@@ -137,7 +137,7 @@ vec2 waferLayer(vec3 p, float wx) {
     float pop = 0.0;
     if (uN > 1.5 && uN < 2.5 && uCut.z < 1000.0) {
       float tp = max(uCut.x + float(c.y + 1) * uCut.y, uCut.z + float(c.x + 1) * uCut.w) + uCut.w * 0.8;
-      pop = 0.0 * smoothstep(0.0, 0.10, uT - tp);
+      pop = 0.5 * smoothstep(0.0, 0.10, uT - tp);
     }
     bool cen = c == CEN;
     float sink = smoothstep(0.0, 0.12, uT - cd.y) * 1.25;
@@ -225,10 +225,13 @@ vec2 map(vec3 p) {
       vec2 g = grainD(p);
       if (g.x < res.x) res = g;
     }
-  } else if (uN > 1.5 && uN < 2.5 && uSaw.w > 0.5 && p.y < 125.0) {
-    vec2 sw = sawD(p);
-    if (sw.x < res.x) res = sw;
-  } else res.x = min(res.x, max(p.y - 11.5, 0.05));
+  } else {
+    res.x = min(res.x, max(p.y - 11.5, 0.05));
+    if (uN > 1.5 && uN < 2.5 && uSaw.w > 0.5 && p.y < 125.0) {
+      vec2 sw = sawD(p);
+      if (sw.x < res.x) res = sw;
+    }
+  }
   return res;
 }
 
