@@ -123,7 +123,7 @@ function orbitAt(t: number): { cam: SECam; ppm: number } {
   const slot = add(MC[2]!, mul(g.a, 0.78 * g.R));
   const pb = Math.exp(-Math.pow((t - 15.60) / 0.12, 2));
   tgt = lerp3(tgt, slot, pb);
-  ppm *= 1 + 7.2 * pb;
+  ppm *= 1 + 5.5 * pb;
   az += 14 * pb;
   return { cam: orbit(tgt, az, el, ppm), ppm };
 }
@@ -163,8 +163,8 @@ const vec3 RETP = vec3(${f1(RET[0])}, ${f1(RET[1])}, ${f1(RET[2])});
 const vec3 FIGI = vec3(${f1(FIG_IN[0])}, ${f1(FIG_IN[1])}, ${f1(FIG_IN[2])});
 const vec3 FIGR = vec3(${f1(FIG_ROOF[0])}, ${f1(FIG_ROOF[1])}, ${f1(FIG_ROOF[2])});
 const float RR[6] = float[6](${RINGS.map(f1).join(', ')});
-#define SE_STEPS 56
-#define SE_EPS 0.8
+#define SE_STEPS 44
+#define SE_EPS 1.0
 #define SE_SHADOW_STEPS 6
 
 float segD(vec3 p, vec3 a, vec3 b, float r) { vec3 pa = p - a, ba = b - a; float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0); return length(pa - ba * h) - r; }
@@ -195,7 +195,7 @@ vec2 mirrorD(vec3 p, int i) {
   // the cutaway slot
   float cs = mix(R * 1.1, 0.42 * R, uMK[i]);
   d = max(d, -max(cs - a, abs(b) - 0.16 * R));
-  vec2 res = vec2(d, (ly - ys) > -${f1(0.26)} * R ? 40.0 + float(i) : 3.0);
+  vec2 res = vec2(d, (ly - ys) > -${f1(0.26)} * R ? 40.0 + float(i) : 0.0);
   // stem, nut and three pads (mount hardware)
   float dS = max(r - 0.10 * R, max(ly - (-T + 0.3), (-T - 0.9 * R) - ly));
   float dN = seRoundBox(vec3(a, ly + T + 0.9 * R, b), vec3(0.17 * R, 0.07 * R, 0.17 * R), 0.02 * R);
@@ -365,7 +365,7 @@ float matAmber(float id, vec3 p, vec3 n) {
       v = 0.95 * (1.0 - smoothstep(9.5, 16.5, r)) * exp(-max(uT - 15.0, 0.0) / 0.40);
     } else {
       vec3 dq = p - uMH[i];
-      v = step(uMT[i], uT) * exp(-(uT - uMT[i]) / 0.30) * (0.55 + 0.45 * exp(-dot(dq, dq) / (0.32 * R * R)));
+      v = step(uMT[i], uT) * exp(-(uT - uMT[i]) / 0.30) * exp(-dot(dq, dq) / (0.10 * R * R));
     }
     return clamp(max(v, uHeat), 0.0, 0.99);
   }
@@ -606,18 +606,14 @@ export default class W3Machine extends Scene {
       }
       x.restore();
     }
-    // second line: and the whole world's waiting
+    // second line: one treatment, the big rows from the start ("AND THE" rises from 16.41, row 2 from 16.85)
     if (t > w[3].start - 0.05) {
       x.save(); x.globalAlpha = 1 - outK;
+      const yb = 1000;
       let X = 116;
-      const yb = t < 16.9 ? 968 : 1000;
-      if (t < 16.9) {
-        for (const i of [3, 4]) X += karaoke(x, w[i].w.toUpperCase(), X, yb, fam, 74, wordP(w[i], t), col(i, 1), 'rgba(94,91,87,0.7)', 5) + 34;
-      } else {
-        for (const i of [3, 4, 5]) { X += karaoke(x, w[i].w.toUpperCase(), X, yb - 150, fam, 120, wordP(w[i], t), col(i, 1), 'rgba(94,91,87,0.5)', 6) + 30; }
-        X = 116;
-        for (const i of [6, 7]) { X += karaoke(x, w[i].w.toUpperCase(), X, yb, fam, 150, wordP(w[i], t), col(i, 1), 'rgba(94,91,87,0.5)', 7) + 34; }
-      }
+      for (const i of [3, 4, 5]) { if (i === 5 && t < w[5].start - 0.05) break; X += karaoke(x, w[i].w.toUpperCase(), X, yb - 150, fam, 120, wordP(w[i], t), col(i, 1), 'rgba(94,91,87,0.5)', 6) + 30; }
+      X = 116;
+      if (t > w[5].start - 0.03) for (const i of [6, 7]) { X += karaoke(x, w[i].w.toUpperCase(), X, yb, fam, 150, wordP(w[i], t), col(i, 1), 'rgba(94,91,87,0.5)', 7) + 34; }
       x.restore();
     }
   }
