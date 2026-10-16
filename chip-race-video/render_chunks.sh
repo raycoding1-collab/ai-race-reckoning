@@ -3,7 +3,7 @@
 # container restart loses at most one chunk. Usage: render_chunks.sh [first_chunk] [last_chunk]
 cd "$(dirname "$0")/app"
 export CHROME_PATH=/opt/pw-browsers/chromium-1194/chrome-linux/chrome
-OUT=../build/chunks; END=142.25; N=24
+OUT=../build/chunks; END=142.25; N=24; mkdir -p $OUT
 for i in $(seq ${1:-0} ${2:-$((N-1))}); do
   f=$(printf "%s/c%02d.mp4" $OUT $i)
   ffprobe -v error -show_entries format=duration -of csv=p=0 "$f" >/dev/null 2>&1 && continue
