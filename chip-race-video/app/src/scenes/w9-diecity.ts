@@ -25,7 +25,8 @@ import { Layer2D, W, H } from '../engine/gl';
 import { F, font } from '../engine/type';
 import { frameIdx, lerp, smoothstep, clamp, ease, prog } from '../engine/util';
 import { lineByScene } from './_motifs';
-import { drawBridgeLine } from './atom-kit';
+import { DIE as CDIE, O_W, shieldDies } from './crack-kit';
+import { stubX } from './node2';
 import { SEShade, SEStrip, seCamera, seProject, sePost, type SECam, type V3 } from '../engine/se';
 import { rgba } from '../engine/palette';
 
@@ -316,9 +317,10 @@ float roofLight(vec3 p) {
   if (!smCell(p.xz, q, ij)) return 0.0;
   float L = smLight(ij);
   if (L < 0.01) return 0.0;
-  vec2 sid = vec2(seRepId(q.x, 0.62), q.y < 0.0 ? 0.0 : 1.0);
-  float hs = hash12(ij * 7.3 + sid * 1.7 + 0.5);
-  float win = step(hs, clamp(L * 1.5, 0.0, 1.0));
+  vec2 wq = q / 0.155;
+  vec2 wc = floor(wq), wf = fract(wq) - 0.5;
+  float hs = hash12(ij * 7.3 + wc * 1.31 + 0.5);
+  float win = step(hs, clamp(L * 1.25, 0.0, 1.0)) * step(abs(wf.x), 0.36) * step(abs(wf.y), 0.36);
   float inner = step(abs(q.x), BX - 0.12) * step(abs(q.y), BZ - 0.12);
   float gr = step(0.035, abs(seRep(q.x, 0.62))) * step(0.035, abs(q.y));
   return win * inner * gr * (0.5 + 0.49 * clamp(L * 1.4, 0.0, 1.0));
@@ -371,8 +373,8 @@ export default class W9DieCity extends Scene {
     const K = night ? CAM_NIGHT : CAM_DAY;
     u.uT!.value = t;
     if (night) {
-      u.uShield!.value = smoothstep(100.72, 101.12, t);
-      u.uWin!.value = smoothstep(100.72, 101.12, t);
+      u.uShield!.value = 0;
+      u.uWin!.value = 0;
     } else {
       const cw = this.line.words.find((w: any) => /crown/i.test(w.w));
       const c0 = cw ? cw.start : 76.88;
@@ -404,13 +406,71 @@ export default class W9DieCity extends Scene {
       this.sign(c, cam, [0, 0.05, -7.8], 'NoC BOULEVARD', 130, -70, a1 * smoothstep(T + 0.2, T + 0.45, t));
       this.sign(c, cam, [CROWN[0], 0.1, CROWN[2]], 'SM 073', 150, 110, smoothstep(76.35, 76.6, t) * (1 - smoothstep(76.95, 77.2, t)));
     }
-    c.save();
-    c.globalAlpha = 1 - smoothstep(f.end - 0.35, f.end - 0.05, t) * (night ? 1 : 0);
-    drawBridgeLine(c, this.line, t, { x: W / 2, y: 972, size: 54, align: 'center', dim: 0.3, lead: 0.3 });
-    c.restore();
+    this.drawLyric(c, t, 1 - smoothstep(night ? 100.7 : 78.4, night ? 101.0 : 78.6, t));
+    // ---- hand-offs: ink-out plus the next plate's first frame
+    const ink = night ? smoothstep(100.75, 101.15, t) : smoothstep(78.45, 78.72, t);
+    if (ink > 0.01) {
+      c.save(); c.globalAlpha = ink; c.fillStyle = '#0A0A0B'; c.fillRect(0, 0, W, H); c.restore();
+      if (night) this.shieldMap(c, smoothstep(100.85, 101.2, t));
+      else this.busbar(c, smoothstep(78.5, 78.7, t));
+    }
     comp.draw(renderer, this.text.upload(), out);
-    this.strip.composite(renderer, comp, out, { ppm: H / 2 / (cam.dist * cam.tanY), alpha: 1 });
+    this.strip.composite(renderer, comp, out, { ppm: H / 2 / (cam.dist * cam.tanY), alpha: 1 - ink });
     return sePost({ ca: 2.5 * kick });
+  }
+
+
+  /** thin etched lyric in clear space (top left), amber while sung, then bone */
+  private drawLyric(c: CanvasRenderingContext2D, t: number, alpha: number) {
+    if (alpha <= 0.01) return;
+    const ws = this.line.words;
+    c.save(); c.globalAlpha = alpha;
+    c.font = font(F.archivo(112, 300), 34); c.textBaseline = 'alphabetic'; (c as any).letterSpacing = '5px';
+    const gap = 22, X0 = 116, Y = 112;
+    let tw = 0; const xs: number[] = [];
+    for (const w of ws) { xs.push(X0 + tw); tw += c.measureText(w.w.toUpperCase()).width + gap; }
+    c.fillStyle = 'rgba(10,10,11,0.72)'; c.fillRect(X0 - 24, Y - 50, tw + 40, 74);
+    c.fillStyle = 'rgba(238,233,223,0.55)'; c.fillRect(X0 - 24, Y + 24, tw + 40, 1);
+    ws.forEach((w: any, i: number) => {
+      const ap = smoothstep(w.start - 0.3, w.start, t);
+      if (ap <= 0) return;
+      const k = Math.exp(-Math.max(t - w.start, 0) / 0.3) * (t >= w.start ? 1 : 0);
+      c.fillStyle = `rgba(${Math.round(lerp(238, 255, k))},${Math.round(lerp(233, 164, k))},${Math.round(lerp(223, 27, k))},${(t >= w.start ? 0.95 : 0.3) * ap})`;
+      c.fillText(w.w.toUpperCase(), xs[i]!, Y);
+    });
+    c.restore();
+  }
+
+  /** crack's first frame: the shield wafer map at its die pitch (104 x 70, centre 960,540), SM windows lit, the stress spark */
+  private shieldMap(c: CanvasRenderingContext2D, a: number) {
+    if (a <= 0.01) return;
+    c.save(); c.globalAlpha = a;
+    for (const d of shieldDies()) {
+      const x0 = 960 + d.x - CDIE.w / 2, y0 = 540 + d.y - CDIE.h / 2;
+      c.strokeStyle = 'rgba(255,164,27,0.32)'; c.lineWidth = 1.2; c.strokeRect(x0 + 3, y0 + 3, CDIE.w - 6, CDIE.h - 6);
+      for (let i = 0; i < 8; i++) for (let j = 0; j < 4; j++) {
+        const fr = Math.sin(d.x * 12.9 + d.y * 78.2 + i * 3.1 + j * 7.7) * 43758.5, on = 0.55 + 0.45 * (fr - Math.floor(fr));
+        c.fillStyle = `rgba(255,164,27,${0.9 * Math.min(1, on)})`;
+        c.fillRect(x0 + 14 + i * 10 + 1.5, y0 + 11 + j * 10 + 1.5, 7, 7);
+      }
+    }
+    c.fillStyle = 'rgba(255,200,120,1)'; c.beginPath(); c.arc(960 + O_W.x, 540 + O_W.y, 4, 0, Math.PI * 2); c.fill();
+    c.restore();
+  }
+
+  /** grid2's first frame: the amber busbar across the frame with node2's feeder stubs, on its drawing frame */
+  private busbar(c: CanvasRenderingContext2D, a: number) {
+    if (a <= 0.01) return;
+    c.save(); c.globalAlpha = a;
+    c.strokeStyle = 'rgba(238,233,223,0.35)'; c.lineWidth = 1.5; c.strokeRect(60, 60, W - 120, H - 120);
+    c.strokeStyle = 'rgba(238,233,223,0.2)'; c.strokeRect(70, 70, W - 140, H - 140);
+    c.strokeStyle = '#FFA41B'; c.lineWidth = 3; c.lineCap = 'round';
+    c.beginPath(); c.moveTo(0, 540); c.lineTo(W, 540); c.stroke();
+    for (const side of [1, -1]) for (let k = 0; k < 10; k++) {
+      const x = stubX(side, k), sg = k % 2 ? 1 : -1;
+      c.beginPath(); c.moveTo(x, 540); c.lineTo(x, 540 + sg * 34); c.stroke();
+    }
+    c.restore();
   }
 
   private sign(c: CanvasRenderingContext2D, cam: SECam, wp: V3, text: string, dx: number, dy: number, alpha: number) {
