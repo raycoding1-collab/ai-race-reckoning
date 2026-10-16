@@ -21,10 +21,10 @@ export const PLATES: [string, string, number, number, Record<string, unknown>?][
   ['shield', 'w7-shield', 34, 36], ['fab', 'fab', 36, 38],
   ['drop2', 'drop', 38, 40, { n: 2 }], ['node2', 'w9-diecity', 40, 42], ['grid2', 'grid2', 42, 44], ['down2', 'down2', 44, 46],
   ['post2', 'post2', 46, 50],
-  ['atom', 'atom', 50, 52], ['dream', 'w9-diecity', 52, 54, { night: true }], ['crack', 'crack', 54, 56], ['whoscrown', 'whoscrown', 56, 58],
-  ['hold', 'hold', 58, 62],
+  ['atom', 'atom', 50, 52], ['dream', 'w9-diecity', 52, 54, { night: true }], ['crack', 'crack', 54, 56], ['whoscrown', 'w10-wire', 56, 58],
+  ['hold', 'w10-wire', 58, 62],
   ['drop3', 'drop', 62, 64, { n: 3 }], ['node3', 'w4-nanosheet', 64, 66, { recap: true }], ['grid3', 'grid3', 66, 68], ['down3', 'down3', 68, 70],
-  ['outro', 'outro', 70, 999],
+  ['outro', 'w12-stub', 70, 999],
 ];
 
 export function makeTimeline(_ly: Lyrics, au: AudioData): TimelineEntry[] {

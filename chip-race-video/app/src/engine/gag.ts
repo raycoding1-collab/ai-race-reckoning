@@ -91,7 +91,7 @@ export const GAG: Gag[] = [
   { id: 'node3', t0: 120, t1: 123.75, at: [84, 56], size: 16, level: 0.85, stages: [S(120, st('PRESENT IN EVERY TILE'))] },
   { id: 'grid3', t0: 123.75, t1: 127.5, at: [84, 838], size: 16, level: 0.9, stages: [S(123.75, st('CAUSE OF OUTAGE: PENDING'))] },
   { id: 'down3', t0: 127.5, t1: 131.25, at: [104, 998], size: 16, level: 0.9, stages: [S(127.5, st('INCIDENT REPORT FILED'))] },
-  { id: 'outro', t0: 131.25, t1: 142.25, at: [264, 1034], size: 22, level: 1, light: true, stages: [S(131.25, st('RETURN TO SENDER'))] },
+  { id: 'outro', t0: 131.25, t1: 141.55, at: [264, 1034], size: 22, level: 1, stages: [S(131.25, st('RETURN TO SENDER'))] },
 ];
 
 const HOP = 0.42; // s: the grain's hop from the previous plate's spot
