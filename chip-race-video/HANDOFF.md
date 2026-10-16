@@ -9,7 +9,7 @@ Order (tick when done, commit after each):
 - [x] A. Foundation (done 15:55 UTC; W7 shield built; polish later: thinner etched lyric type, less overlap with the sand): `engine/glsl/sem.ts` (SDF lib, SE shading, raster grain, data strip) + `semGrade` global re-grade of existing plates; look test stills.
 - [ ] B. Edit diet (flashes <= 8, dissolves <= 4, bursts only in the 3 drops) + UNIT 0001 gag overlay.
 - [ ] C. Hero worlds, ALL approved by the user 2026-10-16 (brief: docs/HERO_BRIEF.md incl. Lean rules; 2 agents max; main session reviews one montage each). Done: W7, W11. Queue: W3 (in progress), W4, W9, W12, W10, W6, W8, W1, W2, W5. Old list: W7 shield, W11 chamber, W12 stub (loop ending), W10 wire, W6 tower, W4 nanosheet, W8 fab rail, W9 die city, W1 wafer, W2 shot, W5 cornfield, W3 machine. At most 2 sonnet agents at a time.
-- [ ] D. Full re-render (render_chunks.sh, resumable, tracked jobs < 2 h), mux v2 audio, 1080p commit copy < 100 MB, 720p preview < 30 MB, SendUserFile with before/after.
+- [ ] D. (IN PROGRESS 2026-10-16 14:52 UTC; user stopped further hero worlds to stay in one window: ship W7 + W11 + SE grade + gag + edit-diet partial) run `finish_render.sh` (tracked job, re-run when stopped) then SendUserFile build/silicon_shield_v3_preview.mp4. Full re-render (render_chunks.sh, resumable, tracked jobs < 2 h), mux v2 audio, 1080p commit copy < 100 MB, 720p preview < 30 MB, SendUserFile with before/after.
 Window rule (learned 2026-10-10): schedule the safety-net `send_later` (~305 min) at the START of each window, not near the end.
 
 ## PHASE 3 (done 2026-10-11 14:30 UTC): perceive the reference exactly
