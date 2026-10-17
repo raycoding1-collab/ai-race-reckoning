@@ -1,0 +1,16 @@
+{
+  "name": "chip-race-video",
+  "version": "1.0.0",
+  "description": "A 44-second lyric video about the AI chip race. Everything (song, vocals, visuals) is generated from code in this folder.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "opentype.js": "^1.3.4",
+    "three": "^0.160.0"
+  }
+}

@@ -1,0 +1,380 @@
+{
+ "label": "v1",
+ "mix": "audio/silicon_shield_v1.mp3",
+ "duration": 142.25,
+ "sections": [
+  {
+   "section": "intro",
+   "start": 0.0,
+   "end": 7.5,
+   "lufs": -20.176513894950133,
+   "wer": null,
+   "n_words": 0,
+   "clap_gap": -0.2035372257232666,
+   "clap_muddy": 0.11223205924034119,
+   "clap_singer": 0.2587214708328247,
+   "clap_robotic": 0.4622586965560913,
+   "ced_singing": 0.020305156707763672,
+   "ced_female_singing": 1.4126300811767578e-05
+  },
+  {
+   "section": "verse1",
+   "start": 7.5,
+   "end": 22.5,
+   "lufs": -15.536232530244675,
+   "wer": 0.3793103448275862,
+   "n_words": 29,
+   "clap_gap": -0.08325165510177612,
+   "clap_muddy": 0.13084129989147186,
+   "clap_singer": 0.2506083548069,
+   "clap_robotic": 0.33386000990867615,
+   "ced_singing": 0.016700213154157,
+   "ced_female_singing": 0.02641846736272176
+  },
+  {
+   "section": "pre1",
+   "start": 22.5,
+   "end": 26.25,
+   "lufs": -12.45879665126433,
+   "wer": 0.375,
+   "n_words": 8,
+   "clap_gap": -0.1642705500125885,
+   "clap_muddy": 0.17022506892681122,
+   "clap_singer": 0.18643078207969666,
+   "clap_robotic": 0.35070133209228516,
+   "ced_singing": 0.007554277777671814,
+   "ced_female_singing": 0.01332046091556549
+  },
+  {
+   "section": "chorus1",
+   "start": 26.25,
+   "end": 41.25,
+   "lufs": -11.002660454728822,
+   "wer": 0.47619047619047616,
+   "n_words": 21,
+   "clap_gap": -0.1158054769039154,
+   "clap_muddy": 0.2020549327135086,
+   "clap_singer": 0.22455167770385742,
+   "clap_robotic": 0.3403571546077728,
+   "ced_singing": 0.012770578265190125,
+   "ced_female_singing": 0.004753872752189636
+  },
+  {
+   "section": "post1",
+   "start": 41.25,
+   "end": 48.75,
+   "lufs": -11.86925868034073,
+   "wer": 1.0,
+   "n_words": 10,
+   "clap_gap": -0.13963615894317627,
+   "clap_muddy": 0.18812325596809387,
+   "clap_singer": 0.24327820539474487,
+   "clap_robotic": 0.38291436433792114,
+   "ced_singing": 0.02345644434293111,
+   "ced_female_singing": 0.0031490822633107505
+  },
+  {
+   "section": "verse2",
+   "start": 48.75,
+   "end": 63.75,
+   "lufs": -14.118731319223594,
+   "wer": 0.37037037037037035,
+   "n_words": 27,
+   "clap_gap": -0.013785898685455322,
+   "clap_muddy": 0.14309491217136383,
+   "clap_singer": 0.2891800105571747,
+   "clap_robotic": 0.30296590924263,
+   "ced_singing": 0.01648486653963725,
+   "ced_female_singing": 0.0038954317569732666
+  },
+  {
+   "section": "pre2",
+   "start": 63.75,
+   "end": 71.25,
+   "lufs": -12.03905069788246,
+   "wer": 0.4117647058823529,
+   "n_words": 17,
+   "clap_gap": -0.14133769273757935,
+   "clap_muddy": 0.21320340037345886,
+   "clap_singer": 0.21764904260635376,
+   "clap_robotic": 0.3589867353439331,
+   "ced_singing": 0.0069688061873118086,
+   "ced_female_singing": 0.015570769707361857
+  },
+  {
+   "section": "chorus2",
+   "start": 71.25,
+   "end": 86.25,
+   "lufs": -10.299469647757194,
+   "wer": 0.7619047619047619,
+   "n_words": 21,
+   "clap_gap": -0.16422879695892334,
+   "clap_muddy": 0.22198128700256348,
+   "clap_singer": 0.21756863594055176,
+   "clap_robotic": 0.3817974328994751,
+   "ced_singing": 0.011272961894671122,
+   "ced_female_singing": 0.004856566588083903
+  },
+  {
+   "section": "post2",
+   "start": 86.25,
+   "end": 93.75,
+   "lufs": -11.39823063200217,
+   "wer": 1.0,
+   "n_words": 10,
+   "clap_gap": -0.21969178318977356,
+   "clap_muddy": 0.24811148643493652,
+   "clap_singer": 0.18941304087638855,
+   "clap_robotic": 0.4091048240661621,
+   "ced_singing": 0.021910955508550007,
+   "ced_female_singing": 0.00040906667709350586
+  },
+  {
+   "section": "bridge",
+   "start": 93.75,
+   "end": 108.75,
+   "lufs": -14.08185234993669,
+   "wer": 0.13333333333333333,
+   "n_words": 30,
+   "clap_gap": -0.21260564029216766,
+   "clap_muddy": 0.1909288614988327,
+   "clap_singer": 0.19724194705486298,
+   "clap_robotic": 0.40984758734703064,
+   "ced_singing": 0.02037536104520162,
+   "ced_female_singing": 0.02609322965145111
+  },
+  {
+   "section": "build",
+   "start": 108.75,
+   "end": 116.25,
+   "lufs": -13.874608813931053,
+   "wer": 1.0,
+   "n_words": 6,
+   "clap_gap": -0.1810116469860077,
+   "clap_muddy": 0.2669924795627594,
+   "clap_singer": 0.2037821114063263,
+   "clap_robotic": 0.384793758392334,
+   "ced_singing": 0.026754021644592285,
+   "ced_female_singing": 0.0029382904370625815
+  },
+  {
+   "section": "chorus3",
+   "start": 116.25,
+   "end": 131.25,
+   "lufs": -9.413204348960443,
+   "wer": 0.6190476190476191,
+   "n_words": 21,
+   "clap_gap": -0.19143430888652802,
+   "clap_muddy": 0.2417706996202469,
+   "clap_singer": 0.18032534420490265,
+   "clap_robotic": 0.37175965309143066,
+   "ced_singing": 0.022886668642361958,
+   "ced_female_singing": 0.0003236234188079834
+  },
+  {
+   "section": "outro",
+   "start": 131.25,
+   "end": 138.75,
+   "lufs": -19.4840577850412,
+   "wer": 1.375,
+   "n_words": 8,
+   "clap_gap": -0.1993301510810852,
+   "clap_muddy": 0.24011872708797455,
+   "clap_singer": 0.09522104263305664,
+   "clap_robotic": 0.29455119371414185,
+   "ced_singing": 0.017521828413009644,
+   "ced_female_singing": 1.773238182067871e-06
+  }
+ ],
+ "whole": {
+  "lufs": -12.307062734490161,
+  "true_peak_dbtp": -2.1139214038848877,
+  "crest_db": 12.024951934814453,
+  "bands": {
+   "sub": 0.2163207232952118,
+   "bass": 0.4795728921890259,
+   "lowmid": 0.10225801914930344,
+   "mid": 0.15040886402130127,
+   "himid": 0.025868959724903107,
+   "presence": 0.01306152157485485,
+   "air": 0.01250902283936739
+  },
+  "wer": 0.5336538461538461,
+  "n_words": 208,
+  "clap_gap": -0.1449815034866333,
+  "clap_muddy": 0.19671179354190826,
+  "ced_singing": 0.01718248961106786,
+  "ced_female_singing": 0.009262403227248282,
+  "worst_lines": [
+   {
+    "i": 34,
+    "t": 135.0,
+    "wer": 2.5,
+    "ref": "export restricted",
+    "hyp": "I can't part race, guys."
+   },
+   {
+    "i": 8,
+    "t": 37.5,
+    "wer": 1.2,
+    "ref": "Nobody's slowing the silicon down",
+    "hyp": "Nobody's lonely, they're too like a dad"
+   },
+   {
+    "i": 15,
+    "t": 123.8,
+    "wer": 1.2,
+    "ref": "Gigawatts in a cornfield town",
+    "hyp": "Giga Watson, I can feel tell"
+   },
+   {
+    "i": 17,
+    "t": 41.2,
+    "wer": 1.0,
+    "ref": "weapon now oh oh oh",
+    "hyp": "What the hell?"
+   },
+   {
+    "i": 18,
+    "t": 45.0,
+    "wer": 1.0,
+    "ref": "weapon now oh oh oh",
+    "hyp": "With it now"
+   },
+   {
+    "i": 9,
+    "t": 71.2,
+    "wer": 1.0,
+    "ref": "Every wafer is a weapon now",
+    "hyp": "Shapering wait for ease of wet now"
+   },
+   {
+    "i": 10,
+    "t": 75.0,
+    "wer": 1.0,
+    "ref": "Two nanometers holding the crown",
+    "hyp": "Tune in all meters holding the ground"
+   },
+   {
+    "i": 12,
+    "t": 82.5,
+    "wer": 1.0,
+    "ref": "Nobody's slowing the silicon down",
+    "hyp": "Nobody's worried that someone can dare"
+   }
+  ],
+  "words_missed": [
+   [
+    "oh",
+    12
+   ],
+   [
+    "the",
+    6
+   ],
+   [
+    "weapon",
+    6
+   ],
+   [
+    "a",
+    5
+   ],
+   [
+    "wafer",
+    4
+   ],
+   [
+    "crown",
+    3
+   ],
+   [
+    "slowing",
+    3
+   ],
+   [
+    "silicon",
+    3
+   ],
+   [
+    "in",
+    2
+   ],
+   [
+    "down",
+    2
+   ],
+   [
+    "now",
+    2
+   ],
+   [
+    "every",
+    2
+   ],
+   [
+    "is",
+    2
+   ],
+   [
+    "hold",
+    2
+   ],
+   [
+    "line",
+    2
+   ],
+   [
+    "fifty",
+    1
+   ],
+   [
+    "thousand",
+    1
+   ],
+   [
+    "shot",
+    1
+   ],
+   [
+    "by",
+    1
+   ],
+   [
+    "laser",
+    1
+   ],
+   [
+    "sun",
+    1
+   ],
+   [
+    "waiting",
+    1
+   ],
+   [
+    "hundred",
+    1
+   ],
+   [
+    "eighty",
+    1
+   ],
+   [
+    "washington",
+    1
+   ]
+  ],
+  "kick": {
+   "n_kicks": 220,
+   "n_onsets": 1586,
+   "pct_matched": 95.0,
+   "median_abs_ms": 20.527210884353053,
+   "max_abs_ms": 39.922448979595515,
+   "median_signed_ms": 16.6911564625849
+  },
+  "asr_model": "base.en",
+  "asr_seconds": 41
+ },
+ "runtime_s": 84
+}
